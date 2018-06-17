@@ -1,0 +1,72 @@
+<IfModule mod_rewrite.c>
+	 RewriteEngine On
+
+    RewriteCond %{REQUEST_URI} ^/.*
+    RewriteRule ^(.*)$ web/$1 [L]
+
+
+
+
+    RewriteCond %{REQUEST_URI} !^/web/
+    RewriteCond %{REQUEST_FILENAME} !-f [OR]
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^.*$ web/index.php
+
+    <IfModule mod_expires.c>
+      ExpiresActive On
+      ExpiresByType text/html "access plus 1 days"
+      ExpiresByType image/gif "access plus 1 weeks"
+      ExpiresByType image/jpeg "access plus 1 weeks"
+      ExpiresByType image/png "access plus 1 weeks"
+      ExpiresByType image/x-icon "access plus 1 years"
+      ExpiresByType text/css "access plus 1 weeks"
+      ExpiresByType text/javascript "access plus 1 weeks"
+      ExpiresByType application/javascript "access plus 1 weeks"
+      ExpiresByType application/font-woff "access plus 1 weeks"
+      ExpiresByType application/x-javascript "access plus 1 weeks"
+      ExpiresByType application/x-shockwave-flash "access plus 1 weeks"
+     </IfModule>
+
+     <IfModule mod_headers.c>
+         # Serve gzip compressed CSS files if they exist and the client accepts gzip.
+         RewriteCond %{HTTP:Accept-encoding} gzip
+         RewriteCond %{REQUEST_FILENAME}\.gz -s
+         RewriteRule ^(.*)\.css $1\.css\.gz [QSA]
+
+         # Serve gzip compressed JS files if they exist and the client accepts gzip.
+         RewriteCond %{HTTP:Accept-encoding} gzip
+         RewriteCond %{REQUEST_FILENAME}\.gz -s
+         RewriteRule ^(.*)\.js $1\.js\.gz [QSA]
+
+         # Serve correct content types, and prevent mod_deflate double gzip.
+         RewriteRule \.css\.gz$ - [T=text/css,E=no-gzip:1]
+         RewriteRule \.js\.gz$ - [T=text/javascript,E=no-gzip:1]
+
+         <FilesMatch "(\.js\.gz|\.css\.gz)$">
+           # Serve correct encoding type.
+           Header set Content-Encoding gzip
+           Header set Cache-Control max-age=2592000
+           Header set Cache-Control must-revalidate
+           # Force proxies to cache gzipped & non-gzipped css/js files separately.
+           Header append Vary Accept-Encoding
+         </FilesMatch>
+       </IfModule>
+
+
+</IfModule>
+
+<IfModule mod_deflate.c>
+        <IfModule mod_filter.c>
+                # these are known to be safe with MSIE 6
+                AddOutputFilterByType DEFLATE text/html text/plain text/xml
+
+                # everything else may cause problems with MSIE 6
+                AddOutputFilterByType DEFLATE text/css
+                AddOutputFilterByType DEFLATE application/x-javascript application/javascript application/ecmascript
+                AddOutputFilterByType DEFLATE application/rss+xml
+                AddOutputFilterByType DEFLATE application/xml
+        </IfModule>
+</IfModule>
+
+
+

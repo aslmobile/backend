@@ -1,0 +1,206 @@
+<?php namespace app\modules\api\controllers;
+
+use Yii;
+use yii\helpers\Url;
+
+use app\components\RestFul;
+use app\modules\api\models\Devices;
+use app\modules\api\models\Users;
+
+use app\modules\api\models\RestFul as RestFulModel;
+
+/** @property \app\modules\api\Module $module */
+class BaseController extends RestFul
+{
+    public $modelClass = 'app\modules\api\models\RestFul';
+
+    public $token;
+    public $body;
+
+    /** @var \app\modules\api\models\Users */
+    public $user;
+
+    /** @var \app\modules\api\models\Devices */
+    public $device;
+
+    const
+        TOKEN = 0,
+        TOKEN_PHONE = 1,
+        TOKEN_SMS = 2;
+
+    public function init()
+    {
+        parent::init();
+
+        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
+        if ($authHeader !== null && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) $this->token = $matches[1];
+        else $this->module->setError(403, '_token', "Token required!");
+    }
+
+    /**
+     * @param \yii\base\Action $event
+     * @return bool
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function beforeAction($event)
+    {
+        $this->logEvent();
+
+        return parent::beforeAction($event);
+    }
+
+    protected function TokenAuth($type = self::TOKEN)
+    {
+        $device = Devices::findOne([
+            'auth_token' => $this->token,
+        ]);
+
+        if ($device) $this->device = $device;
+
+        switch ($type)
+        {
+            case self::TOKEN:
+                if (!$this->device) $this->module->setError(403, '_device', "Not found");
+                if (isset ($this->device->auth_token) && !empty($this->device->auth_token))
+                {
+
+                    $this->module->setError(503, 'app', "NaN");
+                }
+                else $this->authorizationTokenFailed('Device auth_token is empty!');
+                break;
+
+            case self::TOKEN_PHONE:
+                $hash = hash('sha256', $this->body->phone . Yii::$app->params['salt']);
+                if ($hash !== $this->token) $this->authorizationTokenFailed();
+                break;
+
+            case self::TOKEN_SMS:
+                $this->prepareBody();
+                $this->validateBodyParams(['code']);
+
+                if (!$this->device) $this->module->setError(403, '_device', "Not found");
+                elseif ($this->body->code != '000000' && $this->device->sms_code != $this->body->sms_code) $this->module->setError(403, '_device', "Not found");
+                elseif (!isset ($this->device->auth_token) || empty($this->device->auth_token)) $this->authorizationTokenFailed('Device auth_token is empty!');
+
+                $this->device->sms_code = NULL;
+                $this->device->save();
+                break;
+        }
+
+        return true;
+    }
+
+    protected function authorizationTokenFailed($message = false)
+    {
+        $this->module->setError(403, 'Authorization Bearer', $message ? $message : "Token not valid!");
+    }
+
+    /**
+     * @return Devices|array|bool|null|\yii\db\ActiveRecord
+     */
+    protected function Auth()
+    {
+        $device = $this->device;
+
+        if (!$device && !empty ($this->body->phone))
+        {
+            $user = Users::find()->where(['phone' => $this->body->phone])->one();
+            if (!$user)
+            {
+                $user = new Users([
+                    'phone' => $this->body->phone
+                ]);
+
+                if (!$user->save(false))
+                {
+                    $save_errors = $user->getErrors();
+                    if ($save_errors && count ($save_errors) > 0) foreach ($save_errors as $error)
+                    {
+                        echo '<pre>' . print_r($error, true) . '</pre>';
+                        exit;
+                    }
+                    else $this->module->setError(422, '_user', "Problem with user creation");
+                }
+            }
+
+            $this->user = $user;
+            $device = new Devices([
+                'user_id' => $user->id,
+                'push_id' => $this->body->push_id,
+                'lang' => $this->lang,
+                'uip' => Yii::$app->request->userIP,
+                'device_id' => $this->body->device_id,
+                'type' => $this->body->ostype,
+                'user_type' => $this->body->type
+            ]);
+
+            if (!$device->save())
+            {
+                $save_errors = $device->getErrors();
+                if ($save_errors && count ($save_errors) > 0) foreach ($save_errors as $field => $error)
+                {
+                    $this->module->setError(422, $field, $error[0]);
+                }
+                else $this->module->setError(422, '_device', "Problem with device creation");
+            }
+        }
+
+        return $device;
+    }
+
+    /**
+     * Prepare request body
+     */
+    public function prepareBody()
+    {
+        $this->body = Yii::$app->request->getRawBody();
+        if (empty ($this->body)) $this->body = @file_get_contents('php://input');
+        $json = Yii::$app->request->get('json');
+        if (!$json || $json != '1') $this->body = base64_decode($this->body);
+        $this->body = json_decode($this->body, false, 1024);
+
+        if (empty($this->body) && json_last_error() !== JSON_ERROR_NONE) $this->module->setError(422, '_json', json_last_error_msg());
+        elseif (empty ($this->body)) $this->module->setError(422, '_body', 'Empty');
+    }
+
+    /**
+     * @param bool|array|object $params
+     */
+    public function validateBodyParams($params = false)
+    {
+        if ($params && (is_array($params) || is_object($params))) foreach ($params as $param)
+        {
+            if (!isset ($this->body->$param) || empty ($this->body->$param))
+                $this->module->setError(422, '_body.' . $param, 'Field required.');
+
+            switch ($param)
+            {
+                case 'ostype':
+                    if (!is_numeric($this->body->$param) || intval($this->body->$param) == 0)
+                        $this->module->setError(422, '_body.' . $param, 'Numeric only.');
+                    break;
+            }
+        }
+        else $this->module->setError(422, '_body', 'Params has incorrect format');
+    }
+
+    public function logEvent()
+    {
+        $params = [
+            'id' => time(),
+            'type'  => RestFulModel::TYPE_LOG,
+            'message' => json_encode([
+                'controller' => Yii::$app->controller->id,
+                'action' => Yii::$app->controller->action->id,
+                'url' => Url::current(),
+                'time' => time(),
+                'token' => $this->token
+            ]),
+            'user_id' => Yii::$app->user->id ? Yii::$app->user->id : 0,
+            'uip'   => Yii::$app->request->getUserIP()
+        ];
+
+        $logger = new RestFulModel($params);
+        $logger->save();
+    }
+}

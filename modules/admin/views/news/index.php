@@ -1,0 +1,114 @@
+<?php
+
+use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
+use yii\jui\DatePicker;
+use yii\widgets\Breadcrumbs;
+
+/* @var $this yii\web\View */
+/* @var $searchModel app\modules\admin\models\NewsSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+
+$this->title = Yii::$app->mv->gt('Статьи', [], false);
+$this->params['breadcrumbs'][] = $this->title;
+
+$created_at = (!empty(Yii::$app->request->get('NewsSearch')['created_at'])) ?Yii::$app->request->get('NewsSearch')['created_at'] : null;
+$updated_at = (!empty(Yii::$app->request->get('NewsSearch')['updated_at'])) ?Yii::$app->request->get('NewsSearch')['updated_at'] : null;
+?>
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h2></h2>
+        <?= Breadcrumbs::widget([
+            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+        ]) ?>
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><?= Html::encode($this->title) ?></h3>
+
+                <div class="box-tools pull-right">
+                    <?= Html::a(Yii::$app->mv->gt('{i} создать', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false), ['create'], ['class' => 'btn btn-default btn-sm']); ?>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <?= GridView::widget([
+                'dataProvider' => $dataProvider,
+                'id' => 'grid',
+                'layout' => "
+                    <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
+                    <div class='box-footer' style='display: block;'>{pager}</div>
+                ",
+                'tableOptions' => [
+                    'class' => 'table table-bordered table-hover dataTable',
+                ],
+                'filterModel' => $searchModel,
+                'columns' => [
+                    //['class' => 'yii\grid\SerialColumn'],
+                    ['class' => 'yii\grid\CheckboxColumn'],
+
+                    'id',
+                    [
+                        'attribute' => 'image',
+                        'headerOptions' => ['style' => 'width: 150px;'],
+                        'content' => function($model){
+                            return Html::img($model->image,['style'=>'width: 150px;']);
+                        }
+                    ],
+                    'title',
+                    [
+                        'attribute' => 'category_id',
+                        'filter' => ArrayHelper::map(\app\models\NewsCategories::find()->all(), 'id', 'title'),
+                        'content' => function($model){
+                            return !empty($model->category) ? $model->category->title : null;
+                        }
+                    ],
+                    'url:url',
+                    [
+                        'attribute' => 'status',
+                        'filter' => \app\models\News::getStatuses(),
+                        'value' => function ($model, $index, $widget) {
+                            return key_exists($model->status, $model->statuses)? $model->statuses[$model->status] : false;
+                        },
+                    ],
+                    'created_at' => [
+                        'attribute' => 'created_at',
+                        'filter' => DatePicker::widget([
+                            'name' => 'NewsSearch[created_at]',
+                            'value' => $created_at,
+                            'options' => [
+                                'class' => "form-control",
+                                'placeholder' => ''
+                            ]
+                        ]),
+                        'format' => 'datetime'
+                    ],
+                    [
+                        'class' => 'yii\grid\ActionColumn',
+                        'headerOptions' => ['style' => 'width: 125px;'],
+                        'template' => '{view} {update} {delete}',
+                        'buttons' => [
+                            'view' => function ($url, $model) {
+                                return Html::a('<button type="button" class="btn btn-info btn-sm"><i class="fa fa-search"></i></button>', $url);
+                            },
+                            'update' => function ($url, $model) {
+                                return Html::a('<button type="button" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i></button>', $url);
+                            },
+                            'delete' => function ($url, $model) {
+                                return Html::a('<button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>', $url, [
+                                        'data' => [
+                                            'confirm' => Yii::$app->mv->gt('Вы уверены, что хотите удалить?', [], false),
+                                            'method' => 'post',
+                                            'pjax' => '0'
+                                        ]
+                                    ]);
+                            },
+                        ]
+                    ],
+                ],
+            ]); ?>
+        </div>
+    </section>
+</div>

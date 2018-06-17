@@ -1,0 +1,10 @@
+/.idea
+/api/db/prequery.db.php
+/web/data.csv
+/web/files
+/web/git.php
+/web/gitsm.php
+/web/preload
+/web/index.php
+/vendor
+/composer.lock

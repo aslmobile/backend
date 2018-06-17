@@ -1,0 +1,11 @@
+/* TEAM */
+Dev: OurCompany https://v-jet.net
+Location: Dnepr, Ukraine.
+
+/* THANKS */
+Name: https://v-jet.net
+
+/* SITE */
+Last update: 2017/08/25
+Standards: HTML5, CSS3
+Components: Yii 2, jQuery.
