@@ -1,7 +1,9 @@
 <?php namespace app\modules\api\controllers;
 
+use app\modules\api\models\UploadFiles;
 use Yii;
 use yii\helpers\Url;
+use yii\web\UploadedFile;
 
 use app\components\RestFul;
 use app\modules\api\models\Devices;
@@ -61,12 +63,13 @@ class BaseController extends RestFul
         {
             case self::TOKEN:
                 if (!$this->device) $this->module->setError(403, '_device', "Not found");
-                if (isset ($this->device->auth_token) && !empty($this->device->auth_token))
-                {
+                elseif (!isset ($this->device->auth_token) || empty($this->device->auth_token)) $this->authorizationTokenFailed('Device auth_token is empty!');
 
-                    $this->module->setError(503, 'app', "NaN");
-                }
-                else $this->authorizationTokenFailed('Device auth_token is empty!');
+                $user = Users::findOne(['id' => $device->user_id]);
+                if (!$user) $this->module->setError(403, '_user', "Not found");
+                $this->user = $user;
+
+                return Yii::$app->user->login($this->user, 0);
                 break;
 
             case self::TOKEN_PHONE:
@@ -84,6 +87,12 @@ class BaseController extends RestFul
 
                 $this->device->sms_code = NULL;
                 $this->device->save();
+
+                $user = Users::findOne(['id' => $device->user_id]);
+                if (!$user) $this->module->setError(403, '_user', "Not found");
+                $this->user = $user;
+
+                return Yii::$app->user->login($this->user, 0);
                 break;
         }
 
@@ -114,11 +123,7 @@ class BaseController extends RestFul
                 if (!$user->save(false))
                 {
                     $save_errors = $user->getErrors();
-                    if ($save_errors && count ($save_errors) > 0) foreach ($save_errors as $error)
-                    {
-                        echo '<pre>' . print_r($error, true) . '</pre>';
-                        exit;
-                    }
+                    if ($save_errors && count ($save_errors) > 0) foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0]);
                     else $this->module->setError(422, '_user', "Problem with user creation");
                 }
             }
@@ -137,15 +142,29 @@ class BaseController extends RestFul
             if (!$device->save())
             {
                 $save_errors = $device->getErrors();
-                if ($save_errors && count ($save_errors) > 0) foreach ($save_errors as $field => $error)
-                {
-                    $this->module->setError(422, $field, $error[0]);
-                }
+                if ($save_errors && count ($save_errors) > 0) foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0]);
                 else $this->module->setError(422, '_device', "Problem with device creation");
             }
         }
 
         return $device;
+    }
+
+    protected function UploadFile($name, $path = 'photos')
+    {
+        $_FILE = UploadedFile::getInstanceByName($name);
+
+        $uploader = new UploadFiles();
+        $path = '/files/' . $path;
+        $path = $uploader->setPath($path);
+        if ($path)
+        {
+            $uploader->file = $_FILE;
+            $_uploaded_file = $uploader->upload();
+        }
+        else $this->module->setError(411, '_path', "Can't create path");
+
+        return $_uploaded_file;
     }
 
     /**

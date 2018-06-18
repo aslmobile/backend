@@ -1,5 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
+use app\modules\api\models\Users;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -25,7 +26,7 @@ class UserController extends BaseController
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['auth', 'sms'],
+                        'actions' => ['auth', 'sms', 'upload-driver-licence'],
                         'allow' => true
                     ]
                 ]
@@ -34,7 +35,8 @@ class UserController extends BaseController
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'auth'  => ['POST'],
-                    'sms'   => ['POST']
+                    'sms'   => ['POST'],
+                    'upload-driver-licence' => ['POST']
                 ]
             ]
         ];
@@ -65,23 +67,33 @@ class UserController extends BaseController
 
     public function actionSms()
     {
-        $this->TokenAuth(self::TOKEN_SMS);
+        $user = $this->TokenAuth(self::TOKEN_SMS);
+        if ($user) $user = $this->user;
 
-        Yii::$app->user->login($this->device->user, 3600*24*30);
-        if (!Yii::$app->user->isGuest)
-        {
-            $token = Yii::$app->security->generateRandomString();
-            $this->module->data = [
-                'user'   => Yii::$app->user->identity->toArray(),
-                'token' => $token
-            ];
+        $token = Yii::$app->security->generateRandomString();
+        $this->module->data = [
+            'user'   => $user->toArray(),
+            'token' => $token
+        ];
 
-            $this->device->auth_token = $token;
-            $this->device->save();
+        $this->device->auth_token = $token;
+        $this->device->save();
 
-            $this->module->setSuccess();
-            $this->module->sendResponse();
-        }
-        else $this->module->setError(422, '_user', "Authorization Failed");
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionUploadDriverLicence()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
+
+        $documents = [];
+        foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'driver-licence/' . $user->id);
+
+        echo '<pre>' . print_r($documents, true) . '</pre>';
+        exit;
     }
 }
