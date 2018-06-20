@@ -91,8 +91,8 @@ class UploadFiles extends Model
 
     public function afterUpload($file)
     {
-        $uploadedFile = new self(['file' => $file]);
-        if ($uploadedFile->save()) return $uploadedFile->id;
+//        $uploadedFile = new UploadFiles(['file' => $file]);
+//        if ($uploadedFile->save()) return $uploadedFile->id;
 
         return false;
     }
