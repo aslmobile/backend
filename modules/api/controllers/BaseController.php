@@ -82,7 +82,7 @@ class BaseController extends RestFul
                 $this->validateBodyParams(['code']);
 
                 if (!$this->device) $this->module->setError(403, '_device', "Not found");
-                elseif ($this->body->code != '000000' && $this->device->sms_code != $this->body->sms_code) $this->module->setError(403, '_device', "Not found");
+                elseif ($this->body->code != '000000' && $this->device->sms_code != $this->body->code) $this->module->setError(403, '_device', "Not found");
                 elseif (!isset ($this->device->auth_token) || empty($this->device->auth_token)) $this->authorizationTokenFailed('Device auth_token is empty!');
 
                 $this->device->sms_code = NULL;
