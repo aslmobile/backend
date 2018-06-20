@@ -25,7 +25,7 @@ class AppAsset extends AssetBundle
     public $js = [
         //"dist/js/jquery-ui.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js",
-        "bootstrap/js/bootstrap.min.js",
+//        "bootstrap/js/bootstrap.min.js",
         "plugins/iCheck/icheck.min.js",
         "plugins/sparkline/jquery.sparkline.min.js",
         "plugins/jvectormap/jquery-jvectormap-1.2.2.min.js",
@@ -45,9 +45,9 @@ class AppAsset extends AssetBundle
         "dist/js/app.min.js",
         "dist/js/all.js",
     ];
-	public $depends = [
-        'yii\web\YiiAsset',
+    public $depends = [
+        'app\modules\admin\assets\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
-        'yii\jui\JuiAsset',
+//        'yii\jui\JuiAsset',
     ];
 }

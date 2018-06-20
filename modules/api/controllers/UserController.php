@@ -1,6 +1,7 @@
 <?php namespace app\modules\api\controllers;
 
 use app\modules\api\models\DriverLicence;
+use app\modules\api\models\UploadFiles;
 use app\modules\api\models\Users;
 use Yii;
 use yii\filters\AccessControl;
@@ -80,7 +81,7 @@ class UserController extends BaseController
 
         $token = Yii::$app->security->generateRandomString();
         $this->module->data = [
-            'user'   => $user->toArray(),
+            'user'  => $user->toArray(),
             'token' => $token
         ];
 
@@ -170,8 +171,36 @@ class UserController extends BaseController
 
         if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
 
-        $photos = [];
-        foreach ($_FILES as $name => $file) $photos[$name] = $this->UploadFile($name, 'user-photos/' . $user->id);
+        foreach ($_FILES as $name => $file)
+        {
+            $file = $this->UploadFile($name, 'user-photos/' . $user->id, true);
+            $photos[$name] = $file['file'];
+            $user->image = intval($file['file_id']);
+        }
+
+        $old_image = $user->getOldAttribute('image');
+        if (!empty ($old_image) && $old_image > 0)
+        {
+            $image = UploadFiles::findOne(['id' => $old_image]);
+            if ($image)
+            {
+                $file = Yii::getAlias('@webroot') . $image->file;
+                if (file_exists($file)) unlink($file);
+                $image->delete();
+            }
+        }
+
+        if (!$user->save())
+        {
+            $save_errors = $user->getErrors();
+            if ($save_errors && count ($save_errors) > 0)
+            {
+                foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0], true, false);
+                $this->module->sendResponse();
+            }
+            else $this->module->setError(422, '_user', "Problem with file upload");
+        }
+        $this->user = $user;
 
         $this->module->data = [
             'files' => $photos,

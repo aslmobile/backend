@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\modules\api\models\UploadFiles;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -69,7 +70,7 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['email', 'phone', 'first_name', 'last_name'], 'required'],
+            [['phone'], 'required'],
             ['email', 'email'],
             ['email', 'unique', 'targetClass' => self::className(),
                 'message' => Yii::t('app', 'This email address has already been taken.')],
@@ -78,8 +79,8 @@ class User extends ActiveRecord implements IdentityInterface
             }],
             [['phone'], 'number'],
             ['phone', 'unique', 'targetClass' => self::className(), 'message' => Yii::t('app', 'This phone number has already been taken.')],
-            [['type', 'gender', 'city_id', 'email_verified', 'status', 'created_at', 'updated_at', 'blocked_at', 'approved_at', 'created_by', 'updated_by', 'approved_by', 'blocked_by'], 'integer'],
-            [['email', 'login', 'first_name', 'last_name', 'image', 'email_confirm_token', 'password_hash', 'password_reset_token', 'auth_key', 'blocked_reason'], 'string', 'max' => 255],
+            [['type', 'gender', 'image', 'city_id', 'email_verified', 'status', 'created_at', 'updated_at', 'blocked_at', 'approval_at', 'created_by', 'updated_by', 'approval_by', 'blocked_by'], 'integer'],
+            [['email', 'first_name', 'second_name', 'email_confirm_token', 'password_hash', 'password_reset_token', 'auth_key', 'blocked_reason'], 'string', 'max' => 255],
             ['status', 'in', 'range' => array_keys(Yii::$app->params['statuses'])],
             ['status', 'default', 'value' => 1],
             ['gender', 'in', 'range' => array_keys(Yii::$app->params['gender'])],
@@ -130,6 +131,23 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $statuses = self::getStatuses();
         return isset($statuses[$this->status]) ? $statuses[$this->status] : '';
+    }
+
+    public function getAvatar()
+    {
+        return $this->imageFile;
+    }
+
+    public function getImageFile()
+    {
+        $file_id = intval($this->image);
+        if ($file_id > 0)
+        {
+            $file = UploadFiles::findOne(['id' => $file_id]);
+            if ($file) return $file->file;
+        }
+
+        return false;
     }
 
     /**

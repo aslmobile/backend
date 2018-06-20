@@ -286,13 +286,13 @@ AppAsset::register($this); ?>
                     <!-- User Account: style can be found in dropdown.less -->
                     <li class="dropdown user user-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <?= Yii::$app->imageCache->img(Yii::getAlias('@webroot') . Yii::$app->user->identity->avatar, '160x160', ['class' => 'user-image']) ?>
+                            <?/*= Yii::$app->imageCache->img(Yii::getAlias('@webroot') . Yii::$app->user->identity->avatar, '160x160', ['class' => 'user-image']) */?>
                             <span class="hidden-xs"><?= Yii::$app->user->identity->email ?></span>
                         </a>
                         <ul class="dropdown-menu">
                             <!-- User image -->
                             <li class="user-header">
-                                <?= Yii::$app->imageCache->img(Yii::getAlias('@webroot') . Yii::$app->user->identity->avatar, '160x160', ['class' => 'user-image']) ?>
+                                <?/*= Yii::$app->imageCache->img(Yii::getAlias('@webroot') . Yii::$app->user->identity->avatar, '160x160', ['class' => 'user-image']) */?>
                                 <p>
                                     <?= Yii::$app->user->identity->email ?>
                                     <small><?= Yii::$app->mv->gt('Зарегистирован: {date}', [

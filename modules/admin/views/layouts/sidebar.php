@@ -6,6 +6,8 @@ use yii\helpers\Url;
 $cont = Yii::$app->controller->id;
 $act = Yii::$app->controller->action->id;
 
+$image = new Imagick('');
+
 ?>
 <!-- Left side column. contains the logo and sidebar -->
 <aside class="main-sidebar">

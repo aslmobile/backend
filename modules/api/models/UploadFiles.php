@@ -1,7 +1,7 @@
 <?php namespace app\modules\api\models;
 
 use Yii;
-use yii\base\Model;
+use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\web\UploadedFile;
 use dosamigos\transliterator\TransliteratorHelper;
@@ -14,7 +14,7 @@ use dosamigos\transliterator\TransliteratorHelper;
  * @property int $created_at
  * @property int $updated_at
  */
-class UploadFiles extends Model
+class UploadFiles extends ActiveRecord
 {
     const MAX_FILE_SIZE_MB = 16;
 
@@ -91,10 +91,10 @@ class UploadFiles extends Model
 
     public function afterUpload($file)
     {
-//        $uploadedFile = new UploadFiles(['file' => $file]);
-//        if ($uploadedFile->save()) return $uploadedFile->id;
+        $this->file = $file;
+        $this->save();
 
-        return false;
+        return $this->id;
     }
 
     /**
