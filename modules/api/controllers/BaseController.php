@@ -173,12 +173,14 @@ class BaseController extends RestFul
         $path = $uploader->setPath($path);
         if ($path)
         {
-            $uploader->file = $_FILE;
+            $uploader->uploadedFile = $_FILE;
             $_uploaded_file = $uploader->upload();
+
+            return $_uploaded_file['file'];
         }
         else $this->module->setError(411, '_path', "Can't create path");
 
-        return $_uploaded_file;
+        return false;
     }
 
     /**

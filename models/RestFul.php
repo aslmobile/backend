@@ -2,8 +2,9 @@
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
+
 /**
- * This is the model class for table "downloads".
+ * This is the model class for table "watchdog".
  *
  * @property int $id
  * @property int $type

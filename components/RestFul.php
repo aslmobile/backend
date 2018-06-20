@@ -37,7 +37,7 @@ class RestFul extends \yii\rest\ActiveController
 
     public static function getOldLangAssoc($lang)
     {
-        $languages = Yii::$app->controller->oldLangAssoc;
+        $languages = Yii::$app->controller ? Yii::$app->controller->oldLangAssoc : [];
         return isset($languages[$lang]) ? $languages[$lang] : 'en';
     }
 

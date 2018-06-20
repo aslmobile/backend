@@ -1,25 +1,49 @@
 <?php namespace app\modules\api\models;
 
 use Yii;
-use yii\base\DynamicModel;
+use yii\base\Model;
+use yii\behaviors\TimestampBehavior;
 use yii\web\UploadedFile;
 use dosamigos\transliterator\TransliteratorHelper;
 
-class UploadFiles extends DynamicModel
+/**
+ * This is the model class for table "uploaded_files".
+ *
+ * @property int $id
+ * @property string $file
+ * @property int $created_at
+ * @property int $updated_at
+ */
+class UploadFiles extends Model
 {
     const MAX_FILE_SIZE_MB = 16;
 
     public $extensions = ['png', 'jpg', 'jpeg'];
     public $path = '';
 
+    public static function tableName()
+    {
+        return 'uploaded_files';
+    }
+
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::className()
+        ];
+    }
+
     /**
-     * @var UploadedFile
+     * @var UploadedFile $uploadedFile
      */
-    public $file;
+    public $uploadedFile;
 
     public function rules()
     {
-        return [];
+        return [
+            [['file'], 'required'],
+            [['file'], 'string']
+        ];
     }
 
     /**
@@ -49,14 +73,26 @@ class UploadFiles extends DynamicModel
     {
         if ($this->validate())
         {
-            $fileName = mb_strtolower(time() . '_' . $this->file->baseName);
-            $fileName = \Yii::$app->mv->transliterateUrl(str_ireplace(' ', '_', $fileName))  . '.' . $this->file->extension;
+            $fileName = mb_strtolower(time() . '_' . $this->uploadedFile->baseName);
+            $fileName = \Yii::$app->mv->transliterateUrl(str_ireplace(' ', '_', $fileName))  . '.' . $this->uploadedFile->extension;
 
-            $this->file->saveAs($this->path . $fileName);
+            $this->uploadedFile->saveAs($this->path . $fileName);
             $filePath = str_replace([Yii::getAlias('@webroot'), '\\'], ['', '/'], $this->path) . $fileName;
 
-            return $filePath;
+            $id = $this->afterUpload($filePath);
+            return [
+                'file' => $filePath,
+                'file_id' => $id
+            ];
         }
+
+        return false;
+    }
+
+    public function afterUpload($file)
+    {
+        $uploadedFile = new self(['file' => $file]);
+        if ($uploadedFile->save()) return $uploadedFile->id;
 
         return false;
     }
@@ -68,7 +104,7 @@ class UploadFiles extends DynamicModel
      */
     public function validate($attributeNames = null, $clearErrors = true)
     {
-        return ($this->validateExtension($this->file) == true && $this->validateSize($this->file) == true);
+        return ($this->validateExtension($this->uploadedFile) == true && $this->validateSize($this->uploadedFile) == true);
     }
 
     /**
@@ -98,8 +134,8 @@ class UploadFiles extends DynamicModel
     {
         $result = new \StdClass();
         if (!$this->validate()) {
-            if (!$this->validateExtension($this->file)) $result->format = 'Allowed extensions: ' . implode(', ', $this->extensions);
-            if (!$this->validateSize($this->file)) $result->size = 'File is too big, max size: ' . self::MAX_FILE_SIZE_MB . 'MB';
+            if (!$this->validateExtension($this->uploadedFile)) $result->format = 'Allowed extensions: ' . implode(', ', $this->extensions);
+            if (!$this->validateSize($this->uploadedFile)) $result->size = 'File is too big, max size: ' . self::MAX_FILE_SIZE_MB . 'MB';
 
             return $result;
         }
