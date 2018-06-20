@@ -22,7 +22,10 @@ class RestFul extends \yii\rest\ActiveController
         $this->lang = $this->getOldLangAssoc(Yii::$app->language);
         $this->coreSettings = self::getCoreSettings();
 
-        echo '<pre>' . print_r(Yii::$app->request->getHeaders(), true) . '</pre>'; exit;
+        echo '<pre>' . print_r([
+            Yii::$app->request->getHeaders(),
+            apache_request_headers()
+        ], true) . '</pre>'; exit;
 
         $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
         if ($authHeader !== null && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) $this->auth_token = $matches[1];
