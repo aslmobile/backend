@@ -1,5 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
+use app\modules\api\models\DriverLicence;
 use app\modules\api\models\Users;
 use Yii;
 use yii\filters\AccessControl;
@@ -26,7 +27,10 @@ class UserController extends BaseController
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['auth', 'sms', 'upload-driver-licence'],
+                        'actions' => [
+                            'auth', 'sms',
+                            'upload-driver-licence', 'upload-vehicle-insurance', 'upload-vehicle-registration', 'upload-vehicle-photos', 'upload-user-photo'
+                        ],
                         'allow' => true
                     ]
                 ]
@@ -36,7 +40,11 @@ class UserController extends BaseController
                 'actions' => [
                     'auth'  => ['POST'],
                     'sms'   => ['POST'],
-                    'upload-driver-licence' => ['POST']
+                    'upload-driver-licence' => ['POST'],
+                    'upload-vehicle-insurance' => ['POST'],
+                    'upload-vehicle-registration' => ['POST'],
+                    'upload-vehicle-photos' => ['POST'],
+                    'upload-user-photo' => ['POST'],
                 ]
             ]
         ];
@@ -44,9 +52,9 @@ class UserController extends BaseController
 
     public function actionAuth()
     {
-        $this->TokenAuth(self::TOKEN_PHONE);
         $this->prepareBody();
         $this->validateBodyParams(['push_id', 'device_id', 'ostype', 'type', 'phone']);
+        $this->TokenAuth(self::TOKEN_PHONE);
 
         /** @var \app\modules\api\models\Devices $device */
         $device = $this->Auth();
@@ -56,7 +64,7 @@ class UserController extends BaseController
         {
             $this->module->data = [
                 'sms' => 1,
-                'user' => $device->user,
+                'user' => $device->user->toArray(),
                 'token' => $device->auth_token
             ];
             $this->module->setSuccess();
@@ -90,10 +98,151 @@ class UserController extends BaseController
 
         if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
 
-        $documents = [];
-        foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'driver-licence/' . $user->id);
+        $data = $this->UploadLicenceDocument($user, DriverLicence::TYPE_LICENSE);
 
-        echo '<pre>' . print_r($documents, true) . '</pre>';
-        exit;
+        $this->module->data = [
+            'files' => $data['documents'],
+            'user'  => $user->toArray(),
+            'licence' => $data['licenses']->toArray()
+        ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionUploadVehicleInsurance()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
+
+        $data = $this->UploadLicenceDocument($user, DriverLicence::TYPE_INSURANCE);
+
+        $this->module->data = [
+            'files' => $data['documents'],
+            'user'  => $user->toArray(),
+            'licence' => $data['licenses']->toArray()
+        ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionUploadVehicleRegistration()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
+
+        $data = $this->UploadLicenceDocument($user, DriverLicence::TYPE_REGISTRATION);
+
+        $this->module->data = [
+            'files' => $data['documents'],
+            'user'  => $user->toArray(),
+            'licence' => $data['licenses']->toArray()
+        ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionUploadVehiclePhotos()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
+
+        $photos = [];
+        foreach ($_FILES as $name => $file) $photos[$name] = $this->UploadFile($name, 'vehicle-photos/' . $user->id);
+
+        $this->module->data = [
+            'files' => $photos,
+            'user'  => $user->toArray(),
+        ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionUploadUserPhoto()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
+
+        $photos = [];
+        foreach ($_FILES as $name => $file) $photos[$name] = $this->UploadFile($name, 'user-photos/' . $user->id);
+
+        $this->module->data = [
+            'files' => $photos,
+            'user'  => $user->toArray(),
+        ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    /**
+     * Upload documents
+     * @param \app\models\User $user
+     * @param int $type
+     * @return array
+     */
+    protected function UploadLicenceDocument($user, $type = 0)
+    {
+        $remove_old_images = [];
+        $licences = DriverLicence::findOne(['user_id' => $user->id, 'type' => $type]);
+        if (!$licences) $licences = new DriverLicence([
+            'user_id' => $user->id,
+            'type' => $type
+        ]);
+        else
+        {
+            if (!empty ($licences->image)) $remove_old_images[] = Yii::getAlias('@webroot' . $licences->image);
+            if (!empty ($licences->image2)) $remove_old_images[] = Yii::getAlias('@webroot' . $licences->image2);
+        }
+
+        $documents = [];
+        switch ($type)
+        {
+            case DriverLicence::TYPE_LICENSE:
+                foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'driver-licence/' . $user->id);
+                break;
+
+            case DriverLicence::TYPE_INSURANCE:
+                foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-insurance/' . $user->id);
+                break;
+
+            case DriverLicence::TYPE_REGISTRATION:
+                foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-registration/' . $user->id);
+                break;
+
+            default: $this->module->setError(422, 'license.type', "Unknown type");
+        }
+
+        foreach ($documents as $name => $path) switch ($name)
+        {
+            case 'image': $licences->$name = $path; break;
+            case 'image2': $licences->$name = $path; break;
+        }
+
+        if (!$licences->save())
+        {
+            $save_errors = $licences->getErrors();
+            if ($save_errors && count ($save_errors) > 0)
+            {
+                foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0], true, false);
+                $this->module->sendResponse();
+            }
+            else $this->module->setError(422, '_licenses', "Problem with file upload");
+        }
+
+        // REMOVE OLD UPLOADED IMAGES
+        if ($remove_old_images && count($remove_old_images) > 0)
+            foreach ($remove_old_images as $file) if (file_exists($file)) unlink($file);
+
+        return [
+            'documents' => $documents,
+            'licenses'  => $licences
+        ];
     }
 }

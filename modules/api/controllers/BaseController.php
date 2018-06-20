@@ -73,8 +73,8 @@ class BaseController extends RestFul
                 break;
 
             case self::TOKEN_PHONE:
-                $hash = hash('sha256', $this->body->phone . Yii::$app->params['salt']);
-                if ($hash !== $this->token) $this->authorizationTokenFailed();
+                $hash = strtoupper(hash('sha256', $this->body->phone . Yii::$app->params['salt']));
+                if ($hash !== strtoupper($this->token)) $this->authorizationTokenFailed();
                 break;
 
             case self::TOKEN_SMS:
@@ -109,7 +109,13 @@ class BaseController extends RestFul
      */
     protected function Auth()
     {
-        $device = $this->device;
+        $device = false;
+        if ($this->device) $device = $this->device;
+        else
+        {
+            if (isset ($this->body->device_id) && !empty($this->body->device_id))
+                $device = Devices::findOne(['device_id' => $this->body->device_id]);
+        }
 
         if (!$device && !empty ($this->body->phone))
         {
@@ -123,7 +129,11 @@ class BaseController extends RestFul
                 if (!$user->save(false))
                 {
                     $save_errors = $user->getErrors();
-                    if ($save_errors && count ($save_errors) > 0) foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0]);
+                    if ($save_errors && count ($save_errors) > 0)
+                    {
+                        foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0], true, false);
+                        $this->module->sendResponse();
+                    }
                     else $this->module->setError(422, '_user', "Problem with user creation");
                 }
             }
@@ -142,7 +152,11 @@ class BaseController extends RestFul
             if (!$device->save())
             {
                 $save_errors = $device->getErrors();
-                if ($save_errors && count ($save_errors) > 0) foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0]);
+                if ($save_errors && count ($save_errors) > 0)
+                {
+                    foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0], true, false);
+                    $this->module->sendResponse();
+                }
                 else $this->module->setError(422, '_device', "Problem with device creation");
             }
         }

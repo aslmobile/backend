@@ -98,14 +98,13 @@ class UploadFiles extends DynamicModel
     {
         $result = new \StdClass();
         if (!$this->validate()) {
-            if (!$this->validateExtension($this->file)) {
-                $result->format = 'Allowed extensions: ' . implode(', ', $this->extensions);
-            }
-            if (!$this->validateSize($this->file)) {
-                $result->size = 'File is too big, max size: ' . self::MAX_FILE_SIZE_MB . 'MB';
-            }
+            if (!$this->validateExtension($this->file)) $result->format = 'Allowed extensions: ' . implode(', ', $this->extensions);
+            if (!$this->validateSize($this->file)) $result->size = 'File is too big, max size: ' . self::MAX_FILE_SIZE_MB . 'MB';
+
             return $result;
         }
+
+        return true;
     }
 
     /**

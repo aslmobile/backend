@@ -2,6 +2,8 @@
 
 use Yii;
 use yii\web\Response;
+use yii\web\HttpException;
+
 use app\models\Settings;
 
 class RestFul extends \yii\rest\ActiveController

@@ -36,9 +36,9 @@ class Module extends \yii\base\Module
         $this->salt = Yii::$app->params['salt'];
 
         $headers = Yii::$app->request->headers;
-        if ($headers->has('accept-language'))
+        if ($headers->has('Accept-Language'))
         {
-            $this->lang = $headers->get('accept-language');
+            $this->lang = $headers->get('Accept-Language');
             Lang::setCurrent($this->lang);
         }
 
