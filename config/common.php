@@ -35,6 +35,29 @@ $config = [
         'mv' => [
             'class' => 'app\components\Mv',
         ],
+        'assetManager' => [
+            'bundles' => [
+                'yii\web\JqueryAsset' => [
+                    'sourcePath' => null,
+                    'basePath' => '@webroot',
+                    'baseUrl' => '@web',
+                    'js' => [
+                        'adminlte/plugins/jQuery/jquery-2.2.3.min.js',
+                    ]
+                ],
+                'yii\jui\JuiAsset' => [
+                    'sourcePath' => null,
+                    'basePath' => '@webroot',
+                    'baseUrl' => '@web',
+                    'css' => [
+
+                    ],
+                    'js' => [
+                        'adminlte/plugins/jQueryUI/jquery-ui.min.js',
+                    ]
+                ],
+            ],
+        ],
         'request' => [
             'cookieValidationKey' => 'wkxTVJpPd324422zA_BWWUp15TYnIp_c3',
             'class' => 'app\components\LangRequest',

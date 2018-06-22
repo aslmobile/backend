@@ -5,9 +5,6 @@ use yii\helpers\Url;
 
 $cont = Yii::$app->controller->id;
 $act = Yii::$app->controller->action->id;
-
-$image = new Imagick('');
-
 ?>
 <!-- Left side column. contains the logo and sidebar -->
 <aside class="main-sidebar">
@@ -15,11 +12,9 @@ $image = new Imagick('');
     <section class="sidebar">
         <!-- Sidebar user panel -->
         <div class="user-panel">
-            <div class="pull-left image">
-                <?= Yii::$app->imageCache->img(Yii::getAlias('@webroot') . Yii::$app->user->identity->avatar, '160x160', ['class' => 'img-circle']) ?>
-            </div>
-            <div class="pull-left info">
-                <p><?= Yii::$app->user->identity->email ?></p>
+            <div class="row">
+                <div class="col-sm-12 text-center" style="color: white;"><?= Yii::$app->user->identity->fullName ?></div>
+                <small class="col-sm-12 text-center" style="color: white;"><?= Yii::$app->user->identity->email ?></small>
             </div>
         </div>
         <!-- sidebar menu: : style can be found in sidebar.less -->
@@ -61,32 +56,6 @@ $image = new Imagick('');
                     </li>
                 </ul>
             </li>
-            <li class="treeview<?= (($cont == 'menu') || ($cont == 'menu-group')) ? ' active' : '' ?>">
-                <a href="#"> <i class="fa fa-user"></i> <span><?= Yii::$app->mv->gt('Меню', [], false); ?></span>
-                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
-                <ul class="treeview-menu">
-                    <li<?= ($cont == 'menu' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/menu/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Пункты меню', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'menu' && $act == 'create') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/menu/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новый пункт меню', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'menu-group' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/menu-group/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Группы меню', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'menu-group' && $act == 'create') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/menu-group/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая группа меню', [], false) ?>
-                        </a>
-                    </li>
-                </ul>
-            </li>
             <li class="header"><?= Yii::$app->mv->gt('Менеджмент', [], false); ?></li>
             <li class="treeview<?= ($cont == 'user') ? ' active' : '' ?>">
                 <a href="#"> <i class="fa fa-users"></i>
@@ -105,70 +74,32 @@ $image = new Imagick('');
                     </li>
                 </ul>
             </li>
-            <li class="treeview<?= ($cont == 'products') ? ' active' : '' ?>">
-                <a href="#"> <i class="fa fa-product-hunt"></i>
-                    <span><?= Yii::$app->mv->gt('Продукты', [], false); ?></span>
-                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
+            <li class="treeview<?= ($cont == 'vehicles') ? ' active' : '' ?>">
+                <a href="<?= Url::toRoute('/admin/vehicles') ?>">
+                    <i class="fa fa-car"></i>
+                    <span><?= Yii::$app->mv->gt('Автомобили', [], false); ?></span>
+                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                </a>
                 <ul class="treeview-menu">
-                    <li<?= ($cont == 'products' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/products/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
+                    <li<?= ($cont == 'vehicles' && ($act == 'types' || $act == 'type')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/vehicles/types') ?>">
+                            <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Типы', [], false) ?>
                         </a>
                     </li>
-                    <li<?= ($cont == 'products' && $act == 'create') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/products/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
+                    <li<?= ($cont == 'vehicles' && ($act == 'brands' || $act == 'brand')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/vehicles/brands') ?>">
+                            <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Бренды', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'vehicles' && ($act == 'models' || $act == 'model')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/vehicles/models') ?>">
+                            <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Модели', [], false) ?>
                         </a>
                     </li>
                 </ul>
             </li>
-            <li class="treeview<?= ($cont == 'category') ? ' active' : '' ?>">
-                <a href="#"> <i class="fa fa-wrench"></i>
-                    <span><?= Yii::$app->mv->gt('Категории', [], false); ?></span>
-                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
-                <ul class="treeview-menu">
-                    <li<?= ($cont == 'category' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/category/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'products' && $act == 'create') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/category/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-            <li class="treeview<?= ($cont == 'downloads') ? ' active' : '' ?>">
-                <a href="#"> <i class="fa fa-download"></i>
-                    <span><?= Yii::$app->mv->gt('Загрузки', [], false); ?></span>
-                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
-                <ul class="treeview-menu">
-                    <li<?= ($cont == 'downloads' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/downloads/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'products' && $act == 'create') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/downloads/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-            <li class="treeview<?= ($cont == 'feedback') ? ' active' : '' ?>">
-                <a href="#"> <i class="fa fa-download"></i>
-                    <span><?= Yii::$app->mv->gt('Обратная связь', [], false); ?></span>
-                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
-                <ul class="treeview-menu">
-                    <li<?= ($cont == 'feedback' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/feedback/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-            <li class="treeview<?= ($cont == 'countries') ? ' active' : '' ?>" style="display: none">
+
+            <li class="treeview<?= ($cont == 'countries') ? ' active' : '' ?>">
                 <a href="#"> <i class="fa fa-map"></i>
                     <span><?= Yii::$app->mv->gt('Страны', [], false); ?></span>
                     <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
@@ -185,7 +116,7 @@ $image = new Imagick('');
                     </li>
                 </ul>
             </li>
-            <li class="treeview<?= ($cont == 'cities') ? ' active' : '' ?>" style="display: none;">
+            <li class="treeview<?= ($cont == 'cities') ? ' active' : '' ?>">
                 <a href="#"> <i class="fa fa-map-marker"></i>
                     <span><?= Yii::$app->mv->gt('Города', [], false); ?></span>
                     <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
@@ -195,24 +126,6 @@ $image = new Imagick('');
                     </li>
                     <li<?= ($cont == 'cities' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/cities/create') ?>"><i class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новый', [], false) ?>                        </a>
-                    </li>
-                </ul>
-            </li>
-            <li class="header"><?= Yii::$app->mv->gt('Контент', [], false) ?></li>
-            <li class="treeview<?= ($cont == 'dynamic') ? ' active' : '' ?>">
-                <a href="#"> <i class="fa fa-file-text-o"></i>
-                    <span><?= Yii::$app->mv->gt('Страницы', [], false); ?></span>
-                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
-                <ul class="treeview-menu">
-                    <li<?= ($cont == 'dynamic' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/dynamic/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'dynamic' && $act == 'create') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/dynamic/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
-                        </a>
                     </li>
                 </ul>
             </li>

@@ -10,6 +10,7 @@ class Translation extends Model
 {
     public $val;
     public $new_val;
+    public $isNewRecord = false;
 
     /**
      * @return array the validation rules.

@@ -8,7 +8,7 @@ use yii\helpers\ArrayHelper;
 use app\components\MultilingualBehavior;
 use app\components\MultilingualQuery;
 /**
- * This is the model class for table "countries".
+ * This is the model class for table "country".
  *
  * @property integer $id
  * @property string $title_ru

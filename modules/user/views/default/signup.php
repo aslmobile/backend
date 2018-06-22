@@ -37,7 +37,7 @@ Yii::$app->controller->bodyClass[] = 'hold-transition register-page page1200';
                         <span class="glyphicon glyphicon-user form-control-feedback mr15"></span>
                     </div>
                     <div class="form-group has-feedback col-sm-6">
-                        <input type="text" name="SignupForm[last_name]" class="form-control" placeholder="<?=Yii::$app->mv->gt('Last name',[],false);?>">
+                        <input type="text" name="SignupForm[second_name]" class="form-control" placeholder="<?=Yii::$app->mv->gt('Last name',[],false);?>">
                         <span class="glyphicon glyphicon-user form-control-feedback mr15"></span>
                     </div>
                 </div>

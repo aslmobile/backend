@@ -28,9 +28,8 @@ $yesno = Yii::$app->params['yesno'];
             <!-- /.box-header -->
             <div class="box-body">
                 <?= $form->field($model, 'first_name')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'last_name')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'second_name')->textInput(['maxlength' => true]) ?>
                 <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'login')->textInput(['maxlength' => true]) ?>
                 <?= $form->field($model, 'phone')->textInput() ?>
                 <?= $form->field($model, 'city_id')->widget(
                     \kartik\select2\Select2::className(), [

@@ -101,9 +101,6 @@ JS
                     <div class="col-sm-6">
                         <?= $form->field($model, 'copy', ['template' => '{label}{input}{error}{hint}'])->textInput(['maxlength' => true]) ?>
                     </div>
-                    <div class="col-sm-6">
-                        <?= $form->field($model, 'telegram', ['template' => '{label}{input}{error}{hint}'])->textInput(['maxlength' => true]) ?>
-                    </div>
                     <div class="col-sm-12">
                         <?= $form->field($model, 'descr')->widget(alexantr\tinymce\TinyMCE::className(), [
                             'clientOptions' => [
@@ -198,9 +195,6 @@ JS
                     <div class="col-sm-6">
                         <?= $form->field($model, 'site_email', ['template' => '{label}{input}{error}{hint}'])->textInput(['maxlength' => true]) ?>
                     </div>
-                    <div class="col-sm-6">
-                        <?= $form->field($model, 'add_email', ['template' => '{label}{input}{error}{hint}'])->textInput(['maxlength' => true]) ?>
-                    </div>
                     <div class="col-sm-12">
                         <?= $form->field($model, 'address', ['template' => '{label}{input}{error}{hint}'])->textarea(['rows' => '4']) ?>
                     </div>
@@ -257,7 +251,6 @@ JS
                             0 => Yii::$app->mv->gt("Disabled", [], 0),
                             1 => Yii::$app->mv->gt("Enabled", [], 0)
                         ]); ?>
-                        <?= $form->field($model, 'google_api_key', ['template' => '{label}{input}{error}{hint}'])->textInput(['maxlength' => true]) ?>
                     </div>
                 </div>
             </div>

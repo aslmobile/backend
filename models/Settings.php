@@ -39,12 +39,11 @@ class Settings extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'copy', 'logo'], 'required'],
-            [['descr','address','phone','addphone','title','telegram','description','keywords','head_scripts','body_scripts','end_scripts','social'], 'string'],
+            [['descr','address','phone','addphone','title','description','keywords','head_scripts','body_scripts','end_scripts','social'], 'string'],
             [['maint','syscache'], 'integer'],
-            [['site_email','email_admin'], 'email'],
-            [['name', 'copy', 'logo','logo_int', 'logo_small', 'google_api_key'], 'string', 'max' => 255],
-            [['google_analytics_script'], 'string'],
-            [['site_email', 'add_email'], 'email'],
+            [['site_email'], 'email'],
+            [['name', 'copy', 'logo','logo_int', 'logo_small'], 'string', 'max' => 255],
+            [['site_email'], 'email'],
         ];
     }
 

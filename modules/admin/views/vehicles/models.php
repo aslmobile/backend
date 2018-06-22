@@ -1,20 +1,19 @@
 <?php
-
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\admin\models\UserSearch */
+/* @var $searchModel app\modules\admin\models\VehiclesTypeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt('Пользователи', [], false);
+$this->title = Yii::$app->mv->gt('Модели автомобилей', [], false);
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="content-wrapper">
     <section class="content-header">
-        <h2></h2>
+        <h2><?= $this->title; ?></h2>
         <?= Breadcrumbs::widget([
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
@@ -23,10 +22,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title"><?= Html::encode($this->title) ?></h3>
-
                 <div class="box-tools pull-right">
-                    <?= Html::a(Yii::$app->mv->gt('{i} новая', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false), ['create'], ['class' => 'btn btn-default btn-sm']); ?>
-                    <?= Html::a(Yii::$app->mv->gt('{i} удалить выбранные', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false), [''], [
+                    <?= Html::a(Yii::$app->mv->gt('{i} Добавить', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false), ['create-model'], ['class' => 'btn btn-default btn-sm']); ?>
+                    <?= Html::a(Yii::$app->mv->gt('{i} Удалить выбранные', ['i' => Html::tag('i', '', ['class' => 'fa fa-times'])], false), [''], [
                         'class' => 'btn btn-danger btn-sm',
                         'onclick' => "
 								var keys = $('#grid').yiiGridView('getSelectedRows');
@@ -48,16 +46,6 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'id' => 'grid',
-                'rowOptions' => function ($model, $key, $index, $grid) {
-                    $class_color = [
-                        \app\modules\admin\models\User::STATUS_PENDING => 'warning',
-                        \app\modules\admin\models\User::STATUS_APPROVED => 'success',
-                        \app\modules\admin\models\User::STATUS_BLOCKED => 'danger'
-                    ];
-                    return [
-                        'class' => (key_exists($model->status, $class_color)) ? $class_color[$model->status] : ''
-                    ];
-                },
                 'layout' => "
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
                     <div class='box-footer' style='display: block;'>{pager}</div>
@@ -67,8 +55,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'filterModel' => $searchModel,
                 'columns' => [
-                    ['class' => 'yii\grid\CheckboxColumn'],
-
+                    [
+                        'class' => 'yii\grid\CheckboxColumn',
+                        'headerOptions' => ['style' => 'width: 50px;'],
+                    ],
                     'id' => [
                         'attribute' => 'id',
                         'headerOptions' => ['style' => 'width: 50px;'],
@@ -76,17 +66,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             'class' => 'form-control',
                         ],
                     ],
-                    'first_name',
-                    'second_name',
-                    'email:email',
-                    'phone',
-                    'type' => [
-                        'attribute' => 'type',
-                        'filter' => Yii::$app->params['user_type'],
-                        'value' => function ($model) {
-                            return !empty($model->type) ? Yii::$app->params['user_type'][$model->type] : '';
-                        }
-                    ],
+                    'title',
+                    'max_seats',
                     [
                         'class' => 'yii\grid\ActionColumn',
                         'headerOptions' => ['style' => 'width: 125px;'],
