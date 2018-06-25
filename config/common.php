@@ -66,7 +66,12 @@ $config = [
                 'application/json' => 'yii\web\JsonParser',
             ]
         ],
-        'cache' => [],
+        'cache' => [
+            'class' => 'yii\redis\Connection',
+            'hostname' => 'localhost',
+            'port' => 6379,
+            'database' => 0,
+        ],
         'db' => [
             'class' => 'yii\db\Connection',
             'charset' => 'utf8',
