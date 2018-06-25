@@ -57,7 +57,7 @@ class Vehicles extends \yii\db\ActiveRecord
             [['seats'], 'integer', 'min' => 1],
             [['main'], 'integer', 'min' => 0, 'max' => 1],
             [['weight'], 'integer', 'min' => 0],
-            [['main'], 'filter', function () {
+            [['main'], 'filter', 'filter' => function ($value) {
                 // TODO: Check main for current user vehicle
             }],
             ['status', 'default', 'value' => self::STATUS_ADDED]
