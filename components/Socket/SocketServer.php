@@ -19,7 +19,7 @@ class SocketServer implements MessageComponentInterface
      */
     public function __construct()
     {
-        Yii::$app->db->createCommand('SET SESSION wait_timeout = 86400;')->execute();
+//        Yii::$app->db->createCommand('SET SESSION wait_timeout = 86400;')->execute();
     }
 
     /**
