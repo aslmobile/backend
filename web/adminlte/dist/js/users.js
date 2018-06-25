@@ -157,16 +157,3 @@ var usersAction = {
         });
     }
 };
-
-// simple blocking
-
-var changed = $('#user-status');
-var toChange = $('.field-user-blocked_reason');
-
-changed.on('change', function () {
-    var val = changed.val();
-    if (val == 9)
-        toChange.show();
-    else
-        toChange.hide();
-});

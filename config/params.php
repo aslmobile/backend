@@ -43,7 +43,8 @@ $params = [
     ],
     'user_type' => [
         0 => Yii::t('app',"User"),
-        1 => Yii::t('app',"Manager"),
+        1 => Yii::t('app',"Passenger"),
+        2 => Yii::t('app',"Driver"),
     ],
     'block_duration' => [
         0 => Yii::t('app','1 week'),

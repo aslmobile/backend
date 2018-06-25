@@ -1,0 +1,81 @@
+.def-sel-wrap .select2-container {
+    width: 100% !important;
+}
+
+.select2-container--krajee .select2-selection--single {
+    border: 1px solid #D2D6DE;
+    height: 34px;
+    border-radius: 0;
+    background: transparent;
+}
+.select2-container--krajee .select2-selection--single .select2-selection__clear {
+    top: 0;
+    right: 34px;
+    width: 34px;
+    height: 34px;
+    text-align: center;
+    line-height: 34px;
+}
+.select2-container--krajee .select2-selection--single .select2-selection__rendered {
+    font-size: 14px;
+    line-height: 18px;
+    color: #9e9e9f;
+    padding: 0;
+    padding-right: 15px;
+    margin: 0;
+}
+
+.select2-container--krajee .select2-selection--single .select2-selection__arrow {
+    height: 34px;
+    width: 34px;
+    border-color: #D2D6DE;
+    top: 0;
+    right: 0;
+    background: url("https://cdn3.iconfinder.com/data/icons/google-material-design-icons/48/ic_keyboard_arrow_down_48px-20.png") center center no-repeat;
+}
+.select2-container--krajee .select2-selection--single .select2-selection__arrow b {
+    display: none;
+}
+
+.select2-container--krajee.select2-container--open .select2-selection--single .select2-selection__arrow {
+    background: url("https://cdn3.iconfinder.com/data/icons/google-material-design-icons/48/ic_keyboard_arrow_up_48px-20.png") center center no-repeat;
+}
+
+.def-sel-wrap .select2-container.select2-container--below .select2-selection .select2-selection__rendered {
+    color: #1b1f23;
+}
+
+.select2-dropdown {
+    border-color: #e7e7e7;
+}
+
+.select2-search--dropdown {
+    padding: 10px;
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.select2-container--krajee .select2-search--dropdown .select2-search__field {
+    border: 1px solid #e7e7e7;
+    padding: 11px 15px;
+    font-size: 14px;
+    line-height: 18px;
+    color: #1b1f23;
+}
+
+.select2-results__option {
+    padding: 6px 15px;
+    font-size: 14px;
+    line-height: 18px;
+    color: #1b1f23;
+}
+
+.select2-container--krajee .select2-results__option--highlighted[aria-selected] {
+    background-color: #3C8DBC;
+}
+
+.main-header .logo {padding: 10px 15px; text-align: center;}
+.main-header .logo img {max-width: 100%; height: 100%;}
+.breadcrumbs-wrapper.content-header {min-height: 34px; margin-bottom: 20px;}
+.navbar-nav>.notifications-menu>.dropdown-menu, .navbar-nav>.messages-menu>.dropdown-menu, .navbar-nav>.tasks-menu>.dropdown-menu {width: auto;}
+.ui-dialog.el-finder-dialog {background: white; padding: 15px; box-shadow: 0 3px 12px -6px rgba(0,0,0, .35); border: 1px solid #eaeaea;}

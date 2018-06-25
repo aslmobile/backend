@@ -42,6 +42,7 @@ class VehicleBrand extends \yii\db\ActiveRecord
             [['title', 'max_seats', 'vehicle_type_id'], 'required'],
             [['max_seats', 'status', 'vehicle_type_id'], 'integer'],
             [['image'], 'string'],
+            [['max_seats'], 'integer', 'min' => 1],
             ['status', 'default', 'value' => self::STATUS_ACTIVE]
         ];
     }

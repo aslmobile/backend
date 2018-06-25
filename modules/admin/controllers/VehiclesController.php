@@ -1,5 +1,6 @@
 <?php namespace app\modules\admin\controllers;
 
+use app\modules\admin\models\Vehicles;
 use Yii;
 use app\components\Controller;
 use yii\filters\VerbFilter;
@@ -25,7 +26,8 @@ class VehiclesController extends Controller
                 'rules' => [
                     [
                         'actions' => [
-                            'index', 'types', 'brands', 'models',
+                            'index', 'update', 'create', 'delete',
+                            'types', 'brands', 'models',
                             'type', 'brand', 'model',
                             'create-type', 'create-brand', 'create-model',
                             'select-types', 'select-brands', 'select-models'
@@ -46,7 +48,34 @@ class VehiclesController extends Controller
 
     public function actionIndex()
     {
-        return $this->render('index');
+        if (Yii::$app->request->isAjax)
+        {
+            $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
+            if (count($keys))
+            {
+                foreach ($keys as $k => $v) if (($model = Vehicles::findOne($v)) !== null) $model->delete();
+                return $this->redirect(['index']);
+            }
+        }
+
+        $searchModel = new VehiclesBrandSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionCreate()
+    {
+        $model = new Vehicles();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) return $this->redirect(['update', 'id' => $model->id]);
+
+        return $this->render('create', [
+            'model' => $model,
+        ]);
     }
 
     public function actionBrands()
@@ -118,6 +147,33 @@ class VehiclesController extends Controller
         ]);
     }
 
+    public function actionCreateModel()
+    {
+        $model = new VehicleModel();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save())
+            return $this->redirect(['model', 'id' => $model->id]);
+
+        return $this->render('create', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionModel($id)
+    {
+        $model = $this->findModelModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save())
+        {
+            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved', [], 0));
+            return $this->redirect(['model', 'id' => $model->id]);
+        }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
+    }
+
     public function actionTypes()
     {
         if (Yii::$app->request->isAjax)
@@ -185,6 +241,58 @@ class VehiclesController extends Controller
         elseif (is_array($id))
         {
             $out['results'] = VehicleType::find()
+                ->select(['id', 'text' => 'title'])
+                ->andWhere(['in', 'id', $id])->asArray()->all();
+        }
+
+        return $out;
+    }
+
+    public function actionSelectBrands($q = null, $id = null)
+    {
+        if(!empty($id)) $id = explode(',',$id);
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['results' => ['id' => '', 'text' => '']];
+
+        if (!is_null($q))
+        {
+            $out['results'] = VehicleBrand::find()
+                ->select(['id', 'text' => 'title'])
+                ->andWhere([
+                    'OR',
+                    ['like', 'title', $q]
+                ])
+                ->limit(10)->asArray()->all();
+        }
+        elseif (is_array($id))
+        {
+            $out['results'] = VehicleBrand::find()
+                ->select(['id', 'text' => 'title'])
+                ->andWhere(['in', 'id', $id])->asArray()->all();
+        }
+
+        return $out;
+    }
+
+    public function actionSelectModels($q = null, $id = null)
+    {
+        if(!empty($id)) $id = explode(',',$id);
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['results' => ['id' => '', 'text' => '']];
+
+        if (!is_null($q))
+        {
+            $out['results'] = VehicleModel::find()
+                ->select(['id', 'text' => 'title'])
+                ->andWhere([
+                    'OR',
+                    ['like', 'title', $q]
+                ])
+                ->limit(10)->asArray()->all();
+        }
+        elseif (is_array($id))
+        {
+            $out['results'] = VehicleModel::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere(['in', 'id', $id])->asArray()->all();
         }

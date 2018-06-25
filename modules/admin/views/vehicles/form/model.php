@@ -67,6 +67,29 @@ JS
                         'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/vehicles/select-types']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                     ],
                 ]); ?>
+
+                <?= $form->field($model, 'vehicle_brand_id')->widget(Select2::classname(), [
+                    'model' => [],
+                    'theme' => Select2::THEME_KRAJEE,
+                    'attribute' => 'created_by',
+                    'hideSearch' => true,
+                    'options' => [
+                        'placeholder' => Yii::t('app', "Тип автомобиля")
+                    ],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 1,
+                        'ajax' => [
+                            'url' => \yii\helpers\Url::toRoute(['/admin/vehicles/select-brands']),
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                        'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/vehicles/select-brands']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                    ],
+                ]); ?>
             </div>
             <div class="box-footer clearfix text-right">
                 <?= \app\components\widgets\FormButtons::widget(['model' => $model]) ?>

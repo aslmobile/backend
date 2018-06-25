@@ -1,6 +1,5 @@
 <?php namespace app\modules\admin\models;
 
-use app\models\VehicleModel;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 

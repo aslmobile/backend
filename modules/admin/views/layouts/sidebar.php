@@ -81,17 +81,22 @@ $act = Yii::$app->controller->action->id;
                     <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
                 </a>
                 <ul class="treeview-menu">
-                    <li<?= ($cont == 'vehicles' && ($act == 'types' || $act == 'type')) ? ' class="active"' : '' ?>>
+                    <li<?= ($cont == 'vehicles' && ($act == 'index' || $act == 'update' || $act == 'create')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/vehicles') ?>">
+                            <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('Список автомобилей', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'vehicles' && ($act == 'types' || $act == 'type' || $act == 'create-type')) ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/vehicles/types') ?>">
                             <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Типы', [], false) ?>
                         </a>
                     </li>
-                    <li<?= ($cont == 'vehicles' && ($act == 'brands' || $act == 'brand')) ? ' class="active"' : '' ?>>
+                    <li<?= ($cont == 'vehicles' && ($act == 'brands' || $act == 'brand' || $act == 'create-brand')) ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/vehicles/brands') ?>">
                             <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Бренды', [], false) ?>
                         </a>
                     </li>
-                    <li<?= ($cont == 'vehicles' && ($act == 'models' || $act == 'model')) ? ' class="active"' : '' ?>>
+                    <li<?= ($cont == 'vehicles' && ($act == 'models' || $act == 'model' || $act == 'create-model')) ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/vehicles/models') ?>">
                             <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Модели', [], false) ?>
                         </a>

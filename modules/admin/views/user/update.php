@@ -6,9 +6,9 @@ use app\components\widgets\Alert;
 /* @var $this yii\web\View */
 /* @var $model app\models\User */
 
-$this->title = Yii::$app->mv->gt('Редактирование {title}',['title' => (strlen($model->name) > 3)? $model->name : $model->email],false);
+$this->title = Yii::$app->mv->gt('Редактирование {title}',['title' => (strlen($model->fullName) > 3)? $model->fullName : $model->email],false);
 $this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Пользователи',[],false), 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => (strlen($model->name) > 3)? $model->name : $model->email, 'url' => ['view', 'id' => $model->id]];
+$this->params['breadcrumbs'][] = ['label' => (strlen($model->fullName) > 3)? $model->fullName : $model->email, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

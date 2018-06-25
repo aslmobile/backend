@@ -18,7 +18,6 @@ class AppAsset extends AssetBundle
         "plugins/datepicker/datepicker3.css",
         "plugins/daterangepicker/daterangepicker.css",
         "plugins/x-editable/bootstrap3-editable/css/bootstrap-editable.css",
-        "plugins/jQueryUI/jquery-ui.min.css",
         "plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css",
         '/admin_assets/css/all.css'
     ];
@@ -45,9 +44,9 @@ class AppAsset extends AssetBundle
         "dist/js/all.js",
     ];
     public $depends = [
-//        'app\modules\admin\assets\YiiAsset',
-//        'yii\bootstrap\BootstrapAsset',
+        'yii\bootstrap\BootstrapAsset',
         'yii\bootstrap\BootstrapPluginAsset',
+        'yii\web\JqueryAsset',
         'yii\jui\JuiAsset',
     ];
 

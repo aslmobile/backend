@@ -19,7 +19,8 @@ use yii\behaviors\TimestampBehavior;
 class VehicleModel extends \yii\db\ActiveRecord
 {
     const
-        STATUS_DEFAULT = 1;
+        STATUS_ACTIVE = 1,
+        STATUS_DISABLED = 0;
 
     public static function tableName()
     {
@@ -42,7 +43,8 @@ class VehicleModel extends \yii\db\ActiveRecord
             [['title', 'max_seats', 'vehicle_type_id', 'vehicle_brand_id'], 'required'],
             [['max_seats', 'status', 'vehicle_type_id', 'vehicle_brand_id'], 'integer'],
             [['image'], 'string'],
-            ['status', 'default', 'value' => self::STATUS_DEFAULT]
+            [['max_seats'], 'integer', 'min' => 1],
+            ['status', 'default', 'value' => self::STATUS_ACTIVE]
         ];
     }
 

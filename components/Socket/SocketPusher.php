@@ -4,6 +4,7 @@ namespace app\components\Socket;
 
 use Yii;
 use yii\base\Model;
+use Ratchet\ConnectionInterface;
 
 /**
  * Class SocketPusher
@@ -12,7 +13,6 @@ use yii\base\Model;
  */
 class SocketPusher extends Model
 {
-
     protected $scheme;
     protected $host;
     protected $port;
@@ -35,10 +35,13 @@ class SocketPusher extends Model
     {
         $connection = \Ratchet\Client\connect($this->scheme . $this->host . ':' . $this->port . '?authkey=' . $this->authkey);
         $connection->then(function ($conn) use ($message) {
+            /** @var ConnectionInterface $conn */
             $conn->send($message);
             $conn->close();
         }, function ($e) {
             echo "Could not connect: {$e->getMessage()}\n";
         });
+
+        return true;
     }
 }

@@ -74,12 +74,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         'template' => '{view} {update} {delete}',
                         'buttons' => [
                             'view' => function ($url, $model) {
+                                $url = str_replace(['update', 'view'], $model->getSc(), $url);
                                 return Html::a('<button type="button" class="btn btn-info btn-sm"><i class="fa fa-search"></i></button>', $url);
                             },
                             'update' => function ($url, $model) {
+                                $url = str_replace(['update', 'view'], $model->getSc(), $url);
                                 return Html::a('<button type="button" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i></button>', $url);
                             },
                             'delete' => function ($url, $model) {
+                                $url = str_replace(['update', 'view'], $model->getSc(), $url);
                                 return Html::a('<button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>', $url, [
                                     'data' => [
                                         'confirm' => Yii::$app->mv->gt('Are you sure you want to delete this item?', [], false),

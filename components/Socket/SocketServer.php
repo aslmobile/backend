@@ -2,7 +2,7 @@
 
 namespace app\components\Socket;
 
-use app\modules\api\models\Device;
+use app\modules\api\models\Devices;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 use Yii;
@@ -142,11 +142,10 @@ class SocketServer implements MessageComponentInterface
      */
     private function validateDevice($conn, $authkey)
     {
-        if (!empty($authkey)) {
-            $device = Device::find()->joinWith('authDevice')->where(['auth_device.authkey' => $authkey])->one();
-            if (!empty($device)) {
-                return $device;
-            }
+        if (!empty($authkey))
+        {
+            $device = Devices::find()->where(['authkey' => $authkey])->one();
+            if ($device && !empty($device)) return $device;
         }
 
         $conn->send('Unknown auth key');

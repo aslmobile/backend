@@ -26,7 +26,7 @@ class UserController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index', 'create', 'update', 'view'],
+                        'actions' => ['index', 'create', 'update', 'view', 'select-users'],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
                     ],
@@ -171,6 +171,34 @@ class UserController extends Controller
                 'model' => $model,
             ]);
         }
+    }
+
+    public function actionSelectUsers($q = null, $id = null)
+    {
+        if (!empty($id)) $id = explode(',', $id);
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['results' => ['id' => '', 'text' => '']];
+
+        if (!is_null($q))
+        {
+            $out['results'] = User::find()
+                ->select(['id', 'text' => 'CONCAT(first_name,\' \',second_name)'])
+                ->andWhere([
+                    'OR',
+                    ['like', 'first_name', $q],
+                    ['like', 'second_name', $q],
+                    ['like', 'email', $q]
+                ])
+                ->limit(10)->asArray()->all();
+        }
+        elseif (is_array($id))
+        {
+            $out['results'] = User::find()
+                ->select(['id', 'text' => 'CONCAT(first_name,\' \',second_name)'])
+                ->andWhere(['in', 'id', $id])->asArray()->all();
+        }
+
+        return $out;
     }
 
     /**

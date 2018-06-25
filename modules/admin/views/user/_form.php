@@ -31,11 +31,6 @@ $yesno = Yii::$app->params['yesno'];
                 <?= $form->field($model, 'second_name')->textInput(['maxlength' => true]) ?>
                 <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
                 <?= $form->field($model, 'phone')->textInput() ?>
-                <?= $form->field($model, 'city_id')->widget(
-                    \kartik\select2\Select2::className(), [
-                        'data' => \app\modules\admin\models\City::getCitiesList(true)
-                    ]
-                ) ?>
                 <?= $form->field($model, 'gender')->dropDownList($model->genders) ?>
 
             </div>
@@ -123,13 +118,6 @@ JS
                         <?= $form->field($model, 'status')->dropDownList($model->statuses) ?>
                         <?= $form->field($model, 'blocked_reason',
                             ['options' => ['style' => ['display' => $model->status == $model::STATUS_BLOCKED ? 'block' : 'none']]])->textInput() ?>
-                    </div>
-                    <div class="col-sm-6">
-                        <?= $form->field($model, 'country_id')->widget(
-                            \kartik\select2\Select2::className(), [
-                                'data' => $model->countries
-                            ]
-                        ) ?>
                     </div>
                     <div class="col-sm-6">
                         <?php if (!empty($model->created_at)): ?>

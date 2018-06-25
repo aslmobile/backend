@@ -8,7 +8,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\User */
 
-$this->title = (strlen($model->name) > 3) ? $model->name : $model->email;
+$this->title = (strlen($model->fullName) > 3) ? $model->fullName : $model->email;
 $this->params['breadcrumbs'][] = [
     'label' => 'Пользователи',
     'url' => ['index']
@@ -38,7 +38,7 @@ $gender = Yii::$app->params['gender'];
                             </div>
                         <?php endif; ?>
                         <!-- /.widget-user-image -->
-                        <h3 class="widget-user-username"><?= $model->name ?></h3>
+                        <h3 class="widget-user-username"><?= $model->fullName ?></h3>
                         <h5 class="widget-user-desc"><?= $model->email ?></h5>
                     </div>
                 </div>
@@ -92,9 +92,8 @@ $gender = Yii::$app->params['gender'];
                                     'attributes' => [
                                         'id',
                                         'first_name',
-                                        'last_name',
+                                        'second_name',
                                         'email:email',
-                                        'login',
                                         [
                                             'attribute' => 'status',
                                             'value' => key_exists($model->status, $model->statuses)? $model->statuses[$model->status] : null,
