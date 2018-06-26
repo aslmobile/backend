@@ -100,7 +100,7 @@ class Controller extends \yii\web\Controller
             $action = $this->createAction($id);
             $this->beforeAction($action);
 
-            return $this->render('@app/views/layouts/empty', []);
+            return $this->render('@app/views/layouts/maintenance', []);
         }
 
         return parent::runAction($id, $params);
