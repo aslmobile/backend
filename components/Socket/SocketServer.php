@@ -19,7 +19,7 @@ class SocketServer implements MessageComponentInterface
      */
     public function __construct()
     {
-//        Yii::$app->db->createCommand('SET SESSION wait_timeout = 86400;')->execute();
+        // TODO
     }
 
     /**
@@ -35,20 +35,32 @@ class SocketServer implements MessageComponentInterface
         parse_str($query_string, $q);
         $input_data = $q;
 
-        if (is_array($input_data) && array_key_exists('authkey', $input_data)) {
+        echo "New connection.\n";
 
-            $authkey = $input_data['authkey'];
+        if (is_array($input_data) && array_key_exists('auth', $input_data)) {
+
+            $authkey = $input_data['auth'];
 
             $device = $this->validateDevice($conn, $authkey);
 
-            if (!empty($device)) {
-
+            if (!$device || empty($device))
+            {
+                echo "Connection closed! No device auth!\n";
+                $conn->close();
+            }
+            else
+            {
                 $conn->device = $device;
-
                 $this->devices[$conn->resourceId] = $conn;
 
-                echo "New connection! ({$conn->device->id})\n";
+                echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; connected.\n";
             }
+        }
+        else
+        {
+            echo "Connection closed! Connection data is invalid!\n";
+            $conn->send(base64_encode(json_encode(['error_code' => 100, 'message' => 'Connection closed. Please verify your data.'])));
+            $conn->close();
         }
     }
 
@@ -70,7 +82,8 @@ class SocketServer implements MessageComponentInterface
             }
         }
 
-        echo "Connection {$conn->device->id} has disconnected\n";
+        if ($conn->device->id && !empty ($conn->device->id))
+            echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; disconnected.\n";
     }
 
     /**
@@ -113,15 +126,9 @@ class SocketServer implements MessageComponentInterface
         }
 
         $response = json_encode($response);
-        $response = base64_encode($response);
+//        $response = base64_encode($response);
 
         $from->send($response);
-
-        //foreach ($this->devices as $key => $device){
-        //    if($key != $from->resourceId){
-        //        $device->send($response);
-        //    }
-        //}
 
         echo "Message from ({$from->device->id})\n";
     }
@@ -135,20 +142,20 @@ class SocketServer implements MessageComponentInterface
     }
 
     /**
-     * @param $conn
-     * @param $authkey
+     * @param $conn ConnectionInterface
+     * @param $authkey string
      *
-     * @return bool|null|Device|array
+     * @return bool|null|Devices|array
      */
     private function validateDevice($conn, $authkey)
     {
         if (!empty($authkey))
         {
-            $device = Devices::find()->where(['authkey' => $authkey])->one();
+            $device = Devices::find()->where(['auth_token' => $authkey])->one();
             if ($device && !empty($device)) return $device;
         }
 
-        $conn->send('Unknown auth key');
+        $conn->send('Device not found. Please check your token');
         $conn->close();
 
         return false;
