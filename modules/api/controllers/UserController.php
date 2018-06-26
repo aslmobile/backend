@@ -3,9 +3,11 @@
 use app\modules\api\models\DriverLicence;
 use app\modules\api\models\UploadFiles;
 use app\modules\api\models\Users;
+use app\modules\api\models\Vehicles;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 
 /** @property \app\modules\api\Module $module */
 class UserController extends BaseController
@@ -30,7 +32,12 @@ class UserController extends BaseController
                     [
                         'actions' => [
                             'auth', 'sms',
-                            'upload-driver-licence', 'upload-vehicle-insurance', 'upload-vehicle-registration', 'upload-vehicle-photos', 'upload-user-photo'
+                            'registration',
+                            'upload-driver-licence',
+                            'create-vehicle',
+
+
+                            'upload-vehicle-insurance', 'upload-vehicle-registration', 'upload-vehicle-photos', 'upload-user-photo'
                         ],
                         'allow' => true
                     ]
@@ -41,7 +48,10 @@ class UserController extends BaseController
                 'actions' => [
                     'auth'  => ['POST'],
                     'sms'   => ['POST'],
+                    'registration' => ['PUT'],
                     'upload-driver-licence' => ['POST'],
+                    'create-vehicle' => ['PUT'],
+
                     'upload-vehicle-insurance' => ['POST'],
                     'upload-vehicle-registration' => ['POST'],
                     'upload-vehicle-photos' => ['POST'],
@@ -76,6 +86,8 @@ class UserController extends BaseController
 
     public function actionSms()
     {
+        $this->prepareBody();
+
         $user = $this->TokenAuth(self::TOKEN_SMS);
         if ($user) $user = $this->user;
 
@@ -87,6 +99,39 @@ class UserController extends BaseController
 
         $this->device->auth_token = $token;
         $this->device->save();
+
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionRegistration()
+    {
+        $this->prepareBody();
+
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $data = [
+            'Users' => (array) $this->body
+        ];
+
+        if (!$user->load($data)) $this->module->setError(422, 'user', "Can't load user model from data.");
+        if (!$user->validate() || !$user->save())
+        {
+            if ($user->hasErrors())
+            {
+                foreach ($user->errors as $field => $error_message)
+                    $this->module->setError(422, 'user.' . $field, $error_message, true, false);
+                $this->module->sendResponse();
+            }
+            else $this->module->setError(422, 'user', "Can't validate user model from data.");
+        }
+
+        $this->module->data = [
+            'user' => $user->toArray()
+        ];
+        $this->prepareScheme('users');
+        $this->module->JSONValidate('user', $this->scheme);
 
         $this->module->setSuccess();
         $this->module->sendResponse();
@@ -109,6 +154,39 @@ class UserController extends BaseController
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
+
+    public function actionCreateVehicle()
+    {
+        $this->prepareBody();
+
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->validateBodyParams(['user_id', 'vehicle_type_id', 'vehicle_brand_id', 'vehicle_model_id', 'license_plate', 'seats']);
+
+        $vehicle = new Vehicles();
+        $data['Vehicles'] = (array) $this->body;
+        if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle.load', "Can't load vehicle model");
+        if (!$vehicle->validate() || !$vehicle->save())
+        {
+            if ($vehicle->hasErrors())
+            {
+                foreach ($vehicle->errors as $field => $error)
+                    $this->module->setError(422, 'vehicle.' . $field, $error, true, false);
+
+                $this->module->sendResponse();
+            }
+            else $this->module->setError(422, 'vehicle.save', "Can't save vehicle model");
+        }
+
+        $this->module->data = [
+            'vehicle' => $vehicle->toArray()
+        ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    /*
 
     public function actionUploadVehicleInsurance()
     {
@@ -209,6 +287,7 @@ class UserController extends BaseController
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
+    */
 
     /**
      * Upload documents

@@ -1,6 +1,4 @@
 <?php namespace app\modules\api\controllers;
-
-use app\modules\api\models\UploadFiles;
 use Yii;
 use yii\helpers\Url;
 use yii\web\UploadedFile;
@@ -8,6 +6,8 @@ use yii\web\UploadedFile;
 use app\components\RestFul;
 use app\modules\api\models\Devices;
 use app\modules\api\models\Users;
+use app\modules\api\models\UploadFiles;
+use yii\web\ForbiddenHttpException;
 
 use app\modules\api\models\RestFul as RestFulModel;
 
@@ -49,6 +49,25 @@ class BaseController extends RestFul
         $this->logEvent();
 
         return parent::beforeAction($event);
+    }
+
+    public $scheme = false;
+    public function prepareScheme($scheme = false)
+    {
+        if (!$scheme) foreach ($this->module->data as $data_scheme => $data)
+            $this->loadScheme($data_scheme);
+        else
+            $this->loadScheme($scheme);
+    }
+
+    public function loadScheme($scheme)
+    {
+        $className = 'app\modules\api\models\\' . ucfirst($scheme);
+        if (class_exists($className))
+        {
+            $model = new $className();
+            $this->scheme = $model->scheme;
+        }
     }
 
     protected function TokenAuth($type = self::TOKEN)
@@ -191,12 +210,16 @@ class BaseController extends RestFul
     {
         $this->body = Yii::$app->request->getRawBody();
         if (empty ($this->body)) $this->body = @file_get_contents('php://input');
+
         $json = Yii::$app->request->get('json');
         if (!$json || $json != '1') $this->body = base64_decode($this->body);
         $this->body = json_decode($this->body, false, 1024);
 
         if (empty($this->body) && json_last_error() !== JSON_ERROR_NONE) $this->module->setError(422, '_json', json_last_error_msg());
         elseif (empty ($this->body)) $this->module->setError(422, '_body', 'Empty');
+
+        $this->module->body = $this->body;
+        $this->module->validateBody();
     }
 
     /**
@@ -238,5 +261,22 @@ class BaseController extends RestFul
 
         $logger = new RestFulModel($params);
         $logger->save();
+    }
+
+    /**
+     * Checks the privilege of the current user.
+     *
+     * This method should be overridden to check whether the current user has the privilege
+     * to run the specified action against the specified data model.
+     * If the user does not have access, a [[ForbiddenHttpException]] should be thrown.
+     *
+     * @param string $action the ID of the action to be executed
+     * @param object $model the model to be accessed. If null, it means no specific model is being accessed.
+     * @param array $params additional parameters
+     * @throws ForbiddenHttpException if the user does not have access
+     */
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        throw new ForbiddenHttpException("Access denied.", 403);
     }
 }

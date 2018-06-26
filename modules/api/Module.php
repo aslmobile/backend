@@ -83,15 +83,34 @@ class Module extends \yii\base\Module
         return $array;
     }
 
-    public function JSONValidate ($json, $model = false)
+    /**
+     * @param $data string
+     * @param $scheme array|object
+     */
+    public function JSONValidate ($data, $scheme)
     {
+        /** @var Validator $validator */
         $validator = new Validator();
 
         /** @var ValidationResult $result */
-        $result = $validator->dataValidation($json, $model->schema);
+        $result = $validator->dataValidation((object) $this->data[$data], $scheme);
+        if (!$result->isValid())
+        {
+            /** @var ValidationError $validation_error */
+            $validation_errors = $result->getErrors();
+            foreach ($validation_errors as $validation_error)
+            {
+                foreach ($validation_error->dataPointer() as $pointer)
+                {
+                    $this->setError(422, $data . '.' . $pointer, $validation_error->keyword(), true, false);
 
-        // TODO: JSON Validate
-        return $result->isValid();
+                    foreach ($validation_error->keywordArgs() as $param => $value)
+                        $this->setError(422, $data . '.'. $pointer . '.' . $param, $value, true, false);
+                }
+            }
+
+            $this->sendResponse();
+        }
     }
 
     /**
