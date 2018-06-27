@@ -34,10 +34,7 @@ class UserController extends BaseController
                             'auth', 'sms',
                             'registration',
                             'upload-driver-licence',
-                            'create-vehicle',
-
-
-                            'upload-vehicle-insurance', 'upload-vehicle-registration', 'upload-vehicle-photos', 'upload-user-photo'
+                            'upload-user-photo'
                         ],
                         'allow' => true
                     ]
@@ -50,11 +47,6 @@ class UserController extends BaseController
                     'sms'   => ['POST'],
                     'registration' => ['PUT'],
                     'upload-driver-licence' => ['POST'],
-                    'create-vehicle' => ['PUT'],
-
-                    'upload-vehicle-insurance' => ['POST'],
-                    'upload-vehicle-registration' => ['POST'],
-                    'upload-vehicle-photos' => ['POST'],
                     'upload-user-photo' => ['POST'],
                 ]
             ]
@@ -155,93 +147,6 @@ class UserController extends BaseController
         $this->module->sendResponse();
     }
 
-    public function actionCreateVehicle()
-    {
-        $this->prepareBody();
-
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
-        $this->validateBodyParams(['user_id', 'vehicle_type_id', 'vehicle_brand_id', 'vehicle_model_id', 'license_plate', 'seats']);
-
-        $vehicle = new Vehicles();
-        $data['Vehicles'] = (array) $this->body;
-        if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle.load', "Can't load vehicle model");
-        if (!$vehicle->validate() || !$vehicle->save())
-        {
-            if ($vehicle->hasErrors())
-            {
-                foreach ($vehicle->errors as $field => $error)
-                    $this->module->setError(422, 'vehicle.' . $field, $error, true, false);
-
-                $this->module->sendResponse();
-            }
-            else $this->module->setError(422, 'vehicle.save', "Can't save vehicle model");
-        }
-
-        $this->module->data = [
-            'vehicle' => $vehicle->toArray()
-        ];
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
-    /*
-
-    public function actionUploadVehicleInsurance()
-    {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
-        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
-
-        $data = $this->UploadLicenceDocument($user, DriverLicence::TYPE_INSURANCE);
-
-        $this->module->data = [
-            'files' => $data['documents'],
-            'user'  => $user->toArray(),
-            'licence' => $data['licenses']->toArray()
-        ];
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
-    public function actionUploadVehicleRegistration()
-    {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
-        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
-
-        $data = $this->UploadLicenceDocument($user, DriverLicence::TYPE_REGISTRATION);
-
-        $this->module->data = [
-            'files' => $data['documents'],
-            'user'  => $user->toArray(),
-            'licence' => $data['licenses']->toArray()
-        ];
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
-    public function actionUploadVehiclePhotos()
-    {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
-        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
-
-        $photos = [];
-        foreach ($_FILES as $name => $file) $photos[$name] = $this->UploadFile($name, 'vehicle-photos/' . $user->id);
-
-        $this->module->data = [
-            'files' => $photos,
-            'user'  => $user->toArray(),
-        ];
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
     public function actionUploadUserPhoto()
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -249,45 +154,30 @@ class UserController extends BaseController
 
         if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
 
-        foreach ($_FILES as $name => $file)
-        {
-            $file = $this->UploadFile($name, 'user-photos/' . $user->id, true);
-            $photos[$name] = $file['file'];
-            $user->image = intval($file['file_id']);
-        }
+        $documents = [];
+        foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'user-photos/' . $user->id, true);
 
-        $old_image = $user->getOldAttribute('image');
-        if (!empty ($old_image) && $old_image > 0)
+        if (!empty ($user->image))
         {
-            $image = UploadFiles::findOne(['id' => $old_image]);
-            if ($image)
+            $file = UploadFiles::findOne(['id' => $user->image]);
+            if ($file && !empty($file->file))
             {
-                $file = Yii::getAlias('@webroot') . $image->file;
-                if (file_exists($file)) unlink($file);
-                $image->delete();
+                $oldDocument = Yii::getAlias('@webroot') . $file->file;
+                if ($oldDocument && file_exists($oldDocument)) unlink($oldDocument);
+                $file->delete();
             }
         }
 
-        if (!$user->save())
-        {
-            $save_errors = $user->getErrors();
-            if ($save_errors && count ($save_errors) > 0)
-            {
-                foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0], true, false);
-                $this->module->sendResponse();
-            }
-            else $this->module->setError(422, '_user', "Problem with file upload");
-        }
-        $this->user = $user;
+        $user->image = $documents['image']['file_id'];
+        $user->save();
 
         $this->module->data = [
-            'files' => $photos,
-            'user'  => $user->toArray(),
+            'user' => $user->toArray(),
+            'file' => $documents['image']['file']
         ];
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
-    */
 
     /**
      * Upload documents
@@ -314,14 +204,6 @@ class UserController extends BaseController
         {
             case DriverLicence::TYPE_LICENSE:
                 foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'driver-licence/' . $user->id);
-                break;
-
-            case DriverLicence::TYPE_INSURANCE:
-                foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-insurance/' . $user->id);
-                break;
-
-            case DriverLicence::TYPE_REGISTRATION:
-                foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-registration/' . $user->id);
                 break;
 
             default: $this->module->setError(422, 'license.type', "Unknown type");

@@ -12,7 +12,7 @@ class Users extends \app\models\User
         "email": {"type": "string","format": "email"},
         "first_name": {
             "type": "string",
-            "minLength": 2,
+            "minLength": 110,
             "maxLength": 120
         },
         "second_name": {

@@ -14,9 +14,8 @@ use yii\behaviors\TimestampBehavior;
  * @property string $license_plate
  * @property integer $image
  * @property integer $insurance
- * @property integer $insurance2
- * @property integer $license
- * @property integer $license2
+ * @property integer $registration
+ * @property integer $registration2
  * @property integer $weight
  * @property integer $vehicle_type_id
  * @property integer $vehicle_model_id
@@ -52,7 +51,7 @@ class Vehicles extends \yii\db\ActiveRecord
         return [
             [['user_id', 'vehicle_type_id', 'vehicle_model_id', 'vehicle_brand_id', 'seats', 'license_plate'], 'required'],
             [['main', 'weight', 'seats', 'vehicle_type_id', 'vehicle_model_id', 'vehicle_brand_id'], 'integer'],
-            [['image', 'insurance', 'insurance2', 'license', 'license2'], 'integer'],
+            [['image', 'insurance', 'registration', 'registration2'], 'integer'],
             [['license_plate'], 'string'],
             ['license_plate', 'unique', 'targetClass' => self::className(),
                 'message' => Yii::t('app', 'This plate has already been taken.')
@@ -81,10 +80,7 @@ class Vehicles extends \yii\db\ActiveRecord
             'seats'             => Yii::t('app', "Seats"),
             'license_plate'     => Yii::t('app', "License Plate"),
             'image'             => Yii::t('app', "Image"),
-            'insurance'         => Yii::t('app', "Insurance Front"),
-            'insurance2'        => Yii::t('app', "Insurance Back"),
-            'license'           => Yii::t('app', "License Front"),
-            'license2'          => Yii::t('app', "License Back"),
+            'insurance'         => Yii::t('app', "Insurance"),
             'vehicle_type_id'   => Yii::t('app', "Vehicle Type"),
             'vehicle_brand_id'  => Yii::t('app', "Vehicle Brand"),
             'vehicle_model_id'  => Yii::t('app', "Vehicle Model"),
