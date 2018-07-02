@@ -84,7 +84,7 @@ class Settings extends \yii\db\ActiveRecord
     {
         return [
             'ml' => [
-                'class' => MultilingualBehavior::className(),
+                'class' => MultilingualBehavior::class,
                 'languages' => Lang::getBehaviorsList(),
                 //'languageField' => 'language',
                 //'localizedPrefix' => '',

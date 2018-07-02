@@ -160,10 +160,6 @@ class MultilingualBehavior extends Behavior
 
         /** @var ActiveRecord $className */
         $className = $this->ownerClassName;
-
-        var_dump($className::primaryKey());
-        exit;
-
         $this->ownerPrimaryKey = $className::primaryKey()[0];
 
         if (!isset($this->langForeignKey)) {
