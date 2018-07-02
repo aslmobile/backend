@@ -70,7 +70,7 @@ class VehiclesController extends BaseController
         if ($user) $user = $this->user;
 
         $_vehicles = [];
-        $vehicles = Vehicles::find()->orderBy(['created_at' => SORT_DESC])->all();
+        $vehicles = Vehicles::find()->where(['user_id' => $user->id])->orderBy(['created_at' => SORT_DESC])->all();
 
         if ($vehicles && count ($vehicles)) foreach ($vehicles as $vehicle)
         {

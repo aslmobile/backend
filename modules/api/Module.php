@@ -163,8 +163,8 @@ class Module extends \yii\base\Module
 
         if (empty ($ret->data) && !$ret->data) $ret->data = null;
 
-        if (!isset($_GET['json']) || $_GET['json'] !== '1') Yii::$app->response->content = base64_encode(json_encode($ret,JSON_NUMERIC_CHECK));
-        else Yii::$app->response->content = json_encode($ret,JSON_NUMERIC_CHECK);
+        if (!isset($_GET['json']) || $_GET['json'] !== '1') Yii::$app->response->content = base64_encode(json_encode($ret));
+        else Yii::$app->response->content = json_encode($ret);
 
         Yii::$app->response->send();
         exit;
