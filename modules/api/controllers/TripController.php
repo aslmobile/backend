@@ -97,6 +97,7 @@ class TripController extends BaseController
                 break;
 
             case 'driver': return $this->getDriverTrips($id);
+                break;
         }
 
         return false;
