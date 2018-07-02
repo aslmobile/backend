@@ -32,7 +32,7 @@ class RestFul extends \yii\rest\ActiveController
      */
     public static function getCoreSettings()
     {
-        return Settings::find()->where('id = 1')->multilingual()->one();
+        return Settings::find()->where('id = 1')->one();
     }
 
     public static function getOldLangAssoc($lang)

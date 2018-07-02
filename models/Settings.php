@@ -80,29 +80,29 @@ class Settings extends \yii\db\ActiveRecord
         ];
     }
 
-    public function behaviors()
-    {
-        return [
-            'ml' => [
-                'class' => MultilingualBehavior::class,
-                'languages' => Lang::getBehaviorsList(),
-                //'languageField' => 'language',
-                //'localizedPrefix' => '',
-                //'requireTranslations' => false',
-                //'dynamicLangClass' => true',
-                'defaultLanguage' => Lang::getCurrent()->local,
-                'langForeignKey' => 'settings_id',
-                'tableName' => "{{%settings_lang}}",
-                'attributes' => ['name', 'copy', 'descr','title','description','keywords','social','address']
-            ],
-        ];
-    }
+//    public function behaviors()
+//    {
+//        return [
+//            'ml' => [
+//                'class' => MultilingualBehavior::class,
+//                'languages' => Lang::getBehaviorsList(),
+//                //'languageField' => 'language',
+//                //'localizedPrefix' => '',
+//                //'requireTranslations' => false',
+//                //'dynamicLangClass' => true',
+//                'defaultLanguage' => Lang::getCurrent()->local,
+//                'langForeignKey' => 'settings_id',
+//                'tableName' => "{{%settings_lang}}",
+//                'attributes' => ['name', 'copy', 'descr','title','description','keywords','social','address']
+//            ],
+//        ];
+//    }
 
-    public static function find()
-    {
-        $q = new MultilingualQuery(get_called_class());
-        $q->localized();
-        return $q;
-    }
+//    public static function find()
+//    {
+//        $q = new MultilingualQuery(get_called_class());
+//        $q->localized();
+//        return $q;
+//    }
 
 }
