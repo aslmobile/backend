@@ -40,4 +40,12 @@ JSON;
 
         return $schema;
     }
+
+    public function toArray(array $fields = [], array $expand = [], $recursive = true)
+    {
+        $array = parent::toArray($fields, $expand, $recursive);
+        if (isset ($array['phone']) && !empty ($array['phone'])) $array['phone'] = (string) $array['phone'];
+
+        return $array;
+    }
 }
