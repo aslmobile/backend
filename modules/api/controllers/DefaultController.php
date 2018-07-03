@@ -60,6 +60,10 @@ class DefaultController extends BaseController
         if ($user) $user = $this->user;
 
         $this->module->data = Yii::$app->request->post();
+
+        // LOG DATA FOR RESPONSE
+        $this->logResponse($this->module->data);
+
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

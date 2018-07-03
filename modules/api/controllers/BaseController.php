@@ -243,6 +243,27 @@ class BaseController extends RestFul
         else $this->module->setError(422, '_body', 'Params has incorrect format');
     }
 
+    public function logResponse($data = [])
+    {
+        $params = [
+            'id' => time() + 1,
+            'type'  => RestFulModel::TYPE_LOG,
+            'message' => json_encode([
+                'controller' => Yii::$app->controller->id,
+                'action' => Yii::$app->controller->action->id,
+                'url' => Url::current(),
+                'time' => time(),
+                'token' => $this->token,
+                'response' => $data
+            ]),
+            'user_id' => Yii::$app->user->id ? Yii::$app->user->id : 0,
+            'uip'   => Yii::$app->request->getUserIP()
+        ];
+
+        $logger = new RestFulModel($params);
+        $logger->save();
+    }
+
     public function logEvent()
     {
         $params = [
