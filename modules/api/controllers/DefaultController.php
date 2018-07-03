@@ -59,11 +59,10 @@ class DefaultController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $this->module->data = $this->body;
+        $body = Yii::$app->request->rawBody;
+        if (!isset($_GET['json']) || $_GET['json'] !== '1') $body = json_decode(base64_decode($body));
 
-        // LOG DATA FOR RESPONSE
-        $this->logResponse($this->module->data);
-
+        $this->module->data = $body;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
