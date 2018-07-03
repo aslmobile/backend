@@ -30,7 +30,8 @@ class TripController extends BaseController
                     [
                         'actions' => [
                             'passenger-comments',
-                            'driver-comments'
+                            'driver-comments',
+                            'trips'
                         ],
                         'allow' => true
                     ]
@@ -85,6 +86,20 @@ class TripController extends BaseController
         }
 
         $this->module->data = $reviews;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionTrips()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $trips = [];
+        $_trips = Trip::find()->where(['driver_id' => $user->id])->all();
+        if ($_trips && count($_trips) > 0) foreach ($_trips as $trip) $trips[] = $trip->toArray();
+
+        $this->module->data = $trips;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

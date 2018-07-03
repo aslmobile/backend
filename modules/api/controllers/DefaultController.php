@@ -1,5 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
+use app\modules\api\models\Faq;
 use app\modules\api\models\Legal;
 use Yii;
 use yii\filters\AccessControl;
@@ -29,6 +30,7 @@ class DefaultController extends BaseController
                         'actions' => [
                             'dispatch-phone',
                             'legal',
+                            'faq',
                             'method'
                         ],
                         'allow' => true
@@ -68,6 +70,22 @@ class DefaultController extends BaseController
         if ($legals && count($legals) > 0) foreach ($legals as $legal) $legal_data[] = $legal->toArray();
 
         $this->module->data = $legal_data;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionFaq()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $faqs = Faq::find()->orderBy(['weight' => SORT_ASC])->all();
+        $faq_data = [];
+
+        /** @var \app\modules\api\models\Faq $faq */
+        if ($faqs && count($faqs) > 0) foreach ($faqs as $faq) $faq_data[] = $faq->toArray();
+
+        $this->module->data = $faq_data;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

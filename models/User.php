@@ -90,7 +90,7 @@ class User extends ActiveRecord implements IdentityInterface
                 'created_at', 'updated_at', 'blocked_at', 'approval_at',
                 'created_by', 'updated_by', 'approval_by', 'blocked_by'
             ], 'integer'],
-            [['first_name', 'second_name'], 'string'],
+            [['email', 'first_name', 'second_name', 'email_confirm_token', 'password_hash', 'password_reset_token', 'auth_key'], 'string', 'max' => 255],
             [['balance', 'phone'], 'number'],
             [[
                 'country_id', 'city_id',
@@ -98,41 +98,6 @@ class User extends ActiveRecord implements IdentityInterface
                 'created_at', 'updated_at', 'blocked_at', 'approval_at',
                 'created_by', 'updated_by', 'approval_by', 'blocked_by'
             ], 'default', 'value' => 0],
-        ];
-
-
-
-        return [
-            [['phone'], 'required'],
-            ['email', 'email'],
-            ['email', 'unique', 'targetClass' => self::className(),
-                'message' => Yii::t('app', 'This email address has already been taken.')],
-            ['phone', 'filter', 'filter' => function ($value) {
-                return preg_replace('/[^\d]/i', '', $value);
-            }],
-            [['phone'], 'number'],
-            ['phone', 'unique', 'targetClass' => self::className(), 'message' => Yii::t('app', 'This phone number has already been taken.')],
-            [['type', 'gender', 'image', 'city_id', 'email_verified', 'status', 'created_at', 'updated_at', 'blocked_at', 'approval_at', 'created_by', 'updated_by', 'approval_by', 'blocked_by'], 'integer'],
-            [['email', 'first_name', 'second_name', 'email_confirm_token', 'password_hash', 'password_reset_token', 'auth_key', 'blocked_reason'], 'string', 'max' => 255],
-            ['status', 'in', 'range' => array_keys(Yii::$app->params['statuses'])],
-            ['status', 'default', 'value' => 1],
-            ['gender', 'in', 'range' => array_keys(Yii::$app->params['gender'])],
-            ['gender', 'default', 'value' => 2],
-            ['type', 'in', 'range' => array_keys(Yii::$app->params['user_type'])],
-            ['type', 'default', 'value' => 0],
-
-            [['balance'], 'number'],
-            [
-                [
-                    'country_id', 'city_id',
-                    'balance',
-                    'blocked_at', 'blocked_by',
-                    'approval_at', 'approval_by',
-                    'updated_at', 'updated_by',
-                    'created_at', 'created_by'
-                ],
-                'default', 'value' => 0
-            ],
         ];
     }
 
