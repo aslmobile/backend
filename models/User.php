@@ -285,6 +285,17 @@ class User extends ActiveRecord implements IdentityInterface
         $this->auth_key = Yii::$app->security->generateRandomString();
     }
 
+    /**
+     * Finds user by email
+     *
+     * @param string $email
+     * @return static|null
+     */
+    public static function findByUsername($email)
+    {
+        return static::findOne(['email' => $email]);
+    }
+
     public function getFullName()
     {
         return $this->first_name . ' ' . $this->second_name;

@@ -1,5 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
+use app\modules\api\models\Legal;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -27,7 +28,7 @@ class DefaultController extends BaseController
                     [
                         'actions' => [
                             'dispatch-phone',
-
+                            'legal',
                             'method'
                         ],
                         'allow' => true
@@ -38,6 +39,7 @@ class DefaultController extends BaseController
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'dispatch-phone' => ['GET'],
+                    'legal' => ['GET'],
                     'method' => ['POST']
                 ]
             ]
@@ -50,6 +52,22 @@ class DefaultController extends BaseController
         if ($user) $user = $this->user;
 
         $this->module->data['phone'] = $this->coreSettings->phone;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionLegal()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $legals = Legal::find()->all();
+        $legal_data = [];
+
+        /** @var \app\modules\api\models\Legal $legal */
+        if ($legals && count($legals) > 0) foreach ($legals as $legal) $legal_data[] = $legal->toArray();
+
+        $this->module->data = $legal_data;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

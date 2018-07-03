@@ -57,7 +57,7 @@ class AppAsset extends AssetBundle
             'basePath' => '@webroot',
             'baseUrl' => '@web',
             'css' => [
-                'css/bootstrap.min.css',
+                'adminlte/bootstrap/css/bootstrap.min.css',
             ],
         ];
 
@@ -65,8 +65,7 @@ class AppAsset extends AssetBundle
             'basePath' => '@webroot',
             'baseUrl' => '@web',
             'js' => [
-                'js/popper.min.js',
-                'js/bootstrap.min.js',
+                'adminlte/bootstrap/js/bootstrap.min.js',
             ]
         ];
     }

@@ -79,7 +79,7 @@ class Controller extends \yii\web\Controller
      */
     public static function getCoreSettings()
     {
-        return Settings::find()->where('id = 1')->one();
+        return Settings::find()->where('id = 1')->multilingual()->one();
     }
 
     public function runAction($id, $params = [])
