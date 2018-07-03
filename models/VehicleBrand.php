@@ -54,13 +54,13 @@ class VehicleBrand extends \yii\db\ActiveRecord
     {
         return [
             'id'                => Yii::t('app', "ID"),
-            'title'             => Yii::t('app', "Title"),
-            'status'            => Yii::t('app', "Status"),
-            'max_seats'         => Yii::t('app', "Max Seats"),
-            'image'             => Yii::t('app', "Image"),
-            'vehicle_type_id'   => Yii::t('app', "Vehicle Type"),
-            'created_at'        => Yii::t('app', "Created"),
-            'updated_at'        => Yii::t('app', "Updated")
+            'title'             => Yii::t('app', "Название"),
+            'status'            => Yii::t('app', "Статус"),
+            'max_seats'         => Yii::t('app', "Мест"),
+            'image'             => Yii::t('app', "Фото"),
+            'vehicle_type_id'   => Yii::t('app', "Тип"),
+            'created_at'        => Yii::t('app', "Создано"),
+            'updated_at'        => Yii::t('app', "Обновлено")
         ];
     }
 }

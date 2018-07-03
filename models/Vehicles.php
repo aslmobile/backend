@@ -75,17 +75,17 @@ class Vehicles extends \yii\db\ActiveRecord
     {
         return [
             'id'                => Yii::t('app', "ID"),
-            'user_id'           => Yii::t('app', "User"),
-            'status'            => Yii::t('app', "Status"),
-            'seats'             => Yii::t('app', "Seats"),
-            'license_plate'     => Yii::t('app', "License Plate"),
-            'image'             => Yii::t('app', "Image"),
-            'insurance'         => Yii::t('app', "Insurance"),
-            'vehicle_type_id'   => Yii::t('app', "Vehicle Type"),
-            'vehicle_brand_id'  => Yii::t('app', "Vehicle Brand"),
-            'vehicle_model_id'  => Yii::t('app', "Vehicle Model"),
-            'created_at'        => Yii::t('app', "Created"),
-            'updated_at'        => Yii::t('app', "Updated")
+            'user_id'           => Yii::t('app', "Пользователь"),
+            'status'            => Yii::t('app', "Статус"),
+            'seats'             => Yii::t('app', "Мест"),
+            'license_plate'     => Yii::t('app', "Номер"),
+            'image'             => Yii::t('app', "Фото"),
+            'insurance'         => Yii::t('app', "Страхование"),
+            'vehicle_type_id'   => Yii::t('app', "Тип"),
+            'vehicle_brand_id'  => Yii::t('app', "Бренд"),
+            'vehicle_model_id'  => Yii::t('app', "Модель"),
+            'created_at'        => Yii::t('app', "Создано"),
+            'updated_at'        => Yii::t('app', "Обновлено")
         ];
     }
 

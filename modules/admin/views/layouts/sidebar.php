@@ -103,6 +103,30 @@ $act = Yii::$app->controller->action->id;
                     </li>
                 </ul>
             </li>
+            <li class="treeview<?= ($cont == 'lines') ? ' active' : '' ?>">
+                <a href="<?= Url::toRoute('/admin/lines') ?>">
+                    <i class="fa fa-map-marker"></i>
+                    <span><?= Yii::$app->mv->gt('Маршруты', [], false); ?></span>
+                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                </a>
+                <ul class="treeview-menu">
+                    <li<?= ($cont == 'lines' && ($act == 'index' || $act == 'update' || $act == 'create')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/lines') ?>">
+                            <i class="fa fa-map-marker"></i> <?= Yii::$app->mv->gt('Список маршрутов', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'lines' && ($act == 'routes' || $act == 'route')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/lines/routes') ?>">
+                            <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Пути', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'lines' && ($act == 'checkpoints' || $act == 'checkpoint')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/lines/checkpoints') ?>">
+                            <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Контрольные точки', [], false) ?>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
             <li class="treeview<?= ($cont == 'countries') ? ' active' : '' ?>">
                 <a href="#"> <i class="fa fa-map"></i>

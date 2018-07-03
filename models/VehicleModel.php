@@ -55,14 +55,14 @@ class VehicleModel extends \yii\db\ActiveRecord
     {
         return [
             'id'                => Yii::t('app', "ID"),
-            'title'             => Yii::t('app', "Title"),
-            'status'            => Yii::t('app', "Status"),
-            'max_seats'         => Yii::t('app', "Max Seats"),
-            'vehicle_type_id'   => Yii::t('app', "Vehicle Type"),
-            'vehicle_brand_id'  => Yii::t('app', "Vehicle Brand"),
-            'image'             => Yii::t('app', "Image"),
-            'created_at'        => Yii::t('app', "Created"),
-            'updated_at'        => Yii::t('app', "Updated")
+            'title'             => Yii::t('app', "Название"),
+            'status'            => Yii::t('app', "Статус"),
+            'max_seats'         => Yii::t('app', "Мест"),
+            'vehicle_type_id'   => Yii::t('app', "Тип"),
+            'vehicle_brand_id'  => Yii::t('app', "Бренд"),
+            'image'             => Yii::t('app', "Фото"),
+            'created_at'        => Yii::t('app', "Создано"),
+            'updated_at'        => Yii::t('app', "Обновлено")
         ];
     }
 }

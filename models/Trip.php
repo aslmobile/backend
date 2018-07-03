@@ -69,10 +69,7 @@ class Trip extends \yii\db\ActiveRecord
                     'user_id',
                     'driver_id',
                     'vehicle_id',
-                    'line_id',
-                    '',
-                    '',
-                    '',
+                    'line_id'
                 ],
                 'required'
             ],

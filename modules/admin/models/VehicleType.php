@@ -1,6 +1,7 @@
 <?php namespace app\modules\admin\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * @property string $modelTitle
@@ -28,5 +29,11 @@ class VehicleType extends \app\models\VehicleType
             self::STATUS_ACTIVE => Yii::t('app', "Активный"),
             self::STATUS_DISABLED => Yii::t('app', "Отключен")
         ];
+    }
+
+    public static function getTypesList()
+    {
+        $types = VehicleType::findAll(['status' => VehicleType::STATUS_ACTIVE]);
+        return ArrayHelper::map($types, 'id', 'title');
     }
 }

@@ -4,7 +4,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
-class LegalSearch extends Legal
+class LineSearch extends Line
 {
     /**
      * @inheritdoc
@@ -13,7 +13,6 @@ class LegalSearch extends Legal
     {
         return [
             [['id'], 'integer'],
-            [['title', 'content'], 'string'],
         ];
     }
 
@@ -35,7 +34,7 @@ class LegalSearch extends Legal
      */
     public function search($params)
     {
-        $query = Legal::find();
+        $query = Line::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

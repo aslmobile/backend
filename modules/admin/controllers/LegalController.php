@@ -11,9 +11,6 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 
-/**
- * MailtplController implements the CRUD actions for Mailtpl model.
- */
 class LegalController extends Controller
 {
     public $layout = "./sidebar";

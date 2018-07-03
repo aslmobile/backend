@@ -51,11 +51,11 @@ class VehicleType extends \yii\db\ActiveRecord
     {
         return [
             'id'                => Yii::t('app', "ID"),
-            'title'             => Yii::t('app', "Title"),
-            'status'            => Yii::t('app', "Status"),
-            'max_seats'         => Yii::t('app', "Max Seats"),
-            'created_at'        => Yii::t('app', "Created"),
-            'updated_at'        => Yii::t('app', "Updated")
+            'title'             => Yii::t('app', "Название"),
+            'status'            => Yii::t('app', "Статус"),
+            'max_seats'         => Yii::t('app', "Мест"),
+            'created_at'        => Yii::t('app', "Создано"),
+            'updated_at'        => Yii::t('app', "Обновлено")
         ];
     }
 }

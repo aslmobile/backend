@@ -1,10 +1,12 @@
 <?php namespace app\modules\admin\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
-class LegalSearch extends Legal
+/**
+ * UserSearch represents the model behind the search form about `\app\models\VehicleType`.
+ */
+class VehiclesSearch extends Vehicles
 {
     /**
      * @inheritdoc
@@ -12,8 +14,7 @@ class LegalSearch extends Legal
     public function rules()
     {
         return [
-            [['id'], 'integer'],
-            [['title', 'content'], 'string'],
+            [['id', 'user_id', 'status', 'seats', 'vehicle_type_id', 'vehicle_brand_id', 'vehicle_model_id'], 'integer']
         ];
     }
 
@@ -35,14 +36,14 @@ class LegalSearch extends Legal
      */
     public function search($params)
     {
-        $query = Legal::find();
+        $query = Vehicles::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
                 'pageSize' => 50,
             ],
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]]
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
 
         $this->load($params);
@@ -55,6 +56,14 @@ class LegalSearch extends Legal
 
         $query->andFilterWhere([
             'id' => $this->id,
+            'user_id' => $this->user_id,
+            'status' => $this->status,
+            'seats' => $this->seats,
+            'vehicle_type_id' => $this->vehicle_type_id,
+            'vehicle_brand_id' => $this->vehicle_brand_id,
+            'vehicle_model_id' => $this->vehicle_model_id,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ]);
 
         return $dataProvider;

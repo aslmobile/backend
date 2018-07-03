@@ -21,12 +21,17 @@ class Vehicles extends \app\models\Vehicles
         return 'vehicle';
     }
 
-    public function getStatusList()
+    public static function getStatusList()
     {
         return [
             self::STATUS_ADDED      => Yii::t('app', "Добавлена"),
             self::STATUS_APPROVED   => Yii::t('app', "Одобрена"),
             self::STATUS_WAITING    => Yii::t('app', "Ждет одобрения")
         ];
+    }
+
+    public function getUser()
+    {
+        return User::findOne(['id' => $this->user_id]);
     }
 }

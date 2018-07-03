@@ -1,6 +1,7 @@
 <?php namespace app\modules\admin\controllers;
 
 use app\modules\admin\models\Vehicles;
+use app\modules\admin\models\VehiclesSearch;
 use Yii;
 use app\components\Controller;
 use yii\filters\VerbFilter;
@@ -58,7 +59,7 @@ class VehiclesController extends Controller
             }
         }
 
-        $searchModel = new VehiclesBrandSearch();
+        $searchModel = new VehiclesSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
