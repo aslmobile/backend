@@ -26,7 +26,7 @@ class Line extends \yii\db\ActiveRecord
 {
     public static function tableName()
     {
-        return 'trip';
+        return 'line';
     }
 
     public function behaviors()

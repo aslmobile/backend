@@ -90,6 +90,7 @@ class User extends ActiveRecord implements IdentityInterface
                 'created_at', 'updated_at', 'blocked_at', 'approval_at',
                 'created_by', 'updated_by', 'approval_by', 'blocked_by'
             ], 'integer'],
+            [['first_name', 'second_name'], 'string'],
             [['balance', 'phone'], 'number'],
             [[
                 'country_id', 'city_id',
