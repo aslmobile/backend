@@ -246,7 +246,6 @@ class BaseController extends RestFul
     public function logResponse($data = [])
     {
         $params = [
-            'id' => time() + 1,
             'type'  => RestFulModel::TYPE_LOG,
             'message' => json_encode([
                 'controller' => Yii::$app->controller->id,
@@ -267,7 +266,6 @@ class BaseController extends RestFul
     public function logEvent()
     {
         $params = [
-            'id' => time(),
             'type'  => RestFulModel::TYPE_LOG,
             'message' => json_encode([
                 'controller' => Yii::$app->controller->id,
