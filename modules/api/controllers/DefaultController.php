@@ -61,6 +61,7 @@ class DefaultController extends BaseController
 
         $body = Yii::$app->request->rawBody;
         if (!isset($_GET['json']) || $_GET['json'] !== '1') $body = json_decode(base64_decode($body));
+        else $body = json_decode($body);
 
         $this->module->data = $body;
         $this->module->setSuccess();
