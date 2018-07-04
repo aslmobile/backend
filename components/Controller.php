@@ -38,6 +38,7 @@ class Controller extends \yii\web\Controller
 
     public function init()
     {
+        parent::init();
 
         //$start = microtime(true);
         $u = Yii::$app->user->identity;
@@ -70,8 +71,6 @@ class Controller extends \yii\web\Controller
         }
 
         $this->uip = $uip;
-
-        parent::init();
     }
 
     /**
@@ -210,13 +209,13 @@ class Controller extends \yii\web\Controller
 
     public static function getOldLangAssoc($lang = null)
     {
-        $languages = ['en-US' => 'en', 'ru-RU' => 'ru', 'kz' => 'Kz-kz'];
+        $languages = ['en-US' => 'en', 'ru-RU' => 'ru', 'kz' => 'kk-KZ'];
         return isset($languages[$lang]) ? $languages[$lang] : 'ru';
     }
 
     public static function getNewLangAssoc($lang = null)
     {
-        $languages = ['en' => 'en-US', 'ru' => 'ru-RU', 'kz' => 'Kz-kz'];
+        $languages = ['en' => 'en-US', 'ru' => 'ru-RU', 'kz' => 'kk-KZ'];
         return isset($languages[$lang]) ? $languages[$lang] : 'ru';
     }
 

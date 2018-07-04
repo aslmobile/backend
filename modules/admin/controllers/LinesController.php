@@ -94,13 +94,13 @@ class LinesController extends Controller
     public function actionViewRoute($id)
     {
         return $this->render('view/route', [
-            'model' => $this->findModel($id),
+            'model' => $this->findRouteModel($id),
         ]);
     }
 
     public function actionUpdateRoute($id)
     {
-        $model = $this->findModel($id);
+        $model = $this->findRouteModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Сохранено', [], 0));
@@ -114,7 +114,7 @@ class LinesController extends Controller
 
     public function actionDeleteRoute($id)
     {
-        $this->findModel($id)->delete();
+        $this->findRouteModel($id)->delete();
         return $this->redirect(['routes']);
     }
 
@@ -151,6 +151,27 @@ class LinesController extends Controller
         ]);
     }
 
+    public function actionUpdateCheckpoint($id)
+    {
+        $model = $this->findCheckpointModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Сохранено', [], 0));
+            return $this->redirect(['update-checkpoint', 'id' => $model->id]);
+        } else {
+            return $this->render('update/checkpoint', [
+                'model' => $model,
+            ]);
+        }
+    }
+
+    public function actionViewCheckpoint($id)
+    {
+        return $this->render('view/checkpoint', [
+            'model' => $this->findCheckpointModel($id),
+        ]);
+    }
+
     public function actionSelectRoute($q = null, $id = null)
     {
         if (!empty($id)) $id = explode(',', $id);
@@ -177,16 +198,17 @@ class LinesController extends Controller
         return $out;
     }
 
-    /**
-     * Finds the VehicleType model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Route the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
+    protected function findRouteModel($id)
     {
         if (($model = Route::findOne($id)) !== null)
+            return $model;
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function findCheckpointModel($id)
+    {
+        if (($model = Checkpoint::findOne($id)) !== null)
             return $model;
 
         throw new NotFoundHttpException('The requested page does not exist.');

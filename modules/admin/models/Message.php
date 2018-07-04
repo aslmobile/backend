@@ -10,7 +10,6 @@ use Yii;
  * @property integer $id
  * @property string $language
  * @property string $translation
- * @property integer $source_message_id
  *
  * @property SourceMessage $id0
  */
@@ -30,8 +29,8 @@ class Message extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['source_message_id', 'language'], 'required'],
-            [['source_message_id'], 'integer'],
+            [['id', 'language'], 'required'],
+            [['id'], 'integer'],
             [['translation'], 'string'],
             [['language'], 'string', 'max' => 16]
         ];
@@ -54,6 +53,6 @@ class Message extends \yii\db\ActiveRecord
      */
     public function getId0()
     {
-        return $this->hasOne(SourceMessage::className(), ['source_message_id' => 'id']);
+        return $this->hasOne(SourceMessage::className(), ['id' => 'id']);
     }
 }

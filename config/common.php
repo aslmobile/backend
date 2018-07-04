@@ -83,7 +83,7 @@ $config = [
                     'class' => 'yii\i18n\DbMessageSource',
                     'sourceMessageTable' => '{{%source_message}}',
                     'messageTable' => '{{%message}}',
-                    'sourceLanguage' => 'en-En',
+                    'sourceLanguage' => 'ru-RU',
                     'enableCaching' => true,
                     'cachingDuration' => 3600
                 ],

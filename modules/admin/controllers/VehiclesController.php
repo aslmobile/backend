@@ -31,6 +31,7 @@ class VehiclesController extends Controller
                             'types', 'brands', 'models',
                             'type', 'brand', 'model',
                             'create-type', 'create-brand', 'create-model',
+                            'delete-type', 'delete-brand', 'delete-model',
                             'select-types', 'select-brands', 'select-models'
                         ],
                         'allow' => true,
@@ -66,6 +67,26 @@ class VehiclesController extends Controller
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Сохранено', [], 0));
+            return $this->redirect(['update', 'id' => $model->id]);
+        } else {
+            return $this->render('update', [
+                'model' => $model,
+            ]);
+        }
+    }
+
+    public function actionDelete($id)
+    {
+        $this->findModel($id)->delete();
+        return $this->redirect(['index']);
     }
 
     public function actionCreate()
@@ -127,6 +148,13 @@ class VehiclesController extends Controller
         ]);
     }
 
+    public function actionDeleteBrand($id)
+    {
+        $this->findBrandModel($id)->delete();
+
+        return $this->redirect(['brands']);
+    }
+
     public function actionModels()
     {
         if (Yii::$app->request->isAjax)
@@ -175,6 +203,13 @@ class VehiclesController extends Controller
         ]);
     }
 
+    public function actionDeleteModel($id)
+    {
+        $this->findModelModel($id)->delete();
+
+        return $this->redirect(['models']);
+    }
+
     public function actionTypes()
     {
         if (Yii::$app->request->isAjax)
@@ -221,6 +256,13 @@ class VehiclesController extends Controller
         return $this->render('update', [
             'model' => $model,
         ]);
+    }
+
+    public function actionDeleteType($id)
+    {
+        $this->findTypeModel($id)->delete();
+
+        return $this->redirect(['types']);
     }
 
     public function actionSelectTypes($q = null, $id = null)
@@ -341,6 +383,14 @@ class VehiclesController extends Controller
     protected function findModelModel($id)
     {
         if (($model = VehicleModel::findOne($id)) !== null)
+            return $model;
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function findModel($id)
+    {
+        if (($model = Vehicles::findOne($id)) !== null)
             return $model;
 
         throw new NotFoundHttpException('The requested page does not exist.');

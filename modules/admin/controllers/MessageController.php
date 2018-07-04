@@ -18,7 +18,7 @@ use app\modules\admin\models\Message;
  */
 class MessageController extends Controller
 {
-	public $layout = "./sidebar";
+    public $layout = "./sidebar";
 
     public function behaviors()
     {
@@ -38,6 +38,12 @@ class MessageController extends Controller
                     ],
                 ],
             ],
+            'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'delete' => ['post'],
+                ],
+            ],
         ];
     }
 
@@ -47,17 +53,17 @@ class MessageController extends Controller
      */
     public function actionIndex()
     {
-		if (Yii::$app->request->isAjax) {
-			$keys = (isset($_POST['keys']))?$_POST['keys']:[];
-			if (count($keys)) {
-				foreach ($keys as $k => $v) {
-					if (($model = SourceMessage::findOne($v)) !== null) {
-						$model->delete();
-					}
-				}
-				return $this->redirect(['index']);
-			}
-		}
+        if (Yii::$app->request->isAjax) {
+            $keys = (isset($_POST['keys']))?$_POST['keys']:[];
+            if (count($keys)) {
+                foreach ($keys as $k => $v) {
+                    if (($model = SourceMessage::findOne($v)) !== null) {
+                        $model->delete();
+                    }
+                }
+                return $this->redirect(['index']);
+            }
+        }
 
         $searchModel = new SourceMessageSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
@@ -76,23 +82,23 @@ class MessageController extends Controller
     public function actionCreate()
     {
         $model = new SourceMessage();
-		$translations = array();
+        $translations = array();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			Yii::$app->cache->flush();
-			foreach ($_POST['message'] as $k => $v) {
-				$translation_item = Message::find()->where('language = :language AND source_message_id = :id', [':language' => $k, ':id' => $model->id])->one();
-				if ($translation_item === null) {
-					$translation_item = new Message;;
-					$translation_item->language = $k;
-					$translation_item->translation = $v;
-                    $translation_item->source_message_id=$model->id;
-					$translation_item->save();
-				} else {
-					$translation_item->translation = $v;
-					$translation_item->save();
-				}
-			}
+            Yii::$app->cache->flush();
+            foreach ($_POST['message'] as $k => $v) {
+                $translation_item = Message::find()->where('language = :language AND id = :id', [':language' => $k, ':id' => $model->id])->one();
+                if ($translation_item === null) {
+                    $translation_item = new Message;
+                    $translation_item->id = $model->id;
+                    $translation_item->language = $k;
+                    $translation_item->translation = $v;
+                    $translation_item->save();
+                } else {
+                    $translation_item->translation = $v;
+                    $translation_item->save();
+                }
+            }
             return $this->redirect(['index']);
         } else {
             return $this->render('create', [
@@ -111,29 +117,29 @@ class MessageController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-		$translations = array();
-		foreach (ArrayHelper::map(Lang::find()->where("lang.local!='" . Yii::$app->sourceLanguage . "'")->all(), 'local', 'flag') as $k => $v) {
-			$translation_model = Message::find()->where('language = :language AND source_message_id = :id', [':language' => $k, ':id' => $id])->one();
-			$translations[$k] = (!empty($translation_model->translation))?$translation_model->translation:'';
-		}
+        $translations = array();
+        foreach (ArrayHelper::map(Lang::find()->where('lang.default = 0')->all(), 'local', 'flag') as $k => $v) {
+            $translation_model = Message::find()->where('language = :language AND id = :id', [':language' => $k, ':id' => $id])->one();
+            $translations[$k] = (!empty($translation_model->translation))?$translation_model->translation:'';
+        }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			Yii::$app->cache->flush();
-			Yii::$app->getSession()->setFlash('success', 'Изменения сохранены');
-			foreach ($_POST['message'] as $k => $v) {
-				$translation_item = Message::find()->where('language = :language AND source_message_id = :id', [':language' => $k, ':id' => $model->id])->one();
-				if ($translation_item === null) {
-					$translation_item = new Message;
-					$translation_item->language = $k;
-					$translation_item->translation = $v;
-                    $translation_item->source_message_id=$model->id;
-					$translation_item->save();
-				} else {
-					$translation_item->translation = $v;
-					$translation_item->save();
-				}
-			}
-            return $this->redirect(['index']);
+            Yii::$app->cache->flush();
+            Yii::$app->getSession()->setFlash('success', 'Ð˜Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ñ‹');
+            foreach ($_POST['message'] as $k => $v) {
+                $translation_item = Message::find()->where('language = :language AND id = :id', [':language' => $k, ':id' => $model->id])->one();
+                if ($translation_item === null) {
+                    $translation_item = new Message;
+                    $translation_item->id = $model->id;
+                    $translation_item->language = $k;
+                    $translation_item->translation = $v;
+                    $translation_item->save();
+                } else {
+                    $translation_item->translation = $v;
+                    $translation_item->save();
+                }
+            }
+            return $this->redirect(['update', 'id' => $model->id]);
         } else {
             return $this->render('update', [
                 'model' => $model,

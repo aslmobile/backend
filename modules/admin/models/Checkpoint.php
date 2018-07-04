@@ -4,6 +4,8 @@ use Yii;
 
 class Checkpoint extends \app\models\Checkpoint
 {
+    public $address;
+
     public static function getStatusList()
     {
         return [

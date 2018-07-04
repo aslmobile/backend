@@ -43,14 +43,12 @@ use yii\web\JsExpression;
                     ],
                 ]); ?>
 
-                <?= $form->field($model, 'latitude')->hiddenInput()->label(false); ?>
-                <?= $form->field($model, 'longitude')->hiddenInput()->label(false); ?>
-
-                <div id="map" class="map"
-                     data-latitude="<?= !empty($model->latitude) ? $model->latitude : isset($model->city->lat) ? $model->city->lat : null; ?>"
-                     data-longitude="<?= !empty($model->longitude) ? $model->longitude : isset($model->city->lng) ?$model->city->lng  : null; ?>">
-                </div>
-                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFETIaFfGBDmEdSqldObecM6K6lSzSrl4&libraries=places&callback=initMap&hl=en&language=en"></script>
+                <?= $form->field($model, 'address')->widget(\kalyabin\maplocation\SelectMapLocationWidget::className(), [
+                    'attributeLatitude' => 'latitude',
+                    'attributeLongitude' => 'longitude',
+                    'googleMapApiKey' => 'AIzaSyALfPPffcWHUHCDKccaIlBj5kLfQjIcD9w',
+                    'draggable' => true,
+                ]); ?>
             </div>
             <div class="box-footer clearfix text-right">
                 <?= \app\components\widgets\FormButtons::widget(['model' => $model]) ?>
