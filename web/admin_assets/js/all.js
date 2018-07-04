@@ -121,3 +121,56 @@ function removecaseimage(im,el){
         }
     });
 }
+
+var lang = $("html").attr("lang");
+var map;
+var marker;
+
+function initMap()
+{
+    let lat = $("#map").data('latitude');
+    let lng = $("#map").data('longitude');
+    const zoom = 5;
+    const form = $('#place_form');
+
+    if (lat === '') {lat = 48.136207; lng = 67.153550;}
+
+    var optionsMap = {
+        zoom: zoom,
+        draggable: true,
+        center: {lat: lat, lng: lng},
+        scrollwheel: false,
+        styles: [{
+            featureType: "poi",
+            stylers: [
+                {visibility: "off"}
+            ]
+        }]
+    };
+
+    map = new google.maps.Map(document.getElementById('map'), optionsMap);
+    marker = new google.maps.Marker({
+        draggable: true,
+        animation: google.maps.Animation.DROP,
+        map: map,
+        anchorPoint: new google.maps.Point(0, -29)
+    });
+
+    google.maps.event.addListener(marker, "dragend", function (event) {
+        var geometry = marker.getPosition();
+        $("#checkpoint-latitude").prop('value', geometry.lat());
+        $("#checkpoint-longitude").prop('value', geometry.lng());
+        $("#checkpoint-latitude").blur();
+        marker.setPosition(geometry);
+    });
+
+    google.maps.event.addListener(map, 'click', function (event) {
+        var geometry = event.latLng;
+        $("#checkpoint-latitude").prop('value', geometry.lat());
+        $("#checkpoint-longitude").prop('value', geometry.lng());
+        $("#checkpoint-latitude").blur();
+        marker.setPosition(geometry);
+    });
+
+    marker.setPosition({lat: lat, lng: lng});
+}

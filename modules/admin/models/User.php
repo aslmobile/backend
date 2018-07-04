@@ -73,11 +73,12 @@ class User extends \app\models\User
 
     public function beforeValidate()
     {
-        if ($this->status != $this::STATUS_BLOCKED && $this->oldAttributes['status'] == $this::STATUS_BLOCKED) {
+        if (isset ($this->status) && $this->status != $this::STATUS_BLOCKED && $this->getOldAttribute('status') == $this::STATUS_BLOCKED) {
             $this->blocked_reason = null;
             $this->blocked_at = null;
             $this->blocked_by = null;
         }
+
         if (!empty($this->blocked_reason)) {
             $this->blocked_at = time();
             $this->blocked_by = Yii::$app->user->getId();
