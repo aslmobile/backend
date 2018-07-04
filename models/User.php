@@ -82,6 +82,7 @@ class User extends ActiveRecord implements IdentityInterface
             ['phone', 'unique', 'targetClass' => self::className(),
                 'message' => Yii::t('app', 'This phone has already been taken.')
             ],
+            ['phone', 'phoneValidate'],
             [[
                 'type', 'status', 'gender',
                 'image',
@@ -99,6 +100,13 @@ class User extends ActiveRecord implements IdentityInterface
                 'created_by', 'updated_by', 'approval_by', 'blocked_by'
             ], 'default', 'value' => 0],
         ];
+    }
+
+    public function phoneValidate($attribute)
+    {
+        if (!preg_match('/^[\d]{10,12}$/', $this->$attribute)) {
+            $this->addError($attribute, 'Phone must be numeric 10-12 symbols');
+        }
     }
 
     /**
