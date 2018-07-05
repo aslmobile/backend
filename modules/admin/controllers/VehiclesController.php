@@ -144,7 +144,7 @@ class VehiclesController extends Controller
             return $this->redirect(['brand', 'id' => $model->id]);
         }
 
-        return $this->render('update', [
+        return $this->render('brand', [
             'model' => $model,
         ]);
     }
@@ -251,7 +251,7 @@ class VehiclesController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save())
         {
             Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved', [], 0));
-            return $this->redirect(['update', 'id' => $model->id]);
+            return $this->redirect(['type', 'id' => $model->id]);
         }
 
         return $this->render('type', [
