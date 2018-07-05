@@ -126,7 +126,7 @@ class SocketServer implements MessageComponentInterface
         }
 
         $response = json_encode($response);
-//        $response = base64_encode($response);
+        $response = base64_encode($response);
 
         $from->send($response);
 

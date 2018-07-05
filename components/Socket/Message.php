@@ -18,7 +18,7 @@ class Message
     public function __construct(ConnectionInterface $from, $data = '', $connections)
     {
         $this->connections = $connections;
-//        $data = base64_decode($data, true);
+        $data = base64_decode($data, true);
         $data = json_decode($data, true);
 
         if (!empty($data) && is_array($data) && array_key_exists('action', $data))
