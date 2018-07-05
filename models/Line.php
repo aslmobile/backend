@@ -24,6 +24,10 @@ use yii\behaviors\TimestampBehavior;
  */
 class Line extends \yii\db\ActiveRecord
 {
+    const
+        STATUS_ACTIVE = 1,
+        STATUS_DISABLED = 0;
+
     public static function tableName()
     {
         return 'line';
@@ -46,7 +50,10 @@ class Line extends \yii\db\ActiveRecord
                 [
                     'driver_id',
                     'vehicle_id',
+                    'status',
                     'route_id',
+                    'seats',
+                    'freeseats',
                     'startpoint',
                     'endpoint',
                     'tariff'
@@ -63,9 +70,7 @@ class Line extends \yii\db\ActiveRecord
                     'startpoint',
                     'endpoint',
                     'seats',
-                    'freeseats',
-                    'starttime',
-                    'endtime'
+                    'freeseats'
                 ],
                 'integer'
             ],
@@ -82,6 +87,15 @@ class Line extends \yii\db\ActiveRecord
                     'cancel_reason'
                 ],
                 'string'
+            ],
+
+            [
+                [
+
+                    'starttime',
+                    'endtime'
+                ],
+                'safe'
             ],
         ];
     }

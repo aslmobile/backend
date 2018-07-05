@@ -2,6 +2,7 @@
 
 use app\modules\admin\models\Checkpoint;
 use app\modules\admin\models\CheckpointSearch;
+use app\modules\admin\models\Line;
 use app\modules\admin\models\LineSearch;
 use app\modules\admin\models\Route;
 use app\modules\admin\models\RouteSearch;
@@ -26,7 +27,7 @@ class LinesController extends Controller
                             'routes', 'create-route', 'update-route', 'view-route',
                             'checkpoints', 'create-checkpoint', 'update-checkpoint', 'view-checkpoint',
 
-                            'select-route'
+                            'select-route', 'select-startpoints', 'select-endpoints'
                         ],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
@@ -56,6 +57,38 @@ class LinesController extends Controller
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    public function actionCreate()
+    {
+        $model = new Line();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save())
+            return $this->redirect(['view', 'id' => $model->id]);
+
+        return $this->render('create', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionUpdate($id)
+    {
+        $model = $this->findLineModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Сохранено', [], 0));
+            return $this->redirect(['update', 'id' => $model->id]);
+        } else {
+            return $this->render('update', [
+                'model' => $model,
+            ]);
+        }
+    }
+
+    public function actionDelete($id)
+    {
+        $this->findLineModel($id)->delete();
+        return $this->redirect(['index']);
     }
 
     public function actionRoutes()
@@ -198,6 +231,66 @@ class LinesController extends Controller
         return $out;
     }
 
+    public function actionSelectStartpoints($q = null, $id = null)
+    {
+        if (!empty($id)) $id = explode(',', $id);
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['results' => ['id' => '', 'text' => '']];
+
+        if (!is_null($q))
+        {
+            $out['results'] = Checkpoint::find()
+                ->select(['id', 'text' => 'title'])
+                ->andWhere([
+                    'AND',
+                    ['=', 'type', Checkpoint::TYPE_START]
+                ])
+                ->andWhere([
+                    'OR',
+                    ['like', 'title', $q]
+                ])
+                ->limit(10)->asArray()->all();
+        }
+        elseif (is_array($id))
+        {
+            $out['results'] = Checkpoint::find()
+                ->select(['id', 'text' => 'title'])
+                ->andWhere(['in', 'id', $id])->asArray()->all();
+        }
+
+        return $out;
+    }
+
+    public function actionSelectEndpoints($q = null, $id = null)
+    {
+        if (!empty($id)) $id = explode(',', $id);
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['results' => ['id' => '', 'text' => '']];
+
+        if (!is_null($q))
+        {
+            $out['results'] = Checkpoint::find()
+                ->select(['id', 'text' => 'title'])
+                ->andWhere([
+                    'AND',
+                    ['=', 'type', Checkpoint::TYPE_END]
+                ])
+                ->andWhere([
+                    'OR',
+                    ['like', 'title', $q]
+                ])
+                ->limit(10)->asArray()->all();
+        }
+        elseif (is_array($id))
+        {
+            $out['results'] = Checkpoint::find()
+                ->select(['id', 'text' => 'title'])
+                ->andWhere(['in', 'id', $id])->asArray()->all();
+        }
+
+        return $out;
+    }
+
     protected function findRouteModel($id)
     {
         if (($model = Route::findOne($id)) !== null)
@@ -209,6 +302,14 @@ class LinesController extends Controller
     protected function findCheckpointModel($id)
     {
         if (($model = Checkpoint::findOne($id)) !== null)
+            return $model;
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function findLineModel($id)
+    {
+        if (($model = Line::findOne($id)) !== null)
             return $model;
 
         throw new NotFoundHttpException('The requested page does not exist.');

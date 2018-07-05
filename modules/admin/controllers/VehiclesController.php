@@ -32,7 +32,8 @@ class VehiclesController extends Controller
                             'type', 'brand', 'model',
                             'create-type', 'create-brand', 'create-model',
                             'delete-type', 'delete-brand', 'delete-model',
-                            'select-types', 'select-brands', 'select-models'
+                            'select-types', 'select-brands', 'select-models',
+                            'select-vehicles'
                         ],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
@@ -143,7 +144,7 @@ class VehiclesController extends Controller
             return $this->redirect(['brand', 'id' => $model->id]);
         }
 
-        return $this->render('update', [
+        return $this->render('brand', [
             'model' => $model,
         ]);
     }
@@ -198,7 +199,7 @@ class VehiclesController extends Controller
             return $this->redirect(['model', 'id' => $model->id]);
         }
 
-        return $this->render('update', [
+        return $this->render('model', [
             'model' => $model,
         ]);
     }
@@ -253,7 +254,7 @@ class VehiclesController extends Controller
             return $this->redirect(['update', 'id' => $model->id]);
         }
 
-        return $this->render('update', [
+        return $this->render('type', [
             'model' => $model,
         ]);
     }
@@ -343,13 +344,45 @@ class VehiclesController extends Controller
         return $out;
     }
 
-    /**
-     * Finds the VehicleType model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return VehicleType the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+    public function actionSelectVehicles($q = null, $id = null, $v = null)
+    {
+        if(!empty($id)) $id = explode(',',$id);
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['results' => ['id' => '', 'text' => '']];
+
+        if (is_null($q) && !is_null($v))
+        {
+            $out['results'] = Vehicles::find()
+                ->select(['id', 'text' => 'license_plate'])
+                ->andWhere([
+                    ['user_id' => $v]
+                ])
+                ->andWhere([
+                    'OR',
+                    ['like', 'license_plate', $q]
+                ])
+                ->limit(10)->asArray()->all();
+        }
+        elseif (!is_null($q))
+        {
+            $out['results'] = Vehicles::find()
+                ->select(['id', 'text' => 'license_plate'])
+                ->andWhere([
+                    'OR',
+                    ['like', 'license_plate', $q]
+                ])
+                ->limit(10)->asArray()->all();
+        }
+        elseif (is_array($id))
+        {
+            $out['results'] = Vehicles::find()
+                ->select(['id', 'text' => 'license_plate'])
+                ->andWhere(['in', 'id', $id])->asArray()->all();
+        }
+
+        return $out;
+    }
+
     protected function findTypeModel($id)
     {
         if (($model = VehicleType::findOne($id)) !== null)
@@ -358,13 +391,6 @@ class VehiclesController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    /**
-     * Finds the VehicleType model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return VehicleBrand the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     protected function findBrandModel($id)
     {
         if (($model = VehicleBrand::findOne($id)) !== null)
@@ -373,13 +399,6 @@ class VehiclesController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    /**
-     * Finds the VehicleType model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return VehicleModel the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     protected function findModelModel($id)
     {
         if (($model = VehicleModel::findOne($id)) !== null)

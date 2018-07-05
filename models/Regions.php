@@ -1,6 +1,4 @@
-<?php
-
-namespace app\models;
+<?php namespace app\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -8,17 +6,18 @@ use yii\helpers\ArrayHelper;
 use app\components\MultilingualBehavior;
 use app\components\MultilingualQuery;
 /**
- * This is the model class for table "country".
+ * This is the model class for table "region".
  *
  * @property integer $id
  * @property string $title
  * @property int $status
  * @property string $alpha2
  * @property string $alpha3
+ * @property int $country_id
  * @property int $created_at
  * @property int $updated_at
  */
-class Countries extends \yii\db\ActiveRecord
+class Regions extends \yii\db\ActiveRecord
 {
     const
         STATUS_ACTIVE = 1,
@@ -29,7 +28,7 @@ class Countries extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'country';
+        return 'region';
     }
 
     public static function getCountiesList($asArray = false){
@@ -43,11 +42,11 @@ class Countries extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title'], 'required'],
+            [['title', 'country_id'], 'required'],
             [['title'], 'string', 'max' => 60],
             [['alpha2'], 'string', 'max' => 2],
             [['alpha3'], 'string', 'max' => 3],
-            [['status'], 'integer']
+            [['status', 'country_id'], 'integer']
         ];
     }
 
@@ -60,24 +59,8 @@ class Countries extends \yii\db\ActiveRecord
             'id' => Yii::t('app', "ID"),
             'title' => Yii::t('app', "Название"),
             'alpha2' => Yii::t('app', "ISO Alpha2"),
-            'alpha3' => Yii::t('app', "ISO Alpha3")
+            'alpha3' => Yii::t('app', "ISO Alpha3"),
+            'country_id' => Yii::t('app', "Страна")
         ];
     }
-
-    public static function filter($first_empty = true) {
-        $key = 'countries_list_'.Yii::$app->language.'_'.intval($first_empty);
-        if(!$list = Yii::$app->cache->get($key)){
-            $list = [];
-            if($first_empty){
-                $list[''] = 'Country';
-            }
-            $countries_list = self::find()->all();
-            $list = ArrayHelper::merge($list, ArrayHelper::map($countries_list, 'id', 'title'));
-
-            Yii::$app->cache->set($key, $list);
-        }
-
-        return $list;
-    }
-
 }

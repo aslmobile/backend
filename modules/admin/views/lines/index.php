@@ -22,6 +22,25 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title"><?= Html::encode($this->title) ?></h3>
+                <div class="box-tools pull-right">
+                    <?= Html::a(Yii::$app->mv->gt('{i} новая', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false), ['create'], ['class' => 'btn btn-default btn-sm']); ?>
+                    <?= Html::a(Yii::$app->mv->gt('{i} удалить выбранные', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false), [''], [
+                        'class' => 'btn btn-danger btn-sm',
+                        'onclick' => "
+								var keys = $('#grid').yiiGridView('getSelectedRows');
+								if (keys!='') {
+									if (confirm('" . Yii::$app->mv->gt('Вы уверены, что хотите удалить выбранные элементы?', [], false) . "')) {
+										$.ajax({
+											type : 'POST',
+											data: {keys : keys},
+											success : function(data) {}
+										});
+									}
+								}
+								return false;
+							",
+                    ]); ?>
+                </div>
             </div>
             <!-- /.box-header -->
             <?= GridView::widget([
@@ -48,10 +67,14 @@ $this->params['breadcrumbs'][] = $this->title;
                             'class' => 'form-control',
                         ],
                     ],
+                    'driver_id',
+                    'vehicle_id',
+                    'tariff',
+                    'route_id',
                     [
                         'class' => 'yii\grid\ActionColumn',
                         'headerOptions' => ['style' => 'width: 125px;'],
-                        'template' => '{view} {update} {delete}',
+                        'template' => '{update} {delete}',
                         'buttons' => [
                             'view' => function ($url, $model) {
                                 return Html::a('<button type="button" class="btn btn-info btn-sm"><i class="fa fa-search"></i></button>', $url);

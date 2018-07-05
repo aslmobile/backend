@@ -43,6 +43,75 @@ use yii\web\JsExpression;
                     ],
                 ]); ?>
 
+                <?= $form->field($model, 'country_id')->widget(Select2::classname(), [
+                    'model' => [],
+                    'theme' => Select2::THEME_DEFAULT,
+                    'attribute' => 'country_id',
+                    'hideSearch' => true,
+                    'options' => [
+                        'placeholder' => Yii::$app->mv->gt('Найти страну', [], false)
+                    ],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 1,
+                        'ajax' => [
+                            'url' => \yii\helpers\Url::toRoute(['/admin/default/select-countries']),
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                        'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/default/select-countries']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                    ],
+                ]); ?>
+
+                <?= $form->field($model, 'region_id')->widget(Select2::classname(), [
+                    'model' => [],
+                    'theme' => Select2::THEME_DEFAULT,
+                    'attribute' => 'region_id',
+                    'hideSearch' => true,
+                    'options' => [
+                        'placeholder' => Yii::$app->mv->gt('Найти регион', [], false)
+                    ],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 1,
+                        'ajax' => [
+                            'url' => \yii\helpers\Url::toRoute(['/admin/default/select-regions']),
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                        'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/default/select-regions']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                    ],
+                ]); ?>
+
+                <?= $form->field($model, 'city_id')->widget(Select2::classname(), [
+                    'model' => [],
+                    'theme' => Select2::THEME_DEFAULT,
+                    'attribute' => 'city_id',
+                    'hideSearch' => true,
+                    'options' => [
+                        'placeholder' => Yii::$app->mv->gt('Найти город', [], false)
+                    ],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 1,
+                        'ajax' => [
+                            'url' => \yii\helpers\Url::toRoute(['/admin/default/select-cities']),
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                        'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/default/select-cities']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                    ],
+                ]); ?>
+
                 <?= $form->field($model, 'address')->widget(\kalyabin\maplocation\SelectMapLocationWidget::className(), [
                     'attributeLatitude' => 'latitude',
                     'attributeLongitude' => 'longitude',

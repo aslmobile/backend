@@ -61,7 +61,7 @@ class UserController extends BaseController
 
         /** @var \app\modules\api\models\Devices $device */
         $device = $this->Auth();
-        $device = $this->module->sendSms($device, true);
+        $device = $this->module->sendSms($device, false);
 
         if ($device)
         {
