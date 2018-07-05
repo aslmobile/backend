@@ -144,7 +144,7 @@ class VehiclesController extends Controller
             return $this->redirect(['brand', 'id' => $model->id]);
         }
 
-        return $this->render('brand', [
+        return $this->render('update', [
             'model' => $model,
         ]);
     }
@@ -199,7 +199,7 @@ class VehiclesController extends Controller
             return $this->redirect(['model', 'id' => $model->id]);
         }
 
-        return $this->render('model', [
+        return $this->render('update', [
             'model' => $model,
         ]);
     }
