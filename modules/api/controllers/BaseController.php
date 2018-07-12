@@ -129,12 +129,8 @@ class BaseController extends RestFul
     protected function Auth()
     {
         $device = false;
-        if ($this->device) $device = $this->device;
-        else
-        {
-            if (isset ($this->body->device_id) && !empty($this->body->device_id))
-                $device = Devices::findOne(['device_id' => $this->body->device_id]);
-        }
+        if (isset ($this->body->device_id) && !empty($this->body->device_id))
+            $device = Devices::findOne(['device_id' => $this->body->device_id]);
 
         if (!$device && !empty ($this->body->phone))
         {
@@ -179,6 +175,8 @@ class BaseController extends RestFul
                 else $this->module->setError(422, '_device', "Problem with device creation");
             }
         }
+
+        $this->device = $device;
 
         return $device;
     }

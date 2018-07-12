@@ -35,8 +35,6 @@ class SocketServer implements MessageComponentInterface
         parse_str($query_string, $q);
         $input_data = $q;
 
-        echo "New connection.\n";
-
         if (is_array($input_data) && array_key_exists('auth', $input_data)) {
 
             $authkey = $input_data['auth'];
@@ -53,6 +51,7 @@ class SocketServer implements MessageComponentInterface
                 $conn->device = $device;
                 $this->devices[$conn->resourceId] = $conn;
 
+                if ($authkey == Yii::$app->params['socket']['authkey_server']) echo "Server connected.\n";
                 echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; connected.\n";
             }
         }
@@ -127,6 +126,8 @@ class SocketServer implements MessageComponentInterface
 
         $response = json_encode($response);
         $response = base64_encode($response);
+
+        foreach ($this->devices as $device) $device->send($response);
 
         $from->send($response);
 

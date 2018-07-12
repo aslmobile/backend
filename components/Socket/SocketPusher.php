@@ -16,7 +16,7 @@ class SocketPusher extends Model
     protected $scheme;
     protected $host;
     protected $port;
-    protected $authkey;
+    public $authkey;
 
     public function init()
     {
@@ -33,7 +33,7 @@ class SocketPusher extends Model
      */
     public function push($message)
     {
-        $connection = \Ratchet\Client\connect($this->scheme . $this->host . ':' . $this->port . '?authkey=' . $this->authkey);
+        $connection = \Ratchet\Client\connect($this->scheme . $this->host . ':' . $this->port . '?auth=' . $this->authkey);
         $connection->then(function ($conn) use ($message) {
             /** @var ConnectionInterface $conn */
             $conn->send($message);

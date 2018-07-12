@@ -1,5 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
+use app\components\Socket\SocketPusher;
 use app\modules\api\models\Faq;
 use app\modules\api\models\Legal;
 use Yii;
@@ -31,7 +32,8 @@ class DefaultController extends BaseController
                             'dispatch-phone',
                             'legal',
                             'faq',
-                            'method'
+                            'method',
+                            'send-socket-message'
                         ],
                         'allow' => true
                     ]
@@ -42,7 +44,8 @@ class DefaultController extends BaseController
                 'actions' => [
                     'dispatch-phone' => ['GET'],
                     'legal' => ['GET'],
-                    'method' => ['POST']
+                    'method' => ['POST'],
+                    'send-socket-message' => ['POST']
                 ]
             ]
         ];
@@ -100,6 +103,32 @@ class DefaultController extends BaseController
         else $body = json_decode($body);
 
         $this->module->data = $body;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+    
+    public function actionSendSocketMessage()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $message = [
+            'action' => 'ping',
+            'data' => [
+                'message_id' => time(),
+                'message' => 'pong'
+            ]
+        ];
+
+        /** @var \app\components\Socket\SocketPusher $socket */
+        $socket = new SocketPusher();
+        if (!$socket->push(base64_encode(json_encode($message)))) $this->module->setError(422, 'socket.push', "Failure");
+
+        $this->module->data = [
+            'socket' => true,
+            'message' => $message
+        ];
+
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
