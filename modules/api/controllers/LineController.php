@@ -178,6 +178,8 @@ class LineController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['freeseats', 'seats']);
 
+        if ($line->cancel_reason == 0) $line->cancel_reason = '';
+
         $line->freeseats = intval($this->body->freeseats);
         $line->seats = intval($this->body->seats);
 
