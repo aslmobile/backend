@@ -36,7 +36,8 @@ class TripController extends BaseController
 
                             'passenger-comments',
                             'driver-comments',
-                            'trips'
+                            'trips',
+                            'cancel'
                         ],
                         'allow' => true
                     ]
@@ -46,6 +47,7 @@ class TripController extends BaseController
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'cities'  => ['GET'],
+                    'cancel' => ['DELETE']
                 ]
             ]
         ];
@@ -109,6 +111,36 @@ class TripController extends BaseController
         $this->module->sendResponse();
     }
 
+    public function actionCancel()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['cancel_reason', 'route_id', 'vehicle_id']);
+
+        $trip = Trip::findOne(['route_id' => $this->body->route_id, 'vehicle_id' => $this->body->vehicle_id]);
+        if (!$trip) $this->module->setError(422, '_trip', "Not Found");
+
+        $trip->cancel_reason = $this->body->cancel_reason;
+        $trip->status = Trip::STATUS_CANCELED;
+
+        if (!$trip->validate() || !$trip->save())
+        {
+            if ($trip->hasErrors())
+            {
+                foreach ($trip->errors as $field => $error_message)
+                    $this->module->setError(422, 'trip.' . $field, $error_message, true, false);
+                $this->module->sendResponse();
+            }
+            else $this->module->setError(422, 'trip', "Can't validate model from data.");
+        }
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
     public function actionTest($id)
     {
         $tariff = $this->calculatePassengerTariff($id);
@@ -143,7 +175,8 @@ class TripController extends BaseController
         {
             $hard_rate = round($passengers / $seats, 2);
 
-            if ($hard_rate >= .35 && $hard_rate <= .6) $rate = 1.1;
+            if ($hard_rate <= .35) $rate = 1;
+            elseif ($hard_rate >= .35 && $hard_rate <= .6) $rate = 1.1;
             elseif ($hard_rate >= .6 && $hard_rate <= .7) $rate = 1.2;
             elseif ($hard_rate >= .7 && $hard_rate <= .8) $rate = 1.3;
             elseif ($hard_rate >= .8 && $hard_rate <= .9) $rate = 1.4;

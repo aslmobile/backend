@@ -31,7 +31,8 @@ class LineController extends BaseController
                 'rules' => [
                     [
                         'actions' => [
-                            'startpoints', 'endpoints', 'checkpoints'
+                            'startpoints', 'endpoints', 'checkpoints',
+                            'update-line', 'passengers', 'seats'
                         ],
                         'allow' => true
                     ]
@@ -43,6 +44,9 @@ class LineController extends BaseController
                     'startpoints'  => ['GET'],
                     'endpoints'  => ['GET'],
                     'checkpoints'  => ['GET'],
+                    'passengers'  => ['GET'],
+                    'seats'  => ['GET'],
+                    'update-line'  => ['PUT'],
                 ]
             ]
         ];
@@ -138,7 +142,8 @@ class LineController extends BaseController
         if (!$passengers) $this->module->setError(422, 'trip', "Not Found");
 
         $_passengers = [];
-        foreach ($passengers as $passenger) $_passengers[] = $passenger->toArray();
+        /** @var \app\models\Trip $passenger */
+        foreach ($passengers as $passenger) $_passengers[] = $passenger->user->toArray();
 
         $this->module->data['passengers'] = $_passengers;
         $this->module->setSuccess();
@@ -153,10 +158,26 @@ class LineController extends BaseController
         $line = $this->getLine($id);
         if (!$line) $this->module->setError(422, '_line', "Not Found");
 
-        $line->freeseats = 0;
-        $line->seats = 0;
+        $this->prepareBody();
+        $this->validateBodyParams(['freeseats', 'seats']);
 
-        $line->save();
+        $line->freeseats = intval($this->body->freeseats);
+        $line->seats = intval($this->body->seats);
+
+        if (!$line->validate() || !$line->save())
+        {
+            if ($line->hasErrors())
+            {
+                foreach ($line->errors as $field => $error_message)
+                    $this->module->setError(422, 'line.' . $field, $error_message, true, false);
+                $this->module->sendResponse();
+            }
+            else $this->module->setError(422, 'line', "Can't validate line model from data.");
+        }
+
+        $this->module->data['line'] = $line->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     protected function getLine($line_id)
