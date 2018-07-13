@@ -258,8 +258,6 @@ class LineController extends BaseController
         $this->module->sendResponse();
     }
 
-    public function action
-
     protected function getLine($line_id)
     {
         return Line::findOne($line_id);
