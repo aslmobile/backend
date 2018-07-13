@@ -33,7 +33,9 @@ class DefaultController extends BaseController
                             'legal',
                             'faq',
                             'method',
-                            'send-socket-message'
+                            'send-socket-message',
+                            'cancel-trip-reasons',
+                            'cancel-passenger-reasons'
                         ],
                         'allow' => true
                     ]
@@ -44,6 +46,8 @@ class DefaultController extends BaseController
                 'actions' => [
                     'dispatch-phone' => ['GET'],
                     'legal' => ['GET'],
+                    'cancel-trip-reasons' => ['GET'],
+                    'cancel-passenger-reasons' => ['GET'],
                     'method' => ['POST'],
                     'send-socket-message' => ['POST']
                 ]
@@ -128,6 +132,28 @@ class DefaultController extends BaseController
             'socket' => true,
             'message' => $message
         ];
+
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionCancelTripReasons()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->module->data['reasons'] = Yii::$app->params['cancel-trip-reasons'];
+
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionCancelPassengerReasons()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->module->data['reasons'] = Yii::$app->params['cancel-passenger-reasons'];
 
         $this->module->setSuccess();
         $this->module->sendResponse();

@@ -125,5 +125,19 @@ $params = [
         Yii::t('app',"November"),
         Yii::t('app',"December"),
     ],
+    'cancel-trip-reasons' => [
+        1 => Yii::t('app',"Причина 1"),
+        2 => Yii::t('app',"Причина 2"),
+        3 => Yii::t('app',"Причина 3"),
+        4 => Yii::t('app',"Причина 4"),
+        5 => Yii::t('app',"Причина 5")
+    ],
+    'cancel-passenger-reasons' => [
+        1 => Yii::t('app',"Причина 1"),
+        2 => Yii::t('app',"Причина 2"),
+        3 => Yii::t('app',"Причина 3"),
+        4 => Yii::t('app',"Причина 4"),
+        5 => Yii::t('app',"Причина 5")
+    ]
 ];
 return $params;

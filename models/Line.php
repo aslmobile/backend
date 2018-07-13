@@ -26,7 +26,11 @@ class Line extends \yii\db\ActiveRecord
 {
     const
         STATUS_ACTIVE = 1,
-        STATUS_DISABLED = 0;
+        STATUS_DISABLED = 0,
+        STATUS_CANCELED = 0,
+        STATUS_WAITING = 1,
+        STATUS_IN_PROGRESS = 2,
+        STATUS_FINISHED = 3;
 
     public static function tableName()
     {
