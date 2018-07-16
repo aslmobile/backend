@@ -52,6 +52,8 @@ class BaseController extends RestFul
     {
         $this->logEvent();
 
+        echo '<pre>' . print_r(Yii::$app->request->getHeaders(), true) . '</pre>'; exit;
+
         $push_id = Yii::$app->request->getHeaders()->get('push_id');
         $device_id = Yii::$app->request->getHeaders()->get('device_id');
         $ostype = Yii::$app->request->getHeaders()->get('ostype');
