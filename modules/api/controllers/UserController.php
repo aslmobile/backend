@@ -56,7 +56,7 @@ class UserController extends BaseController
     public function actionAuth()
     {
         $this->prepareBody();
-        $this->validateBodyParams(['push_id', 'device_id', 'ostype', 'type', 'phone']);
+        $this->validateBodyParams(['type', 'phone']);
         $this->TokenAuth(self::TOKEN_PHONE);
 
         /** @var \app\modules\api\models\Devices $device */

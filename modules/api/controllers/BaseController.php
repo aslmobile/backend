@@ -19,6 +19,10 @@ class BaseController extends RestFul
     public $token;
     public $body;
 
+    public $push_id;
+    public $device_id;
+    public $ostype;
+
     /** @var \app\modules\api\models\Users */
     public $user;
 
@@ -47,6 +51,19 @@ class BaseController extends RestFul
     public function beforeAction($event)
     {
         $this->logEvent();
+
+        $push_id = Yii::$app->request->getHeaders()->get('push_id');
+        $device_id = Yii::$app->request->getHeaders()->get('device_id');
+        $ostype = Yii::$app->request->getHeaders()->get('ostype');
+
+        if (!is_object($this->body)) $this->body = new \StdClass();
+
+        if ($push_id && !empty ($push_id)) $this->push_id = $push_id;
+        else $this->module->setError(422, 'headers.push_id', "Required parameter");
+        if ($device_id && !empty ($device_id)) $this->device_id = $device_id;
+        else $this->module->setError(422, 'headers.device_id', "Required parameter");
+        if ($ostype && !empty ($ostype)) $this->ostype = $ostype;
+        else $this->module->setError(422, 'headers.ostype', "Required parameter");
 
         return parent::beforeAction($event);
     }
@@ -156,11 +173,11 @@ class BaseController extends RestFul
             $this->user = $user;
             $device = new Devices([
                 'user_id' => $user->id,
-                'push_id' => $this->body->push_id,
+                'push_id' => $this->push_id,
                 'lang' => $this->lang,
                 'uip' => Yii::$app->request->userIP,
-                'device_id' => $this->body->device_id,
-                'type' => $this->body->ostype,
+                'device_id' => $this->device_id,
+                'type' => $this->ostype,
                 'user_type' => $this->body->type
             ]);
 
