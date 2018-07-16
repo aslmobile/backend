@@ -34,7 +34,7 @@ class LineController extends BaseController
                         'actions' => [
                             'startpoints', 'endpoints', 'checkpoints',
                             'update-line', 'passengers', 'seats',
-                            'cancel'
+                            'cancel', 'passenger-decline'
                         ],
                         'allow' => true
                     ]
@@ -49,7 +49,8 @@ class LineController extends BaseController
                     'passengers'  => ['GET'],
                     'seats'  => ['GET'],
                     'update-line'  => ['PUT'],
-                    'cancel' => ['DELETE']
+                    'cancel' => ['DELETE'],
+                    'passenger-decline' => ['DELETE']
                 ]
             ]
         ];
@@ -256,6 +257,31 @@ class LineController extends BaseController
 
         $this->module->data['line'] = $line->toArray();
         $this->module->data['trips'] = $_trips;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionPassengerDecline($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['passenger_id', 'cancel_reason_trip']);
+
+        /** @var \app\models\Line $line */
+        $line = Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', "Not Found");
+
+        /** @var \app\models\Trip $trip */
+        $trip = Trip::find()->where(['route_id' => $line->route_id, 'driver_id' => $line->driver_id, 'user_id' => $this->body->passenger_id])->one();
+        if (!$trip) $this->module->setError(422, '_trip', "Not Found");
+
+        $trip->cancel_reason = $this->body->cancel_reason_trip;
+        $trip->status = Trip::STATUS_CANCELED;
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->data['line'] = $line->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

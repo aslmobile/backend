@@ -2,6 +2,7 @@
 
 use app\models\Line;
 use app\models\Route;
+use app\modules\admin\models\Checkpoint;
 use app\modules\api\models\Trip;
 use app\modules\api\models\Users;
 use Yii;
@@ -50,6 +51,7 @@ class TripController extends BaseController
                 'actions' => [
                     'cities'  => ['GET'],
                     'passengers'  => ['GET'],
+                    'arrived' => ['POST']
                 ]
             ]
         ];
@@ -77,7 +79,12 @@ class TripController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['checkpoint']);
 
-        $this->module->data = $trips;
+        $checkpoint = Checkpoint::findOne(intval($this->body->checkpoint));
+        if (!$checkpoint) $this->module->setError(422, 'checkpoint', "Not Found");
+
+        // TODO: Отправить на сокет сообщение что водитель подъехал к checkpoint
+
+        $this->module->data = $checkpoint->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
