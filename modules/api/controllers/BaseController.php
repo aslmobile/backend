@@ -52,10 +52,8 @@ class BaseController extends RestFul
     {
         $this->logEvent();
 
-        echo '<pre>' . print_r(Yii::$app->request->getHeaders(), true) . '</pre>'; exit;
-
-        $push_id = Yii::$app->request->getHeaders()->get('push_id');
-        $device_id = Yii::$app->request->getHeaders()->get('device_id');
+        $push_id = Yii::$app->request->getHeaders()->get('push');
+        $device_id = Yii::$app->request->getHeaders()->get('device');
         $ostype = Yii::$app->request->getHeaders()->get('ostype');
 
         if (!is_object($this->body)) $this->body = new \StdClass();
