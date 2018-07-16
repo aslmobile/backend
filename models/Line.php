@@ -136,5 +136,10 @@ class Line extends \yii\db\ActiveRecord
         {
             // TODO: Отправка в сокет что машина заполнена и подтверждение о выезде через 5 минут
         }
+
+        if ($this->status == self::STATUS_IN_PROGRESS && $this->getOldAttribute('status') != self::STATUS_IN_PROGRESS)
+        {
+            // TODO: Отправлять уведомление о выезде
+        }
     }
 }
