@@ -1,48 +1,36 @@
 <?php
 
-use yii\helpers\Inflector;
-use yii\helpers\StringHelper;
-
-/* @var $this yii\web\View */
-/* @var $generator app\modules\gii\generators\crud\Generator */
-
-$urlParams = $generator->generateUrlParams();
-$nameAttribute = $generator->getNameAttribute();
-
-echo "<?php\n";
-?>
-
 use yii\helpers\Html;
-use <?= $generator->indexWidgetType === 'grid' ? "yii\\grid\\GridView" : "yii\\widgets\\ListView" ?>;
+use yii\grid\GridView;
 use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
-<?= !empty($generator->searchModelClass) ? "/* @var \$searchModel " . ltrim($generator->searchModelClass, '\\') . " */\n" : '' ?>
+/* @var $searchModel app\modules\admin\models\FaqSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt(<?= $generator->generateString(Inflector::pluralize(Inflector::camel2words(StringHelper::basename($generator->modelClass)))) ?>,[],false);
+$this->title = 'Faqs';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="content-wrapper">
     <section class="content-header">
         <h2></h2>
-        <?= "<?=" ?> Breadcrumbs::widget([
+        <?= Breadcrumbs::widget([
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
     </section>
     <section class="content">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h3 class="box-title"><?= "<?=" ?> Html::encode($this->title) ?></h3>
+                <h3 class="box-title"><?= Html::encode($this->title) ?></h3>
 
                 <div class="box-tools pull-right">
-                    <?= "<?=" ?> Html::a(
+                    <?= Html::a(
                         Yii::$app->mv->gt('{i} new',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
                     ); ?>
-                    <?= "<?=" ?> Html::a(
+                    <?= Html::a(
                         Yii::$app->mv->gt('{i} delete selected',['i'=>Html::tag('i','',['class'=>'fa fa-fire'])],false),
                         [''],
                         [
@@ -65,7 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             </div>
             <!-- /.box-header -->
-            <?= "<?=" ?> GridView::widget([
+            <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'id' => 'grid',
                 'layout'=>"
@@ -75,31 +63,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'tableOptions' => [
                     'class' => 'table table-bordered table-hover dataTable',
                 ],
-                <?= !empty($generator->searchModelClass) ? "'filterModel' => \$searchModel,\n        'columns' => [\n" : "'columns' => [\n"; ?>
+                'filterModel' => $searchModel,
+        'columns' => [
                     //['class' => 'yii\grid\SerialColumn'],
                     ['class' => 'yii\grid\CheckboxColumn'],
 
-                    <?php
-                    $count = 0;
-                    if (($tableSchema = $generator->getTableSchema()) === false) {
-                        foreach ($generator->getColumnNames() as $name) {
-                            if (++$count < 6) {
-                                echo "            '" . $name . "',\n";
-                            } else {
-                                echo "            // '" . $name . "',\n";
-                            }
-                        }
-                    } else {
-                        foreach ($tableSchema->columns as $column) {
-                            $format = $generator->generateColumnFormat($column);
-                            if (++$count < 6) {
-                                echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
-                            } else {
-                                echo "            // '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
-                            }
-                        }
-                    }
-                    ?>
+                                'id',
+            'title',
+            'created_at',
+            'updated_at',
+            'status',
+            // 'weight',
+            // 'text:ntext',
                     [
                         'class' => 'yii\grid\ActionColumn',
                         'template' => '{view} {update} {delete}',

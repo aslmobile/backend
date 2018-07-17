@@ -34,7 +34,8 @@ class UserController extends BaseController
                             'auth', 'sms',
                             'registration',
                             'upload-driver-licence',
-                            'upload-user-photo'
+                            'upload-user-photo',
+                            'update-profile'
                         ],
                         'allow' => true
                     ]
@@ -48,6 +49,7 @@ class UserController extends BaseController
                     'registration' => ['PUT'],
                     'upload-driver-licence' => ['POST'],
                     'upload-user-photo' => ['POST'],
+                    'update-profile' => ['POST'],
                 ]
             ]
         ];
@@ -91,6 +93,37 @@ class UserController extends BaseController
 
         $this->device->auth_token = $token;
         $this->device->save();
+
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionUpdateProfile($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+
+        $data = [
+            'Users' => (array) $this->body
+        ];
+
+        if (!$user->load($data)) $this->module->setError(422, 'user', "Can't load user model from data.");
+        if (!$user->validate() || !$user->save())
+        {
+            if ($user->hasErrors())
+            {
+                foreach ($user->errors as $field => $error_message)
+                    $this->module->setError(422, 'user.' . $field, $error_message, true, false);
+                $this->module->sendResponse();
+            }
+            else $this->module->setError(422, 'user', "Can't validate user model from data.");
+        }
+
+        $this->module->data['user'] = $user->toArray();
+        $this->prepareScheme('users');
+        $this->module->JSONValidate('user', $this->scheme);
 
         $this->module->setSuccess();
         $this->module->sendResponse();

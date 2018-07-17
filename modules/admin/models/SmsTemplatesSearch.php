@@ -1,10 +1,16 @@
-<?php namespace app\modules\admin\models;
+<?php
+
+namespace app\modules\admin\models;
 
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use app\models\SmsTemplates;
 
-class LegalSearch extends Legal
+/**
+ * SmsTemplatesSearch represents the model behind the search form about `app\models\SmsTemplates`.
+ */
+class SmsTemplatesSearch extends SmsTemplates
 {
     /**
      * @inheritdoc
@@ -12,8 +18,8 @@ class LegalSearch extends Legal
     public function rules()
     {
         return [
-            [['id', 'type'], 'integer'],
-            [['title', 'content'], 'string'],
+            [['id', 'created_at', 'updated_at'], 'integer'],
+            [['template'], 'safe'],
         ];
     }
 
@@ -35,14 +41,14 @@ class LegalSearch extends Legal
      */
     public function search($params)
     {
-        $query = Legal::find();
+        $query = SmsTemplates::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'pagination' => [
-                'pageSize' => 50,
-            ],
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]]
+			'pagination' => [
+				'pageSize' => 50,
+			],
+			'sort'=> ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
 
         $this->load($params);
@@ -55,8 +61,11 @@ class LegalSearch extends Legal
 
         $query->andFilterWhere([
             'id' => $this->id,
-            'type' => $this->type
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ]);
+
+        $query->andFilterWhere(['like', 'template', $this->template]);
 
         return $dataProvider;
     }

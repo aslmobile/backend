@@ -11,6 +11,7 @@ use app\components\MultilingualQuery;
  * @property int $id
  * @property string $title
  * @property string $content
+ * @property int $type
  * @property int $created_at
  * @property int $updated_at
  */
@@ -20,6 +21,10 @@ class Legal extends \yii\db\ActiveRecord
         STATUS_ADDED = 0,
         STATUS_APPROVED = 1,
         STATUS_WAITING = 2;
+
+    const
+        TYPE_DRIVER = 1,
+        TYPE_PASSENGER = 2;
 
     public static function tableName()
     {
@@ -74,6 +79,7 @@ class Legal extends \yii\db\ActiveRecord
             'id'                => Yii::t('app', "ID"),
             'title'             => Yii::t('app', "Title"),
             'content'           => Yii::t('app', "Content"),
+            'type'              => Yii::t('app', "Type"),
             'created_at'        => Yii::t('app', "Created"),
             'updated_at'        => Yii::t('app', "Updated")
         ];

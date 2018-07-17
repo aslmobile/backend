@@ -69,6 +69,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                     ],
                     'title',
+                    'type' => [
+                        'attribute' => 'type',
+                        'content' => function ($data) {
+                            return key_exists($data->type, $data->types) ? $data->types[$data->type] : false;
+                        },
+                        'filter' => \app\modules\admin\models\Legal::getTypes(),
+                    ],
                     [
                         'class' => 'yii\grid\ActionColumn',
                         'headerOptions' => ['style' => 'width: 125px;'],

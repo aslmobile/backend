@@ -1,19 +1,22 @@
-<?php namespace app\modules\admin\controllers;
+<?php
 
-use app\modules\admin\models\Legal;
-use app\modules\admin\models\LegalSearch;
+namespace app\modules\admin\controllers;
+
 use Yii;
-use app\modules\admin\models\Lang;
-use app\modules\admin\models\Mailtpl;
+use app\models\SmsTemplates;
+use app\modules\admin\models\SmsTemplatesSearch;
 use app\components\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 
-class LegalController extends Controller
+/**
+ * SmsTemplatesController implements the CRUD actions for SmsTemplates model.
+ */
+class SmsTemplatesController extends Controller
 {
-    public $layout = "./sidebar";
+	public $layout = "./sidebar";
 
     public function behaviors()
     {
@@ -27,7 +30,7 @@ class LegalController extends Controller
                         'roles' => ['admin', 'moderator'],
                     ],
                     [
-                        'actions' => ['delete'],
+                        'actions' => ['delete', 'delete-group'],
                         'allow' => true,
                         'roles' => ['admin'],
                     ],
@@ -42,18 +45,25 @@ class LegalController extends Controller
         ];
     }
 
+    /**
+     * Lists all SmsTemplates models.
+     * @return mixed
+     */
     public function actionIndex()
     {
-        if (Yii::$app->request->isAjax)
-        {
-            $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
-            if (count($keys)) foreach ($keys as $k => $v) if (($model = Legal::findOne($v)) !== null)
-                    $model->delete();
+		if (Yii::$app->request->isAjax) {
+			$keys = (isset($_POST['keys']))?$_POST['keys']:[];
+			if (count($keys)) {
+				foreach ($keys as $k => $v) {
+					if (($model = SmsTemplates::findOne($v)) !== null) {
+						$model->delete();
+					}
+				}
+				return $this->redirect(['index']);
+			}
+		}
 
-            return $this->redirect(['index']);
-        }
-
-        $searchModel = new LegalSearch();
+        $searchModel = new SmsTemplatesSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -63,7 +73,7 @@ class LegalController extends Controller
     }
 
     /**
-     * Displays a single Mailtpl model.
+     * Displays a single SmsTemplates model.
      * @param integer $id
      * @return mixed
      */
@@ -75,16 +85,16 @@ class LegalController extends Controller
     }
 
     /**
-     * Creates a new Mailtpl model.
+     * Creates a new SmsTemplates model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Legal();
+        $model = new SmsTemplates();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['index', 'id' => $model->id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -93,17 +103,17 @@ class LegalController extends Controller
     }
 
     /**
-     * Updates an existing Mailtpl model.
+     * Updates an existing SmsTemplates model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id, true);
+        $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            Yii::$app->getSession()->setFlash('success', 'Изменения сохранены');
+			Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved',[],0));
             return $this->redirect(['update', 'id' => $model->id]);
         } else {
             return $this->render('update', [
@@ -113,7 +123,7 @@ class LegalController extends Controller
     }
 
     /**
-     * Deletes an existing Mailtpl model.
+     * Deletes an existing SmsTemplates model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -124,23 +134,16 @@ class LegalController extends Controller
 
         return $this->redirect(['index']);
     }
-
     /**
-     * Finds the Mailtpl model based on its primary key value.
+     * Finds the SmsTemplates model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Mailtpl the loaded model
+     * @return SmsTemplates the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id, $ml = true)
+    protected function findModel($id)
     {
-        if ($ml) {
-            $model = Legal::find()->where('id = :id', [':id' => $id])->multilingual()->one();
-        } else {
-            $model = Legal::findOne($id);
-        }
-
-        if ($model !== null) {
+        if (($model = SmsTemplates::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

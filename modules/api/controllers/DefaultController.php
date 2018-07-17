@@ -65,12 +65,19 @@ class DefaultController extends BaseController
         $this->module->sendResponse();
     }
 
-    public function actionLegal()
+    public function actionLegal($id)
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $legals = Legal::find()->all();
+        switch ($id)
+        {
+            case Legal::TYPE_DRIVER: $id = Legal::TYPE_DRIVER; break;
+            case Legal::TYPE_PASSENGER: $id = Legal::TYPE_PASSENGER; break;
+            default: $id = Legal::TYPE_DRIVER;
+        }
+
+        $legals = Legal::find()->where(['type' => $id])->all();
         $legal_data = [];
 
         /** @var \app\modules\api\models\Legal $legal */

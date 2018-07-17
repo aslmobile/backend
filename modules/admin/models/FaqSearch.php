@@ -1,10 +1,16 @@
-<?php namespace app\modules\admin\models;
+<?php
+
+namespace app\modules\admin\models;
 
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use app\models\Faq;
 
-class LegalSearch extends Legal
+/**
+ * FaqSearch represents the model behind the search form about `app\models\Faq`.
+ */
+class FaqSearch extends Faq
 {
     /**
      * @inheritdoc
@@ -12,8 +18,8 @@ class LegalSearch extends Legal
     public function rules()
     {
         return [
-            [['id', 'type'], 'integer'],
-            [['title', 'content'], 'string'],
+            [['id', 'created_at', 'updated_at', 'status', 'weight'], 'integer'],
+            [['title', 'text'], 'safe'],
         ];
     }
 
@@ -35,14 +41,14 @@ class LegalSearch extends Legal
      */
     public function search($params)
     {
-        $query = Legal::find();
+        $query = Faq::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'pagination' => [
-                'pageSize' => 50,
-            ],
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]]
+			'pagination' => [
+				'pageSize' => 50,
+			],
+			'sort'=> ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
 
         $this->load($params);
@@ -55,8 +61,14 @@ class LegalSearch extends Legal
 
         $query->andFilterWhere([
             'id' => $this->id,
-            'type' => $this->type
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'status' => $this->status,
+            'weight' => $this->weight,
         ]);
+
+        $query->andFilterWhere(['like', 'title', $this->title])
+            ->andFilterWhere(['like', 'text', $this->text]);
 
         return $dataProvider;
     }
