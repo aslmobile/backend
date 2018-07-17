@@ -1,6 +1,7 @@
 <?php namespace app\modules\api;
 
 
+use app\models\SmsTemplates;
 use app\modules\api\models\Devices;
 use app\modules\api\models\Users;
 use Yii;
@@ -141,7 +142,12 @@ class Module extends \yii\base\Module
 
             if (!$sandbox)
             {
-                $response = $SMSCenter->send($device->user->phone, Yii::t('app','{app} | Авторизация: {code}', ['app' => Yii::$app->params['defTitle'], 'code' => $code]));
+                /** @var \app\models\SmsTemplates $template */
+                $template = SmsTemplates::find()->where(['name' => "auth-template"])->one();
+                if ($template) $template = Yii::t('app', $template->template, ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
+                else $template = Yii::t('app','{name} | Авторизация: {code}', ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
+
+                $response = $SMSCenter->send($device->user->phone, $template);
                 $send = new \SimpleXMLElement($response);
             }
             else $send = (object) ['cnt' => 1];

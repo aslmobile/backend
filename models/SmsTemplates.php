@@ -12,6 +12,7 @@ use app\components\MultilingualQuery;
  *
  * @property integer $id
  * @property string $template
+ * @property string $name
  * @property integer $created_at
  * @property integer $updated_at
  */
@@ -32,7 +33,7 @@ class SmsTemplates extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['template'], 'string'],
+            [['template', 'name'], 'string'],
             [['created_at', 'updated_at'], 'integer'],
         ];
     }
@@ -52,6 +53,7 @@ class SmsTemplates extends \yii\db\ActiveRecord
         return [
             'id' => Yii::$app->mv->gt('ID', [], 0),
             'template' => Yii::$app->mv->gt('Template', [], 0),
+            'name' => Yii::$app->mv->gt('Name', [], 0),
             'created_at' => Yii::$app->mv->gt('Created At', [], 0),
             'updated_at' => Yii::$app->mv->gt('Updated At', [], 0),
         ];

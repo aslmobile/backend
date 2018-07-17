@@ -37,7 +37,8 @@ use app\modules\admin\models\Lang;
             <div id="top" class="tab-pane fade in active">
                 <div class="row">
                     <div class="col-sm-6">
-                            <?= $form->field($model, 'template')->textarea(); ?>
+                        <?= $form->field($model, 'name')->textInput(); ?>
+                        <?= $form->field($model, 'template')->textarea(); ?>
 
                     </div>
                     <div class="col-sm-6">
