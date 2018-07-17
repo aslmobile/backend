@@ -128,7 +128,6 @@ class SocketServer implements MessageComponentInterface
         $response = base64_encode($response);
 
         foreach ($this->devices as $device) $device->send($response);
-
         $from->send($response);
 
         echo "Message from ({$from->device->id})\n";
