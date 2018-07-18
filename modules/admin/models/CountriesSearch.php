@@ -18,8 +18,8 @@ class CountriesSearch extends Countries
     public function rules()
     {
         return [
-            [['id', 'code_iso', 'dc'], 'integer'],
-            [['title_ru', 'title_ua', 'title_be', 'title_en', 'title_es', 'title_pt', 'title_de', 'title_fr', 'title_it', 'title_po', 'title_ja', 'title_lt', 'title_lv', 'title_cz', 'title_zh', 'title_he', 'code_alpha2', 'code_alpha3'], 'safe'],
+            [['id'], 'integer'],
+            [['title', 'alpha2', 'alpha3'], 'safe'],
         ];
     }
 
@@ -61,29 +61,11 @@ class CountriesSearch extends Countries
 
         $query->andFilterWhere([
             'id' => $this->id,
-            'code_iso' => $this->code_iso,
-            'dc' => $this->dc,
         ]);
 
-        $query->andFilterWhere(['like', 'title_ru', $this->title_ru])
-            ->andFilterWhere(['like', 'title_ua', $this->title_ua])
-            ->andFilterWhere(['like', 'title_be', $this->title_be])
-            ->andFilterWhere(['like', 'title_en', $this->title_en])
-            ->andFilterWhere(['like', 'title_es', $this->title_es])
-            ->andFilterWhere(['like', 'title_pt', $this->title_pt])
-            ->andFilterWhere(['like', 'title_de', $this->title_de])
-            ->andFilterWhere(['like', 'title_fr', $this->title_fr])
-            ->andFilterWhere(['like', 'title_it', $this->title_it])
-            ->andFilterWhere(['like', 'title_po', $this->title_po])
-            ->andFilterWhere(['like', 'title_ja', $this->title_ja])
-            ->andFilterWhere(['like', 'title_lt', $this->title_lt])
-            ->andFilterWhere(['like', 'title_lv', $this->title_lv])
-            ->andFilterWhere(['like', 'title_cz', $this->title_cz])
-            ->andFilterWhere(['like', 'title_zh', $this->title_zh])
-            ->andFilterWhere(['like', 'title_he', $this->title_he])
-            ->andFilterWhere(['like', 'code_alpha2', $this->code_alpha2])
-            ->andFilterWhere(['like', 'code_alpha3', $this->code_alpha3])
-            ->andFilterWhere(['like', 'flag', $this->flag]);
+        $query->andFilterWhere(['like', 'title', $this->title])
+            ->andFilterWhere(['like', 'alpha2', $this->alpha2])
+            ->andFilterWhere(['like', 'alpha3', $this->alpha3]);
 
         return $dataProvider;
     }

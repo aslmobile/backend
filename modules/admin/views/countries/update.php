@@ -7,9 +7,9 @@ use app\components\widgets\Alert;
 /* @var $model app\models\Countries */
 
 
-$this->title = Yii::$app->mv->gt('Edit {title}',['title' => $model->title_en],false);
+$this->title = Yii::$app->mv->gt('Edit {title}',['title' => $model->title],false);
 $this->params['breadcrumbs'][] = ['label' => 'Countries', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->title_en, 'url' => ['view', 'id' => $model->id]];
+$this->params['breadcrumbs'][] = ['label' => $model->title, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

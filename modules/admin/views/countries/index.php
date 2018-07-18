@@ -64,36 +64,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'id',
                         'headerOptions' => ['style' => 'width: 50px;']
                     ],
-                    [
-                        'attribute' => 'flag',
-                        'format'=>'raw',
-                        'value'=>function($model) {
-                            if($model->flag){
-                                return Yii::$app->imageCache->img(Yii::getAlias('@webroot').$model->flag,'50x');
-                            }
-                            return null;
-                        },
-                    ],
-                    'title_en',
-                    'code_iso',
-                    // 'title_ru',
-                    // 'title_ua',
-                    // 'title_be',
-                    // 'title_es',
-                    // 'title_pt',
-                    // 'title_de',
-                    // 'title_fr',
-                    // 'title_it',
-                    // 'title_po',
-                    // 'title_ja',
-                    // 'title_lt',
-                    // 'title_lv',
-                    // 'title_cz',
-                    // 'title_zh',
-                    // 'title_he',
-                    // 'code_alpha2',
-                    // 'code_alpha3',
-                    // 'dc',
+                    'title',
+                    'alpha2',
+                    'alpha3',
                     [
                         'class' => 'yii\grid\ActionColumn',
                         'headerOptions' => ['style' => 'width: 125px;'],

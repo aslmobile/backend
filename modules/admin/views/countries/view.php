@@ -7,7 +7,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $this yii\web\View */
 /* @var $model app\models\Countries */
 
-$this->title = $model->title_en;
+$this->title = $model->title;
 $this->params['breadcrumbs'][] = [
     'label' => 'Countries',
     'url' => ['index']
@@ -39,31 +39,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'model' => $model,
                                     'attributes' => [
                                         'id',
-                                        [
-                                            'attribute' => 'flag',
-                                            'value' => $model->flag,
-                                            'format' => ['image', ['width' => '100']],
-                                        ],
-                                        'title_en',
-                                        'code_alpha2',
-                                        'code_alpha3',
-                                        //'dc',
-                                        //'title_he',
-                                        //'title_zh',
-                                        //'title_cz',
-                                        //'title_lv',
-                                        //'title_lt',
-                                        //'title_ja',
-                                        //'title_po',
-                                        //'title_it',
-                                        //'title_fr',
-                                        //'title_de',
-                                        //'title_pt',
-                                        //'title_es',
-                                        //'title_be',
-                                        //'title_ua',
-                                        //'title_ru',
-                                        'code_iso',
+                                        'title',
+                                        'alpha2',
+                                        'alpha3'
                                     ],
                                 ]) ?>
                             </div>
