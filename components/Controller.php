@@ -209,13 +209,13 @@ class Controller extends \yii\web\Controller
 
     public static function getOldLangAssoc($lang = null)
     {
-        $languages = ['en-US' => 'en', 'ru-RU' => 'ru', 'kz' => 'kk-KZ'];
+        $languages = ['en-EN' => 'en', 'ru-RU' => 'ru', 'kz' => 'kk-KZ'];
         return isset($languages[$lang]) ? $languages[$lang] : 'ru';
     }
 
     public static function getNewLangAssoc($lang = null)
     {
-        $languages = ['en' => 'en-US', 'ru' => 'ru-RU', 'kz' => 'kk-KZ'];
+        $languages = ['en' => 'en-EN', 'ru' => 'ru-RU', 'kz' => 'kk-KZ'];
         return isset($languages[$lang]) ? $languages[$lang] : 'ru';
     }
 

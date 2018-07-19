@@ -79,7 +79,7 @@ AppAsset::register($this);
                 Yii::$app->imageCache->img(Yii::getAlias('@webroot') . Yii::$app->controller->coreSettings->logo, 'x50', [
                     'alt' => Yii::$app->controller->coreSettings->name,
                     'class' => 'logo-lg'
-                ]),
+                ]) . '<span class="logo-mini text-red"><b>ASL</b></span>',
                 ['/admin/default/index'],
                 ['class' => 'logo']
             ) ?>

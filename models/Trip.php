@@ -46,6 +46,14 @@ use yii\behaviors\TimestampBehavior;
  */
 class Trip extends \yii\db\ActiveRecord
 {
+    const
+        STATUS_CANCELLED = 0,
+        STATUS_CREATED = 1,
+        STATUS_WAITING = 2,
+        STATUS_WAY = 3,
+        STATUS_FINISHED = 4,
+        STATUS_CANCELLED_DRIVER = 9;
+
     public static function tableName()
     {
         return 'trip';

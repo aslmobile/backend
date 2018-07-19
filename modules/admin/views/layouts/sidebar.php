@@ -12,7 +12,7 @@ $act = Yii::$app->controller->action->id;
     <section class="sidebar">
         <!-- Sidebar user panel -->
         <div class="user-panel">
-            <div class="row">
+            <div class="info" style="min-height: 60px; position: relative; left: 0;">
                 <div class="col-sm-12 text-center" style="color: white;"><?= Yii::$app->user->identity->fullName ?></div>
                 <small class="col-sm-12 text-center" style="color: white;"><?= Yii::$app->user->identity->email ?></small>
             </div>
@@ -31,27 +31,27 @@ $act = Yii::$app->controller->action->id;
                 <ul class="treeview-menu">
                     <li<?= ($cont == 'translations' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/translations/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Динамические переводы', [], false) ?>
+                                    class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Динамические', [], false) ?>
                         </a>
                     </li>
                     <li<?= ($cont == 'translations' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/translations/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новый дин. перевод', [], false) ?>
+                                    class="fa fa-plus"></i> <?= Yii::$app->mv->gt('Новый', [], false) ?>
                         </a>
                     </li>
                     <li<?= ($cont == 'translations' && $act == 'edit') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/translations/edit') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Редактировать дин. перевод', [], false) ?>
+                                    class="fa fa-pencil"></i> <?= Yii::$app->mv->gt('Изменить', [], false) ?>
                         </a>
                     </li>
                     <li<?= ($cont == 'message' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/message/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Статические переводы', [], false) ?>
+                                    class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Статические', [], false) ?>
                         </a>
                     </li>
                     <li<?= ($cont == 'message' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/message/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новый статический перевод', [], false) ?>
+                                    class="fa fa-plus"></i> <?= Yii::$app->mv->gt('Новый', [], false) ?>
                         </a>
                     </li>
                 </ul>

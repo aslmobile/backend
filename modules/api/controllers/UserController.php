@@ -98,6 +98,23 @@ class UserController extends BaseController
         $this->module->sendResponse();
     }
 
+    public function actionSettings()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['notifications']);
+
+        $this->device->notifications = intval($this->body->notifications) == 1 ? 1 : 0;
+        $this->device->save();
+
+        $this->module->data['device'] = $this->device->toArray();
+        $this->module->data['user'] = $this->user->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
     public function actionUpdateProfile($id)
     {
         $user = $this->TokenAuth(self::TOKEN);

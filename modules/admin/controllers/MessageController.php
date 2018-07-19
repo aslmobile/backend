@@ -2,16 +2,18 @@
 
 namespace app\modules\admin\controllers;
 
-use Yii;
-use app\modules\admin\models\SourceMessage;
-use app\modules\admin\models\SourceMessageSearch;
 use app\components\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use yii\helpers\ArrayHelper;
+use app\models\Message;
+use app\models\SourceMessage;
 use app\modules\admin\models\Lang;
-use app\modules\admin\models\Message;
+use app\modules\admin\models\MenuGroup;
+use app\modules\admin\models\MenuGroupSearch;
+use app\modules\admin\models\SourceMessageSearch;
+use Yii;
+use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
+use yii\web\NotFoundHttpException;
 
 /**
  * MessageController implements the CRUD actions for SourceMessage model.
@@ -19,33 +21,6 @@ use app\modules\admin\models\Message;
 class MessageController extends Controller
 {
     public $layout = "./sidebar";
-
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::className(),
-                'rules' => [
-                    [
-                        'actions' => ['index', 'create', 'update'],
-                        'allow' => true,
-                        'roles' => ['admin', 'moderator'],
-                    ],
-                    [
-                        'actions' => ['delete', 'delete-group'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['post'],
-                ],
-            ],
-        ];
-    }
 
     /**
      * Lists all SourceMessage models.
@@ -125,7 +100,7 @@ class MessageController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             Yii::$app->cache->flush();
-            Yii::$app->getSession()->setFlash('success', 'Ð˜Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ñ‹');
+            Yii::$app->getSession()->setFlash('success', 'Изменения сохранены');
             foreach ($_POST['message'] as $k => $v) {
                 $translation_item = Message::find()->where('language = :language AND id = :id', [':language' => $k, ':id' => $model->id])->one();
                 if ($translation_item === null) {
@@ -157,6 +132,7 @@ class MessageController extends Controller
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
+        Message::findOne($id)->delete();
 
         return $this->redirect(['index']);
     }
