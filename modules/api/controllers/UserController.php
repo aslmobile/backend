@@ -1,6 +1,7 @@
 <?php namespace app\modules\api\controllers;
 
 use app\modules\api\models\DriverLicence;
+use app\modules\api\models\Trip;
 use app\modules\api\models\UploadFiles;
 use app\modules\api\models\Users;
 use app\modules\api\models\Vehicles;
@@ -35,7 +36,8 @@ class UserController extends BaseController
                             'registration',
                             'upload-driver-licence',
                             'upload-user-photo',
-                            'update-profile'
+                            'update-profile',
+                            'trips'
                         ],
                         'allow' => true
                     ]
@@ -50,6 +52,7 @@ class UserController extends BaseController
                     'upload-driver-licence' => ['POST'],
                     'upload-user-photo' => ['POST'],
                     'update-profile' => ['POST'],
+                    'trips' => ['GET'],
                 ]
             ]
         ];
@@ -225,6 +228,22 @@ class UserController extends BaseController
             'user' => $user->toArray(),
             'file' => $documents['image']['file']
         ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionTrips()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        /** @var \app\modules\api\models\Trip $trip */
+        $trips = Trip::find()->where(['user_id' => $user->id])->all();
+        if ($trips && count($trips)) foreach ($trips as $trip)
+        {
+            $this->module->data['trips'][] = $trip->toArray();
+        }
+
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

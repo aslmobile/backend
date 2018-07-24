@@ -134,12 +134,12 @@ $act = Yii::$app->controller->action->id;
                     <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
                 </a>
                 <ul class="treeview-menu">
-                    <li<?= ($cont == 'countries' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
+                    <li<?= ($cont == 'user' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/user/index') ?>"><i
                                     class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
                         </a>
                     </li>
-                    <li<?= ($cont == 'countries' && $act == 'create') ? ' class="active"' : '' ?>>
+                    <li<?= ($cont == 'user' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/user/create') ?>"><i
                                     class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
                         </a>
@@ -158,6 +158,24 @@ $act = Yii::$app->controller->action->id;
                         </a>
                     <li<?= ($cont == 'blacklist' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/blacklist/create') ?>"><i
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="treeview<?= ($cont == 'trips') ? ' active' : '' ?>">
+                <a href="#"> <i class="fa fa-users"></i>
+                    <span><?= Yii::$app->mv->gt('Поездки', [], false); ?></span>
+                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                </a>
+                <ul class="treeview-menu">
+                    <li<?= ($cont == 'trips' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/trips/index') ?>"><i
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'trips' && $act == 'create') ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/trips/create') ?>"><i
                                     class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
                         </a>
                     </li>

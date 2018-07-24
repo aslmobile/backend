@@ -8,6 +8,12 @@ class Trip extends \app\models\Trip
         STATUS_ENDED = 3,
         STATUS_CANCELED = 4;
 
+    const
+        PAYMENT_STATUS_WAITING = 1,
+        PAYMENT_STATUS_REJECTED = 2,
+        PAYMENT_STATUS_CANCELLED = 3,
+        PAYMENT_STATUS_PAID = 4;
+
     protected $oldStatus;
 
     public function getUser()

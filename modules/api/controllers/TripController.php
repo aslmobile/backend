@@ -1,7 +1,10 @@
 <?php namespace app\modules\api\controllers;
 
+use app\models\Countries;
 use app\models\Line;
+use app\models\LuggageType;
 use app\models\Route;
+use app\models\Taxi;
 use app\modules\admin\models\Checkpoint;
 use app\modules\api\models\Trip;
 use app\modules\api\models\Users;
@@ -40,7 +43,10 @@ class TripController extends BaseController
                             'driver-comments',
                             'trips',
                             'passengers',
-                            'checkpoint-arrived'
+                            'checkpoint-arrived',
+                            'luggage-type',
+                            'taxi',
+                            'queue'
                         ],
                         'allow' => true
                     ]
@@ -51,7 +57,10 @@ class TripController extends BaseController
                 'actions' => [
                     'cities'  => ['GET'],
                     'passengers'  => ['GET'],
-                    'checkpoint-arrived' => ['POST']
+                    'checkpoint-arrived' => ['POST'],
+                    'taxi' => ['POST'],
+                    'luggage-type' => ['GET'],
+                    'queue' => ['PUT']
                 ]
             ]
         ];
@@ -306,6 +315,178 @@ class TripController extends BaseController
 
         $this->module->data['trip'] = $trip->toArray();
         $this->module->data['line'] = $line->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionLuggageType()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        /** @var \app\models\LuggageType $luggage_type */
+        $luggage_types = LuggageType::find()->where(['status' => LuggageType::STATUS_ACTIVE])->all();
+        if ($luggage_types && count($luggage_types) > 0) foreach ($luggage_types as $luggage_type)
+        {
+            $this->module->data['types'][] = $luggage_type->toArray();
+        }
+
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionTaxi()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['address', 'checkpoint']);
+
+        /** @var \app\models\Checkpoint $checkpoint */
+        $checkpoint = \app\models\Checkpoint::find()->andWhere([
+            'AND',
+            ['=', 'id', $this->body->checkpoint],
+            ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
+            ['=', 'type', \app\models\Checkpoint::TYPE_STOP]
+        ])->one();
+
+        if (!$checkpoint) $this->module->setError(422, '_checkpoint', "Not Found");
+
+        $taxi = new Taxi();
+        $taxi->user_id = $user->id;
+        $taxi->status = $taxi::STATUS_NEW;
+        $taxi->address = $this->body->address;
+        $taxi->checkpoint = $checkpoint->id;
+
+        if (!$taxi->validate() || !$taxi->save())
+        {
+            if ($taxi->hasErrors())
+            {
+                foreach ($taxi->errors as $field => $error_message)
+                    $this->module->setError(422, 'taxi.' . $field, $error_message, true, false);
+                $this->module->sendResponse();
+            }
+            else $this->module->setError(422, '_taxi', "Can't create taxi request.");
+        }
+
+        $this->module->data['taxi'] = $taxi->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionQueue()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['country', 'checkpoint', 'endpoint', 'route', 'time', 'seats', 'luggage', 'taxi', 'comment', 'schedule', 'payment_type']);
+
+        $country = Countries::findOne($this->body->country);
+        if (!$country) $this->module->setError(422, 'country', "Not Found");
+
+        /** @var \app\models\Checkpoint $checkpoint */
+        $checkpoint = \app\models\Checkpoint::find()->andWhere([
+            'AND',
+            ['=', 'type', \app\models\Checkpoint::TYPE_STOP],
+            ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
+            ['=', 'id', $this->body->checkpoint]
+        ])->one();
+        if (!$checkpoint) $this->module->setError(422, 'checkpoint', "Not Found");
+
+        /** @var \app\models\Checkpoint $endpoint */
+        $endpoint = \app\models\Checkpoint::find()->andWhere([
+            'AND',
+            ['=', 'type', \app\models\Checkpoint::TYPE_END],
+            ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
+            ['=', 'id', $this->body->endpoint]
+        ])->one();
+        if (!$endpoint) $this->module->setError(422, 'endpoint', "Not Found");
+
+        /** @var \app\models\Route $route */
+        $route = Route::find()->andWhere([
+            'AND',
+            ['=', 'status' , Route::STATUS_ACTIVE],
+            ['=', 'id', $this->body->route]
+        ])->one();
+        if (!$route) $this->module->setError(422, 'route', 'Not Found');
+
+        $_luggages = [];
+        $luggages = $this->body->luggage;
+        if (is_array($luggages) && count($luggages) > 0) foreach ($luggages as $luggage)
+        {
+            $luggage = LuggageType::findOne($luggage);
+            if (!$luggage) $this->module->setError(422, 'luggage', "Not Found");
+            $_luggages[] = $luggage->toArray();
+        }
+
+        $luggage_unique = false;
+        if ($_luggages && count($_luggages) > 0)
+        {
+            foreach ($_luggages as $luggage) $luggage_unique .= $luggage['id'] . '+';
+            $luggage_unique .= $user->id . '+' . $route->id;
+            $luggage_unique = hash('sha256', md5($luggage_unique) . time());
+        }
+
+        $taxi = false;
+        if ($this->body->taxi)
+        {
+            $taxi = Taxi::findOne($this->body->taxi);
+            if (!$taxi) $this->module->setError(422, 'taxi', "Not Found");
+        }
+
+        $trip = new Trip();
+        $trip->status = Trip::STATUS_WAITING;
+        $trip->user_id = $user->id;
+        $trip->tariff = $this->calculatePassengerTariff($route->id)['tariff'];
+        $trip->currency = "₸";
+        $trip->payment_type = $this->body->payment_type;
+        $trip->startpoint_id = $checkpoint->id;
+        $trip->route_id = $route->id;
+        $trip->seats = $this->body->seats;
+        $trip->endpoint_id = $endpoint->id;
+        $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
+        $trip->passenger_comment = $this->body->comment;
+        $trip->need_taxi = $this->body->taxi ? 1 : 0;
+        $trip->start_time = $this->body->time == -1 ? time() + 1800 : $this->body->time;
+
+        if ($taxi)
+        {
+            $trip->taxi_status = $taxi->status;
+            $trip->taxi_address = $taxi->address;
+            $trip->taxi_time = time() + 900;
+        }
+
+        if ($this->body->schedule)
+        {
+            $trip->scheduled = 1;
+            $trip->schedule_id = 0;
+        }
+        else $trip->scheduled = 0;
+
+        if ($luggage_unique)
+        {
+            // TODO: $luggage_trip
+            $trip->luggage_unique_id = $luggage_unique;
+        }
+
+        $trip->driver_id = 0;
+        $trip->vehicle_id = 0;
+        $trip->line_id = 0;
+
+        if (!$trip->validate() || !$trip->save())
+        {
+            if ($trip->hasErrors())
+            {
+                foreach ($trip->errors as $field => $error_message)
+                    $this->module->setError(422, 'trip.' . $field, $error_message, true, false);
+                $this->module->sendResponse();
+            }
+            else $this->module->setError(422, '_trip', "Can't create trip request.");
+        }
+
+        $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
