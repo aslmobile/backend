@@ -274,4 +274,68 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return $this->first_name . ' ' . $this->second_name;
     }
+
+    public function getOnline()
+    {
+        $activity = \app\modules\admin\models\Watchdog::find()->where(['user_id' => $this->id])->orderBy(['created_at' => SORT_DESC])->one();
+        if ($activity && $activity->created_at <= time() - 900) return true;
+
+        return false;
+    }
+
+    public function getRating() : float
+    {
+        $rating = (float) 0.0;
+
+        switch ($this->type)
+        {
+            case self::TYPE_DRIVER: $rating = (float) $this->driverRating();
+                break;
+
+            case self::TYPE_PASSENGER: $rating = (float)$this->passengerRating();
+                break;
+        }
+
+        return $rating;
+    }
+
+    protected function driverRating() : float
+    {
+        $trips = Trip::find()->andWhere([
+            'AND',
+            ['=', 'driver_id', $this->id]
+        ])->all();
+
+        $rating = 0.0;
+        $ratings = 0;
+        /** @var \app\models\Trip $trip */
+        if ($trips && count ($trips) > 0) foreach ($trips as $trip) if (intval($trip->passenger_rating) > 0)
+        {
+            $rating += $trip->passenger_rating;
+            $ratings++;
+        }
+
+        if ($ratings > 0) $rating = round(floatval((float) ($rating / $ratings)), 2);
+        return $rating;
+    }
+
+    protected function passengerRating() : float
+    {
+        $trips = Trip::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $this->id]
+        ])->all();
+
+        $rating = 0.0;
+        $ratings = 0;
+        /** @var \app\models\Trip $trip */
+        if ($trips && count ($trips) > 0) foreach ($trips as $trip) if (intval($trip->driver_rating) > 0)
+        {
+            $rating += $trip->driver_rating;
+            $ratings++;
+        }
+
+        if ($ratings > 0) $rating = round(floatval((float) ($rating / $ratings)), 2);
+        return $rating;
+    }
 }

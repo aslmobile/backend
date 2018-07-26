@@ -4,6 +4,7 @@ use app\modules\admin\models\Checkpoint;
 use app\modules\admin\models\CheckpointSearch;
 use app\modules\admin\models\Line;
 use app\modules\admin\models\LineSearch;
+use app\modules\admin\models\LineSearchVehicles;
 use app\modules\admin\models\Route;
 use app\modules\admin\models\RouteSearch;
 use Yii;
@@ -27,7 +28,9 @@ class LinesController extends Controller
                             'routes', 'create-route', 'update-route', 'view-route',
                             'checkpoints', 'create-checkpoint', 'update-checkpoint', 'view-checkpoint',
 
-                            'select-route', 'select-startpoints', 'select-endpoints'
+                            'select-route', 'select-startpoints', 'select-endpoints',
+
+                            'vehicles'
                         ],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
@@ -46,6 +49,17 @@ class LinesController extends Controller
                 ],
             ],
         ];
+    }
+
+    public function actionVehicles()
+    {
+        $searchModel = new LineSearchVehicles();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('vehicles', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     public function actionIndex()

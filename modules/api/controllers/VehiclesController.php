@@ -87,9 +87,7 @@ class VehiclesController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $types = VehicleTypes::getTypesList(true);
-
-        $this->module->data = $types;
+        $this->module->data = VehicleTypes::getTypesList(true);
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
@@ -99,9 +97,7 @@ class VehiclesController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $brands = VehicleBrands::getBrandsList($id, true);
-        if (!$brands || empty ($brands) || count ($brands) == 0) $brands = null;
-        $this->module->data = $brands;
+        $this->module->data = VehicleBrands::getBrandsList($id, true);
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
@@ -111,9 +107,7 @@ class VehiclesController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $models = VehicleModels::getModelsList($id, true);
-
-        $this->module->data = $models;
+        $this->module->data = VehicleModels::getModelsList($id, true);
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

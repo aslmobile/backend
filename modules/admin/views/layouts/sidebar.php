@@ -181,13 +181,18 @@ $act = Yii::$app->controller->action->id;
                     </li>
                 </ul>
             </li>
-            <li class="treeview<?= ($cont == 'vehicles') ? ' active' : '' ?>">
+            <li class="treeview<?= ($cont == 'vehicles' || ($cont == 'lines' && $act == 'vehicles')) ? ' active' : '' ?>">
                 <a href="<?= Url::toRoute('/admin/vehicles') ?>">
                     <i class="fa fa-car"></i>
                     <span><?= Yii::$app->mv->gt('Автомобили', [], false); ?></span>
                     <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
                 </a>
                 <ul class="treeview-menu">
+                    <li<?= ($cont == 'lines' && ($act == 'vehicles')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/lines/vehicles') ?>">
+                            <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('На линии', [], false) ?>
+                        </a>
+                    </li>
                     <li<?= ($cont == 'vehicles' && ($act == 'index' || $act == 'update' || $act == 'create')) ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/vehicles') ?>">
                             <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('Список автомобилей', [], false) ?>
@@ -210,18 +215,13 @@ $act = Yii::$app->controller->action->id;
                     </li>
                 </ul>
             </li>
-            <li class="treeview<?= ($cont == 'lines') ? ' active' : '' ?>">
+            <li class="treeview<?= ($cont == 'lines' && $act != 'vehicles') ? ' active' : '' ?>">
                 <a href="<?= Url::toRoute('/admin/lines') ?>">
                     <i class="fa fa-map-marker"></i>
                     <span><?= Yii::$app->mv->gt('Маршруты', [], false); ?></span>
                     <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
                 </a>
                 <ul class="treeview-menu">
-                    <li<?= ($cont == 'lines' && ($act == 'index' || $act == 'update' || $act == 'create')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/lines') ?>">
-                            <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Все', [], false) ?>
-                        </a>
-                    </li>
                     <li<?= ($cont == 'lines' && ($act == 'routes' || $act == 'route')) ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/lines/routes') ?>">
                             <i class="fa fa-arrows-h"></i> <?= Yii::$app->mv->gt('Список маршрутов', [], false) ?>

@@ -25,12 +25,22 @@ use yii\behaviors\TimestampBehavior;
 class Line extends \yii\db\ActiveRecord
 {
     const
-        STATUS_ACTIVE = 1,
-        STATUS_DISABLED = 0,
+        STATUS_QUEUE = -1,
         STATUS_CANCELED = 0,
-        STATUS_WAITING = 1,
-        STATUS_IN_PROGRESS = 2,
+        STATUS_IN_PROGRESS = 1,
+        STATUS_WAITING = 2,
         STATUS_FINISHED = 3;
+
+    public static function getStatusList()
+    {
+        return [
+            self::STATUS_QUEUE => Yii::t('app', "В очереди"),
+            self::STATUS_CANCELED => Yii::t('app', "Отменена"),
+            self::STATUS_WAITING => Yii::t('app', "Ожидает посадки"),
+            self::STATUS_IN_PROGRESS => Yii::t('app', "В пути"),
+            self::STATUS_FINISHED => Yii::t('app', "Завершена")
+        ];
+    }
 
     public static function tableName()
     {
