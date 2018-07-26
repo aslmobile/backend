@@ -412,6 +412,7 @@ class TripController extends BaseController
         ])->one();
         if (!$route) $this->module->setError(422, 'route', 'Not Found');
 
+        $seats = $this->body->seats;
         $_luggages = [];
         $luggages = $this->body->luggage;
         if (is_array($luggages) && count($luggages) > 0) foreach ($luggages as $luggage)
@@ -419,6 +420,8 @@ class TripController extends BaseController
             $luggage = LuggageType::findOne($luggage);
             if (!$luggage) $this->module->setError(422, 'luggage', "Not Found");
             $_luggages[] = $luggage->toArray();
+
+            if ($luggage->need_place) $seats++;
         }
 
         $luggage_unique = false;
@@ -444,7 +447,7 @@ class TripController extends BaseController
         $trip->payment_type = $this->body->payment_type;
         $trip->startpoint_id = $checkpoint->id;
         $trip->route_id = $route->id;
-        $trip->seats = $this->body->seats;
+        $trip->seats = intval($seats);
         $trip->endpoint_id = $endpoint->id;
         $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
         $trip->passenger_description = $this->body->comment;
