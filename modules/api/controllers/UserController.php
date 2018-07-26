@@ -189,6 +189,7 @@ class UserController extends BaseController
 
         if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
 
+        echo '<pre>' . print_r('123', true) . '</pre>'; exit;
         $data = $this->UploadLicenceDocument($user, DriverLicence::TYPE_LICENSE);
 
         $this->module->data = [
