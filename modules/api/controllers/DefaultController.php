@@ -149,7 +149,7 @@ class DefaultController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $this->module->data['reasons'] = Yii::$app->params['cancel-trip-reasons'];
+        $this->module->data = Yii::$app->params['cancel-trip-reasons'];
 
         $this->module->setSuccess();
         $this->module->sendResponse();
@@ -160,7 +160,7 @@ class DefaultController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $this->module->data['reasons'] = Yii::$app->params['cancel-passenger-reasons'];
+        $this->module->data = Yii::$app->params['cancel-passenger-reasons'];
 
         $this->module->setSuccess();
         $this->module->sendResponse();
