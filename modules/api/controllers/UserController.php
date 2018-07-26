@@ -38,7 +38,8 @@ class UserController extends BaseController
                             'upload-user-photo',
                             'update-profile',
                             'trips',
-                            'get'
+                            'get',
+                            'settings'
                         ],
                         'allow' => true
                     ]
@@ -54,7 +55,8 @@ class UserController extends BaseController
                     'upload-user-photo' => ['POST'],
                     'update-profile' => ['POST'],
                     'trips' => ['GET'],
-                    'get' => ['GET']
+                    'get' => ['GET'],
+                    'settings' => ['POST']
                 ]
             ]
         ];

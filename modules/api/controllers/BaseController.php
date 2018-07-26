@@ -244,8 +244,11 @@ class BaseController extends RestFul
     {
         if ($params && (is_array($params) || is_object($params))) foreach ($params as $param)
         {
-            if (!isset ($this->body->$param) || empty ($this->body->$param))
+            if (!isset ($this->body->$param))
                 $this->module->setError(422, '_body.' . $param, 'Field required.');
+
+            if (empty ($this->body->$param) && $this->body->$param !== false && $this->body->$param !== 0)
+                $this->module->setError(422, '_body.' . $param, 'Field empty.');
 
             switch ($param)
             {

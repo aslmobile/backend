@@ -96,6 +96,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'format'    => 'html'
                     ],
+                    'freeseats',
+                    'route_id' => [
+                        'attribute' => 'route_id',
+                        'value'     => function ($model) {
+                            return $model->route->title;
+                        },
+                        'format'    => 'html'
+                    ],
                     'status' => [
                         'attribute' => 'status',
                         'content' => function ($data) {
@@ -103,9 +111,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'filter' => \app\modules\admin\models\Line::getStatusList(),
                     ],
-                    'freeseats',
                     'created_at' => [
                         'attribute' => 'created_at',
+                        'label' => Yii::t('app', "Стал на линию"),
                         'value' => function ($model) {
                             return Yii::$app->formatter->asDatetime($model->created_at);
                         }

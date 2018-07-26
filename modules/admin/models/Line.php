@@ -32,4 +32,9 @@ class Line extends \app\models\Line
     {
         return User::findOne($this->driver_id);
     }
+
+    public function getRoute()
+    {
+        return Route::findOne($this->route_id);
+    }
 }

@@ -37,6 +37,7 @@ use yii\web\IdentityInterface;
  * @property integer $blocked_by
  * @property string $blocked_reason
  * @property string $auth_key
+ * @property integer $last_activity
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -89,7 +90,7 @@ class User extends ActiveRecord implements IdentityInterface
                 'city_id', 'country_id',
                 'email_verified',
                 'created_at', 'updated_at', 'blocked_at', 'approval_at',
-                'created_by', 'updated_by', 'approval_by', 'blocked_by'
+                'created_by', 'updated_by', 'approval_by', 'blocked_by', 'last_activity'
             ], 'integer'],
             [['email', 'first_name', 'second_name', 'email_confirm_token', 'password_hash', 'password_reset_token', 'auth_key'], 'string', 'max' => 255],
             [['balance', 'phone'], 'number'],
@@ -277,8 +278,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function getOnline()
     {
-        $activity = \app\modules\admin\models\Watchdog::find()->where(['user_id' => $this->id])->orderBy(['created_at' => SORT_DESC])->one();
-        if ($activity && $activity->created_at <= time() - 900) return true;
+        if ($this->last_activity == null || $this->last_activity >= time() - 15) return true;
 
         return false;
     }
