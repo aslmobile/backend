@@ -38,7 +38,7 @@ class UserController extends BaseController
                             'upload-user-photo',
                             'update-profile',
                             'trips',
-                            'debug'
+                            'get'
                         ],
                         'allow' => true
                     ]
@@ -54,15 +54,22 @@ class UserController extends BaseController
                     'upload-user-photo' => ['POST'],
                     'update-profile' => ['POST'],
                     'trips' => ['GET'],
-                    'debug' => ['POST']
+                    'get' => ['GET']
                 ]
             ]
         ];
     }
 
-    public function actionDebug()
+    public function actionGet($id)
     {
-        echo '<pre>' . print_r('123', true) . '</pre>'; exit;
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        if ($user->id == $id) $this->module->data = $user->toArray();
+        else $this->module->data = Users::findOne($id)->toArray();
+
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionAuth()
