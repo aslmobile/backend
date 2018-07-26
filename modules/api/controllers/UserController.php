@@ -194,6 +194,8 @@ class UserController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
+        echo '<pre>' . print_r('123', true) . '</pre>'; exit;
+
         if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
         $data = $this->UploadLicenceDocument($user, DriverLicence::TYPE_LICENSE);
 
