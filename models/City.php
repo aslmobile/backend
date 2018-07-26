@@ -26,7 +26,15 @@ class City extends \yii\db\ActiveRecord
 
     public static function getCitiesList($asArray = false) {
         $list = self::find()->all();
-        return $asArray ? ArrayHelper::map($list, 'id', 'title') : $list;
+
+        $cities = [];
+        /** @var \app\models\City $city */
+        if ($asArray && $list && count ($list) > 0) foreach ($list as $city) $cities[] = [
+            'id' => $city->id,
+            'value' => $city->title
+        ];
+
+        return $asArray ? $cities : $list;
     }
 
 

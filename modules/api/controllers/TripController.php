@@ -447,7 +447,7 @@ class TripController extends BaseController
         $trip->seats = $this->body->seats;
         $trip->endpoint_id = $endpoint->id;
         $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
-        $trip->passenger_comment = $this->body->comment;
+        $trip->passenger_description = $this->body->comment;
         $trip->need_taxi = $this->body->taxi ? 1 : 0;
         $trip->start_time = $this->body->time == -1 ? time() + 1800 : $this->body->time;
 

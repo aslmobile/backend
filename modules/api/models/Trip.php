@@ -14,6 +14,11 @@ class Trip extends \app\models\Trip
         PAYMENT_STATUS_CANCELLED = 3,
         PAYMENT_STATUS_PAID = 4;
 
+    const
+        PAYMENT_TYPE_CARD = 1,
+        PAYMENT_TYPE_KM = 2,
+        PAYMENT_TYPE_CASH = 3;
+
     protected $oldStatus;
 
     public function getUser()
