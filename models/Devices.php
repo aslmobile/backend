@@ -20,6 +20,7 @@ use yii\db\ActiveRecord;
  * @property integer $updated_at
  * @property string $uip
  * @property integer $notifications
+ * @property integer $app
  */
 class Devices extends ActiveRecord
 {
@@ -42,6 +43,10 @@ class Devices extends ActiveRecord
         NOTIFICATION_ENABLED = 1,
         NOTIFICATION_DISABLED = 0;
 
+    const
+        APP_PASSENGER = 2,
+        APP_DRIVER = 1;
+
     /**
      * @inheritdoc
      */
@@ -57,7 +62,7 @@ class Devices extends ActiveRecord
     {
         return [
             [['user_id', 'device_id'], 'required'],
-            [['user_id', 'type', 'user_type', 'notifications'], 'integer'],
+            [['user_id', 'type', 'user_type', 'notifications', 'app'], 'integer'],
             [['sms_code'], 'number'],
             [['push_id', 'device_id', 'auth_token', 'lang', 'uip'], 'string']
         ];
@@ -82,6 +87,7 @@ class Devices extends ActiveRecord
             'updated_at' => Yii::t('app', "Updated At"),
             'uip' => Yii::t('app', "User IP"),
             'notifications' => Yii::t('app', "Notification Status"),
+            'app' => Yii::t('app', "Application"),
         ];
     }
 

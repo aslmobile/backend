@@ -22,6 +22,7 @@ class BaseController extends RestFul
     public $push_id;
     public $device_id;
     public $ostype;
+    public $apptype;
 
     /** @var \app\modules\api\models\Users */
     public $user;
@@ -55,15 +56,21 @@ class BaseController extends RestFul
         $push_id = Yii::$app->request->getHeaders()->get('push');
         $device_id = Yii::$app->request->getHeaders()->get('device');
         $ostype = Yii::$app->request->getHeaders()->get('ostype');
+        $apptype = Yii::$app->request->getHeaders()->get('Application-Type');
 
         if (!is_object($this->body)) $this->body = new \StdClass();
 
         if ($push_id && !empty ($push_id)) $this->push_id = $push_id;
-        else $this->module->setError(422, 'headers.push_id', "Required parameter");
+        else $this->module->setError(422, 'headers.push', "Required parameter");
+
         if ($device_id && !empty ($device_id)) $this->device_id = $device_id;
-        else $this->module->setError(422, 'headers.device_id', "Required parameter");
+        else $this->module->setError(422, 'headers.device', "Required parameter");
+
         if ($ostype && !empty ($ostype)) $this->ostype = $ostype;
         else $this->module->setError(422, 'headers.ostype', "Required parameter");
+
+        if ($apptype && !empty ($apptype)) $this->apptype = $apptype;
+        else $this->module->setError(422, 'headers.application-type', "Required parameter");
 
         return parent::beforeAction($event);
     }
@@ -93,7 +100,15 @@ class BaseController extends RestFul
             'auth_token' => $this->token,
         ]);
 
-        if ($device) $this->device = $device;
+        if ($device)
+        {
+            $this->device = $device;
+            $this->device->push_id = (string) $this->push_id;
+            $this->device->device_id = (string) $this->device_id;
+            $this->device->type = intval($this->ostype);
+            $this->device->app = intval($this->apptype);
+            $this->device->save();
+        }
 
         switch ($type)
         {
