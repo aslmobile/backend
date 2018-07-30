@@ -20,9 +20,7 @@ class SocketServer implements MessageComponentInterface
      */
     public function __construct()
     {
-        // TODO
-
-        Yii::$app->db->createCommand('SET SESSION wait_timeout = 86400;')->execute();
+        Yii::$app->db->createCommand('SET SESSION statement_timeout = 86400;');
 
         $timestamp = strtotime(gmdate("M d Y H:i:s", time()));
         User::updateAll(['last_activity' => $timestamp],'last_activity IS NULL');
@@ -57,7 +55,7 @@ class SocketServer implements MessageComponentInterface
                 $conn->device = $device;
                 $this->devices[$conn->resourceId] = $conn;
 
-                Yii::$app->db->createCommand()->update('user', ['last_activity' => null], 'id = ' . $device->user_id)->execute();
+                Yii::$app->db->createCommand()->update('users', ['last_activity' => null], 'id = ' . $device->user_id)->execute();
 
                 if ($authkey == Yii::$app->params['socket']['authkey_server']) echo "Server connected.\n";
                 echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; connected.\n";
@@ -91,7 +89,7 @@ class SocketServer implements MessageComponentInterface
 
         if ($conn->device->id && !empty ($conn->device->id))
         {
-            Yii::$app->db->createCommand()->update('user', ['last_activity' => time()], 'id = ' . $conn->device->user_id)->execute();
+            Yii::$app->db->createCommand()->update('users', ['last_activity' => time()], 'id = ' . $conn->device->user_id)->execute();
             echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; disconnected.\n";
         }
     }
