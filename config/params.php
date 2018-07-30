@@ -138,6 +138,14 @@ $params = [
         ['id' => 3, 'value' => Yii::t('app',"Причина 3")],
         ['id' => 4, 'value' => Yii::t('app',"Причина 4")],
         ['id' => 5, 'value' => Yii::t('app',"Причина 5")]
+    ],
+    'blacklist' => [
+        'rating' => [
+            'comment' => Yii::t('app', "Rating abuse"),
+            'description' => Yii::t('app', "Blacklisted for low rating"),
+            'reason' => Yii::t('app', "Rating abuse"),
+            'notification' => Yii::t('app', "You have been blacklisted for rating abuse")
+        ]
     ]
 ];
 return $params;

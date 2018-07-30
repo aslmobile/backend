@@ -65,8 +65,8 @@ class Notifications extends \yii\db\ActiveRecord
 
     const
         NT_DEFAULT = 0,
+        NT_BLACKLIST        = 1,
 
-        NTP_BLACKLIST       = 1,
         NTP_TRIP_READY      = 2,
         NTP_TRIP_CANCEL     = 3,
         NTP_TRIP_WAIT       = 4,
@@ -75,7 +75,6 @@ class Notifications extends \yii\db\ActiveRecord
         NTP_TRIP_REVIEW     = 7,
         NTP_TRIP_RATING     = 8,
 
-        NTD_BLACKLIST       = 1,
         NTD_TRIP_SEATS      = 2,
         NTD_TRIP_CANCEL     = 3,
         NTD_TRIP_FINISHED   = 4,
@@ -98,6 +97,11 @@ class Notifications extends \yii\db\ActiveRecord
         STATUS_WAITING      = 2;
 
     public function getStatuses()
+    {
+
+    }
+
+    public static function create($type = self::NT_DEFAULT, $user, $important = false, $message = null)
     {
 
     }

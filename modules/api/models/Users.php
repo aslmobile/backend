@@ -46,6 +46,13 @@ JSON;
         $array = parent::toArray($fields, $expand, $recursive);
         if (isset ($array['phone']) && !empty ($array['phone'])) $array['phone'] = (string) $array['phone'];
 
+        $image_file = UploadFiles::findOne($this->image);
+        if ($image_file)
+        {
+            $array['image_url'] = $image_file->file;
+        }
+        else $array['image_url'] = null;
+
         return $array;
     }
 }

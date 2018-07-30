@@ -24,6 +24,13 @@ use app\components\MultilingualQuery;
  */
 class Blacklist extends \yii\db\ActiveRecord
 {
+    const
+        STATUS_BLACKLISTED = 1,
+        STATUS_DISBAND = 0;
+
+    const
+        TYPE_AUTO = 1;
+
     /**
      * @inheritdoc
      */

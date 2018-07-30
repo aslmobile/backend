@@ -18,6 +18,10 @@ use app\components\MultilingualQuery;
  */
 class Answers extends \yii\db\ActiveRecord
 {
+    const
+        TYPE_CTR = 1,
+        TYPE_CPR = 2;
+
     /**
      * @inheritdoc
      */

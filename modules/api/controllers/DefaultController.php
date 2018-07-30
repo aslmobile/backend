@@ -1,8 +1,10 @@
 <?php namespace app\modules\api\controllers;
 
 use app\components\Socket\SocketPusher;
+use app\models\Answers;
 use app\modules\api\models\Faq;
 use app\modules\api\models\Legal;
+use app\modules\api\models\UploadFiles;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -35,7 +37,8 @@ class DefaultController extends BaseController
                             'method',
                             'send-socket-message',
                             'cancel-trip-reasons',
-                            'cancel-passenger-reasons'
+                            'cancel-passenger-reasons',
+                            'get-file'
                         ],
                         'allow' => true
                     ]
@@ -48,11 +51,28 @@ class DefaultController extends BaseController
                     'legal' => ['GET'],
                     'cancel-trip-reasons' => ['GET'],
                     'cancel-passenger-reasons' => ['GET'],
+                    'get-file' => ['GET'],
                     'method' => ['POST'],
                     'send-socket-message' => ['POST']
                 ]
             ]
         ];
+    }
+
+    public function actionGetFile($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $file = UploadFiles::findOne($id);
+        if (!$file) $this->module->setError(404, 'file', "Not Found");
+
+        $this->module->data = [
+            'file' => Yii::getAlias('@web') . $file->file,
+            'created' => $file->created_at
+        ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionDispatchPhone()
@@ -149,7 +169,17 @@ class DefaultController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $this->module->data = Yii::$app->params['cancel-trip-reasons'];
+        $answers = [];
+
+        /** @var \app\models\Answers $answer */
+        $_answers = Answers::find()->where(['type' => Answers::TYPE_CTR])->all();
+        if ($_answers && count($_answers) > 0) foreach ($_answers as $answer) $answers[] = [
+            'id' => $answer->id,
+            'value' => $answer->answer
+        ];
+
+        if (empty ($answers) || count($answers) == 0) $answers = Yii::$app->params['cancel-passenger-reasons'];
+        $this->module->data = $answers;
 
         $this->module->setSuccess();
         $this->module->sendResponse();
@@ -160,7 +190,17 @@ class DefaultController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $this->module->data = Yii::$app->params['cancel-passenger-reasons'];
+        $answers = [];
+
+        /** @var \app\models\Answers $answer */
+        $_answers = Answers::find()->where(['type' => Answers::TYPE_CPR])->all();
+        if ($_answers && count($_answers) > 0) foreach ($_answers as $answer) $answers[] = [
+            'id' => $answer->id,
+            'value' => $answer->answer
+        ];
+
+        if (empty ($answers) || count($answers) == 0) $answers = Yii::$app->params['cancel-passenger-reasons'];
+        $this->module->data = $answers;
 
         $this->module->setSuccess();
         $this->module->sendResponse();
