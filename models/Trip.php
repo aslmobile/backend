@@ -1,5 +1,6 @@
 <?php namespace app\models;
 
+use app\modules\api\models\Users;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 
@@ -146,5 +147,23 @@ class Trip extends \yii\db\ActiveRecord
             'created_at'        => Yii::t('app', "Created"),
             'updated_at'        => Yii::t('app', "Updated")
         ];
+    }
+
+    public static function getQueue()
+    {
+        $_trips = self::find()->select(['id', 'user_id', 'vehicle_type_id', 'MAX(created_at) as created_at'])->where(['status' => self::STATUS_WAITING])->orderBy(['created_at' => SORT_DESC])->groupBy(['id', 'user_id', 'vehicle_type_id'])->all();
+        /** @var \app\models\Trip $trip */
+
+        $queue = [];
+        foreach ($_trips as $trip)
+        {
+            $queue[$trip->vehicle_type_id]['vehicle_type_id'] = $trip->vehicle_type_id;
+            $queue[$trip->vehicle_type_id]['queue'][] = [
+                'trip' => \app\modules\api\models\Trip::findOne($trip->id)->toArray(),
+                'user' => Users::findOne($trip->user_id)->toArray()
+            ];
+        }
+
+        return ($queue && count($queue) > 0) ? array_values($queue) : [];
     }
 }

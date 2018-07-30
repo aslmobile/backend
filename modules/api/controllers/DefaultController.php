@@ -2,6 +2,7 @@
 
 use app\components\Socket\SocketPusher;
 use app\models\Answers;
+use app\models\Trip;
 use app\modules\api\models\Faq;
 use app\modules\api\models\Legal;
 use app\modules\api\models\UploadFiles;
@@ -38,7 +39,9 @@ class DefaultController extends BaseController
                             'send-socket-message',
                             'cancel-trip-reasons',
                             'cancel-passenger-reasons',
-                            'get-file'
+                            'get-file',
+
+                            'for-testing'
                         ],
                         'allow' => true
                     ]
@@ -57,6 +60,11 @@ class DefaultController extends BaseController
                 ]
             ]
         ];
+    }
+
+    public function actionForTesting()
+    {
+        Trip::getQueue();
     }
 
     public function actionGetFile($id)
