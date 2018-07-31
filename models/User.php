@@ -273,7 +273,14 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function getFullName()
     {
-        return $this->first_name . ' ' . $this->second_name;
+        if (empty ($this->first_name)) $first_name = 'Имя';
+        else $first_name = $this->first_name;
+
+        if (empty ($this->second_name)) $second_name = 'Фамилия';
+        else $second_name = $this->second_name;
+
+        $name = $first_name . ' ' . $second_name;
+        return $name == 'Имя Фамилия' ? 'Не указано' : $name;
     }
 
     public function getOnline()

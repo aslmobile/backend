@@ -40,6 +40,7 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $schedule_id
  * @property integer $start_time
  * @property integer $finish_time
+ * @property integer $position
  * @property int $created_at
  * @property int $created_by
  * @property int $updated_at
@@ -130,10 +131,12 @@ class Trip extends \yii\db\ActiveRecord
                     'driver_comment',
                     'passenger_comment',
                     'luggage_unique_id',
-                    'taxi_address'
+                    'taxi_address',
+                    'position'
                 ],
                 'string'
             ],
+            ['position', 'default', 'value' => '0.0,0.0']
         ];
     }
 
@@ -144,26 +147,80 @@ class Trip extends \yii\db\ActiveRecord
     {
         return [
             'id'                => Yii::t('app', "ID"),
+            'user_id'           => Yii::t('app', "Пользователь"),
+            'vehicle_type_id'   => Yii::t('app', "Тип автомобиля"),
+            'startpoint_id'     => Yii::t('app', "Остановка"),
+            'status'            => Yii::t('app', "Статус"),
             'created_at'        => Yii::t('app', "Created"),
             'updated_at'        => Yii::t('app', "Updated")
         ];
     }
 
-    public static function getQueue()
+    public static function getQueue($cache = false)
     {
-        $_trips = self::find()->select(['id', 'user_id', 'vehicle_type_id', 'MAX(created_at) as created_at'])->where(['status' => self::STATUS_WAITING])->orderBy(['created_at' => SORT_DESC])->groupBy(['id', 'user_id', 'vehicle_type_id'])->all();
-        /** @var \app\models\Trip $trip */
+        if ($cache) $queue = Yii::$app->cache->get('queue');
+        else $queue = false;
 
-        $queue = [];
-        foreach ($_trips as $trip)
+        if (!$queue)
         {
-            $queue[$trip->vehicle_type_id]['vehicle_type_id'] = $trip->vehicle_type_id;
-            $queue[$trip->vehicle_type_id]['queue'][] = [
-                'trip' => \app\modules\api\models\Trip::findOne($trip->id)->toArray(),
-                'user' => Users::findOne($trip->user_id)->toArray()
-            ];
+            $_trips = self::find()->select(['id', 'user_id', 'vehicle_type_id', 'MAX(created_at) as created_at'])->where(['status' => self::STATUS_WAITING])->orderBy(['created_at' => SORT_DESC])->groupBy(['id', 'user_id', 'vehicle_type_id'])->all();
+            /** @var \app\models\Trip $trip */
+
+            $queue = [];
+            foreach ($_trips as $trip)
+            {
+                $queue[$trip->vehicle_type_id]['vehicle_type_id'] = $trip->vehicle_type_id;
+                $queue[$trip->vehicle_type_id]['queue'][] = [
+                    'trip' => \app\modules\api\models\Trip::findOne($trip->id)->toArray(),
+                    'user' => Users::findOne($trip->user_id)->toArray()
+                ];
+            }
+
+            $queue = array_values($queue);
+            Yii::$app->cache->set('queue', $queue, 300);
         }
 
-        return ($queue && count($queue) > 0) ? array_values($queue) : [];
+        return $queue;
+    }
+
+    public static function getStatusList()
+    {
+        return [
+            self::STATUS_CANCELLED => Yii::t('app', "Отменена"),
+            self::STATUS_CREATED => Yii::t('app', "Создана"),
+            self::STATUS_WAITING => Yii::t('app', "В очереди"),
+            self::STATUS_WAY => Yii::t('app', "В пути"),
+            self::STATUS_FINISHED => Yii::t('app', "Завершена"),
+            self::STATUS_CANCELLED_DRIVER => Yii::t('app', "Отменена водителем")
+        ];
+    }
+
+    public function getUser()
+    {
+        return User::findOne(['id' => $this->user_id]);
+    }
+
+    public function getStartpoint()
+    {
+        return Checkpoint::findOne($this->startpoint_id);
+    }
+
+    public static function getVehicleTypeList()
+    {
+        $types = Yii::$app->cache->get('vehicle_types');
+        if (!$types)
+        {
+            $types = \app\modules\admin\models\VehicleType::find()->orderBy(['title' => SORT_ASC])->all();
+            Yii::$app->cache->set('vehicle_types', $types, 900);
+        }
+
+        $list = [];
+        /** @var \app\modules\admin\models\VehicleType $type */
+        if ($types && count($types) > 0) foreach ($types as $type)
+        {
+            $list[$type->id] = $type->title;
+        }
+
+        return $list;
     }
 }

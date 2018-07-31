@@ -64,7 +64,9 @@ class DefaultController extends BaseController
 
     public function actionForTesting()
     {
-        Trip::getQueue();
+//        Trip::getQueue(true);
+
+        $this->module->setError(404, 'method', "Not Found");
     }
 
     public function actionGetFile($id)

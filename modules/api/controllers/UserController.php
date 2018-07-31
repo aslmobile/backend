@@ -82,7 +82,9 @@ class UserController extends BaseController
 
         /** @var \app\modules\api\models\Devices $device */
         $device = $this->Auth();
-        $device = $this->module->sendSms($device, true);
+
+        if ($this->body->phone == '380000000000') $device = $this->module->sendSms($device, true);
+        else $device = $this->module->sendSms($device);
 
         if ($device)
         {

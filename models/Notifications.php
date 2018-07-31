@@ -101,7 +101,7 @@ class Notifications extends \yii\db\ActiveRecord
 
     }
 
-    public static function create($type = self::NT_DEFAULT, $user, $important = false, $message = null)
+    public static function create($type = self::NT_DEFAULT, $user, $important = false, $message = null, $initiator = 0)
     {
 
     }
