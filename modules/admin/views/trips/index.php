@@ -159,31 +159,35 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </section>
 </div>
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+<?php $this->registerJsFile("https://maps.googleapis.com/maps/api/js?key=AIzaSyALfPPffcWHUHCDKccaIlBj5kLfQjIcD9w&callback=initMap"); ?>
+<?php $this->registerJs(new JsExpression("    
+    function initMap() {
+      
+    }
+"), yii\web\View::POS_BEGIN); ?>
 <?php $this->registerJs(new JsExpression("
     $(document).on('click', '.badge[data-map-location]', function () {
         var location = $(this).attr('data-map-location').split(\",\");
         
         var latitude = location[0],
             longitude = location[1];
+            
+        var myLatLng = {lat: parseFloat(latitude), lng: parseFloat(longitude)};
         
-        console.log(latitude, longitude);
+        console.log(myLatLng);
+            
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15,
+            center: myLatLng,
+            mapTypeId: 'roadmap'
+        });
+        
+        var marker = new google.maps.Marker({
+            position: myLatLng,
+            map: map,
+            icon: '/img/passenger_marker.png'
+        });
     });
-    
-    function initMap() {
-      var myLatLng = {lat: latitude, lng: longitude};
-    
-      var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 4,
-        center: myLatLng
-      });
-    
-      var marker = new google.maps.Marker({
-        position: myLatLng,
-        map: map,
-        title: 'Hello World!'
-      });
-    }
 "), yii\web\View::POS_READY); ?>
 <div class="modal fade" id="map-location" tabindex="-1" role="dialog" aria-labelledby="Map Location">
     <div class="modal-dialog modal-lg" role="document">
@@ -193,7 +197,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <h4 class="modal-title"><?= Yii::t('app', "Позиция на карте"); ?></h4>
             </div>
             <div class="modal-body">
-                <div id="map"></div>
+                <div id="map" style="width: 100%; min-height: 450px;"></div>
             </div>
         </div>
     </div>
