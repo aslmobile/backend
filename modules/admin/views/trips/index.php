@@ -129,7 +129,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function ($module)
                         {
                             return Yii::$app->formatter->asDateTime($module->created_at);
-                        }
+                        },
+                        'format' => 'html'
                     ],
                     [
                         'class' => 'yii\grid\ActionColumn',
