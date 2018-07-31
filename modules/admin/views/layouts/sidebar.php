@@ -128,41 +128,29 @@ $act = Yii::$app->controller->action->id;
                 </ul>
             </li>
             <li class="header"><?= Yii::$app->mv->gt('Менеджмент', [], false); ?></li>
-            <li class="treeview<?= ($cont == 'user') ? ' active' : '' ?>">
-                <a href="#"> <i class="fa fa-users"></i>
-                    <span><?= Yii::$app->mv->gt('Пользователи', [], false); ?></span>
-                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+
+            <li<?= ($cont == 'user' && $act == 'passengers') ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute(['/admin/user/passengers']) ?>">
+                    <i class="fa fa-users"></i>
+                    <span><?= Yii::$app->mv->gt('Пассажиры', [], false); ?></span>
                 </a>
-                <ul class="treeview-menu">
-                    <li<?= ($cont == 'user' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/user/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'user' && $act == 'create') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/user/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
-                        </a>
-                    </li>
-                </ul>
             </li>
-            <li class="treeview<?= ($cont == 'blacklist') ? ' active' : '' ?>">
-                <a href="#"> <i class="fa fa-users"></i>
+
+            <li<?= ($cont == 'user' && $act == 'drivers') ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute(['/admin/user/drivers']) ?>">
+                    <i class="fa fa-users"></i>
+                    <span><?= Yii::$app->mv->gt('Водители', [], false); ?></span>
+                </a>
+            </li>
+
+            <li<?= ($cont == 'blacklist' && $act == 'index') ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute(['/admin/blacklist/index']) ?>">
+                    <i class="fa fa-user-secret"></i>
                     <span><?= Yii::$app->mv->gt('Черный список', [], false); ?></span>
-                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
                 </a>
-                <ul class="treeview-menu">
-                    <li<?= ($cont == 'blacklist' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/blacklist/index') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
-                        </a>
-                    <li<?= ($cont == 'blacklist' && $act == 'create') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/blacklist/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
-                        </a>
-                    </li>
-                </ul>
             </li>
+
+            <li class="header"><hr style="margin: 0; border-color: #273135;" /></li>
             <li class="treeview<?= ($cont == 'trips') ? ' active' : '' ?>">
                 <a href="#"> <i class="fa fa-users"></i>
                     <span><?= Yii::$app->mv->gt('Поездки', [], false); ?></span>

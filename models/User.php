@@ -38,6 +38,7 @@ use yii\web\IdentityInterface;
  * @property string $blocked_reason
  * @property string $auth_key
  * @property integer $last_activity
+ * @property integer $km
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -100,6 +101,7 @@ class User extends ActiveRecord implements IdentityInterface
                 'created_at', 'updated_at', 'blocked_at', 'approval_at',
                 'created_by', 'updated_by', 'approval_by', 'blocked_by'
             ], 'default', 'value' => 0],
+            ['km', 'number']
         ];
     }
 
@@ -116,7 +118,10 @@ class User extends ActiveRecord implements IdentityInterface
     public function attributeLabels()
     {
         return [
-
+            'km' => Yii::t('app', "Километры"),
+            'phone' => Yii::t('app', "Телефон"),
+            'city_id' => Yii::t('app', "Город"),
+            'status' => Yii::t('app', "Статус")
         ];
     }
 
@@ -283,6 +288,11 @@ class User extends ActiveRecord implements IdentityInterface
         return $name == 'Имя Фамилия' ? 'Не указано' : $name;
     }
 
+    public function getCity()
+    {
+        return \app\modules\admin\models\City::findOne($this->city_id);
+    }
+
     public function getOnline()
     {
         if ($this->last_activity == null || $this->last_activity >= time() - 15) return true;
@@ -290,7 +300,7 @@ class User extends ActiveRecord implements IdentityInterface
         return false;
     }
 
-    public function getRating($marks = false) : float
+    public function getRating($marks = false)
     {
         $rating = (float) 0.0;
 
@@ -306,7 +316,7 @@ class User extends ActiveRecord implements IdentityInterface
         return $rating;
     }
 
-    protected function driverRating($marks) : float
+    protected function driverRating($marks)
     {
         $trips = Trip::find()->andWhere([
             'AND',
@@ -327,7 +337,7 @@ class User extends ActiveRecord implements IdentityInterface
         return $rating;
     }
 
-    protected function passengerRating($marks) : float
+    protected function passengerRating($marks)
     {
         $trips = Trip::find()->andWhere([
             'AND',

@@ -12,13 +12,17 @@ class Vehicles extends \app\models\Vehicles
             if (!empty ($this->$field) && intval($this->$field) > 0)
             {
                 $file = UploadFiles::findOne($this->$field);
-                if ($file)
-                {
-                    $array[$field . '_url'] = $file->file;
-                }
+                if ($file) $array[$field . '_url'] = $file->file;
                 else $array[$field . '_url'] = null;
             }
             else $array[$field . '_url'] = null;
+        }
+
+        foreach ($array as $field => $value)
+        {
+            if ($field == 'vehicle_type_id') $array[$field] = VehicleTypes::findOne($this->vehicle_type_id)->toArray();
+            if ($field == 'vehicle_model_id') $array[$field] = VehicleModels::findOne($this->vehicle_model_id)->toArray();
+            if ($field == 'vehicle_brand_id') $array[$field] = VehicleBrands::findOne($this->vehicle_brand_id)->toArray();
         }
 
         return $array;

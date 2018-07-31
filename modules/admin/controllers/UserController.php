@@ -26,7 +26,10 @@ class UserController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index', 'create', 'update', 'view', 'select-users', 'select-drivers'],
+                        'actions' => [
+                            'index', 'create', 'update', 'view', 'select-users', 'select-drivers',
+                            'passengers', 'drivers'
+                        ],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
                     ],
@@ -46,6 +49,27 @@ class UserController extends Controller
         ];
     }
 
+    public function actionPassengers()
+    {
+        $searchModel = new UserSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, User::TYPE_PASSENGER);
+
+        return $this->render('passengers', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionDrivers()
+    {
+        $searchModel = new UserSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, User::TYPE_DRIVER);
+
+        return $this->render('drivers', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
 
     /**
      * @return string|Response

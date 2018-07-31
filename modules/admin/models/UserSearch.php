@@ -42,9 +42,9 @@ class UserSearch extends User
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $type)
     {
-        $query = User::find();
+        $query = User::find()->where(['type' => $type]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
