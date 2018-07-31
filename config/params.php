@@ -10,7 +10,7 @@ $params = [
 	'limit_items' => 12,
     'siteUrl' => 'https://aslmobile.net',
 	'allowedIps' => [
-        '127.0.0.1', '217.24.160.240', '217.24.160.195'
+        '127.0.0.1', '217.24.160.240', '217.24.160.195', '217.24.161.64'
     ],
     'db_content_type' => [
         0 => 'image_count',
