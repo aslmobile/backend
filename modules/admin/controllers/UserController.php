@@ -92,7 +92,7 @@ class UserController extends Controller
         }
 
         $searchModel = new UserSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, [User::TYPE_ADMIN, User::TYPE_PASSENGER, 0]);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
