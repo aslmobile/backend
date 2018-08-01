@@ -36,7 +36,7 @@ class LineController extends BaseController
                         'actions' => [
                             'startpoints', 'endpoints', 'checkpoints',
                             'update-line', 'passengers', 'seats',
-                            'cancel', 'passenger-decline'
+                            'cancel', 'passenger-decline', 'on-line'
                         ],
                         'allow' => true
                     ]
@@ -52,6 +52,7 @@ class LineController extends BaseController
                     'seats'  => ['GET'],
                     'update-line'  => ['PUT'],
                     'cancel' => ['DELETE'],
+                    'on-line' => ['PUT'],
                     'passenger-decline' => ['DELETE']
                 ]
             ]
