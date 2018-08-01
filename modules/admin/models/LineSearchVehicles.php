@@ -32,9 +32,9 @@ class LineSearchVehicles extends Line
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $status)
     {
-        $query = Line::find();
+        $query = Line::find()->where(['status' => $status]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

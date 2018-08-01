@@ -47,7 +47,7 @@ JS
 
                 <?= $form->field($model, 'vehicle_type_id')->widget(Select2::classname(), [
                     'model' => [],
-                    'theme' => Select2::THEME_KRAJEE,
+                    'theme' => Select2::THEME_DEFAULT,
                     'attribute' => 'created_by',
                     'hideSearch' => true,
                     'options' => [

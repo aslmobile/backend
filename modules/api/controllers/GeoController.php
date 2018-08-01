@@ -48,7 +48,7 @@ class GeoController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $cities = City::getCitiesList(true);
+        $cities = City::getCitiesList(2);
 
         $this->module->data = $cities;
         $this->module->setSuccess();

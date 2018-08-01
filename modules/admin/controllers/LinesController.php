@@ -30,7 +30,7 @@ class LinesController extends Controller
 
                             'select-route', 'select-startpoints', 'select-endpoints',
 
-                            'vehicles'
+                            'vehicles-queue', 'vehicles-ready', 'vehicles-trip'
                         ],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
@@ -51,10 +51,32 @@ class LinesController extends Controller
         ];
     }
 
-    public function actionVehicles()
+    public function actionVehiclesQueue()
     {
         $searchModel = new LineSearchVehicles();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Line::STATUS_QUEUE);
+
+        return $this->render('vehicles', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionVehiclesReady()
+    {
+        $searchModel = new LineSearchVehicles();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Line::STATUS_WAITING);
+
+        return $this->render('vehicles', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionVehiclesTrip()
+    {
+        $searchModel = new LineSearchVehicles();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Line::STATUS_IN_PROGRESS);
 
         return $this->render('vehicles', [
             'searchModel' => $searchModel,

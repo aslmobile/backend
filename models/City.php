@@ -34,7 +34,9 @@ class City extends \yii\db\ActiveRecord
             'value' => $city->title
         ];
 
-        return $asArray ? ArrayHelper::map($list, 'id', 'title') : $list;
+        if ($asArray === true) return ArrayHelper::map($list, 'id', 'title');
+        elseif ($asArray === 2) return $cities;
+        return $list;
     }
 
 
