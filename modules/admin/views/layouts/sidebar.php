@@ -150,7 +150,9 @@ $act = Yii::$app->controller->action->id;
                 </a>
             </li>
 
-            <li class="header"><hr style="margin: 0; border-color: #273135;" /></li>
+            <li class="header"><?= Yii::$app->mv->gt('Маршруты', [], false); ?></li>
+
+            <div class="hidden">
             <li class="treeview<?= ($cont == 'trips') ? ' active' : '' ?>">
                 <a href="#"> <i class="fa fa-users"></i>
                     <span><?= Yii::$app->mv->gt('Поездки', [], false); ?></span>
@@ -287,6 +289,7 @@ $act = Yii::$app->controller->action->id;
                     </li>
                 </ul>
             </li>
+            </div>
             <li class="header"><?= Yii::$app->mv->gt('Настройки', [], false) ?></li>
             <li<?= ($cont == 'settings') ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute(['/admin/settings/index']) ?>"> <i class="fa fa-cogs"></i>

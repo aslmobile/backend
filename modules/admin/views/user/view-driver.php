@@ -109,6 +109,14 @@ use yii\widgets\DetailView;
                 <div class="box-header with-border">
                     <h3 class="box-title"><?= $vehicle->vehicleName; ?></h3>
                 </div>
+                <?php if (!empty ($vehicle->image) && intval($vehicle->image) > 0) : ?>
+                    <?php $image = \app\modules\api\models\UploadFiles::findOne($vehicle->image); ?>
+                    <?php if ($image) : ?>
+                        <div class="box-body">
+                            <img class="img-responsive img-bordered" src="<?= $image->file; ?>" />
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
                 <div class="box-body">
                     <?= DetailView::widget([
                         'model' => $vehicle,
