@@ -56,6 +56,13 @@ class Trip extends \yii\db\ActiveRecord
         STATUS_FINISHED = 4,
         STATUS_CANCELLED_DRIVER = 9;
 
+    const
+        TAXI_STATUS_PENDING = 0,
+        TAXI_STATUS_REQUESTED = 1,
+        TAXI_STATUS_ARRIVED = 2,
+        TAXI_STATUS_WAY = 3,
+        TAXI_STATUS_DELIVERED = 4;
+
     public static function tableName()
     {
         return 'trip';
@@ -147,12 +154,17 @@ class Trip extends \yii\db\ActiveRecord
     {
         return [
             'id'                => Yii::t('app', "ID"),
-            'user_id'           => Yii::t('app', "Пользователь"),
+            'user_id'           => Yii::t('app', "Пассажир"),
             'vehicle_type_id'   => Yii::t('app', "Тип автомобиля"),
             'startpoint_id'     => Yii::t('app', "Остановка"),
             'status'            => Yii::t('app', "Статус"),
-            'created_at'        => Yii::t('app', "Created"),
-            'updated_at'        => Yii::t('app', "Updated")
+            'created_at'        => Yii::t('app', "Создана"),
+            'updated_at'        => Yii::t('app', "Обновлена"),
+            'position'          => Yii::t('app', "Позиция на карте"),
+            'taxi_status'       => Yii::t('app', "Статус заказа"),
+            'taxi_cancel_reason'       => Yii::t('app', "Причина отказа"),
+            'taxi_address'       => Yii::t('app', "Адрес подачи"),
+            'taxi_time'       => Yii::t('app', "На какое время"),
         ];
     }
 
@@ -192,6 +204,17 @@ class Trip extends \yii\db\ActiveRecord
             self::STATUS_WAY => Yii::t('app', "В пути"),
             self::STATUS_FINISHED => Yii::t('app', "Завершена"),
             self::STATUS_CANCELLED_DRIVER => Yii::t('app', "Отменена водителем")
+        ];
+    }
+
+    public static function getTaxiStatusList()
+    {
+        return [
+            self::TAXI_STATUS_ARRIVED => Yii::t('app', "Подана"),
+            self::TAXI_STATUS_DELIVERED => Yii::t('app', "Завершена"),
+            self::TAXI_STATUS_PENDING => Yii::t('app', "В ожидании"),
+            self::TAXI_STATUS_REQUESTED => Yii::t('app', "Запрошена"),
+            self::TAXI_STATUS_WAY => Yii::t('app', "В пути")
         ];
     }
 

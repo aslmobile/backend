@@ -57,7 +57,7 @@ class Module extends \yii\base\Module
         $this->data = false;
 
         $this->error_code = $code;
-        if ($needheader) Yii::$app->response->statusCode = $code;
+        if ($needheader) Yii::$app->response->statusCode = 200;
 
         if (empty($this->error_message)) $this->error_message = new \StdClass();
         $this->error_message->$key = $message;

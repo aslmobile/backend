@@ -10,7 +10,7 @@ use yii\web\JsExpression;
 /* @var $searchModel app\modules\admin\models\TripSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt('Trips',[],false);
+$this->title = Yii::$app->mv->gt('Пассажиры в очереди',[],false);
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -28,29 +28,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="box-tools pull-right">
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} new',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
+                        Yii::$app->mv->gt('{i} Добавить',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
-                    ); ?>
-                    <?= Html::a(
-                        Yii::$app->mv->gt('{i} delete selected',['i'=>Html::tag('i','',['class'=>'fa fa-fire'])],false),
-                        [''],
-                        [
-                            'class' => 'btn btn-danger btn-sm',
-                            'onclick'=>"
-								var keys = $('#grid').yiiGridView('getSelectedRows');
-								if (keys!='') {
-									if (confirm('".Yii::$app->mv->gt('Are you sure you want to delete the selected items?',[],false)."')) {
-										$.ajax({
-											type : 'POST',
-											data: {keys : keys},
-											success : function(data) {}
-										});
-									}
-								}
-								return false;
-							",
-                        ]
                     ); ?>
                 </div>
             </div>
@@ -58,6 +38,12 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'id' => 'grid',
+                'rowOptions' => function ($model, $key, $index, $grid) {
+                    return [
+                        'role' => 'button',
+                        'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/trips/view/" . $key) . "'"
+                    ];
+                },
                 'layout'=>"
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
                     <div class='box-footer' style='display: block;'>{pager}</div>
@@ -67,12 +53,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'filterModel' => $searchModel,
                 'columns' => [
-                    ['class' => 'yii\grid\CheckboxColumn'],
-                    'id',
                     'user_id' => [
                         'attribute' => 'user_id',
                         'content' => function ($data) {
-                            return $data->user->fullName . '<br /><a href="tel:+' . $data->user->phone . '">+' . $data->user->phone . '</a>';
+                            return ($data->user) ? $data->user->fullName . '<br /><a href="tel:+' . $data->user->phone . '">+' . $data->user->phone . '</a>' : Yii::t('app', "Удален");
                         },
                         'filter' => Select2::widget([
                             'model' => $searchModel,
@@ -118,12 +102,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'filter' => \app\models\Trip::getStatusList(),
                     ],
-                    'position' => [
-                        'attribute' => 'position',
-                        'content' => function ($data) {
-                            return '<span class="badge bg-aqua-gradient link" role="button" data-toggle="modal" data-target="#map-location" data-map-location="' . $data->position . '">' . Yii::t('app', "Позиция на карте") . '</span>';
-                        }
-                    ],
                     'created_at' => [
                         'attribute' => 'created_at',
                         'value' => function ($module)
@@ -131,75 +109,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             return Yii::$app->formatter->asDateTime($module->created_at);
                         },
                         'format' => 'html'
-                    ],
-                    [
-                        'class' => 'yii\grid\ActionColumn',
-                        'template' => '{view} {update} {delete}',
-                        'buttons' => [
-                            'view' => function ($url, $model) {
-                                return Html::a('<button type="button" class="btn btn-info btn-sm"><i class="fa fa-search"></i></button>', $url);
-                            },
-                            'update' => function ($url, $model) {
-                                return Html::a('<button type="button" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i></button>', $url);
-                            },
-                            'delete' => function ($url, $model) {
-                                return Html::a(
-                                    '<button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>',
-                                    $url,
-                                    ['data'=>[
-                                        'confirm'=>Yii::$app->mv->gt('Are you sure you want to delete this item?',[],false),
-                                        'method'=>'post',
-                                        'pjax'=>'0'
-                                    ]]
-                                );
-                            },
-                        ]
-                    ],
+                    ]
                 ],
             ]); ?>
         </div>
     </section>
-</div>
-<?php $this->registerJsFile("https://maps.googleapis.com/maps/api/js?key=AIzaSyALfPPffcWHUHCDKccaIlBj5kLfQjIcD9w&callback=initMap"); ?>
-<?php $this->registerJs(new JsExpression("    
-    function initMap() {
-      
-    }
-"), yii\web\View::POS_BEGIN); ?>
-<?php $this->registerJs(new JsExpression("
-    $(document).on('click', '.badge[data-map-location]', function () {
-        var location = $(this).attr('data-map-location').split(\",\");
-        
-        var latitude = location[0],
-            longitude = location[1];
-            
-        var myLatLng = {lat: parseFloat(latitude), lng: parseFloat(longitude)};
-        
-        console.log(myLatLng);
-            
-        var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 15,
-            center: myLatLng,
-            mapTypeId: 'roadmap'
-        });
-        
-        var marker = new google.maps.Marker({
-            position: myLatLng,
-            map: map,
-            icon: '/img/passenger_marker.png'
-        });
-    });
-"), yii\web\View::POS_READY); ?>
-<div class="modal fade" id="map-location" tabindex="-1" role="dialog" aria-labelledby="Map Location">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title"><?= Yii::t('app', "Позиция на карте"); ?></h4>
-            </div>
-            <div class="modal-body">
-                <div id="map" style="width: 100%; min-height: 450px;"></div>
-            </div>
-        </div>
-    </div>
 </div>
