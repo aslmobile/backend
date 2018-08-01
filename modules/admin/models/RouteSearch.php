@@ -14,7 +14,7 @@ class RouteSearch extends Route
     public function rules()
     {
         return [
-            [['id', 'title', 'status', 'base_tariff'], 'integer']
+            [['id', 'title', 'status', 'base_tariff', 'start_city_id', 'end_city_id'], 'integer']
         ];
     }
 
@@ -59,6 +59,8 @@ class RouteSearch extends Route
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'start_city_id' => $this->start_city_id,
+            'end_city_id' => $this->end_city_id
         ]);
 
         $query->andFilterWhere(['<=', 'base_tariff', $this->base_tariff]);

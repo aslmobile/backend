@@ -29,13 +29,28 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title"><?= Yii::$app->mv->gt('Инфомрация', [], false); ?></h3>
+                        <div class="box-tools">
+                            <?= Html::a('Редактировать', [
+                                'update-checkpoint',
+                                'id' => $model->id
+                            ], ['class' => 'btn btn-sm btn-primary']) ?>
+                            <?= Html::a('Удалить', [
+                                'delete-checkpoint',
+                                'id' => $model->id
+                            ], [
+                                'class' => 'btn btn-sm btn-danger',
+                                'data' => [
+                                    'confirm' => 'Вы действительно хотите удалить пользователя?',
+                                    'method' => 'post',
+                                ],
+                            ]) ?>
+                        </div>
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
                         <?= DetailView::widget([
                             'model' => $model,
                             'attributes' => [
-                                'id',
                                 [
                                     'attribute' => 'status',
                                     'value' => key_exists($model->status, $model->statusList)? $model->statusList[$model->status] : null,
@@ -47,7 +62,14 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'value' => $model->getRouteModel() ? $model->routeModel->title : $model->route,
                                 ],
                                 'latitude', 'longitude',
-                                'country_id', 'city_id', 'region_id'
+                                'city_id' => [
+                                    'attribute' => 'city_id',
+                                    'value' => function ($data) {
+                                        $cities = \app\modules\admin\models\City::getCitiesList(true);
+                                        return key_exists($data->city_id, $cities) ? $cities[$data->city_id] : false;
+                                    },
+                                    'filter' => \app\modules\admin\models\City::getCitiesList(true),
+                                ]
                             ],
                         ]) ?>
                     </div>

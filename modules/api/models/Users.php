@@ -10,16 +10,8 @@ class Users extends \app\models\User
     "properties": {
         "id": {"type": "integer"},
         "email": {"type": "string","format": "email"},
-        "first_name": {
-            "type": "string",
-            "minLength": 4,
-            "maxLength": 120
-        },
-        "second_name": {
-            "type": "string",
-            "minLength": 4,
-            "maxLength": 120
-        },
+        "first_name": {"type": "string"},
+        "second_name": { "type": "string"},
         "created_at": {"type": "integer"},
         "created_by": {"type": "integer"},
         "updated_at": {"type": "integer"},

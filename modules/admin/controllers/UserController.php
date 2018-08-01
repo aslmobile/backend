@@ -8,6 +8,7 @@ use app\modules\admin\models\UserSearch;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\helpers\Url;
 use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -43,7 +44,7 @@ class UserController extends Controller
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'delete' => ['post'],
+//                    'delete' => ['post'],
                 ],
             ],
         ];
@@ -79,6 +80,8 @@ class UserController extends Controller
      */
     public function actionIndex()
     {
+        return $this->redirect(Url::toRoute(['/admin/user/passengers']));
+
         if (Yii::$app->request->isAjax) {
             $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
             if (count($keys)) {

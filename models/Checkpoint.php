@@ -74,7 +74,9 @@ class Checkpoint extends \yii\db\ActiveRecord
             'city_id'           => Yii::t('app', "Город"),
             'route'             => Yii::t('app', "Маршрут"),
             'created_at'        => Yii::t('app', "Создано"),
-            'updated_at'        => Yii::t('app', "Обновлено")
+            'updated_at'        => Yii::t('app', "Обновлено"),
+            'latitude'          => Yii::t('app', "Широта"),
+            'longitude'         => Yii::t('app', "Долгота"),
         ];
     }
 

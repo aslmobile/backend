@@ -7,8 +7,8 @@ class Route extends \app\models\Route
     public static function getStatusList()
     {
         return [
-            self::STATUS_ACTIVE     => Yii::t('app', "Активная"),
-            self::STATUS_DISABLED   => Yii::t('app', "Отключено")
+            self::STATUS_ACTIVE     => Yii::t('app', "Активный"),
+            self::STATUS_DISABLED   => Yii::t('app', "Не активный")
         ];
     }
 }

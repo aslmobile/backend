@@ -10,6 +10,8 @@ use yii\behaviors\TimestampBehavior;
  * @property string $title
  * @property int $status
  * @property float $base_tariff
+ * @property int $start_city_id
+ * @property int $end_city_id
  * @property int $created_at
  * @property int $updated_at
  */
@@ -38,7 +40,7 @@ class Route extends \yii\db\ActiveRecord
     {
         return [
             [['title','base_tariff'], 'required'],
-            ['status', 'integer'],
+            [['status', 'start_city_id', 'end_city_id'], 'integer'],
             ['base_tariff', 'number'],
             ['title', 'string']
         ];
@@ -52,10 +54,20 @@ class Route extends \yii\db\ActiveRecord
         return [
             'id'                => Yii::t('app', "ID"),
             'title'             => Yii::t('app', "Название"),
+            'start_city_id'            => Yii::t('app', "Город начала"),
+            'end_city_id'            => Yii::t('app', "Город окончания"),
             'status'            => Yii::t('app', "Статус"),
             'base_tariff'       => Yii::t('app', "Базовый тариф"),
             'created_at'        => Yii::t('app', "Создано"),
             'updated_at'        => Yii::t('app', "Обновлено")
+        ];
+    }
+
+    public static function getStatusList()
+    {
+        return [
+            self::STATUS_ACTIVE => Yii::t('app', "Активный"),
+            self::STATUS_DISABLED => Yii::t('app', "Не активный")
         ];
     }
 }

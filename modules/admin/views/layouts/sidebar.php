@@ -127,30 +127,110 @@ $act = Yii::$app->controller->action->id;
                     </li>
                 </ul>
             </li>
-            <li class="header"><?= Yii::$app->mv->gt('Менеджмент', [], false); ?></li>
 
+            <li class="header"><?= Yii::$app->mv->gt('Менеджмент', [], false); ?></li>
             <li<?= ($cont == 'user' && $act == 'passengers') ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute(['/admin/user/passengers']) ?>">
                     <i class="fa fa-users"></i>
                     <span><?= Yii::$app->mv->gt('Пассажиры', [], false); ?></span>
                 </a>
             </li>
-
             <li<?= ($cont == 'user' && $act == 'drivers') ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute(['/admin/user/drivers']) ?>">
                     <i class="fa fa-users"></i>
                     <span><?= Yii::$app->mv->gt('Водители', [], false); ?></span>
                 </a>
             </li>
-
             <li<?= ($cont == 'blacklist' && $act == 'index') ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute(['/admin/blacklist/index']) ?>">
                     <i class="fa fa-user-secret"></i>
                     <span><?= Yii::$app->mv->gt('Черный список', [], false); ?></span>
                 </a>
             </li>
+            <li<?= ($cont == 'km' && $act == 'settings') ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute(['/admin/km/settings']) ?>">
+                    <i class="fa fa-users"></i>
+                    <span><?= Yii::$app->mv->gt('Бесплатные КМ', [], false); ?></span>
+                </a>
+            </li>
 
             <li class="header"><?= Yii::$app->mv->gt('Маршруты', [], false); ?></li>
+            <li<?= ($cont == 'route') ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute(['/admin/route/index']) ?>">
+                    <i class="fa fa-map"></i>
+                    <span><?= Yii::$app->mv->gt('Маршруты', [], false); ?></span>
+                </a>
+            </li>
+            <li<?= ($cont == 'lines' && ($act == 'checkpoints' || $act == 'checkpoint')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute(['/admin/lines/checkpoints']) ?>">
+                    <i class="fa fa-map-marker"></i>
+                    <span><?= Yii::$app->mv->gt('Остановки', [], false); ?></span>
+                </a>
+            </li>
+            <li<?= ($cont == 'lines' && ($act == 'prices' || $act == 'price')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute(['/admin/lines/prices']) ?>">
+                    <i class="fa fa-money"></i>
+                    <span><?= Yii::$app->mv->gt('Цены', [], false); ?></span>
+                </a>
+            </li>
+
+            <li class="header"><?= Yii::$app->mv->gt('Линия', [], false); ?></li>
+            <li<?= ($cont == 'lines' && ($act == 'vehicles')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute('/admin/lines/vehicles') ?>">
+                    <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('Машины в очереди', [], false) ?>
+                </a>
+            </li>
+            <li<?= ($cont == 'lines' && ($act == 'vehicles')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute('/admin/lines/vehicles') ?>">
+                    <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('Машины на отправку', [], false) ?>
+                </a>
+            </li>
+            <li<?= ($cont == 'lines' && ($act == 'vehicles')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute('/admin/lines/vehicles') ?>">
+                    <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('Машины в пути', [], false) ?>
+                </a>
+            </li>
+            <li<?= ($cont == 'lines' && ($act == 'vehicles')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute('/admin/lines/vehicles') ?>">
+                    <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('Пассажиры в очереди', [], false) ?>
+                </a>
+            </li>
+            <li<?= ($cont == 'trips' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute('/admin/trips/index') ?>">
+                    <i class="fa fa-users"></i> <?= Yii::$app->mv->gt('Очередь пассажиров', [], false) ?>
+                </a>
+            </li>
+
+            <li class="header"><?= Yii::$app->mv->gt('Автомобили', [], false); ?></li>
+            <li class="treeview<?= (($cont == 'vehicles' || ($cont == 'lines' && $act == 'vehicles')) && $act != 'vehicles') ? ' active' : '' ?>">
+                <a href="<?= Url::toRoute('/admin/vehicles') ?>">
+                    <i class="fa fa-car"></i>
+                    <span><?= Yii::$app->mv->gt('Автомобили', [], false); ?></span>
+                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                </a>
+                <ul class="treeview-menu">
+                    <li<?= ($cont == 'vehicles' && ($act == 'index' || $act == 'update' || $act == 'create')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/vehicles') ?>">
+                            <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('Список автомобилей', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'vehicles' && ($act == 'types' || $act == 'type' || $act == 'create-type')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/vehicles/types') ?>">
+                            <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Типы', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'vehicles' && ($act == 'brands' || $act == 'brand' || $act == 'create-brand')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/vehicles/brands') ?>">
+                            <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Бренды', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'vehicles' && ($act == 'models' || $act == 'model' || $act == 'create-model')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/vehicles/models') ?>">
+                            <i class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Модели', [], false) ?>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
             <div class="hidden">
             <li class="treeview<?= ($cont == 'trips') ? ' active' : '' ?>">
