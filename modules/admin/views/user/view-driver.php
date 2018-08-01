@@ -112,8 +112,8 @@ use yii\widgets\DetailView;
                 <?php if (!empty ($vehicle->image) && intval($vehicle->image) > 0) : ?>
                     <?php $image = \app\modules\api\models\UploadFiles::findOne($vehicle->image); ?>
                     <?php if ($image) : ?>
-                        <div class="box-body">
-                            <img class="img-responsive img-bordered" src="<?= $image->file; ?>" />
+                        <div class="box-body text-center">
+                            <img class="img-responsive img-bordered" style="max-height: 220px; display: inline-block" src="<?= $image->file; ?>" />
                         </div>
                     <?php endif; ?>
                 <?php endif; ?>
