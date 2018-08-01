@@ -104,7 +104,7 @@ use yii\widgets\DetailView;
 <div class="row">
     <?php $vehicles = \app\modules\admin\models\Vehicles::find()->where(['user_id' => $model->id])->all(); ?>
     <?php if ($vehicles && count($vehicles) > 0) : foreach ($vehicles as $vehicle) : ?>
-        <div class="col-12 col-sm-8 col-md-6">
+        <div class="col-12 col-sm-6 col-md-4">
             <div class="box">
                 <div class="box-header with-border">
                     <h3 class="box-title"><?= $vehicle->vehicleName; ?></h3>
