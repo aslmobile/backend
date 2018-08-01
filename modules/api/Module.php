@@ -60,6 +60,8 @@ class Module extends \yii\base\Module
         if ($needheader) Yii::$app->response->statusCode = 200;
 
         if (empty($this->error_message)) $this->error_message = new \StdClass();
+
+        if (is_array($message) || is_object($message)) $message = implode(',', $message);
         $this->error_message->$key = $message;
 
         $immediatelyExit ? $this->sendResponse() : false;
@@ -69,7 +71,7 @@ class Module extends \yii\base\Module
     {
         $this->status = 'success';
         $this->error_code = 0;
-        $this->error_message = "no errors";
+        $this->error_message = null;
         Yii::$app->response->statusCode = 200;
     }
 

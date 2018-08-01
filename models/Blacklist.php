@@ -59,16 +59,14 @@ class Blacklist extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::$app->mv->gt('ID', [], 0),
-            'add_comment' => Yii::$app->mv->gt('Add Comment', [], 0),
-            'created_at' => Yii::$app->mv->gt('Created At', [], 0),
-            'updated_at' => Yii::$app->mv->gt('Updated At', [], 0),
-            'status' => Yii::$app->mv->gt('Status', [], 0),
-            'user_id' => Yii::$app->mv->gt('User ID', [], 0),
-            'add_type' => Yii::$app->mv->gt('Add Type', [], 0),
-            'description' => Yii::$app->mv->gt('Description', [], 0),
-            'created_by' => Yii::$app->mv->gt('Created By', [], 0),
-            'updated_by' => Yii::$app->mv->gt('Updated By', [], 0),
-            'cancel_comment' => Yii::$app->mv->gt('Cancel Comment', [], 0),
+            'add_comment' => Yii::$app->mv->gt('Комментарий', [], 0),
+            'status' => Yii::$app->mv->gt('Статус', [], 0),
+            'user_id' => Yii::$app->mv->gt('Пользователь', [], 0),
+            'add_type' => Yii::$app->mv->gt('Тип блокировки', [], 0),
+            'description' => Yii::$app->mv->gt('Описание', [], 0),
+            'created_at' => Yii::$app->mv->gt('Добавлен', [], 0),
+            'updated_at' => Yii::$app->mv->gt('Обновлен', [], 0),
+            'cancel_comment' => Yii::$app->mv->gt('Комментарий отмены', [], 0),
         ];
     }
 
@@ -77,5 +75,10 @@ class Blacklist extends \yii\db\ActiveRecord
         return [
             TimestampBehavior::className(),
         ];
+    }
+
+    public function getUser()
+    {
+        return \app\modules\admin\models\User::findOne($this->user_id);
     }
 }

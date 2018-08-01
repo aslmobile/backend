@@ -8,7 +8,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $searchModel app\modules\admin\models\BlacklistSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Blacklists';
+$this->title = Yii::t('app', "Черный список");
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -26,29 +26,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="box-tools pull-right">
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} new',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
+                        Yii::$app->mv->gt('{i} Добавить',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
-                    ); ?>
-                    <?= Html::a(
-                        Yii::$app->mv->gt('{i} delete selected',['i'=>Html::tag('i','',['class'=>'fa fa-fire'])],false),
-                        [''],
-                        [
-                            'class' => 'btn btn-danger btn-sm',
-                            'onclick'=>"
-								var keys = $('#grid').yiiGridView('getSelectedRows');
-								if (keys!='') {
-									if (confirm('".Yii::$app->mv->gt('Are you sure you want to delete the selected items?',[],false)."')) {
-										$.ajax({
-											type : 'POST',
-											data: {keys : keys},
-											success : function(data) {}
-										});
-									}
-								}
-								return false;
-							",
-                        ]
                     ); ?>
                 </div>
             </div>
@@ -56,6 +36,12 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'id' => 'grid',
+                'rowOptions' => function ($model, $key, $index, $grid) {
+                    return [
+                        'role' => 'button',
+                        'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/blacklist/view/" . $key) . "'"
+                    ];
+                },
                 'layout'=>"
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
                     <div class='box-footer' style='display: block;'>{pager}</div>
@@ -64,44 +50,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'table table-bordered table-hover dataTable',
                 ],
                 'filterModel' => $searchModel,
-        'columns' => [
-                    //['class' => 'yii\grid\SerialColumn'],
-                    ['class' => 'yii\grid\CheckboxColumn'],
-
-                                'id',
-            'add_comment',
-            'created_at',
-            'updated_at',
-            'status',
-            // 'user_id',
-            // 'add_type',
-            // 'description',
-            // 'created_by',
-            // 'updated_by',
-            // 'cancel_comment',
+                'columns' => [
                     [
-                        'class' => 'yii\grid\ActionColumn',
-                        'template' => '{view} {update} {delete}',
-                        'buttons' => [
-                            'view' => function ($url, $model) {
-                                return Html::a('<button type="button" class="btn btn-info btn-sm"><i class="fa fa-search"></i></button>', $url);
-                            },
-                            'update' => function ($url, $model) {
-                                return Html::a('<button type="button" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i></button>', $url);
-                            },
-                            'delete' => function ($url, $model) {
-                                return Html::a(
-                                    '<button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>',
-                                    $url,
-                                    ['data'=>[
-                                        'confirm'=>Yii::$app->mv->gt('Are you sure you want to delete this item?',[],false),
-                                        'method'=>'post',
-                                        'pjax'=>'0'
-                                    ]]
-                                );
-                            },
-                        ]
+                        'attribute' => 'user_id',
+                        'value' => function ($model)
+                        {
+                            return $model->user->fullName;
+                        }
                     ],
+                    'add_comment',
+                    'status',
+                    'created_at',
+                    'updated_at'
                 ],
             ]); ?>
         </div>

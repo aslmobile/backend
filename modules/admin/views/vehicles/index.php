@@ -32,6 +32,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= GridView::widget([
                     'dataProvider' => $dataProvider,
                     'id' => 'grid',
+                    'rowOptions' => function ($model, $key, $index, $grid) {
+                        return [
+                            'role' => 'button',
+                            'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/vehicles/update/" . $key) . "'"
+                        ];
+                    },
                     'layout' => "
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
                     <div class='box-footer' style='display: block;'>{pager}</div>
@@ -41,15 +47,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'filterModel' => $searchModel,
                     'columns' => [
-//                        ['class' => 'yii\grid\CheckboxColumn', 'headerOptions' => ['style' => 'width: 50px;']],
-
-                        'id' => [
-                            'attribute' => 'id',
-                            'headerOptions' => ['style' => 'width: 50px;'],
-                            'filterInputOptions' => [
-                                'class' => 'form-control',
-                            ],
-                        ],
                         'user_id' => [
                             'attribute' => 'user_id',
                             'content' => function ($data) {
@@ -120,29 +117,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 return key_exists($data->status, $data->statusList) ? $data->statusList[$data->status] : false;
                             },
                             'filter' => \app\modules\admin\models\Vehicles::getStatusList(),
-                        ],
-                        [
-                            'class' => 'yii\grid\ActionColumn',
-                            'headerOptions' => ['style' => 'width: 125px;'],
-                            'template' => '{update} {delete}',
-                            'buttons' => [
-                                'view' => function ($url, $model) {
-                                    return Html::a('<button type="button" class="btn btn-info btn-sm"><i class="fa fa-search"></i></button>', $url);
-                                },
-                                'update' => function ($url, $model) {
-                                    return Html::a('<button type="button" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i></button>', $url);
-                                },
-                                'delete' => function ($url, $model) {
-                                    return Html::a('<button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>', $url, [
-                                        'data' => [
-                                            'confirm' => Yii::$app->mv->gt('Are you sure you want to delete this item?', [], false),
-                                            'method' => 'post',
-                                            'pjax' => '0'
-                                        ]
-                                    ]);
-                                },
-                            ]
-                        ],
+                        ]
                     ],
                 ]); ?>
             </div>

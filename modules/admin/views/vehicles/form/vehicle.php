@@ -21,7 +21,6 @@ use yii\web\JsExpression;
                 <?= $form->field($model, 'seats')->textInput(['maxlength' => true]) ?>
 
                 <?= $form->field($model, 'license_plate')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'weight')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="box-footer clearfix text-right">
                 <?= \app\components\widgets\FormButtons::widget(['model' => $model]) ?>
@@ -33,7 +32,7 @@ use yii\web\JsExpression;
             <div class="box-body">
                 <?= $form->field($model, 'user_id')->widget(Select2::classname(), [
                     'model' => [],
-                    'theme' => Select2::THEME_KRAJEE,
+                    'theme' => Select2::THEME_DEFAULT,
                     'attribute' => 'created_by',
                     'hideSearch' => true,
                     'options' => [
@@ -56,7 +55,7 @@ use yii\web\JsExpression;
 
                 <?= $form->field($model, 'vehicle_type_id')->widget(Select2::classname(), [
                     'model' => [],
-                    'theme' => Select2::THEME_KRAJEE,
+                    'theme' => Select2::THEME_DEFAULT,
                     'attribute' => 'created_by',
                     'hideSearch' => true,
                     'options' => [
@@ -79,7 +78,7 @@ use yii\web\JsExpression;
 
                 <?= $form->field($model, 'vehicle_brand_id')->widget(Select2::classname(), [
                     'model' => [],
-                    'theme' => Select2::THEME_KRAJEE,
+                    'theme' => Select2::THEME_DEFAULT,
                     'attribute' => 'created_by',
                     'hideSearch' => true,
                     'options' => [
@@ -102,7 +101,7 @@ use yii\web\JsExpression;
 
                 <?= $form->field($model, 'vehicle_model_id')->widget(Select2::classname(), [
                     'model' => [],
-                    'theme' => Select2::THEME_KRAJEE,
+                    'theme' => Select2::THEME_DEFAULT,
                     'attribute' => 'created_by',
                     'hideSearch' => true,
                     'options' => [

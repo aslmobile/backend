@@ -162,9 +162,14 @@ class Trip extends \yii\db\ActiveRecord
             'updated_at'        => Yii::t('app', "Обновлена"),
             'position'          => Yii::t('app', "Позиция на карте"),
             'taxi_status'       => Yii::t('app', "Статус заказа"),
-            'taxi_cancel_reason'       => Yii::t('app', "Причина отказа"),
-            'taxi_address'       => Yii::t('app', "Адрес подачи"),
-            'taxi_time'       => Yii::t('app', "На какое время"),
+            'taxi_cancel_reason'     => Yii::t('app', "Причина отказа"),
+            'taxi_address'      => Yii::t('app', "Адрес подачи"),
+            'taxi_time'         => Yii::t('app', "На какое время"),
+            'seats'             => Yii::t('app', "Места"),
+            'endpoint_id'       => Yii::t('app', "Конечная"),
+            'start_time'        => Yii::t('app', "Время"),
+            'line_id'           => Yii::t('app', "Линия"),
+            'route_id'          => Yii::t('app', "Маршрут"),
         ];
     }
 
@@ -226,6 +231,68 @@ class Trip extends \yii\db\ActiveRecord
     public function getStartpoint()
     {
         return Checkpoint::findOne($this->startpoint_id);
+    }
+
+    public function getEndpoint()
+    {
+        return Checkpoint::findOne($this->endpoint_id);
+    }
+
+    public function getLine()
+    {
+        return \app\modules\admin\models\Line::findOne($this->line_id);
+    }
+
+    public function getRoute()
+    {
+        return \app\modules\admin\models\Route::findOne($this->route_id);
+    }
+
+    public function getVehicleType()
+    {
+        return \app\modules\admin\models\VehicleType::findOne($this->vehicle_type_id);
+    }
+
+    public function getCalculatedAmount()
+    {
+        $amount = floatval($this->amount);
+        $luggage_amount = 0.0;
+
+        $luggages = TripLuggage::find(['unique_id' => $this->luggage_unique_id])->all();
+        if ($luggages) foreach ($luggages as $luggage)
+        {
+            if (floatval($luggage->amount) > 0) $luggage_amount += floatval($luggage->amount);
+        }
+
+        if ($luggage_amount > 0) return round($amount, 2) . ' (+' . $luggage_amount . ')';
+
+        return round($amount, 2);
+    }
+
+    public function getSummaryAmount()
+    {
+        $amount = floatval($this->amount);
+
+        $luggages = TripLuggage::find(['unique_id' => $this->luggage_unique_id])->all();
+        if ($luggages) foreach ($luggages as $luggage)
+        {
+            if (floatval($luggage->amount) > 0) $amount += floatval($luggage->amount);
+        }
+
+        return round($amount, 2);
+    }
+
+    public function getSummarySeats()
+    {
+        $seats = intval($this->seats);
+
+        $luggages = TripLuggage::find(['unique_id' => $this->luggage_unique_id, 'need_place' => 1])->all();
+        if ($luggages) foreach ($luggages as $luggage)
+        {
+            if (intval($luggage->seats) > 0) $seats += intval($luggage->seats);
+        }
+
+        return $seats;
     }
 
     public static function getVehicleTypeList()
