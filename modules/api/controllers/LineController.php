@@ -27,7 +27,7 @@ class LineController extends BaseController
                         'actions' => [
                             'startpoints', 'endpoints', 'checkpoints',
                             'update-line', 'passengers', 'seats',
-                            'cancel', 'passenger-decline', 'on-line'
+                            'cancel', 'passenger-decline', 'on-line', 'calculate-tariff'
                         ],
                         'allow' => true
                     ]
@@ -44,7 +44,8 @@ class LineController extends BaseController
                     'update-line'  => ['PUT'],
                     'cancel' => ['DELETE'],
                     'on-line' => ['PUT'],
-                    'passenger-decline' => ['DELETE']
+                    'passenger-decline' => ['DELETE'],
+                    'calculate-tariff' => ['POST']
                 ]
             ]
         ];
@@ -62,6 +63,39 @@ class LineController extends BaseController
             $this->module->setError(403, 'user', Yii::$app->mv->gt("У пользователя нет прав на данное действие", [], false));
 
         return parent::beforeAction($event);
+    }
+
+    public function actionCalculateTariff()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['startpoint', 'endpoint']);
+
+        /** @var \app\models\Checkpoint $startpoint */
+        $startpoint = Checkpoint::findOne($this->body->startpoint);
+        if (!$startpoint || $startpoint->type != $startpoint::TYPE_START) $this->module->setError(422, '_startpoint', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\models\Checkpoint $endpoint */
+        $endpoint = Checkpoint::findOne($this->body->endpoint);
+        if (!$endpoint || $endpoint->type != $endpoint::TYPE_END) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\models\Route $route */
+        $route = Route::findOne($startpoint->route);
+        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
+
+        $rate = $this->getRate($route->id);
+        $seat = (float) round($route->base_tariff * $rate, 2);
+        $commission = (float) round($seat * 0.2, 2);
+
+        $this->module->data['amount'] = [
+            'base_tariff'   => $route->base_tariff,
+            'seat'          => $seat,
+            'commission'    => $commission
+        ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionOnLine($id)
@@ -335,5 +369,41 @@ class LineController extends BaseController
     protected function getLine($line_id)
     {
         return Line::findOne($line_id);
+    }
+
+    protected function getRate($route_id)
+    {
+        /** @var \app\models\Line $line */
+        $lines = Line::find()->andWhere([
+            'AND',
+            ['=', 'route_id', $route_id]
+        ])->all();
+
+        if (!$lines) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        $seats = 0;
+        foreach ($lines as $line) $seats += $line->freeseats;
+
+        $passengers = Trip::find()->andWhere([
+            'AND',
+            ['=', 'route_id', $route_id],
+            ['=', 'driver_id', 0]
+        ])->count();
+
+        if ($seats == 0) $rate = 1.5;
+        elseif ($passengers == 0) $rate = 1;
+        else
+        {
+            $hard_rate = round($passengers / $seats, 2);
+
+            if ($hard_rate <= .35) $rate = 1;
+            elseif ($hard_rate >= .35 && $hard_rate <= .6) $rate = 1.1;
+            elseif ($hard_rate >= .6 && $hard_rate <= .7) $rate = 1.2;
+            elseif ($hard_rate >= .7 && $hard_rate <= .8) $rate = 1.3;
+            elseif ($hard_rate >= .8 && $hard_rate <= .9) $rate = 1.4;
+            else $rate = 1.5;
+        }
+
+        return $rate;
     }
 }
