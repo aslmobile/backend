@@ -174,7 +174,6 @@ class Generator extends \app\modules\gii\Generator
      */
     public function requiredTemplates()
     {
-        // @todo make 'query.php' to be required before 2.1 release
         return ['model.php'/*, 'query.php'*/];
     }
 
