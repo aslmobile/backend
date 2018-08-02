@@ -31,6 +31,7 @@ class DefaultController extends BaseController
                             'cancel-trip-reasons',
                             'cancel-passenger-reasons',
                             'get-file',
+                            'update-device',
 
                             'for-testing'
                         ],
@@ -47,10 +48,20 @@ class DefaultController extends BaseController
                     'cancel-passenger-reasons' => ['GET'],
                     'get-file' => ['GET'],
                     'method' => ['POST'],
-                    'send-socket-message' => ['POST']
+                    'send-socket-message' => ['POST'],
+                    'update-device' => ['POST'],
                 ]
             ]
         ];
+    }
+
+    public function actionUpdateDevice()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionForTesting()
