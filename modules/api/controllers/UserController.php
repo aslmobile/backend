@@ -15,15 +15,6 @@ class UserController extends BaseController
 {
     public $modelClass = 'app\modules\api\models\RestFul';
 
-    public function init()
-    {
-        parent::init();
-
-        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
-        if ($authHeader !== null && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) $this->token = $matches[1];
-        else $this->module->setError(403, '_token', "Token required!");
-    }
-
     public function behaviors()
     {
         return [
@@ -96,7 +87,7 @@ class UserController extends BaseController
             $this->module->setSuccess();
             $this->module->sendResponse();
         }
-        else $this->module->setError(422, '_sms', "SMS not send");
+        else $this->module->setError(422, '_sms', Yii::$app->mv->gt("Не удалось отправить СМС", [], false));
     }
 
     public function actionSms()
@@ -147,16 +138,16 @@ class UserController extends BaseController
             'Users' => (array) $this->body
         ];
 
-        if (!$user->load($data)) $this->module->setError(422, 'user', "Can't load user model from data.");
+        if (!$user->load($data)) $this->module->setError(422, '_user', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
         if (!$user->validate() || !$user->save())
         {
             if ($user->hasErrors())
             {
                 foreach ($user->errors as $field => $error_message)
-                    $this->module->setError(422, 'user.' . $field, $error_message, true, false);
+                    $this->module->setError(422, 'user.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
             }
-            else $this->module->setError(422, 'user', "Can't validate user model from data.");
+            else $this->module->setError(422, '_user', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['user'] = $user->toArray();
@@ -178,16 +169,16 @@ class UserController extends BaseController
             'Users' => (array) $this->body
         ];
 
-        if (!$user->load($data)) $this->module->setError(422, 'user', "Can't load user model from data.");
+        if (!$user->load($data)) $this->module->setError(422, 'user', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
         if (!$user->validate() || !$user->save())
         {
             if ($user->hasErrors())
             {
                 foreach ($user->errors as $field => $error_message)
-                    $this->module->setError(422, 'user.' . $field, $error_message, true, false);
+                    $this->module->setError(422, 'user.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
             }
-            else $this->module->setError(422, 'user', "Can't validate user model from data.");
+            else $this->module->setError(422, 'user', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data = [
@@ -205,7 +196,7 @@ class UserController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
+        if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
         $data = $this->UploadLicenceDocument($user, DriverLicence::TYPE_LICENSE);
 
         $this->module->data = [
@@ -222,7 +213,7 @@ class UserController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
+        if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
 
         $documents = [];
         foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'user-photos/' . $user->id, true);
@@ -292,7 +283,7 @@ class UserController extends BaseController
                 foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'driver-licence/' . $user->id);
                 break;
 
-            default: $this->module->setError(422, 'license.type', "Unknown type");
+            default: $this->module->setError(422, 'license.type', Yii::$app->mv->gt("Передан неизвестный тип документа", [], false));
         }
 
         foreach ($documents as $name => $path) switch ($name)
@@ -306,10 +297,10 @@ class UserController extends BaseController
             $save_errors = $licences->getErrors();
             if ($save_errors && count ($save_errors) > 0)
             {
-                foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0], true, false);
+                foreach ($save_errors as $field => $error) $this->module->setError(422, $field, Yii::$app->mv->gt($error[0], [], false), true, false);
                 $this->module->sendResponse();
             }
-            else $this->module->setError(422, '_licenses', "Problem with file upload");
+            else $this->module->setError(422, '_licenses', Yii::$app->mv->gt("Не удалось сохранить файл", [], false));
         }
 
         // REMOVE OLD UPLOADED IMAGES

@@ -75,19 +75,19 @@ class Devices extends ActiveRecord
     {
         return [
             'id' => Yii::t('app', "ID"),
-            'user_id' => Yii::t('app', "User ID"),
-            'user_type' => Yii::t('app', "User Type"),
-            'push_id' => Yii::t('app', "Push ID"),
-            'device_id' => Yii::t('app', "Device ID"),
-            'sms_code' => Yii::t('app', "SMS Code"),
-            'type' => Yii::t('app', "Device Type"),
-            'auth_token' => Yii::t('app', "Auth Token"),
-            'lang' => Yii::t('app', "Language"),
-            'created_at' => Yii::t('app', "Created At"),
-            'updated_at' => Yii::t('app', "Updated At"),
-            'uip' => Yii::t('app', "User IP"),
-            'notifications' => Yii::t('app', "Notification Status"),
-            'app' => Yii::t('app', "Application"),
+            'user_id' => Yii::t('app', "Пользователь"),
+            'user_type' => Yii::t('app', "Тип пользователя"),
+            'push_id' => Yii::t('app', "ID Пуша"),
+            'device_id' => Yii::t('app', "ID Девайса"),
+            'sms_code' => Yii::t('app', "Код авторизации"),
+            'type' => Yii::t('app', "Теп девайса"),
+            'auth_token' => Yii::t('app', "Токен авторизации"),
+            'lang' => Yii::t('app', "Язык"),
+            'created_at' => Yii::t('app', "Создан"),
+            'updated_at' => Yii::t('app', "Обновлен"),
+            'uip' => Yii::t('app', "IP Пользователя"),
+            'notifications' => Yii::t('app', "Статус нотификаций"),
+            'app' => Yii::t('app', "Тип приложения"),
         ];
     }
 

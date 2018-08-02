@@ -11,15 +11,6 @@ class GeoController extends BaseController
 {
     public $modelClass = 'app\modules\api\models\RestFul';
 
-    public function init()
-    {
-        parent::init();
-
-        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
-        if ($authHeader !== null && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) $this->token = $matches[1];
-        else $this->module->setError(403, '_token', "Token required!");
-    }
-
     public function behaviors()
     {
         return [

@@ -15,15 +15,6 @@ class DefaultController extends BaseController
 {
     public $modelClass = 'app\modules\api\models\RestFul';
 
-    public function init()
-    {
-        parent::init();
-
-        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
-        if ($authHeader !== null && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) $this->token = $matches[1];
-        else $this->module->setError(403, '_token', "Token required!");
-    }
-
     public function behaviors()
     {
         return [
@@ -66,7 +57,7 @@ class DefaultController extends BaseController
     {
 //        Trip::getQueue(true);
 
-        $this->module->setError(404, 'method', "Not Found");
+        $this->module->setError(404, 'method', Yii::$app->mv->gt("Не найден", [], false));
     }
 
     public function actionGetFile($id)
@@ -75,7 +66,7 @@ class DefaultController extends BaseController
         if ($user) $user = $this->user;
 
         $file = UploadFiles::findOne($id);
-        if (!$file) $this->module->setError(404, 'file', "Not Found");
+        if (!$file) $this->module->setError(404, 'file', Yii::$app->mv->gt("Не найден", [], false));
 
         $this->module->data = [
             'file' => Yii::getAlias('@web') . $file->file,
@@ -163,7 +154,7 @@ class DefaultController extends BaseController
 
         /** @var \app\components\Socket\SocketPusher $socket */
         $socket = new SocketPusher();
-        if (!$socket->push(base64_encode(json_encode($message)))) $this->module->setError(422, 'socket.push', "Failure");
+        if (!$socket->push(base64_encode(json_encode($message)))) $this->module->setError(422, 'socket.push', Yii::$app->mv->gt("Не удалось отправить сообщение", [], false));
 
         $this->module->data = [
             'socket' => true,

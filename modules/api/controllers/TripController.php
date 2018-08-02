@@ -19,15 +19,6 @@ class TripController extends BaseController
 {
     public $modelClass = 'app\modules\api\models\RestFul';
 
-    public function init()
-    {
-        parent::init();
-
-        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
-        if ($authHeader !== null && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) $this->token = $matches[1];
-        else $this->module->setError(403, '_token', "Token required!");
-    }
-
     public function behaviors()
     {
         return [
@@ -84,11 +75,11 @@ class TripController extends BaseController
 
         /** @var \app\models\Line $line */
         $line = Line::findOne($id);
-        if (!$line) $this->module->setError(422, '_line', "Not Found");
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
         $trip = Trip::find()->where(['route_id' => $line->route_id, 'driver_id' => $line->driver_id, 'user_id' => $this->body->passenger_id])->one();
-        if (!$trip) $this->module->setError(422, '_trip', "Not Found");
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $trip->status = Trip::STATUS_TRIP;
 
@@ -97,10 +88,10 @@ class TripController extends BaseController
             if ($trip->hasErrors())
             {
                 foreach ($trip->errors as $field => $error_message)
-                    $this->module->setError(422, 'trip.' . $field, $error_message, true, false);
+                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
             }
-            else $this->module->setError(422, 'trip', "Can't validate model from data.");
+            else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['line'] = $line->toArray();
@@ -119,11 +110,11 @@ class TripController extends BaseController
 
         /** @var \app\models\Line $line */
         $line = Line::findOne($id);
-        if (!$line) $this->module->setError(422, '_line', "Not Found");
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
         $trips = Trip::find()->andWhere(['route_id' => $line->route_id, 'vehicle_id' => $line->vehicle_id, 'driver_id' => $line->driver_id])->all();
-        if (!$trips) $this->module->setError(422, '_trip', "Not Found");
+        if (!$trips) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $_trips = [];
         foreach ($trips as $trip)
@@ -135,10 +126,10 @@ class TripController extends BaseController
                 if ($trip->hasErrors())
                 {
                     foreach ($trip->errors as $field => $error_message)
-                        $this->module->setError(422, 'trip.' . $field, $error_message, true, false);
+                        $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                     $this->module->sendResponse();
                 }
-                else $this->module->setError(422, 'trip', "Can't validate model from data.");
+                else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
             }
 
             $_trips[] = $trip->toArray();
@@ -160,11 +151,11 @@ class TripController extends BaseController
 
         /** @var \app\models\Line $line */
         $line = Line::findOne($id);
-        if (!$line) $this->module->setError(422, '_line', "Not Found");
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
         $trip = Trip::find()->where(['route_id' => $line->route_id, 'driver_id' => $line->driver_id, 'user_id' => $this->body->passenger_id])->one();
-        if (!$trip) $this->module->setError(422, '_trip', "Not Found");
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $trip->passenger_rating = floatval($this->body->passenger_rating);
         $trip->driver_comment = $this->body->driver_comment;
@@ -174,10 +165,10 @@ class TripController extends BaseController
             if ($trip->hasErrors())
             {
                 foreach ($trip->errors as $field => $error_message)
-                    $this->module->setError(422, 'trip.' . $field, $error_message, true, false);
+                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
             }
-            else $this->module->setError(422, 'trip', "Can't validate model from data.");
+            else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['line'] = $line->toArray();
@@ -195,7 +186,7 @@ class TripController extends BaseController
         $this->validateBodyParams(['checkpoint']);
 
         $checkpoint = Checkpoint::findOne(intval($this->body->checkpoint));
-        if (!$checkpoint) $this->module->setError(422, 'checkpoint', "Not Found");
+        if (!$checkpoint) $this->module->setError(422, 'checkpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         // TODO: Отправить на сокет сообщение что водитель подъехал к checkpoint
 
@@ -278,11 +269,11 @@ class TripController extends BaseController
 
         /** @var \app\models\Line $line */
         $line = Line::findOne($id);
-        if (!$line) $this->module->setError(422, 'line', "Not Found");
+        if (!$line) $this->module->setError(422, 'line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
         $trips = Trip::find()->andWhere(['route_id' => $line->route_id, 'vehicle_id' => $line->vehicle_id, 'driver_id' => $line->driver_id])->all();
-        if (!$trips) $this->module->setError(422, '_trip', "Not Found");
+        if (!$trips) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $_passengers = [];
         /** @var \app\models\Trip $passenger */
@@ -305,11 +296,11 @@ class TripController extends BaseController
 
         /** @var \app\models\Line $line */
         $line = Line::findOne($id);
-        if (!$line) $this->module->setError(422, '_line', "Not Found");
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
         $trip = Trip::find()->where(['route_id' => $line->route_id, 'driver_id' => $line->driver_id, 'user_id' => $user->id])->one();
-        if (!$trip) $this->module->setError(422, '_trip', "Not Found");
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $trip->status = Trip::STATUS_TRIP;
 
@@ -351,7 +342,7 @@ class TripController extends BaseController
             ['=', 'type', \app\models\Checkpoint::TYPE_STOP]
         ])->one();
 
-        if (!$checkpoint) $this->module->setError(422, '_checkpoint', "Not Found");
+        if (!$checkpoint) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         $taxi = new Taxi();
         $taxi->user_id = $user->id;
@@ -364,10 +355,10 @@ class TripController extends BaseController
             if ($taxi->hasErrors())
             {
                 foreach ($taxi->errors as $field => $error_message)
-                    $this->module->setError(422, 'taxi.' . $field, $error_message, true, false);
+                    $this->module->setError(422, 'taxi.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
             }
-            else $this->module->setError(422, '_taxi', "Can't create taxi request.");
+            else $this->module->setError(422, '_taxi', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['taxi'] = $taxi->toArray();
@@ -384,7 +375,7 @@ class TripController extends BaseController
         $this->validateBodyParams(['country', 'checkpoint', 'endpoint', 'route', 'time', 'seats', 'luggage', 'taxi', 'comment', 'schedule', 'payment_type']);
 
         $country = Countries::findOne($this->body->country);
-        if (!$country) $this->module->setError(422, 'country', "Not Found");
+        if (!$country) $this->module->setError(422, '_country', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Checkpoint $checkpoint */
         $checkpoint = \app\models\Checkpoint::find()->andWhere([
@@ -393,7 +384,7 @@ class TripController extends BaseController
             ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
             ['=', 'id', $this->body->checkpoint]
         ])->one();
-        if (!$checkpoint) $this->module->setError(422, 'checkpoint', "Not Found");
+        if (!$checkpoint) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Checkpoint $endpoint */
         $endpoint = \app\models\Checkpoint::find()->andWhere([
@@ -402,7 +393,7 @@ class TripController extends BaseController
             ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
             ['=', 'id', $this->body->endpoint]
         ])->one();
-        if (!$endpoint) $this->module->setError(422, 'endpoint', "Not Found");
+        if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Route $route */
         $route = Route::find()->andWhere([
@@ -410,7 +401,7 @@ class TripController extends BaseController
             ['=', 'status' , Route::STATUS_ACTIVE],
             ['=', 'id', $this->body->route]
         ])->one();
-        if (!$route) $this->module->setError(422, 'route', 'Not Found');
+        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         $seats = $this->body->seats;
         $_luggages = [];
@@ -418,7 +409,7 @@ class TripController extends BaseController
         if (is_array($luggages) && count($luggages) > 0) foreach ($luggages as $luggage)
         {
             $luggage = LuggageType::findOne($luggage);
-            if (!$luggage) $this->module->setError(422, 'luggage', "Not Found");
+            if (!$luggage) $this->module->setError(422, '_luggage', Yii::$app->mv->gt("Не найден", [], false));
             $_luggages[] = $luggage->toArray();
 
             if ($luggage->need_place) $seats++;
@@ -436,7 +427,7 @@ class TripController extends BaseController
         if ($this->body->taxi)
         {
             $taxi = Taxi::findOne($this->body->taxi);
-            if (!$taxi) $this->module->setError(422, 'taxi', "Not Found");
+            if (!$taxi) $this->module->setError(422, '_taxi', Yii::$app->mv->gt("Не найден", [], false));
         }
 
         $trip = new Trip();
@@ -483,10 +474,10 @@ class TripController extends BaseController
             if ($trip->hasErrors())
             {
                 foreach ($trip->errors as $field => $error_message)
-                    $this->module->setError(422, 'trip.' . $field, $error_message, true, false);
+                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
             }
-            else $this->module->setError(422, '_trip', "Can't create trip request.");
+            else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['trip'] = $trip->toArray();
@@ -504,7 +495,7 @@ class TripController extends BaseController
             ['=', 'route_id', $route_id]
         ])->all();
 
-        if (!$lines) $this->module->setError(422, '_line', "Not Found");
+        if (!$lines) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $seats = 0;
         foreach ($lines as $line) $seats += $line->freeseats;
@@ -539,7 +530,7 @@ class TripController extends BaseController
 
         /** @var \app\models\Route $route */
         $route = Route::find()->where(['id' => $id])->one();
-        if (!$route) $this->module->setError(422, '_route', "Not Found");
+        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         $tariff = $route->base_tariff * $rate + $taxi_tariff;
 

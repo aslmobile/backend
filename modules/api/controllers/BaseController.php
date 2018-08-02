@@ -41,7 +41,7 @@ class BaseController extends RestFul
 
         $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
         if ($authHeader !== null && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) $this->token = $matches[1];
-        else $this->module->setError(403, '_token', "Token required!");
+        else $this->module->setError(403, '_token', Yii::$app->mv->gt("Токен является обязательным параметром", [], false));
     }
 
     /**
@@ -61,16 +61,16 @@ class BaseController extends RestFul
         if (!is_object($this->body)) $this->body = new \StdClass();
 
         if ($push_id && !empty ($push_id)) $this->push_id = $push_id;
-        else $this->module->setError(422, 'headers.push', "Required parameter");
+        else $this->module->setError(422, 'headers.push', Yii::$app->mv->gt("Обязательный параметр", [], false));
 
         if ($device_id && !empty ($device_id)) $this->device_id = $device_id;
-        else $this->module->setError(422, 'headers.device', "Required parameter");
+        else $this->module->setError(422, 'headers.device', Yii::$app->mv->gt("Обязательный параметр", [], false));
 
         if ($ostype && !empty ($ostype)) $this->ostype = $ostype;
-        else $this->module->setError(422, 'headers.ostype', "Required parameter");
+        else $this->module->setError(422, 'headers.ostype', Yii::$app->mv->gt("Обязательный параметр", [], false));
 
         if ($apptype && !empty ($apptype)) $this->apptype = $apptype;
-        else $this->module->setError(422, 'headers.application-type', "Required parameter");
+        else $this->module->setError(422, 'headers.application-type', Yii::$app->mv->gt("Обязательный параметр", [], false));
 
         return parent::beforeAction($event);
     }
@@ -113,11 +113,11 @@ class BaseController extends RestFul
         switch ($type)
         {
             case self::TOKEN:
-                if (!$this->device) $this->module->setError(403, '_device', "Not found");
-                elseif (!isset ($this->device->auth_token) || empty($this->device->auth_token)) $this->authorizationTokenFailed('Device auth_token is empty!');
+                if (!$this->device) $this->module->setError(403, '_device', Yii::$app->mv->gt("Не найден", [], false));
+                elseif (!isset ($this->device->auth_token) || empty($this->device->auth_token)) $this->authorizationTokenFailed(Yii::$app->mv->gt("Токен не передан", [], false));
 
                 $user = Users::findOne(['id' => $device->user_id]);
-                if (!$user) $this->module->setError(403, '_user', "Not found");
+                if (!$user) $this->module->setError(403, '_user', Yii::$app->mv->gt("Не найден", [], false));
                 $this->user = $user;
 
                 return Yii::$app->user->login($this->user, 0);
@@ -132,15 +132,15 @@ class BaseController extends RestFul
                 $this->prepareBody();
                 $this->validateBodyParams(['code']);
 
-                if (!$this->device) $this->module->setError(403, '_device', "Not found");
-                elseif ($this->body->code != '000000' && $this->device->sms_code != $this->body->code) $this->module->setError(403, '_device', "Not found");
-                elseif (!isset ($this->device->auth_token) || empty($this->device->auth_token)) $this->authorizationTokenFailed('Device auth_token is empty!');
+                if (!$this->device) $this->module->setError(403, '_device', Yii::$app->mv->gt("Не найден", [], false));
+                elseif ($this->body->code != '000000' && $this->device->sms_code != $this->body->code) $this->module->setError(403, '_device', Yii::$app->mv->gt("Не найден", [], false));
+                elseif (!isset ($this->device->auth_token) || empty($this->device->auth_token)) $this->authorizationTokenFailed(Yii::$app->mv->gt("Токен не передан", [], false));
 
                 $this->device->sms_code = NULL;
                 $this->device->save();
 
                 $user = Users::findOne(['id' => $device->user_id]);
-                if (!$user) $this->module->setError(403, '_user', "Not found");
+                if (!$user) $this->module->setError(403, '_user', Yii::$app->mv->gt("Не найден", [], false));
                 $this->user = $user;
 
                 return Yii::$app->user->login($this->user, 0);
@@ -152,7 +152,7 @@ class BaseController extends RestFul
 
     protected function authorizationTokenFailed($message = false)
     {
-        $this->module->setError(403, 'Authorization Bearer', $message ? $message : "Token not valid!");
+        $this->module->setError(403, 'Authorization Bearer', $message ? $message : Yii::$app->mv->gt("Переданный токен имеет не верный формат", [], false));
     }
 
     /**
@@ -161,8 +161,8 @@ class BaseController extends RestFul
     protected function Auth()
     {
         $device = false;
-        if (isset ($this->body->device_id) && !empty($this->body->device_id))
-            $device = Devices::findOne(['device_id' => $this->body->device_id]);
+        if (isset ($this->device_id) && !empty($this->device_id))
+            $device = Devices::findOne(['device_id' => $this->device_id]);
 
         if (!$device && !empty ($this->body->phone))
         {
@@ -178,10 +178,10 @@ class BaseController extends RestFul
                     $save_errors = $user->getErrors();
                     if ($save_errors && count ($save_errors) > 0)
                     {
-                        foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0], true, false);
+                        foreach ($save_errors as $field => $error) $this->module->setError(422, $field, Yii::$app->mv->gt($error[0], [], false), true, false);
                         $this->module->sendResponse();
                     }
-                    else $this->module->setError(422, '_user', "Problem with user creation");
+                    else $this->module->setError(422, '_user', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
                 }
             }
 
@@ -201,10 +201,10 @@ class BaseController extends RestFul
                 $save_errors = $device->getErrors();
                 if ($save_errors && count ($save_errors) > 0)
                 {
-                    foreach ($save_errors as $field => $error) $this->module->setError(422, $field, $error[0], true, false);
+                    foreach ($save_errors as $field => $error) $this->module->setError(422, $field, Yii::$app->mv->gt($error[0], [], false), true, false);
                     $this->module->sendResponse();
                 }
-                else $this->module->setError(422, '_device', "Problem with device creation");
+                else $this->module->setError(422, '_device', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
             }
         }
 
@@ -228,7 +228,7 @@ class BaseController extends RestFul
             if ($return_file_id) return $_uploaded_file;
             return $_uploaded_file['file'];
         }
-        else $this->module->setError(411, '_path', "Can't create path");
+        else $this->module->setError(411, '_path', Yii::$app->mv->gt("Не возможно создать директорию", [], false));
 
         return false;
     }
@@ -246,7 +246,7 @@ class BaseController extends RestFul
         $this->body = json_decode($this->body, false, 1024);
 
         if (empty($this->body) && json_last_error() !== JSON_ERROR_NONE) $this->module->setError(422, '_json', json_last_error_msg());
-        elseif (empty ($this->body)) $this->module->setError(422, '_body', 'Empty');
+        elseif (empty ($this->body)) $this->module->setError(422, '_body', Yii::$app->mv->gt("Тело запроса не должно быть пустым", [], false));
 
         $this->module->body = $this->body;
         $this->module->validateBody();
@@ -260,20 +260,20 @@ class BaseController extends RestFul
         if ($params && (is_array($params) || is_object($params))) foreach ($params as $param)
         {
             if (!isset ($this->body->$param))
-                $this->module->setError(422, '_body.' . $param, 'Field required.');
+                $this->module->setError(422, '_body.' . $param, Yii::$app->mv->gt("Поле является обязательным параметром", [], false));
 
             if (empty ($this->body->$param) && $this->body->$param !== false && $this->body->$param !== 0)
-                $this->module->setError(422, '_body.' . $param, 'Field empty.');
+                $this->module->setError(422, '_body.' . $param, Yii::$app->mv->gt("Поле не может быть пустым", [], false));
 
             switch ($param)
             {
                 case 'ostype':
                     if (!is_numeric($this->body->$param) || intval($this->body->$param) == 0)
-                        $this->module->setError(422, '_body.' . $param, 'Numeric only.');
+                        $this->module->setError(422, '_body.' . $param, Yii::$app->mv->gt("Поле должно быть в числовом формате", [], false));
                     break;
             }
         }
-        else $this->module->setError(422, '_body', 'Params has incorrect format');
+        else $this->module->setError(422, '_body', Yii::$app->mv->gt("Параметры имеют не верный формат", [], false));
     }
 
     public function logResponse($data = [])

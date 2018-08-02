@@ -48,7 +48,7 @@ class Module extends \yii\base\Module
 
     public function validateBody()
     {
-        if (empty($this->body)) { $this->setError(401, '_body', 'Empty body'); }
+        if (empty($this->body)) { $this->setError(401, '_body', Yii::$app->mv->gt("Тело запроса не должно быть пустым", [], false)); }
     }
 
     public function setError($code, $key, $message, $needheader = true, $immediatelyExit = true)
@@ -105,10 +105,10 @@ class Module extends \yii\base\Module
             {
                 foreach ($validation_error->dataPointer() as $pointer)
                 {
-                    $this->setError(422, $data . '.' . $pointer, $validation_error->keyword(), true, false);
+                    $this->setError(422, $data . '.' . $pointer, Yii::$app->mv->gt($validation_error->keyword(), [], false), true, false);
 
                     foreach ($validation_error->keywordArgs() as $param => $value)
-                        $this->setError(422, $data . '.'. $pointer . '.' . $param, $value, true, false);
+                        $this->setError(422, $data . '.'. $pointer . '.' . $param, Yii::$app->mv->gt($value, [], false), true, false);
                 }
             }
 
@@ -139,7 +139,7 @@ class Module extends \yii\base\Module
                     echo '<pre>' . print_r($error, true) . '</pre>';
                     exit;
                 }
-                else $this->setError(422, '_device', "Problem with device creation");
+                else $this->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
             }
 
             if (!$sandbox)
@@ -169,7 +169,7 @@ class Module extends \yii\base\Module
         if (is_array($ret->data)) $ret->data = $this->replaceNullWithEmptyString($ret->data);
         if (!empty($this->data_errors)) $ret->data_errors = $this->data_errors;
 
-        if (empty ($ret->data) && !$ret->data) $ret->data = null;
+        if ((empty ($ret->data) && !$ret->data) || (is_array($ret->data) && count($ret->data) == 0)) $ret->data = null;
 
         if (!isset($_GET['json']) || $_GET['json'] !== '1') Yii::$app->response->content = base64_encode(json_encode($ret));
         else Yii::$app->response->content = json_encode($ret);

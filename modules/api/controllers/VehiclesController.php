@@ -14,15 +14,6 @@ class VehiclesController extends BaseController
 {
     public $modelClass = 'app\modules\api\models\RestFul';
 
-    public function init()
-    {
-        parent::init();
-
-        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
-        if ($authHeader !== null && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) $this->token = $matches[1];
-        else $this->module->setError(403, '_token', "Token required!");
-    }
-
     public function behaviors()
     {
         return [
@@ -123,17 +114,17 @@ class VehiclesController extends BaseController
 
         $vehicle = new Vehicles();
         $data['Vehicles'] = (array) $this->body;
-        if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle.load', "Can't load vehicle model");
+        if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle.load', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
         if (!$vehicle->validate() || !$vehicle->save())
         {
             if ($vehicle->hasErrors())
             {
                 foreach ($vehicle->errors as $field => $error)
-                    $this->module->setError(422, 'vehicle.' . $field, $error, true, false);
+                    $this->module->setError(422, 'vehicle.' . $field, Yii::$app->mv->gt($error[0], [], false), true, false);
 
                 $this->module->sendResponse();
             }
-            else $this->module->setError(422, 'vehicle.save', "Can't save vehicle model");
+            else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data = [
@@ -151,22 +142,22 @@ class VehiclesController extends BaseController
         if ($user) $user = $this->user;
 
         $vehicle = Vehicles::findOne(['id' => $id]);
-        if (!$vehicle) $this->module->setError(422, 'vehicle', "Not Found");
+        if (!$vehicle) $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
         $data = [
             'Vehicles' => (array) $this->body
         ];
 
-        if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle', "Can't load vehicle model from data.");
+        if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
         if (!$vehicle->validate() || !$vehicle->save())
         {
             if ($vehicle->hasErrors())
             {
                 foreach ($vehicle->errors as $field => $error_message)
-                    $this->module->setError(422, 'vehicle.' . $field, $error_message, true, false);
+                    $this->module->setError(422, 'vehicle.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
             }
-            else $this->module->setError(422, 'vehicle', "Can't validate vehicle model from data.");
+            else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data = [
@@ -185,7 +176,7 @@ class VehiclesController extends BaseController
         if ($user) $user = $this->user;
 
         $vehicle = Vehicles::findOne(['id' => $id]);
-        if (!$vehicle) $this->module->setError(422, 'vehicle', "Not Found");
+        if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
         $vehicle->delete();
 
@@ -199,10 +190,10 @@ class VehiclesController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
+        if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
 
         $vehicle = Vehicles::findOne(['id' => $id]);
-        if (!$vehicle) $this->module->setError(422, 'vehicle', "Not Found");
+        if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
         $documents = [];
         foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-insurance/' . $user->id, true);
@@ -234,10 +225,10 @@ class VehiclesController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
+        if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
 
         $vehicle = Vehicles::findOne(['id' => $id]);
-        if (!$vehicle) $this->module->setError(422, 'vehicle', "Not Found");
+        if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
         $documents = [];
         foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-registration/' . $user->id, true);
@@ -281,10 +272,10 @@ class VehiclesController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        if (empty ($_FILES)) $this->module->setError(411, '_files', 'Empty');
+        if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
 
         $vehicle = Vehicles::findOne(['id' => $id]);
-        if (!$vehicle) $this->module->setError(422, 'vehicle', "Not Found");
+        if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
         $documents = [];
         foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-photos/' . $user->id, true);
