@@ -144,6 +144,9 @@ class Module extends \yii\base\Module
 
             if (!$sandbox)
             {
+                if (!is_numeric($device->user->phone) || empty($device->user->phone) || intval($device->user->phone) == 0)
+                    $this->setError(422, 'phone', Yii::$app->mv->gt("Не верный формат. " . $device->user->phone, [], false));
+
                 /** @var \app\models\SmsTemplates $template */
                 $template = SmsTemplates::find()->where(['name' => "auth-template"])->one();
                 if ($template) $template = Yii::t('app', $template->template, ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
@@ -152,6 +155,7 @@ class Module extends \yii\base\Module
                 $response = $SMSCenter->send($device->user->phone, $template);
                 $send = new \SimpleXMLElement($response);
 
+                header('Content-Type: application/json; charset=UTF-8');
                 echo json_encode(['response' => $send, 'phone' => $device->user->phone]); exit;
             }
             else $send = (object) ['cnt' => 1];
