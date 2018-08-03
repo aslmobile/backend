@@ -164,14 +164,8 @@ class BaseController extends RestFul
         if (isset ($this->device_id) && !empty($this->device_id))
             $device = Devices::findOne(['device_id' => $this->device_id]);
 
-        if ($device)
-        {
-            if (!$device->user) $device = false;
-            else
-            {
-                if ($device->user->phone != $this->body->phone) $device = false;
-            }
-        }
+        if ($device && !$device->user) $device = false;
+        elseif ($device && $device->user->phone != $this->body->phone) $device = false;
 
         if (!$device && !empty ($this->body->phone))
         {
