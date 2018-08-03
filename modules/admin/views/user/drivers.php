@@ -71,6 +71,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'filter' => false
                     ]
                 ],
+                [
+                    'attribute' => 'approved',
+                    'label' => Yii::t('app', "Подтвержен"),
+                    'value' => function ($model) {
+                        return $model->approved == 1 ? '<i class="fa fa-check text-success"></i>' : '';
+                    },
+                    'filter' => false
+                ]
             ]); ?>
         </div>
     </section>
