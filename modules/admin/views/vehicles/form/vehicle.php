@@ -128,4 +128,65 @@ use yii\web\JsExpression;
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-12 col-sm-4 col-md-6">
+        <div class="box">
+            <div class="box-header with-border">
+                <?= Yii::t('app', "Фото автомобиля"); ?>
+            </div>
+            <?php if (!empty ($model->image) && intval($model->image) > 0) : ?>
+            <div class="box-body text-center">
+                <?php $image = \app\modules\api\models\UploadFiles::findOne($model->image); ?>
+                <?php if ($image) : ?><img class="img-responsive img-bordered" src="<?= $image->file; ?>" />
+                <?php else : ?><p class="text-center text-info"><?= Yii::t('app', "Фото не загружено"); ?></p>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    <div class="col-12 col-sm-4 col-md-6">
+        <div class="box">
+            <div class="box-header with-border">
+                <?= Yii::t('app', "Фото страховки"); ?>
+            </div>
+            <?php if (!empty ($model->insurance) && intval($model->insurance) > 0) : ?>
+            <div class="box-body text-center">
+                <?php $image = \app\modules\api\models\UploadFiles::findOne($model->insurance); ?>
+                <?php if ($image) : ?><img class="img-responsive img-bordered" src="<?= $image->file; ?>" />
+                <?php else : ?><p class="text-center text-info"><?= Yii::t('app', "Фото документа не загружено"); ?></p>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    <div class="col-2 col-sm-4 col-md-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <?= Yii::t('app', "Фото тех. паспорта"); ?>
+            </div>
+
+            <div class="box-body">
+                <div class="row">
+                    <?php if (!empty ($model->registration) && intval($model->registration) > 0) : ?>
+                    <div class="col-12 col-md-6">
+                        <?php $image = \app\modules\api\models\UploadFiles::findOne($model->registration); ?>
+                        <?php if ($image) : ?><img class="img-responsive img-bordered" src="<?= $image->file; ?>" />
+                        <?php else : ?><p class="text-center text-info"><?= Yii::t('app', "Фото документа не загружено"); ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty ($model->registration2) && intval($model->registration2) > 0) : ?>
+                    <div class="col-12 col-md-6">
+                        <?php $image = \app\modules\api\models\UploadFiles::findOne($model->registration2); ?>
+                        <?php if ($image) : ?><img class="img-responsive img-bordered" src="<?= $image->file; ?>" />
+                        <?php else : ?><p class="text-center text-info"><?= Yii::t('app', "Фото документа не загружено"); ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <?php ActiveForm::end(); ?>

@@ -91,8 +91,8 @@ class Vehicles extends \yii\db\ActiveRecord
             'vehicle_model_id'  => Yii::t('app', "Модель"),
             'created_at'        => Yii::t('app', "Создано"),
             'updated_at'        => Yii::t('app', "Обновлено"),
-            'registration'      => Yii::t('app', "Фото тех. паспрта"),
-            'registration2'     => Yii::t('app', "Фото тех. паспрта"),
+            'registration'      => Yii::t('app', "Фото тех. паспорта"),
+            'registration2'     => Yii::t('app', "Фото тех. паспорта"),
             'rating'            => Yii::t('app', "Рейтинг"),
             'main'              => Yii::t('app', "Основная")
         ];

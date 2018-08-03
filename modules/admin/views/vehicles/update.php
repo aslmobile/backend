@@ -5,9 +5,13 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\modules\admin\models\VehicleType | app\modules\admin\models\VehicleModel | app\modules\admin\models\VehicleBrand */
 
-$this->title = Yii::$app->mv->gt('Автомобиль: {mt}<small>Редактирование</small>', ['mt' => $model->brand->title], false);
+$this->title = Yii::$app->mv->gt('<span>{plate}</span>: {brand} {model} <small>Редактирование</small>', [
+    'brand' => $model->brand->title,
+    'model' => $model->model->title,
+    'plate' => $model->license_plate
+], false);
 $this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Автомобили',[],false), 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->params['breadcrumbs'][] = $model->license_plate;
 ?>
 
 <div class="content-wrapper">
