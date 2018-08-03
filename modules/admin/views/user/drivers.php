@@ -76,7 +76,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function ($model) {
                             return $model->approved == 1 ? '<i class="fa fa-check text-success"></i>' : '';
                         },
-                        'filter' => false
+                        'filter' => false,
+                        'format' => 'html'
                     ]
                 ]
             ]); ?>
