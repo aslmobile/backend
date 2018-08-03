@@ -152,7 +152,7 @@ class Module extends \yii\base\Module
                 $response = $SMSCenter->send($device->user->phone, $template);
                 $send = new \SimpleXMLElement($response);
 
-                echo '<pre>' . print_r(['response' => $send, 'phone' => $device->user->phone], true) . '</pre>'; exit;
+                echo json_encode(['response' => $send, 'phone' => $device->user->phone]); exit;
             }
             else $send = (object) ['cnt' => 1];
         }
