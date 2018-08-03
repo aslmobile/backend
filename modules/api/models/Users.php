@@ -9,7 +9,6 @@ class Users extends \app\models\User
     "type": "object",
     "properties": {
         "id": {"type": "integer"},
-        "email": {"type": "string","format": "email"},
         "first_name": {"type": "string"},
         "second_name": { "type": "string"},
         "created_at": {"type": "integer"},

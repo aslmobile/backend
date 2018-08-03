@@ -181,7 +181,8 @@ class BaseController extends RestFul
             if (!$user)
             {
                 $user = new Users([
-                    'phone' => $this->body->phone
+                    'phone' => $this->body->phone,
+                    'type'  => $this->body->type
                 ]);
 
                 if (!$user->save(false))
@@ -203,9 +204,14 @@ class BaseController extends RestFul
                 'lang' => $this->lang,
                 'uip' => Yii::$app->request->userIP,
                 'device_id' => $this->device_id,
-                'type' => $this->ostype,
-                'user_type' => $this->body->type
+                'type' => $this->ostype
             ]);
+
+            if ($user->type != $this->body->type)
+            {
+                $user->type = $this->body->type;
+                $user->save(false);
+            }
 
             if (!$device->save())
             {
