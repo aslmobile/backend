@@ -3,6 +3,7 @@
 namespace app\components\Socket;
 
 use app\models\Devices;
+use app\models\Line;
 use Ratchet\ConnectionInterface;
 
 class Message
@@ -52,6 +53,29 @@ class Message
             'user_id'       => $device->user_id,
             'data'          => [
                 'message'   => 'pong'
+            ]
+        ];
+
+        return $response;
+    }
+
+    public function driverQueue($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        $lines = Line::find()->all();
+        $queue = [];
+        foreach ($lines as $line) $queue[] = $line->toArray();
+
+        $response = [
+            'message_id'    => $this->message_id,
+            'device_id'     => $device->id,
+            'user_id'       => $device->user_id,
+            'data'          => [
+                'queue'   => $queue
             ]
         ];
 

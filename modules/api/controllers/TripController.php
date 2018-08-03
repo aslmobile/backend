@@ -435,7 +435,7 @@ class TripController extends BaseController
         $trip = new Trip();
         $trip->status = Trip::STATUS_WAITING;
         $trip->user_id = $user->id;
-        $trip->tariff = $this->calculatePassengerTariff($route->id)['tariff'];
+        $trip->tariff = $this->calculatePassengerTariff($route->id, $checkpoint->id, $endpoint->id)['tariff'];
         $trip->currency = "₸";
         $trip->payment_type = $this->body->payment_type;
         $trip->startpoint_id = $checkpoint->id;
@@ -546,30 +546,45 @@ class TripController extends BaseController
         return $rate;
     }
 
-    protected function calculatePassengerTariff($id, $scp = 0, $ecp = 0)
+    protected function calculatePassengerTariff($id, $checkpoint_start = 0, $checkpoint_end = 0)
     {
         $rate = $this->getRate($id);
-        $taxi_tariff = 0;
+        $taxi_tariff = 0; // TODO: Брать тариф на такси через админку
 
         /** @var \app\models\Route $route */
         $route = Route::find()->where(['id' => $id])->one();
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
-        /** @var \app\models\Checkpoint $route */
-        $route = Checkpoint::find()->where(['id' => $id])->one();
-        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
+        /** @var \app\models\Checkpoint $checkpoint_start */
+        $checkpoint_start = Checkpoint::find()->where(['id' => $checkpoint_start])->one();
+        if (!$checkpoint_start) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найдена", [], false));
 
-        $tariff = $route->base_tariff * $rate + $taxi_tariff;
+        /** @var \app\models\Checkpoint $checkpoint_end */
+        $checkpoint_end = Checkpoint::find()->where(['id' => $checkpoint_end])->one();
+        if (!$checkpoint_end) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найдена", [], false));
 
         $dependence = TariffDependence::find()->where([
             'route_id'              => $route->id,
-            'start_checkpoint_id'   => 0,
-            'end_checkpoint_id'     => 0
-        ]);
+            'start_checkpoint_id'   => $checkpoint_start->id,
+            'end_checkpoint_id'     => $checkpoint_end->id
+        ])->one();
 
+        if (!$dependence)
+        {
+            $dependence = new TariffDependence();
+            $dependence->route_id = $route->id;
+            $dependence->start_checkpoint_id = $checkpoint_start->id;
+            $dependence->end_checkpoint_id = $checkpoint_end->id;
+            $dependence->base_tariff = $route->base_tariff;
+            $dependence->base_rate = 0;
+
+            $dependence->save();
+        }
+
+        $tariff = $dependence->base_tariff * $rate + $taxi_tariff;
 
         return [
-            'base_tariff' => $route->base_tariff,
+            'base_tariff' => $dependence->base_tariff,
             'tariff' => $tariff
         ];
     }
