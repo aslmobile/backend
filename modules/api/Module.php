@@ -154,9 +154,6 @@ class Module extends \yii\base\Module
 
                 $response = $SMSCenter->send($device->user->phone, $template);
                 $send = new \SimpleXMLElement($response);
-
-                header('Content-Type: application/json; charset=UTF-8');
-                echo json_encode(['response' => $send, 'phone' => $device->user->phone]); exit;
             }
             else $send = (object) ['cnt' => 1];
         }
