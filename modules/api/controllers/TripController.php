@@ -481,6 +481,7 @@ class TripController extends BaseController
                 $_luggage->need_place = (int) intval($luggage['need_place']);
                 $_luggage->seats = (int) intval($luggage['seats']);
                 $_luggage->currency = (string) "₸";
+                $_luggage->luggage_type = (int) intval($luggage['id']);
 
                 $_luggage->save(false);
             }

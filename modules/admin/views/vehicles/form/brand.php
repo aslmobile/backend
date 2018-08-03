@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use kartik\select2\Select2;
 use yii\web\JsExpression;
+use alexantr\elfinder\InputFile;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\admin\models\VehicleType | app\modules\admin\models\VehicleModel | app\modules\admin\models\VehicleBrand */
@@ -20,7 +21,7 @@ use yii\web\JsExpression;
                 <?= $form->field($model, 'status')->dropDownList($model->statusList) ?>
                 <?= $form->field($model, 'max_seats')->textInput(['maxlength' => true]) ?>
 
-                <?= $form->field($model, 'image')->widget(alexantr\elfinder\InputFile::className(), [
+                <?= $form->field($model, 'image', ['template' => "{label}\n{input}"])->widget(InputFile::className(), [
                     'buttonText' => Yii::$app->mv->gt('Выбрать', [], false),
                     'options' => [
                         'language' => 'ru',
@@ -30,10 +31,10 @@ use yii\web\JsExpression;
                                     var val = $(changed).val();
                                     setTimeout(function() {
                                     if($(".elfinder-input-preview").length){
-                                       $(".elfinder-input-preview").html($("<img/>", {src : val, 'width': 200}));
+                                       $(".elfinder-input-preview").html($("<img/>", {src : val, width: 200, height: 'auto'}));
                                     }else{
                                         $(changed).parent().after('<div class="help-block elfinder-input-preview"></div');
-                                        $(".elfinder-input-preview").html($("<img/>", {src : val, 'width': 200}));
+                                        $(".elfinder-input-preview").html($("<img/>", {src : val, width: 200, height: 'auto'}));
                                     }
                                     }, 500);
 JS
@@ -51,7 +52,8 @@ JS
                     'attribute' => 'created_by',
                     'hideSearch' => true,
                     'options' => [
-                        'placeholder' => Yii::t('app', "Тип автомобиля")
+                        'placeholder' => Yii::t('app', "Тип автомобиля"),
+                        'multiple' => true
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,

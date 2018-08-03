@@ -85,12 +85,15 @@ class LineController extends BaseController
         $route = Route::findOne($startpoint->route);
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
+        // TODO: Переделать логику
         $rate = $this->getRate($route->id);
         $seat = (float) round($route->base_tariff * $rate, 2);
-        $commission = (float) round($seat * 0.2, 2);
+
+        $commission = (float) 0.0;
 
         $this->module->data['amount'] = [
             'base_tariff'   => $route->base_tariff,
+            'rate'          => $rate,
             'seat'          => $seat,
             'commission'    => $commission
         ];

@@ -199,7 +199,7 @@ class VehiclesController extends Controller
             return $this->redirect(['model', 'id' => $model->id]);
         }
 
-        return $this->render('update', [
+        return $this->render('model', [
             'model' => $model,
         ]);
     }

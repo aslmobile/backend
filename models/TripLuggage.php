@@ -19,6 +19,7 @@ use app\components\MultilingualQuery;
  * @property string $unique_id
  * @property double $amount
  * @property string $currency
+ * @property integer $luggage_type
  */
 class TripLuggage extends \yii\db\ActiveRecord
 {
@@ -37,7 +38,7 @@ class TripLuggage extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['created_at', 'updated_at', 'status', 'need_place', 'seats'], 'integer'],
+            [['created_at', 'updated_at', 'status', 'need_place', 'seats', 'luggage_type'], 'integer'],
             [['unique_id'], 'string'],
             [['amount'], 'number'],
             [['currency'], 'string', 'max' => 255],
@@ -59,7 +60,12 @@ class TripLuggage extends \yii\db\ActiveRecord
             'unique_id' => Yii::$app->mv->gt('Уникальный идентификатор', [], 0),
             'amount' => Yii::$app->mv->gt('Сумма', [], 0),
             'currency' => Yii::$app->mv->gt('Валюта', [], 0),
+            'luggage_type' => Yii::$app->mv->gt('Тип багажа', [], 0),
         ];
     }
 
+    public function getLuggageType()
+    {
+        return LuggageType::findOne($this->luggage_type);
+    }
 }

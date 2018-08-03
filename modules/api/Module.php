@@ -154,6 +154,7 @@ class Module extends \yii\base\Module
             }
             else $send = (object) ['cnt' => 1];
         }
+        else $this->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
 
         return isset ($send->cnt) && isset ($device) ? $device : false;
     }

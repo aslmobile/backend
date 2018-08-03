@@ -185,7 +185,12 @@ $this->params['breadcrumbs'][] = $this->title;
                                             'seats',
                                             'need_place',
                                             'amount',
-                                            'seats'
+                                            'seats',
+                                            'luggage_type' => [
+                                                'attribute' => 'luggage_type',
+                                                'label' => Yii::t('app', "Размер багажа"),
+                                                'value' => ($luggage->luggageType) ? $luggage->luggageType->title : Yii::t('app', "Не указано")
+                                            ]
                                         ],
                                     ]) ?>
                                 </div>

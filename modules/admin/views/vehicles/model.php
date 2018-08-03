@@ -5,9 +5,10 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\modules\admin\models\VehicleType | app\modules\admin\models\VehicleModel | app\modules\admin\models\VehicleBrand */
 
-$this->title = Yii::$app->mv->gt('Редактирование &laquo;{mt}&raquo; автомобиля',['mt' => $model->modelTitle], false);
+$this->title = Yii::$app->mv->gt('{mt}: {title} <small>Редактирование</small>', ['mt' => $model->modelTitle, 'title' => $model->title], false);
 $this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Автомобили',[],false), 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->params['breadcrumbs'][] = $model->modelTitle;
+$this->params['breadcrumbs'][] = $model->title;
 ?>
 
 <div class="content-wrapper">
