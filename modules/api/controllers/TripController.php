@@ -4,6 +4,7 @@ use app\models\Countries;
 use app\models\Line;
 use app\models\LuggageType;
 use app\models\Route;
+use app\models\TariffDependence;
 use app\models\Taxi;
 use app\models\TripLuggage;
 use app\modules\admin\models\Checkpoint;
@@ -545,7 +546,7 @@ class TripController extends BaseController
         return $rate;
     }
 
-    protected function calculatePassengerTariff($id)
+    protected function calculatePassengerTariff($id, $scp = 0, $ecp = 0)
     {
         $rate = $this->getRate($id);
         $taxi_tariff = 0;
@@ -554,7 +555,18 @@ class TripController extends BaseController
         $route = Route::find()->where(['id' => $id])->one();
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
+        /** @var \app\models\Checkpoint $route */
+        $route = Checkpoint::find()->where(['id' => $id])->one();
+        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
+
         $tariff = $route->base_tariff * $rate + $taxi_tariff;
+
+        $dependence = TariffDependence::find()->where([
+            'route_id'              => $route->id,
+            'start_checkpoint_id'   => 0,
+            'end_checkpoint_id'     => 0
+        ]);
+
 
         return [
             'base_tariff' => $route->base_tariff,

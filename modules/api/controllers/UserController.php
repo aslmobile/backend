@@ -30,6 +30,7 @@ class UserController extends BaseController
                             'update-profile',
                             'trips',
                             'get',
+                            'get-own',
                             'settings'
                         ],
                         'allow' => true
@@ -47,10 +48,21 @@ class UserController extends BaseController
                     'update-profile' => ['POST'],
                     'trips' => ['GET'],
                     'get' => ['GET'],
+                    'get-own' => ['GET'],
                     'settings' => ['POST']
                 ]
             ]
         ];
+    }
+
+    public function actionGetOwn()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->module->data = $user->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionGet($id)
