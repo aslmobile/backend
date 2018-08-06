@@ -18,6 +18,9 @@ class Vehicles extends \app\models\Vehicles
             else $array[$field . '_url'] = null;
         }
 
+        $array['photos_url'] = null;
+        if (isset ($array['photos']) && !empty ($array['photos'])) $array['photos_url'] = $this->getVehiclePhotos();
+
         foreach ($array as $field => $value)
         {
             if ($field == 'vehicle_type_id') $array[$field] = VehicleTypes::findOne($this->vehicle_type_id)->toArray();

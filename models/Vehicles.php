@@ -1,5 +1,6 @@
 <?php namespace app\models;
 
+use app\modules\api\models\UploadFiles;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 
@@ -13,6 +14,7 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $seats
  * @property string $license_plate
  * @property integer $image
+ * @property string $photos
  * @property integer $insurance
  * @property integer $registration
  * @property integer $registration2
@@ -57,7 +59,7 @@ class Vehicles extends \yii\db\ActiveRecord
             [['user_id', 'vehicle_type_id', 'vehicle_model_id', 'vehicle_brand_id', 'seats', 'license_plate'], 'required'],
             [['main', 'weight', 'seats', 'vehicle_type_id', 'vehicle_model_id', 'vehicle_brand_id'], 'integer'],
             [['image', 'insurance', 'registration', 'registration2'], 'integer'],
-            [['license_plate'], 'string'],
+            [['license_plate', 'photos'], 'string'],
             ['license_plate', 'unique', 'targetClass' => self::className(),
                 'message' => Yii::t('app', 'This plate has already been taken.')
             ],
@@ -85,6 +87,7 @@ class Vehicles extends \yii\db\ActiveRecord
             'seats'             => Yii::t('app', "Мест"),
             'license_plate'     => Yii::t('app', "Номер"),
             'image'             => Yii::t('app', "Фото"),
+            'photos'            => Yii::t('app', "Фотографии"),
             'insurance'         => Yii::t('app', "Страхование"),
             'vehicle_type_id'   => Yii::t('app', "Тип"),
             'vehicle_brand_id'  => Yii::t('app', "Бренд"),
@@ -134,5 +137,49 @@ class Vehicles extends \yii\db\ActiveRecord
         $vehicle_name = implode(' ', $concatenate);
 
         return $vehicle_name;
+    }
+
+    public function getVehiclePhotos($type = 1)
+    {
+        if (empty ($this->photos)) return null;
+
+        $photos = explode(',', $this->photos);
+        switch ($type)
+        {
+            case 1:
+                $_photos = [];
+                if ($photos && count ($photos) > 0) foreach ($photos as $file_id)
+                {
+                    if (intval($file_id) > 0)
+                    {
+                        $file = UploadFiles::findOne(intval($file_id));
+                        if ($file) $_photos[] = [
+                            'id' => $file->id,
+                            'value' => $file->file
+                        ];
+                    }
+                }
+
+                if ($_photos && count($_photos) > 0) return $_photos;
+                return null;
+                break;
+
+            case 2:
+                $_photos = [];
+                if ($photos && count ($photos) > 0) foreach ($photos as $file_id)
+                {
+                    if (intval($file_id) > 0)
+                    {
+                        $file = UploadFiles::findOne(intval($file_id));
+                        if ($file) $_photos[] = $file;
+                    }
+                }
+
+                if ($_photos && count($_photos) > 0) return $_photos;
+                return null;
+                break;
+        }
+
+        return null;
     }
 }

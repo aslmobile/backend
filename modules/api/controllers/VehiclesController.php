@@ -31,6 +31,7 @@ class VehiclesController extends BaseController
                             'upload-vehicle-insurance',
                             'upload-vehicle-registration',
                             'upload-vehicle-photo',
+                            'upload-vehicle-photos',
                         ],
                         'allow' => true
                     ]
@@ -50,6 +51,7 @@ class VehiclesController extends BaseController
                     'upload-vehicle-insurance' => ['POST'],
                     'upload-vehicle-registration' => ['POST'],
                     'upload-vehicle-photo' => ['POST'],
+                    'upload-vehicle-photos' => ['POST'],
                 ]
             ]
         ];
@@ -297,6 +299,41 @@ class VehiclesController extends BaseController
         $this->module->data = [
             'vehicle' => $vehicle->toArray(),
             'file' => $documents['image']['file']
+        ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionUploadVehiclePhotos($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
+
+        $vehicle = Vehicles::findOne(['id' => $id]);
+        if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
+
+        $documents = [];
+        foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-photos/' . $user->id, true);
+
+        if (!empty ($vehicle->photos))
+        {
+            $photos = $vehicle->getVehiclePhotos(2);
+            /** @var \app\modules\api\models\UploadFiles $file */
+            if ($photos && count ($photos) > 0) foreach ($photos as $file) $file->delete();
+        }
+
+        $_photos = [];
+        foreach ($documents as $file) $_photos[] = $file['file_id'];
+        $_photos = implode(',', $_photos);
+
+        $vehicle->photos = (string) $_photos;
+        $vehicle->save();
+
+        $this->module->data = [
+            'vehicle' => $vehicle->toArray(),
+            'photos' => $documents
         ];
         $this->module->setSuccess();
         $this->module->sendResponse();
