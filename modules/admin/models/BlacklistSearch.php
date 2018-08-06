@@ -18,7 +18,7 @@ class BlacklistSearch extends Blacklist
     public function rules()
     {
         return [
-            [['id', 'created_at', 'updated_at', 'status', 'user_id', 'add_type', 'created_by', 'updated_by'], 'integer'],
+            [['id', 'status', 'user_id', 'add_type', 'created_by', 'updated_by'], 'integer'],
             [['add_comment', 'description', 'cancel_comment'], 'safe'],
         ];
     }

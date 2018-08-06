@@ -46,6 +46,7 @@ class Answers extends \yii\db\ActiveRecord
                 'tableName' => "{{%answers_lang}}",
                 'attributes' => ['answer',]
             ],
+            TimestampBehavior::className()
         ];
     }
 
@@ -67,10 +68,10 @@ class Answers extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::$app->mv->gt('ID', [], 0),
-            'type' => Yii::$app->mv->gt('Type', [], 0),
-            'answer' => Yii::$app->mv->gt('Answer', [], 0),
-            'created_at' => Yii::$app->mv->gt('Created At', [], 0),
-            'updated_at' => Yii::$app->mv->gt('Updated At', [], 0),
+            'type' => Yii::$app->mv->gt('Тип', [], 0),
+            'answer' => Yii::$app->mv->gt('Ответ', [], 0),
+            'created_at' => Yii::$app->mv->gt('Создан', [], 0),
+            'updated_at' => Yii::$app->mv->gt('Обновлен', [], 0),
         ];
     }
 
@@ -85,4 +86,11 @@ class Answers extends \yii\db\ActiveRecord
         return $q;
     }
 
+    public static function getTypesList()
+    {
+        return [
+            self::TYPE_CPR => Yii::t('app', "Водитель. Отмена поездки"),
+            self::TYPE_CTR => Yii::t('app', "Пассажир. Отмена поездки."),
+        ];
+    }
 }

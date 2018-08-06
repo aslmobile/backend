@@ -295,6 +295,20 @@ class User extends ActiveRecord implements IdentityInterface
         return \app\modules\admin\models\City::findOne($this->city_id);
     }
 
+    public function getUserPhoto()
+    {
+        if ($this->image && intval($this->image) > 0)
+        {
+            $image = \app\modules\api\models\UploadFiles::findOne($this->image);
+            if ($image)
+            {
+                return Yii::$app->imageCache->img(Yii::getAlias('@webroot') . $image->file, '128x128', ['class' => 'img-circle']);
+            }
+        }
+
+        return '<img class="img-circle" src="https://placehold.it/128x128" alt="no-photo">';
+    }
+
     public function getOnline()
     {
         if ($this->last_activity == null || $this->last_activity >= time() - 15) return true;

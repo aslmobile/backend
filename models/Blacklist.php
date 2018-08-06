@@ -66,6 +66,8 @@ class Blacklist extends \yii\db\ActiveRecord
             'description' => Yii::$app->mv->gt('Описание', [], 0),
             'created_at' => Yii::$app->mv->gt('Добавлен', [], 0),
             'updated_at' => Yii::$app->mv->gt('Обновлен', [], 0),
+            'created_by' => Yii::$app->mv->gt('Кто добавил', [], 0),
+            'updated_by' => Yii::$app->mv->gt('Кто обновил', [], 0),
             'cancel_comment' => Yii::$app->mv->gt('Комментарий отмены', [], 0),
         ];
     }
@@ -80,6 +82,23 @@ class Blacklist extends \yii\db\ActiveRecord
     public function getUser()
     {
         return \app\modules\admin\models\User::findOne($this->user_id);
+    }
+
+    public function getCreator()
+    {
+        return \app\modules\admin\models\User::findOne($this->created_by);
+    }
+
+    public function getUpdater()
+    {
+        return \app\modules\admin\models\User::findOne($this->updated_by);
+    }
+
+    public static function getTypesList()
+    {
+        return [
+            self::TYPE_AUTO => Yii::t('app', "Автоматическая блокировка")
+        ];
     }
 
     public static function getStatusList()

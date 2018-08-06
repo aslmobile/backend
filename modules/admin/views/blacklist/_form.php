@@ -7,6 +7,8 @@ use alexantr\elfinder\InputFile;
 use alexantr\tinymce\TinyMCE as TTinyMCE;
 use alexantr\elfinder\TinyMCE as ETinyMCE;
 use app\modules\admin\models\Lang;
+use kartik\select2\Select2;
+use yii\web\JsExpression;
 /* @var $this yii\web\View */
 /* @var $model app\models\Blacklist */
 /* @var $form yii\widgets\ActiveForm */
@@ -29,9 +31,9 @@ use app\modules\admin\models\Lang;
     <div class="box-body" style="padding: 10px 0">
         <ul class="nav nav-tabs">
             <li class="active" style="margin-left: 15px;">
-                <a data-toggle="tab" href="#top">Data</a>
+                <a data-toggle="tab" href="#top"><?= Yii::t('app', "Информация"); ?></a>
             </li>
-                    </ul>
+        </ul>
 
         <div class="tab-content" style="padding: 10px">
             <div id="top" class="tab-pane fade in active">
@@ -39,21 +41,34 @@ use app\modules\admin\models\Lang;
                     <div class="col-sm-6">
                             <?= $form->field($model, 'add_comment')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'created_at')->textInput() ?>
+    <?= $form->field($model, 'status')->dropDownList($model->statusList) ?>
 
-    <?= $form->field($model, 'updated_at')->textInput() ?>
+                            <?= $form->field($model, 'user_id')->widget(Select2::classname(), [
+                                'model' => [],
+                                'theme' => Select2::THEME_DEFAULT,
+                                'attribute' => 'created_by',
+                                'hideSearch' => true,
+                                'options' => [
+                                    'placeholder' => Yii::t('app', "Тип автомобиля")
+                                ],
+                                'pluginOptions' => [
+                                    'allowClear' => true,
+                                    'minimumInputLength' => 1,
+                                    'ajax' => [
+                                        'url' => \yii\helpers\Url::toRoute(['/admin/user/select-users']),
+                                        'dataType' => 'json',
+                                        'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                                    ],
+                                    'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                                    'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                                    'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+                                    'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/user/select-users']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                                ],
+                            ]); ?>
 
-    <?= $form->field($model, 'status')->textInput() ?>
-
-    <?= $form->field($model, 'user_id')->textInput() ?>
-
-    <?= $form->field($model, 'add_type')->textInput() ?>
+    <?= $form->field($model, 'add_type')->dropDownList($model->typesList) ?>
 
     <?= $form->field($model, 'description')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'created_by')->textInput() ?>
-
-    <?= $form->field($model, 'updated_by')->textInput() ?>
 
     <?= $form->field($model, 'cancel_comment')->textInput(['maxlength' => true]) ?>
 

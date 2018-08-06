@@ -171,22 +171,22 @@ $act = Yii::$app->controller->action->id;
             <li class="header"><?= Yii::$app->mv->gt('Линия', [], false); ?></li>
             <li<?= ($cont == 'lines' && ($act == 'vehicles-queue')) ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute('/admin/lines/vehicles-queue') ?>">
-                    <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('Машины в очереди', [], false) ?>
+                    <i class="fa fa-car"></i> <span><?= Yii::$app->mv->gt('Машины в очереди', [], false) ?></span>
                 </a>
             </li>
             <li<?= ($cont == 'lines' && ($act == 'vehicles-ready')) ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute('/admin/lines/vehicles-ready') ?>">
-                    <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('Машины на отправку', [], false) ?>
+                    <i class="fa fa-car"></i> <span><?= Yii::$app->mv->gt('Машины на отправку', [], false) ?></span>
                 </a>
             </li>
             <li<?= ($cont == 'lines' && ($act == 'vehicles-trip')) ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute('/admin/lines/vehicles-trip') ?>">
-                    <i class="fa fa-car"></i> <?= Yii::$app->mv->gt('Машины в пути', [], false) ?>
+                    <i class="fa fa-car"></i> <span><?= Yii::$app->mv->gt('Машины в пути', [], false) ?></span>
                 </a>
             </li>
             <li<?= ($cont == 'trips' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute('/admin/trips/index') ?>">
-                    <i class="fa fa-users"></i> <?= Yii::$app->mv->gt('Пассажиры в очереди', [], false) ?>
+                    <i class="fa fa-users"></i> <span><?= Yii::$app->mv->gt('Пассажиры в очереди', [], false) ?></span>
                 </a>
             </li>
 

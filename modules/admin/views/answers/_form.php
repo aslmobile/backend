@@ -29,29 +29,21 @@ use app\modules\admin\models\Lang;
     <div class="box-body" style="padding: 10px 0">
         <ul class="nav nav-tabs">
             <li class="active" style="margin-left: 15px;">
-                <a data-toggle="tab" href="#top"><?= Yii::$app->mv->gt('Data',[],false); ?></a>
+                <a data-toggle="tab" href="#top"><?= Yii::$app->mv->gt('Информация',[],false); ?></a>
             </li>
-                            <?php foreach (Lang::getBehaviorsList() as $k => $v) { ?>
+            <?php foreach (Lang::getBehaviorsList() as $k => $v) { ?>
                 <li>
                     <a data-toggle="tab" href="#top-<?= $k ?>" style="max-height: 42px;"><?= $v ?></a>
                 </li>
-                <?php } ?>                    </ul>
+            <?php } ?>
+        </ul>
 
         <div class="tab-content" style="padding: 10px">
             <div id="top" class="tab-pane fade in active">
                 <div class="row">
-                    <div class="col-sm-6">
-                            <?= $form->field($model, 'type')->textInput() ?>
-
-    <?= $form->field($model, 'answer')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'created_at')->textInput() ?>
-
-    <?= $form->field($model, 'updated_at')->textInput() ?>
-
-                    </div>
-                    <div class="col-sm-6">
-
+                    <div class="col-sm-12">
+                        <?= $form->field($model, 'type')->dropDownList($model->typesList) ?>
+                        <?= $form->field($model, 'answer')->textInput(['maxlength' => true]) ?>
                     </div>
                 </div>
             </div>

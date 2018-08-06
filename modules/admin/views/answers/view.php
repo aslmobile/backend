@@ -7,8 +7,8 @@ use yii\widgets\Breadcrumbs;
 /* @var $this yii\web\View */
 /* @var $model app\models\Answers */
 
-$this->title = Yii::$app->mv->gt($model->id,[],false);
-$this->params['breadcrumbs'][] = ['label' => 'Answers', 'url' => ['index']];
+$this->title = $model->answer;
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Быстрые ответы"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -26,13 +26,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="box-header with-border">
                         <h3></h3>
                         <div class="box-tools pull-right">
-                            <?= Html::a('Edit', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-                            <?= Html::a('Remove', ['delete', 'id' => $model->id], [
-                            'class' => 'btn btn-danger',
-                            'data' => [
-                            'confirm' => 'Are you sure you want to delete this item?',
-                            'method' => 'post',
-                            ],
+                            <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                            <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
+                                'class' => 'btn btn-danger',
+                                'data' => [
+                                    'confirm' => 'Are you sure you want to delete this item?',
+                                    'method' => 'post'
+                                ]
                             ]) ?>
                         </div>
                     </div>
@@ -40,14 +40,16 @@ $this->params['breadcrumbs'][] = $this->title;
                         <div class="row">
                             <div class="col-lg-12">
                                 <?= DetailView::widget([
-                                'model' => $model,
-                                'attributes' => [
-                                            'id',
-            'type',
-            'answer',
-            'created_at',
-            'updated_at',
-                                ],
+                                    'model' => $model,
+                                    'attributes' => [
+                                        [
+                                            'attribute' => 'type',
+                                            'value' => key_exists($model->type, $model->typesList) ? $model->typesList[$model->type] : false
+                                        ],
+                                        'answer',
+                                        'created_at:datetime',
+                                        'updated_at:datetime',
+                                    ]
                                 ]) ?>
                             </div>
                         </div>

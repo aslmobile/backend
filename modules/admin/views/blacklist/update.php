@@ -7,16 +7,15 @@ use app\components\widgets\Alert;
 /* @var $model app\models\Blacklist */
 
 
-$this->title = Yii::$app->mv->gt('Edit {title}',['title' => $model->id],false);
-$this->params['breadcrumbs'][] = ['label' => 'Blacklists', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
+$this->title = Yii::$app->mv->gt('Редактирование: {title}', ['title' => $model->user->fullName], false);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Черный список"), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->user->fullName, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="content-wrapper">
     <section class="content-header">
         <?= Html::tag('h1', $this->title)?>
-
         <?= Breadcrumbs::widget([
         'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>

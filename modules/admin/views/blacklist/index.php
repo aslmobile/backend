@@ -66,8 +66,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'filter' => \app\models\Blacklist::getStatusList()
                     ],
-                    'created_at',
-                    'updated_at'
+                    'created_at:datetime',
+                    'updated_at:datetime'
                 ],
             ]); ?>
         </div>

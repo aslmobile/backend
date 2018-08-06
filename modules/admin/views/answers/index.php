@@ -56,46 +56,28 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'id' => 'grid',
+                'rowOptions' => function ($model, $key, $index, $grid) {
+                    return [
+                        'role' => 'button',
+                        'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/answers/update/" . $key) . "'"
+                    ];
+                },
                 'layout'=>"
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
-                    <div class='box-footer' style='display: block;'>{pager}</div>
-                ",
+                    <div class='box-footer' style='display: block;'>{pager}</div>",
                 'tableOptions' => [
                     'class' => 'table table-bordered table-hover dataTable',
                 ],
                 'filterModel' => $searchModel,
-        'columns' => [
-                    //['class' => 'yii\grid\SerialColumn'],
-                    ['class' => 'yii\grid\CheckboxColumn'],
-
-                                'id',
-            'type',
-            'answer',
-            'created_at',
-            'updated_at',
-                    [
-                        'class' => 'yii\grid\ActionColumn',
-                        'template' => '{view} {update} {delete}',
-                        'buttons' => [
-                            'view' => function ($url, $model) {
-                                return Html::a('<button type="button" class="btn btn-info btn-sm"><i class="fa fa-search"></i></button>', $url);
-                            },
-                            'update' => function ($url, $model) {
-                                return Html::a('<button type="button" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i></button>', $url);
-                            },
-                            'delete' => function ($url, $model) {
-                                return Html::a(
-                                    '<button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>',
-                                    $url,
-                                    ['data'=>[
-                                        'confirm'=>Yii::$app->mv->gt('Are you sure you want to delete this item?',[],false),
-                                        'method'=>'post',
-                                        'pjax'=>'0'
-                                    ]]
-                                );
-                            },
-                        ]
-                    ],
+                 'columns' => [
+                     [
+                         'attribute' => 'type',
+                         'content' => function ($data) {
+                             return key_exists($data->type, $data->typesList) ? $data->typesList[$data->type] : false;
+                         },
+                         'filter' => \app\models\Answers::getTypesList(),
+                     ],
+                    'answer'
                 ],
             ]); ?>
         </div>

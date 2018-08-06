@@ -7,9 +7,9 @@ use app\components\widgets\Alert;
 /* @var $model app\models\Answers */
 
 
-$this->title = Yii::$app->mv->gt('Edit {title}',['title' => $model->id],false);
-$this->params['breadcrumbs'][] = ['label' => 'Answers', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
+$this->title = Yii::$app->mv->gt('Редактирование',['title' => $model->id],false);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Быстрые ответы"), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->answer, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
