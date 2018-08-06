@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'user_id' => [
                             'attribute' => 'user_id',
                             'content' => function ($data) {
-                                return $data->user->fullName;
+                                return ($data->user) ? $data->user->fullName : '';
                             },
                             'filter' => Select2::widget([
                                 'model' => $searchModel,
