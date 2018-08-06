@@ -51,8 +51,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'id',
                         'label' => Yii::t('app', "Имя"),
                         'value' => function ($model) {
-                            return $model->fullName;
-                        }
+                            $check = $model->approved == 1 ? ' <i class="fa fa-check text-success"></i>' : '';
+                            return $model->fullName . $check;
+                        },
+                        'format' => 'html'
                     ],
                     'phone',
                     'email:email',
@@ -69,15 +71,6 @@ $this->params['breadcrumbs'][] = $this->title;
                             return $model->rating;
                         },
                         'filter' => false
-                    ],
-                    [
-                        'attribute' => 'approved',
-                        'label' => Yii::t('app', "Подтвержен"),
-                        'value' => function ($model) {
-                            return $model->approved == 1 ? '<i class="fa fa-check text-success"></i>' : '';
-                        },
-                        'filter' => false,
-                        'format' => 'html'
                     ]
                 ]
             ]); ?>
