@@ -81,4 +81,12 @@ class Blacklist extends \yii\db\ActiveRecord
     {
         return \app\modules\admin\models\User::findOne($this->user_id);
     }
+
+    public static function getStatusList()
+    {
+        return [
+            self::STATUS_BLACKLISTED => Yii::t('app', "Заблокирован"),
+            self::STATUS_DISBAND => Yii::t('app', "Разблокирован")
+        ];
+    }
 }

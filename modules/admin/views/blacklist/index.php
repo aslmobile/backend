@@ -59,7 +59,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     ],
                     'add_comment',
-                    'status',
+                    'status' => [
+                        'attribute' => 'status',
+                        'content' => function ($data) {
+                            return key_exists($data->status, $data->statusList) ? $data->statusList[$data->status] : false;
+                        },
+                        'filter' => \app\models\Blacklist::getStatusList()
+                    ],
                     'created_at',
                     'updated_at'
                 ],
