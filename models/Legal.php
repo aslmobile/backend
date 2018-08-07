@@ -77,11 +77,11 @@ class Legal extends \yii\db\ActiveRecord
     {
         return [
             'id'                => Yii::t('app', "ID"),
-            'title'             => Yii::t('app', "Title"),
-            'content'           => Yii::t('app', "Content"),
-            'type'              => Yii::t('app', "Type"),
-            'created_at'        => Yii::t('app', "Created"),
-            'updated_at'        => Yii::t('app', "Updated")
+            'title'             => Yii::t('app', "Заголовок"),
+            'content'           => Yii::t('app', "Содержание"),
+            'type'              => Yii::t('app', "Тип"),
+            'created_at'        => Yii::t('app', "Создан"),
+            'updated_at'        => Yii::t('app', "Обновлен")
         ];
     }
 
