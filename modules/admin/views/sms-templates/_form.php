@@ -29,7 +29,7 @@ use app\modules\admin\models\Lang;
     <div class="box-body" style="padding: 10px 0">
         <ul class="nav nav-tabs">
             <li class="active" style="margin-left: 15px;">
-                <a data-toggle="tab" href="#top">Data</a>
+                <a data-toggle="tab" href="#top"><?= Yii::t('app', "Информация"); ?></a>
             </li>
                     </ul>
 

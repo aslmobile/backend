@@ -101,6 +101,4 @@ class User extends \app\models\User
         return $this->hasMany(AuthItem::className(), ['name' => 'item_name'])
             ->viaTable('auth_assignment', ['user_id' => 'id']);
     }
-
-
 }

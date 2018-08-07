@@ -52,10 +52,10 @@ class SmsTemplates extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::$app->mv->gt('ID', [], 0),
-            'template' => Yii::$app->mv->gt('Template', [], 0),
-            'name' => Yii::$app->mv->gt('Name', [], 0),
-            'created_at' => Yii::$app->mv->gt('Created At', [], 0),
-            'updated_at' => Yii::$app->mv->gt('Updated At', [], 0),
+            'template' => Yii::$app->mv->gt('Шаблон', [], 0),
+            'name' => Yii::$app->mv->gt('Название', [], 0),
+            'created_at' => Yii::$app->mv->gt('Создан', [], 0),
+            'updated_at' => Yii::$app->mv->gt('Обновлен', [], 0),
         ];
     }
 

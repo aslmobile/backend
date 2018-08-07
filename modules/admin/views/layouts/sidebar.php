@@ -36,7 +36,7 @@ $act = Yii::$app->controller->action->id;
                     </li>
                     <li<?= ($cont == 'translations' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/translations/create') ?>"><i
-                                    class="fa fa-plus"></i> <?= Yii::$app->mv->gt('Новый', [], false) ?>
+                                    class="fa fa-plus"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                     <li<?= ($cont == 'translations' && $act == 'edit') ? ' class="active"' : '' ?>>
@@ -51,7 +51,7 @@ $act = Yii::$app->controller->action->id;
                     </li>
                     <li<?= ($cont == 'message' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/message/create') ?>"><i
-                                    class="fa fa-plus"></i> <?= Yii::$app->mv->gt('Новый', [], false) ?>
+                                    class="fa fa-plus"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                 </ul>
@@ -69,7 +69,7 @@ $act = Yii::$app->controller->action->id;
                     </li>
                     <li<?= ($cont == 'legal' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/legal/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                 </ul>
@@ -86,7 +86,7 @@ $act = Yii::$app->controller->action->id;
                     </li>
                     <li<?= ($cont == 'sms-templates' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/sms-templates/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                 </ul>
@@ -104,7 +104,7 @@ $act = Yii::$app->controller->action->id;
                     </li>
                     <li<?= ($cont == 'faq' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/faq/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                 </ul>
@@ -122,7 +122,7 @@ $act = Yii::$app->controller->action->id;
                     </li>
                     <li<?= ($cont == 'answers' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/answers/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                 </ul>
@@ -235,7 +235,7 @@ $act = Yii::$app->controller->action->id;
                     </li>
                     <li<?= ($cont == 'trips' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/trips/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                 </ul>
@@ -306,7 +306,7 @@ $act = Yii::$app->controller->action->id;
                     </li>
                     <li<?= ($cont == 'countries' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/countries/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                 </ul>
@@ -336,7 +336,7 @@ $act = Yii::$app->controller->action->id;
                         </a>
                     <li<?= ($cont == 'dynamic' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/dynamic/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                 </ul>
@@ -353,7 +353,7 @@ $act = Yii::$app->controller->action->id;
                         </a>
                     <li<?= ($cont == 'dispatch' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/dispatch/create') ?>"><i
-                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новая', [], false) ?>
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                 </ul>

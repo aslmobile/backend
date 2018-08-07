@@ -269,9 +269,18 @@ class UserController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $redirect = ['index'];
 
-        return $this->redirect(['index']);
+        $model = $this->findModel($id);
+        if ($model)
+        {
+            if ($model->type == $model::TYPE_PASSENGER) $redirect = ['passengers'];
+            elseif ($model->type == $model::TYPE_DRIVER) $redirect = ['drivers'];
+
+            $model->delete();
+        }
+
+        return $this->redirect($redirect);
     }
 
     /**

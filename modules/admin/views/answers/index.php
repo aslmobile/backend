@@ -8,7 +8,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $searchModel app\modules\admin\models\AnswersSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt('Answers',[],false);
+$this->title = Yii::$app->mv->gt('Быстрые ответы',[],false);
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -26,29 +26,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="box-tools pull-right">
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} new',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
+                        Yii::$app->mv->gt('{i} Добавить',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
-                    ); ?>
-                    <?= Html::a(
-                        Yii::$app->mv->gt('{i} delete selected',['i'=>Html::tag('i','',['class'=>'fa fa-fire'])],false),
-                        [''],
-                        [
-                            'class' => 'btn btn-danger btn-sm',
-                            'onclick'=>"
-								var keys = $('#grid').yiiGridView('getSelectedRows');
-								if (keys!='') {
-									if (confirm('".Yii::$app->mv->gt('Are you sure you want to delete the selected items?',[],false)."')) {
-										$.ajax({
-											type : 'POST',
-											data: {keys : keys},
-											success : function(data) {}
-										});
-									}
-								}
-								return false;
-							",
-                        ]
                     ); ?>
                 </div>
             </div>

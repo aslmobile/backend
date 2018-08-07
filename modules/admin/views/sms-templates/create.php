@@ -6,8 +6,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\SmsTemplates */
 
-$this->title = 'New Sms Templates';
-$this->params['breadcrumbs'][] = ['label' => 'Sms Templates', 'url' => ['index']];
+$this->title = Yii::t('app', "Новый шаблон");
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Шаблоны СМС"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

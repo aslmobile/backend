@@ -123,7 +123,13 @@ class User extends ActiveRecord implements IdentityInterface
             'km' => Yii::t('app', "Километры"),
             'phone' => Yii::t('app', "Телефон"),
             'city_id' => Yii::t('app', "Город"),
-            'status' => Yii::t('app', "Статус")
+            'status' => Yii::t('app', "Статус"),
+            'first_name' => Yii::t('app', "Имя"),
+            'second_name' => Yii::t('app', "Фамилия"),
+            'email' => Yii::t('app', "Эл. почта"),
+            'gender' => Yii::t('app', "Пол"),
+            'image' => Yii::t('app', "Фотограция"),
+            'type' => Yii::t('app', "Тип")
         ];
     }
 

@@ -23,6 +23,10 @@ $params = [
     'image_extensions' => 'bmp,gif,jpeg,jpg,jpe,jp2,png',
     'video_extensions' => 'avi,mpeg,mp4,mkv,flv',
     'api_salt' => "e54d713d1a6afca4305874c9a7bea030d5feeab3b61369bb7c940e6cfb7aa14e",
+    'yes_no' => [
+        1 => Yii::t('app', "Да"),
+        0 => Yii::t('app', "Нет")
+    ],
     'content_status' => [
         0 => Yii::t('app', 'Включено'),
         1 => Yii::t('app', 'Отключено'),
@@ -36,9 +40,9 @@ $params = [
         1 => Yii::t('app', "Неактивно"),
     ],
     'statuses' => [
-        0 => Yii::t('app',"Pending approval"),
-        1 => Yii::t('app',"Approved"),
-        9 => Yii::t('app',"Blocked"),
+        0 => Yii::t('app',"Ждет одобрения"),
+        1 => Yii::t('app',"Одобрен"),
+        9 => Yii::t('app',"Заблокирован"),
     ],
     'feedback' => [
         0 => Yii::t('app',"Created"),
@@ -46,11 +50,11 @@ $params = [
         2 => Yii::t('app',"Processed"),
     ],
     'user_type' => [
-        0 => Yii::t('app',"User"),
-        1 => Yii::t('app',"Admin"),
-        2 => Yii::t('app',"Manager"),
-        3 => Yii::t('app',"Driver"),
-        4 => Yii::t('app',"Passenger"),
+        0 => Yii::t('app',"Пользователь"),
+        1 => Yii::t('app',"Администратор"),
+        2 => Yii::t('app',"Диспетчер"),
+        3 => Yii::t('app',"Водитель"),
+        4 => Yii::t('app',"Пассажир"),
     ],
     'block_duration' => [
         0 => Yii::t('app','1 week'),
@@ -63,9 +67,9 @@ $params = [
         1 => Yii::t('app','Spam'),
     ],
     'gender' => [
-        0 => Yii::t('app',"male"),
-        1 => Yii::t('app',"female"),
-        2 => Yii::t('app',"other"),
+        0 => Yii::t('app',"Мужской"),
+        1 => Yii::t('app',"Женский"),
+        2 => Yii::t('app',"Не указан"),
     ],
     'auth2arr' => [
         Yii::t('app',"Off"),
@@ -145,10 +149,10 @@ $params = [
     ],
     'blacklist' => [
         'rating' => [
-            'comment' => Yii::t('app', "Rating abuse"),
-            'description' => Yii::t('app', "Blacklisted for low rating"),
-            'reason' => Yii::t('app', "Rating abuse"),
-            'notification' => Yii::t('app', "You have been blacklisted for rating abuse")
+            'comment' => Yii::t('app', "Низкий уровень рейтинга"),
+            'description' => Yii::t('app', "Заблокирован за низкий рейтинг"),
+            'reason' => Yii::t('app', "Низкий уровень рейтинга"),
+            'notification' => Yii::t('app', "Вы были заблокированы за низкий уровень рейтинга")
         ]
     ]
 ];

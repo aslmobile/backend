@@ -7,8 +7,8 @@ use yii\widgets\Breadcrumbs;
 /* @var $this yii\web\View */
 /* @var $model app\models\SmsTemplates */
 
-$this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Sms Templates', 'url' => ['index']];
+$this->title = $model->name;
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Шаблоны СМС"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -26,11 +26,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="box-header with-border">
                         <h3></h3>
                         <div class="box-tools pull-right">
-                            <?= Html::a('Edit', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-                            <?= Html::a('Remove', ['delete', 'id' => $model->id], [
+                            <?= Html::a('Изменить', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                            <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
                             'class' => 'btn btn-danger',
                             'data' => [
-                            'confirm' => 'Are you sure you want to delete this item?',
+                            'confirm' => Yii::t('app', "Подтвердите удаление"),
                             'method' => 'post',
                             ],
                             ]) ?>
@@ -42,11 +42,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?= DetailView::widget([
                                 'model' => $model,
                                 'attributes' => [
-                                            'id',
-            'template:ntext',
-            'created_at',
-            'updated_at',
-                                ],
+                                    'template:ntext',
+                                    'created_at:datetime',
+                                    'updated_at:datetime',
+                                ]
                                 ]) ?>
                             </div>
                         </div>

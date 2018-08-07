@@ -40,8 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'layout' => "
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
-                    <div class='box-footer' style='display: block;'>{pager}</div>
-                ",
+                    <div class='box-footer' style='display: block;'>{pager}</div>",
                 'tableOptions' => [
                     'class' => 'table table-bordered table-hover dataTable',
                 ],
@@ -53,7 +52,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function ($model) {
                             $check = $model->approved == 1 ? ' <i class="fa fa-check text-success"></i>' : '';
                             return $model->fullName . $check;
-                        }
+                        },
+                        'format' => 'html'
                     ],
                     'phone',
                     'km',

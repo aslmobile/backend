@@ -7,9 +7,9 @@ use app\components\widgets\Alert;
 /* @var $model app\models\SmsTemplates */
 
 
-$this->title = Yii::$app->mv->gt('Edit {title}',['title' => $model->id],false);
-$this->params['breadcrumbs'][] = ['label' => 'Sms Templates', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
+$this->title = Yii::$app->mv->gt('Редактирование',[],false);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Шаблоны СМС"), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
