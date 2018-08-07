@@ -32,6 +32,7 @@ class VehiclesController extends BaseController
                             'upload-vehicle-registration',
                             'upload-vehicle-photo',
                             'upload-vehicle-photos',
+                            'get-vehicle'
                         ],
                         'allow' => true
                     ]
@@ -44,6 +45,7 @@ class VehiclesController extends BaseController
                     'types'  => ['GET'],
                     'brands'  => ['GET'],
                     'models'  => ['GET'],
+                    'get-vehicle' => ['GET'],
 
                     'create-vehicle' => ['PUT'],
                     'update-vehicle' => ['PUT'],
@@ -71,6 +73,20 @@ class VehiclesController extends BaseController
         }
 
         $this->module->data = $_vehicles;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionGetVehicle($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $vehicle = Vehicles::findOne($id);
+        if ($vehicle) $vehicle = $vehicle->toArray();
+        else $vehicle = null;
+
+        $this->module->data = $vehicle;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

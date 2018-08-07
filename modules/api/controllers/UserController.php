@@ -31,7 +31,8 @@ class UserController extends BaseController
                             'trips',
                             'get',
                             'get-own',
-                            'settings'
+                            'settings',
+                            'get-rating'
                         ],
                         'allow' => true
                     ]
@@ -49,6 +50,7 @@ class UserController extends BaseController
                     'trips' => ['GET'],
                     'get' => ['GET'],
                     'get-own' => ['GET'],
+                    'get-rating' => ['GET'],
                     'settings' => ['POST']
                 ]
             ]
@@ -73,6 +75,22 @@ class UserController extends BaseController
         if ($user->id == $id) $this->module->data = $user->toArray();
         else $this->module->data = Users::findOne($id)->toArray();
 
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionGetRating($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        if ($user->id == $id) $_user = $user;
+        else $_user = Users::findOne($id);
+
+
+        $this->module->data = [
+            'rating' => $_user->rating
+        ];
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
