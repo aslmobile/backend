@@ -138,6 +138,11 @@ class DefaultController extends BaseController
         $agreements = Agreement::find()->where(['type' => $id])->all();
         $agreement_data = [];
 
+        echo '<pre>' . print_r([
+            'type' => Agreement::getTypesList()[$id],
+            'agreements' => $agreements
+        ], true) . '</pre>'; exit;
+
         /** @var \app\modules\api\models\Agreement $legal */
         if ($agreements && count($agreements) > 0) foreach ($agreements as $agreement) $agreement_data[] = $agreement->toArray();
 
