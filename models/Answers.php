@@ -44,7 +44,7 @@ class Answers extends \yii\db\ActiveRecord
                 'defaultLanguage' => Lang::getCurrent()->local,
                 'langForeignKey' => 'original_id',
                 'tableName' => "{{%answers_lang}}",
-                'attributes' => ['answer',]
+                'attributes' => ['answer']
             ],
             TimestampBehavior::className()
         ];

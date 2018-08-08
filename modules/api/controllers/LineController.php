@@ -188,7 +188,7 @@ class LineController extends BaseController
         $startpoints = Checkpoint::find()->andWhere([
             'AND',
             ['=', 'type', Checkpoint::TYPE_START],
-            ['=', 'route_id', $id]
+            ['=', 'route', $id]
         ])->all();
         if ($startpoints && count($startpoints) > 0) foreach ($startpoints as $point)
         {
@@ -230,7 +230,7 @@ class LineController extends BaseController
         $endpoints = Checkpoint::find()->andWhere([
             'AND',
             ['=', 'type', Checkpoint::TYPE_END],
-            ['=', 'route_id', $id]
+            ['=', 'route', $id]
         ])->all();
         if ($endpoints && count($endpoints) > 0) foreach ($endpoints as $point)
         {
@@ -272,7 +272,7 @@ class LineController extends BaseController
         $checkpoints = Checkpoint::find()->andWhere([
             'AND',
             ['=', 'type', Checkpoint::TYPE_STOP],
-            ['=', 'route_id', $id]
+            ['=', 'route', $id]
         ])->all();
         if ($checkpoints && count($checkpoints) > 0) foreach ($checkpoints as $point)
         {
