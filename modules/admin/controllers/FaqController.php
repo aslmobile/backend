@@ -1,22 +1,19 @@
-<?php
+<?php namespace app\modules\admin\controllers;
 
-namespace app\modules\admin\controllers;
-
-use Yii;
-use app\models\Faq;
+use app\modules\admin\models\Faq;
 use app\modules\admin\models\FaqSearch;
+use Yii;
+use app\modules\admin\models\Lang;
+use app\modules\admin\models\Mailtpl;
 use app\components\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 
-/**
- * FaqController implements the CRUD actions for Faq model.
- */
 class FaqController extends Controller
 {
-	public $layout = "./sidebar";
+    public $layout = "./sidebar";
 
     public function behaviors()
     {
@@ -30,7 +27,7 @@ class FaqController extends Controller
                         'roles' => ['admin', 'moderator'],
                     ],
                     [
-                        'actions' => ['delete', 'delete-group'],
+                        'actions' => ['delete'],
                         'allow' => true,
                         'roles' => ['admin'],
                     ],
@@ -39,29 +36,22 @@ class FaqController extends Controller
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'delete' => ['post'],
+                    'delete' => ['post', 'get'],
                 ],
             ],
         ];
     }
 
-    /**
-     * Lists all Faq models.
-     * @return mixed
-     */
     public function actionIndex()
     {
-		if (Yii::$app->request->isAjax) {
-			$keys = (isset($_POST['keys']))?$_POST['keys']:[];
-			if (count($keys)) {
-				foreach ($keys as $k => $v) {
-					if (($model = Faq::findOne($v)) !== null) {
-						$model->delete();
-					}
-				}
-				return $this->redirect(['index']);
-			}
-		}
+        if (Yii::$app->request->isAjax)
+        {
+            $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
+            if (count($keys)) foreach ($keys as $k => $v) if (($model = Faq::findOne($v)) !== null)
+                    $model->delete();
+
+            return $this->redirect(['index']);
+        }
 
         $searchModel = new FaqSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
@@ -73,7 +63,7 @@ class FaqController extends Controller
     }
 
     /**
-     * Displays a single Faq model.
+     * Displays a single Mailtpl model.
      * @param integer $id
      * @return mixed
      */
@@ -85,7 +75,7 @@ class FaqController extends Controller
     }
 
     /**
-     * Creates a new Faq model.
+     * Creates a new Mailtpl model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
@@ -94,7 +84,7 @@ class FaqController extends Controller
         $model = new Faq();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['index', 'id' => $model->id]);
+            return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -103,17 +93,17 @@ class FaqController extends Controller
     }
 
     /**
-     * Updates an existing Faq model.
+     * Updates an existing Mailtpl model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $model = $this->findModel($id, true);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved',[],0));
+            Yii::$app->getSession()->setFlash('success', 'Изменения сохранены');
             return $this->redirect(['update', 'id' => $model->id]);
         } else {
             return $this->render('update', [
@@ -123,7 +113,7 @@ class FaqController extends Controller
     }
 
     /**
-     * Deletes an existing Faq model.
+     * Deletes an existing Mailtpl model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -134,16 +124,23 @@ class FaqController extends Controller
 
         return $this->redirect(['index']);
     }
+
     /**
-     * Finds the Faq model based on its primary key value.
+     * Finds the Mailtpl model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Faq the loaded model
+     * @return Mailtpl the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel($id, $ml = true)
     {
-        if (($model = Faq::findOne($id)) !== null) {
+        if ($ml) {
+            $model = Faq::find()->where('id = :id', [':id' => $id])->multilingual()->one();
+        } else {
+            $model = Faq::findOne($id);
+        }
+
+        if ($model !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

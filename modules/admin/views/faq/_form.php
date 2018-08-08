@@ -29,43 +29,64 @@ use app\modules\admin\models\Lang;
     <div class="box-body" style="padding: 10px 0">
         <ul class="nav nav-tabs">
             <li class="active" style="margin-left: 15px;">
-                <a data-toggle="tab" href="#top">Data</a>
+                <a data-toggle="tab" href="#top"><?= Yii::$app->mv->gt('Информация',[],false); ?></a>
             </li>
-                    </ul>
+            <?php foreach (Lang::getBehaviorsList() as $k => $v) { ?>
+                <li>
+                    <a data-toggle="tab" href="#top-<?= $k ?>" style="max-height: 42px;"><?= $v ?></a>
+                </li>
+            <?php } ?>
+        </ul>
 
         <div class="tab-content" style="padding: 10px">
             <div id="top" class="tab-pane fade in active">
                 <div class="row">
-                    <div class="col-sm-6">
-                            <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
+                    <div class="col-sm-12">
+                        <?= $form->field($model, 'type')->dropDownList($model->typesList); ?>
+                        <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'status')->textInput() ?>
-
-    <?= $form->field($model, 'weight')->textInput() ?>
-
-    <?= $form->field($model, 'text')->widget(TTinyMCE::className(), [
-                                'clientOptions' => [
-                                    'language_url' => Yii::$app->homeUrl.'tiny_translates/ru.js',
-                                    'language' => 'ru',
-                                    'plugins' => [
-                                        "advlist autolink lists link image charmap print preview hr anchor pagebreak",
-                                        "searchreplace visualblocks visualchars code fullscreen",
-                                        "insertdatetime media nonbreaking save table contextmenu directionality",
-                                        "template paste textcolor emoticons",
-                                    ],
-                                    'toolbar' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media | forecolor backcolor | emoticons",
-                                    'file_picker_callback' => ETinyMCE::getFilePickerCallback(['el-finder/tinymce']),
+                        <?= $form->field($model, 'content')->widget(TTinyMCE::className(), [
+                            'clientOptions' => [
+                                'language_url' => Yii::$app->homeUrl.'tiny_translates/ru.js',
+                                'language' => 'ru',
+                                'plugins' => [
+                                    "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+                                    "searchreplace visualblocks visualchars code fullscreen",
+                                    "insertdatetime media nonbreaking save table contextmenu directionality",
+                                    "template paste textcolor emoticons",
                                 ],
-                            ]) ?>
-
-                    </div>
-                    <div class="col-sm-6">
-
+                                'toolbar' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media | forecolor backcolor | emoticons",
+                                'file_picker_callback' => ETinyMCE::getFilePickerCallback(['el-finder/tinymce']),
+                            ],
+                        ]) ?>
                     </div>
                 </div>
             </div>
+            <?php foreach (Lang::getBehaviorsList() as $k => $v) { ?>
+            <div class="tab-pane fade" id="top-<?= $k ?>">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <?= $form->field($model, 'title_'.$k)->textInput()->label($model->getAttributeLabel('title').' '.$v); ?>
 
-            
+                        <?= $form->field($model, 'content_'.$k)->widget(TTinyMCE::className(), [
+                            'clientOptions' => [
+                                'language_url' => Yii::$app->homeUrl.'tiny_translates/ru.js',
+                                'language' => 'ru',
+                                'plugins' => [
+                                    "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+                                    "searchreplace visualblocks visualchars code fullscreen",
+                                    "insertdatetime media nonbreaking save table contextmenu directionality",
+                                    "template paste textcolor emoticons",
+                                ],
+                                'toolbar' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media | forecolor backcolor | emoticons",
+                                'file_picker_callback' => ETinyMCE::getFilePickerCallback(['el-finder/tinymce']),
+                            ],
+                        ])->label($model->getAttributeLabel('content').' '.$v) ?>
+                    </div>
+                    <div class="col-sm-6"></div>
+                </div>
+            </div>
+            <?php } ?>
         </div>
     </div>
     <!-- /.box-body -->

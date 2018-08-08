@@ -1,15 +1,9 @@
-<?php
-
-namespace app\modules\admin\models;
+<?php namespace app\modules\admin\models;
 
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Faq;
 
-/**
- * FaqSearch represents the model behind the search form about `app\models\Faq`.
- */
 class FaqSearch extends Faq
 {
     /**
@@ -18,8 +12,8 @@ class FaqSearch extends Faq
     public function rules()
     {
         return [
-            [['id', 'created_at', 'updated_at', 'status', 'weight'], 'integer'],
-            [['title', 'text'], 'safe'],
+            [['id', 'type'], 'integer'],
+            [['title', 'content'], 'string'],
         ];
     }
 
@@ -45,10 +39,10 @@ class FaqSearch extends Faq
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'pagination' => [
-				'pageSize' => 50,
-			],
-			'sort'=> ['defaultOrder' => ['id' => SORT_DESC]]
+            'pagination' => [
+                'pageSize' => 50,
+            ],
+            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
 
         $this->load($params);
@@ -61,14 +55,8 @@ class FaqSearch extends Faq
 
         $query->andFilterWhere([
             'id' => $this->id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'status' => $this->status,
-            'weight' => $this->weight,
+            'type' => $this->type
         ]);
-
-        $query->andFilterWhere(['like', 'title', $this->title])
-            ->andFilterWhere(['like', 'text', $this->text]);
 
         return $dataProvider;
     }

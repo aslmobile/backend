@@ -8,7 +8,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $model app\models\Faq */
 
 $this->title = $model->title;
-$this->params['breadcrumbs'][] = ['label' => 'Faqs', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "FAQ"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -21,38 +21,19 @@ $this->params['breadcrumbs'][] = $this->title;
     </section>
     <section class="content">
         <div class="row">
-            <div class="col-sm-12">
-                <div class="box box-primary">
-                    <div class="box-header with-border">
-                        <h3></h3>
-                        <div class="box-tools pull-right">
-                            <?= Html::a('Edit', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-                            <?= Html::a('Remove', ['delete', 'id' => $model->id], [
+            <div class="col-sm-12 col-md-6 col-lg-4 col-md-offset-3 col-lg-offset-4">
+                <div class="box box-widget">
+                    <div class="box-header with-border bg-aqua"><?= $model->title; ?></div>
+                    <div class="box-body"><?= $model->content; ?></div>
+                    <div class="box-footer text-center">
+                        <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                        <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
                             'class' => 'btn btn-danger',
                             'data' => [
-                            'confirm' => 'Are you sure you want to delete this item?',
-                            'method' => 'post',
-                            ],
-                            ]) ?>
-                        </div>
-                    </div>
-                    <div class="box-body">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <?= DetailView::widget([
-                                'model' => $model,
-                                'attributes' => [
-                                            'id',
-            'title',
-            'created_at',
-            'updated_at',
-            'status',
-            'weight',
-            'text:ntext',
-                                ],
-                                ]) ?>
-                            </div>
-                        </div>
+                                'confirm' => 'Are you sure you want to delete this item?',
+                                'method' => 'post'
+                            ]
+                        ]) ?>
                     </div>
                 </div>
             </div>

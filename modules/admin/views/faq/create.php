@@ -4,10 +4,10 @@ use yii\helpers\Html;
 
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Faq */
+/* @var $model app\models\Answers */
 
-$this->title = 'New Faq';
-$this->params['breadcrumbs'][] = ['label' => 'Faqs', 'url' => ['index']];
+$this->title = Yii::$app->mv->gt('Добавить раздел',[],false);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "FAQ"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
