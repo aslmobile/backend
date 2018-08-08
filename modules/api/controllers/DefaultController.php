@@ -135,12 +135,12 @@ class DefaultController extends BaseController
             default: $id = Agreement::TYPE_DRIVER;
         }
 
-        $agreements = Agreement::find()->where(['type' => $id])->all();
+        $agreements = Agreement::find()->where(['type' => $id]);
         $agreement_data = [];
 
         echo '<pre>' . print_r([
             'type' => Agreement::getTypesList()[$id],
-            'agreements' => $agreements
+            'agreements' => $agreements->createCommand()->rawSql
         ], true) . '</pre>'; exit;
 
         /** @var \app\modules\api\models\Agreement $legal */
