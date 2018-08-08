@@ -14,7 +14,7 @@ $this->title = Yii::$app->mv->gt('Sign in',[],false);
 <div class="login-box">
     <div class="login-logo text-center">
         <?= Html::a(
-                Yii::$app->imageCache->img(Yii::getAlias('@webroot') . Yii::$app->controller->coreSettings->logo, 'x2', [
+                Yii::$app->imageCache->img(Yii::getAlias('@webroot') . Yii::$app->controller->coreSettings->logo, 'x100', [
                     'alt' => Yii::$app->controller->coreSettings->name,
                     'class' => 'img-responsive'
                 ])
