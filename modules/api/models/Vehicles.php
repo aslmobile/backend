@@ -20,7 +20,7 @@ class Vehicles extends \app\models\Vehicles
             else $array[$field . '_url'] = null;
         }
 
-        $array['photos_url'] = null;
+        $array['photos_url'] = [];
 
         if (isset ($array['photos']) && !empty ($array['photos']))
         {
@@ -32,7 +32,7 @@ class Vehicles extends \app\models\Vehicles
                     'url' => $file->file
                 ];
 
-                return null;
+                return [];
             }, explode(',', $array['photos']));
         }
 
