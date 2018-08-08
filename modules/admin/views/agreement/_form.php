@@ -44,7 +44,21 @@ use app\modules\admin\models\Lang;
                     <div class="col-sm-12">
                         <?= $form->field($model, 'type')->dropDownList($model->typesList); ?>
                         <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
-                        <?= $form->field($model, 'content')->textarea(['maxlength' => true]) ?>
+
+                        <?= $form->field($model, 'content')->widget(TTinyMCE::className(), [
+                            'clientOptions' => [
+                                'language_url' => Yii::$app->homeUrl.'tiny_translates/ru.js',
+                                'language' => 'ru',
+                                'plugins' => [
+                                    "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+                                    "searchreplace visualblocks visualchars code fullscreen",
+                                    "insertdatetime media nonbreaking save table contextmenu directionality",
+                                    "template paste textcolor emoticons",
+                                ],
+                                'toolbar' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media | forecolor backcolor | emoticons",
+                                'file_picker_callback' => ETinyMCE::getFilePickerCallback(['el-finder/tinymce']),
+                            ],
+                        ]) ?>
                     </div>
                 </div>
             </div>
@@ -52,8 +66,22 @@ use app\modules\admin\models\Lang;
             <div class="tab-pane fade" id="top-<?= $k ?>">
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'title_'.$k)->textInput()->label($model->getAttributeLabel('title').' '.$v) ; ?>
-                        <?= $form->field($model, 'content_'.$k)->textarea()->label($model->getAttributeLabel('content').' '.$v) ; ?>
+                        <?= $form->field($model, 'title_'.$k)->textInput()->label($model->getAttributeLabel('title').' '.$v); ?>
+
+                        <?= $form->field($model, 'content_'.$k)->widget(TTinyMCE::className(), [
+                            'clientOptions' => [
+                                'language_url' => Yii::$app->homeUrl.'tiny_translates/ru.js',
+                                'language' => 'ru',
+                                'plugins' => [
+                                    "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+                                    "searchreplace visualblocks visualchars code fullscreen",
+                                    "insertdatetime media nonbreaking save table contextmenu directionality",
+                                    "template paste textcolor emoticons",
+                                ],
+                                'toolbar' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media | forecolor backcolor | emoticons",
+                                'file_picker_callback' => ETinyMCE::getFilePickerCallback(['el-finder/tinymce']),
+                            ],
+                        ])->label($model->getAttributeLabel('content').' '.$v) ?>
                     </div>
                     <div class="col-sm-6"></div>
                 </div>
