@@ -133,6 +133,7 @@ class LineController extends BaseController
 
         /** @var \app\models\Line $line */
         $line = new Line();
+        $line->status = Line::STATUS_QUEUE;
         $line->driver_id = $user->id;
         $line->vehicle_id = $vehicle->id;
         $line->tariff = $route->base_tariff;

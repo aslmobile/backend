@@ -19,7 +19,15 @@ class Vehicles extends \app\models\Vehicles
         }
 
         $array['photos_url'] = null;
-        if (isset ($array['photos']) && !empty ($array['photos'])) $array['photos_url'] = $this->getVehiclePhotos();
+        if (isset ($array['photos']) && !empty ($array['photos']))
+        {
+            $array['photos_url'] = $this->getVehiclePhotos();
+
+            $photos = explode(',', $array['photos']);
+            $photos_ids = [];
+            foreach ($photos as $photo_id) $photos_ids[] = intval($photo_id);
+            $array['photos'] = $photos_ids;
+        }
 
         foreach ($array as $field => $value)
         {

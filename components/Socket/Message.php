@@ -66,7 +66,7 @@ class Message
 
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        $lines = Line::find()->all();
+        $lines = Line::find()->where(['status' => Line::STATUS_QUEUE])->all();
         $queue = [];
         foreach ($lines as $line) $queue[] = $line->toArray();
 

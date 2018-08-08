@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?= $form->field($model, 'description')->widget(TTinyMCE::className(), [
                                     'clientOptions' => [
                                         'language_url' => Yii::$app->homeUrl.'tiny_translates/ru.js',
-                                        'language' => 'ru',
+                                        'language' => Yii::$app->controller::getOldLangAssoc(Yii::$app->language),
                                         'plugins' => [
                                             "advlist autolink lists link image charmap print preview hr anchor pagebreak",
                                             "searchreplace visualblocks visualchars code fullscreen",
@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         ],
                                         'toolbar' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media | forecolor backcolor | emoticons",
                                         'file_picker_callback' => ETinyMCE::getFilePickerCallback(['el-finder/tinymce']),
-                                    ],
+                                    ]
                                 ]) ?>
                             </div>
                             <div class="col-sm-6">
