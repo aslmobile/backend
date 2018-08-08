@@ -80,7 +80,7 @@ class Module extends \yii\base\Module
         foreach ($array as $key => $value)
         {
             if (is_array($value)) $array[$key] = $this->replaceNullWithEmptyString($value);
-            elseif (is_null($value)) $array[$key] = null;
+            elseif (is_null($value) || empty ($value)) $array[$key] = null;
         }
 
         return $array;
