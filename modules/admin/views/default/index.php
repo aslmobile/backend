@@ -57,9 +57,8 @@ $statuses = Yii::$app->params['statuses'];
                             <?php /** @var \app\models\Vehicles $vehicle */ ?>
                                 <li class="item">
                                     <div class="product-img">
-                                        <?php $vehicle_image = \app\modules\api\models\UploadFiles::findOne($vehicle->image); ?>
-                                        <?php if ($vehicle_image) : ?>
-                                        <img src="<?= $vehicle_image->file; ?>" style="height: auto;" />
+                                        <?php if (!empty ($vehicle->model->image)) : ?>
+                                        <img src="<?= $vehicle->model->image; ?>" style="height: auto;" />
                                         <?php endif; ?>
                                     </div>
                                     <div class="product-info">
