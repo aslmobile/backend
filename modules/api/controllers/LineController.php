@@ -370,10 +370,6 @@ class LineController extends BaseController
         $line = Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
-        /** @var \app\models\Trip $trip */
-        $trips = Trip::find()->andWhere(['route_id' => $line->route_id, 'vehicle_id' => $line->vehicle_id, 'driver_id' => $line->driver_id])->all();
-        if (!$trips) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
-
         $line->cancel_reason = $this->body->cancel_reason_line;
         $line->status = Line::STATUS_CANCELED;
 
@@ -388,33 +384,39 @@ class LineController extends BaseController
             else $this->module->setError(422, '_line', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
-        $trip_errors = 0;
-        $_trips = [];
-        foreach ($trips as $trip)
+        /** @var \app\models\Trip $trip */
+        $trips = Trip::find()->andWhere(['route_id' => $line->route_id, 'vehicle_id' => $line->vehicle_id, 'driver_id' => $line->driver_id])->all();
+        if ($trips)
         {
-            $trip->cancel_reason = $this->body->cancel_reason_trip;
-            $trip->status = Trip::STATUS_CANCELED;
-
-            if (!$trip->validate() || !$trip->save())
+            $trip_errors = 0;
+            $_trips = [];
+            foreach ($trips as $trip)
             {
-                if ($trip->hasErrors())
+                $trip->cancel_reason = $this->body->cancel_reason_trip;
+                $trip->status = Trip::STATUS_CANCELED;
+
+                if (!$trip->validate() || !$trip->save())
                 {
-                    foreach ($trip->errors as $field => $error_message)
+                    if ($trip->hasErrors())
                     {
-                        $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
-                        $trip_errors++;
+                        foreach ($trip->errors as $field => $error_message)
+                        {
+                            $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                            $trip_errors++;
+                        }
                     }
+                    else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
                 }
-                else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+
+                $_trips[] = $trip->toArray();
             }
 
-            $_trips[] = $trip->toArray();
+            if ($trip_errors > 0) $this->module->sendResponse();
+
+            $this->module->data['trips'] = $_trips;
         }
 
-        if ($trip_errors > 0) $this->module->sendResponse();
-
         $this->module->data['line'] = $line->toArray();
-        $this->module->data['trips'] = $_trips;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
