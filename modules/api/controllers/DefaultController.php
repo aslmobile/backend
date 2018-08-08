@@ -46,6 +46,7 @@ class DefaultController extends BaseController
                 'actions' => [
                     'dispatch-phone' => ['GET'],
                     'legal' => ['GET'],
+                    'agreement' => ['GET'],
                     'cancel-trip-reasons' => ['GET'],
                     'cancel-passenger-reasons' => ['GET'],
                     'get-file' => ['GET'],
