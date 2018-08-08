@@ -21,6 +21,7 @@ class Vehicles extends \app\models\Vehicles
         }
 
         $array['photos_url'] = null;
+
         if (isset ($array['photos']) && !empty ($array['photos']))
         {
             $array['photos_url'] = $this->getVehiclePhotos();
