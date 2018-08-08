@@ -6,7 +6,7 @@ use app\components\MultilingualBehavior;
 use app\components\MultilingualQuery;
 
 /**
- * This is the model class for table "legal".
+ * This is the model class for table "agreement".
  *
  * @property int $id
  * @property string $title
@@ -15,7 +15,7 @@ use app\components\MultilingualQuery;
  * @property int $created_at
  * @property int $updated_at
  */
-class Legal extends \yii\db\ActiveRecord
+class Agreement extends \yii\db\ActiveRecord
 {
     const
         STATUS_ADDED = 0,
@@ -28,7 +28,7 @@ class Legal extends \yii\db\ActiveRecord
 
     public static function tableName()
     {
-        return 'legal';
+        return 'agreement';
     }
 
     public function behaviors()
@@ -44,7 +44,7 @@ class Legal extends \yii\db\ActiveRecord
                 //'dynamicLangClass' => true',
                 'defaultLanguage' => Lang::getCurrent()->local,
                 'langForeignKey' => 'original_id',
-                'tableName' => "{{%legal_lang}}",
+                'tableName' => "{{%agreement_lang}}",
                 'attributes' => [
                     'content', 'title'
                 ]

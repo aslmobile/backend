@@ -8,7 +8,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $model app\models\Legal */
 
 $this->title = $model->title;
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Юр. информация"), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Пользовательское соглашение"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

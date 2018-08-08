@@ -4,10 +4,10 @@ use yii\helpers\Html;
 
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\admin\models\Legal */
+/* @var $model app\models\Answers */
 
-$this->title = Yii::$app->mv->gt('New Legal',[],false);
-$this->params['breadcrumbs'][] = ['label' => 'Legals', 'url' => ['index']];
+$this->title = Yii::$app->mv->gt('Добавить раздел',[],false);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Юр. Информация"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

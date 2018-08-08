@@ -4,11 +4,11 @@ use yii\helpers\Html;
 use app\components\widgets\Alert;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\admin\models\Legal */
+/* @var $model app\models\Legal */
 
 
-$this->title = Yii::$app->mv->gt('Редактирование {title}',['title' => $model->title],false);
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Юридическая инфомрация"), 'url' => ['index']];
+$this->title = Yii::$app->mv->gt('Редактирование', ['title' => $model->id],false);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Юр. информация"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->title, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::tag('h1', $this->title)?>
 
         <?= Breadcrumbs::widget([
-            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+        'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
     </section>
     <section class="content">
@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="row">
             <div class="col-lg-12">
                 <?= $this->render('_form', [
-                    'model' => $model,
+                'model' => $model,
                 ]) ?>
             </div>
         </div>

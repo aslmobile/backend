@@ -60,7 +60,8 @@ $act = Yii::$app->controller->action->id;
             <li class="treeview<?= ($cont == 'legal') ? ' active' : '' ?>">
                 <a href="#"> <i class="fa fa-file-text"></i>
                     <span><?= Yii::$app->mv->gt('Юр. инфо. водитель', [], false); ?></span>
-                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
+                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                </a>
                 <ul class="treeview-menu">
                     <li<?= ($cont == 'legal' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/legal/index') ?>"><i
@@ -69,6 +70,24 @@ $act = Yii::$app->controller->action->id;
                     </li>
                     <li<?= ($cont == 'legal' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/legal/create') ?>"><i
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="treeview<?= ($cont == 'agreement') ? ' active' : '' ?>">
+                <a href="#"> <i class="fa fa-file-text"></i>
+                    <span><?= Yii::$app->mv->gt('Соглашение', [], false); ?></span>
+                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                </a>
+                <ul class="treeview-menu">
+                    <li<?= ($cont == 'agreement' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/agreement/index') ?>"><i
+                                    class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'agreement' && $act == 'create') ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/agreement/create') ?>"><i
                                     class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>

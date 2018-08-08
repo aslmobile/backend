@@ -4,11 +4,11 @@ use yii\helpers\Html;
 use app\components\widgets\Alert;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\admin\models\Legal */
+/* @var $model app\models\Legal */
 
 
-$this->title = Yii::$app->mv->gt('Edit {title}',['title' => $model->title],false);
-$this->params['breadcrumbs'][] = ['label' => 'Legals', 'url' => ['index']];
+$this->title = Yii::$app->mv->gt('Редактирование', ['title' => $model->id],false);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Юр. информация"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->title, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

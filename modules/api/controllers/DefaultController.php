@@ -3,6 +3,7 @@
 use app\components\Socket\SocketPusher;
 use app\models\Answers;
 use app\models\Trip;
+use app\modules\admin\models\Agreement;
 use app\modules\api\models\Faq;
 use app\modules\api\models\Legal;
 use app\modules\api\models\UploadFiles;
@@ -25,6 +26,7 @@ class DefaultController extends BaseController
                         'actions' => [
                             'dispatch-phone',
                             'legal',
+                            'agreement',
                             'faq',
                             'method',
                             'send-socket-message',
@@ -116,6 +118,29 @@ class DefaultController extends BaseController
         if ($legals && count($legals) > 0) foreach ($legals as $legal) $legal_data[] = $legal->toArray();
 
         $this->module->data = $legal_data;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionAgreement($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        switch ($id)
+        {
+            case Agreement::TYPE_DRIVER: $id = Agreement::TYPE_DRIVER; break;
+            case Agreement::TYPE_PASSENGER: $id = Agreement::TYPE_PASSENGER; break;
+            default: $id = Agreement::TYPE_DRIVER;
+        }
+
+        $agreements = Agreement::find()->where(['type' => $id])->all();
+        $agreement_data = [];
+
+        /** @var \app\modules\api\models\Agreement $legal */
+        if ($agreements && count($agreements) > 0) foreach ($agreements as $agreement) $agreement_data[] = $agreement->toArray();
+
+        $this->module->data = $agreement_data;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

@@ -3,21 +3,21 @@
 use Yii;
 
 /**
- * This is the model class for table "legal_lang".
+ * This is the model class for table "agreement_lang".
  *
  * @property integer $id
  * @property string $content
  * @property integer $original_id
  * @property string $language
  */
-class LegalLang extends \yii\db\ActiveRecord
+class AgreementLang extends \yii\db\ActiveRecord
 {
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'legal_lang';
+        return 'agreement_lang';
     }
 
     /**
