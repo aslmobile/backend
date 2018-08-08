@@ -24,7 +24,15 @@ class Vehicles extends \app\models\Vehicles
         if (isset ($array['photos']) && !empty ($array['photos']))
         {
             $array['photos_url'] = $this->getVehiclePhotos();
-            $array['photos'] = array_map(function ($val){return intval($val);}, explode(',', $array['photos']));
+            $array['photos'] = array_map(function ($id) {
+                $file = UploadFiles::findOne(intval($id));
+                if ($file) return [
+                    'id' => $file->id,
+                    'url' => $file->file
+                ];
+
+                return null;
+            }, explode(',', $array['photos']));
         }
 
         foreach ($array as $field => $value)
