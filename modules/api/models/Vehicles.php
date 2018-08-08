@@ -1,5 +1,7 @@
 <?php namespace app\modules\api\models;
 
+use yii\helpers\ArrayHelper;
+
 class Vehicles extends \app\models\Vehicles
 {
     public function toArray(array $fields = [], array $expand = [], $recursive = true)
@@ -22,11 +24,7 @@ class Vehicles extends \app\models\Vehicles
         if (isset ($array['photos']) && !empty ($array['photos']))
         {
             $array['photos_url'] = $this->getVehiclePhotos();
-
-            $photos = explode(',', $array['photos']);
-            $photos_ids = [];
-            foreach ($photos as $photo_id) $photos_ids[] = intval($photo_id);
-            $array['photos'] = $photos_ids;
+            $array['photos'] = array_map(function ($val){return intval($val);}, explode(',', $array['photos']));
         }
 
         foreach ($array as $field => $value)
