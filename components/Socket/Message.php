@@ -2,8 +2,8 @@
 
 namespace app\components\Socket;
 
+use app\components\Socket\models\Line;
 use app\models\Devices;
-use app\models\Line;
 use Ratchet\ConnectionInterface;
 
 class Message

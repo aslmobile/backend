@@ -26,6 +26,8 @@ class LineController extends BaseController
                     [
                         'actions' => [
                             'startpoints', 'endpoints', 'checkpoints',
+                            'startpoints-route', 'endpoints-route', 'checkpoints-route',
+
                             'update-line', 'passengers', 'seats',
                             'cancel', 'passenger-decline', 'on-line', 'calculate-tariff'
                         ],
@@ -39,6 +41,10 @@ class LineController extends BaseController
                     'startpoints'  => ['GET'],
                     'endpoints'  => ['GET'],
                     'checkpoints'  => ['GET'],
+                    'startpoints-route'  => ['GET'],
+                    'endpoints-route'  => ['GET'],
+                    'checkpoints-route'  => ['GET'],
+
                     'passengers'  => ['GET'],
                     'seats'  => ['GET'],
                     'update-line'  => ['PUT'],
@@ -172,6 +178,29 @@ class LineController extends BaseController
         $this->module->sendResponse();
     }
 
+    public function actionStartpointsRoute($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $points = [];
+
+        $startpoints = Checkpoint::find()->andWhere([
+            'AND',
+            ['=', 'type', Checkpoint::TYPE_START],
+            ['=', 'route_id', $id]
+        ])->all();
+        if ($startpoints && count($startpoints) > 0) foreach ($startpoints as $point)
+        {
+            /** @var $point \app\models\Checkpoint */
+            $points[] = $point->toArray();
+        }
+
+        $this->module->data = $points;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
     public function actionEndpoints()
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -191,6 +220,29 @@ class LineController extends BaseController
         $this->module->sendResponse();
     }
 
+    public function actionEndpointsRoute($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $points = [];
+
+        $endpoints = Checkpoint::find()->andWhere([
+            'AND',
+            ['=', 'type', Checkpoint::TYPE_END],
+            ['=', 'route_id', $id]
+        ])->all();
+        if ($endpoints && count($endpoints) > 0) foreach ($endpoints as $point)
+        {
+            /** @var $point \app\models\Checkpoint */
+            $points[] = $point->toArray();
+        }
+
+        $this->module->data = $points;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
     public function actionCheckpoints()
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -199,6 +251,29 @@ class LineController extends BaseController
         $points = [];
 
         $checkpoints = Checkpoint::find()->where(['type' => Checkpoint::TYPE_STOP])->all();
+        if ($checkpoints && count($checkpoints) > 0) foreach ($checkpoints as $point)
+        {
+            /** @var $point \app\models\Checkpoint */
+            $points[] = $point->toArray();
+        }
+
+        $this->module->data = $points;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionCheckpointsRoute($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $points = [];
+
+        $checkpoints = Checkpoint::find()->andWhere([
+            'AND',
+            ['=', 'type', Checkpoint::TYPE_STOP],
+            ['=', 'route_id', $id]
+        ])->all();
         if ($checkpoints && count($checkpoints) > 0) foreach ($checkpoints as $point)
         {
             /** @var $point \app\models\Checkpoint */
