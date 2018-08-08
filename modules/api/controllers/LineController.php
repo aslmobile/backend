@@ -113,7 +113,7 @@ class LineController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['vehicle_id', 'startpoint', 'endpoint']);
+        $this->validateBodyParams(['vehicle_id', 'startpoint', 'endpoint', 'seats', 'freeseats']);
 
         /** @var \app\models\Route $route */
         $route = Route::findOne($id);
@@ -131,6 +131,12 @@ class LineController extends BaseController
         $endpoint = Checkpoint::findOne($this->body->endpoint);
         if (!$endpoint || $endpoint->type != $endpoint::TYPE_END) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
 
+        $seats = isset ($this->body->seats) ? intval($this->body->seats) : $vehicle->seats;
+        if ($seats == 0) $seats = $vehicle->seats;
+
+        $freeseats = isset ($this->body->freeseats) ? intval($this->body->freeseats) : $vehicle->seats;
+        if ($freeseats == 0) $freeseats = $vehicle->seats;
+
         /** @var \app\models\Line $line */
         $line = new Line();
         $line->status = Line::STATUS_QUEUE;
@@ -138,8 +144,8 @@ class LineController extends BaseController
         $line->vehicle_id = $vehicle->id;
         $line->tariff = $route->base_tariff;
         $line->route_id = $route->id;
-        $line->seats = $vehicle->seats;
-        $line->freeseats = $vehicle->seats;
+        $line->seats = $seats;
+        $line->freeseats = $freeseats;
         $line->status = Line::STATUS_WAITING;
         $line->startpoint = $startpoint->id;
         $line->endpoint = $endpoint->id;
