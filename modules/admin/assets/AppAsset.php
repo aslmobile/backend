@@ -40,6 +40,7 @@ class AppAsset extends AssetBundle
         "/admin_assets/js/jquery.blockUI.js",
         "dist/js/users.js",
         "plugins/jscolor-2.0.4/jscolor.min.js",
+        "dist/js/save-sidebar-collapse.js",
         "dist/js/app.min.js",
         "dist/js/all.js",
     ];
