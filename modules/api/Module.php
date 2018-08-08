@@ -170,7 +170,7 @@ class Module extends \yii\base\Module
         $ret->error_message = $this->error_message;
         $ret->data = $this->data;
 
-        if (is_array($ret->data)) $ret->data = $this->replaceNullWithEmptyString($ret->data);
+//        if (is_array($ret->data)) $ret->data = $this->replaceNullWithEmptyString($ret->data);
         if (!empty($this->data_errors)) $ret->data_errors = $this->data_errors;
 
         if ((empty ($ret->data) && !$ret->data) || (is_array($ret->data) && count($ret->data) == 0)) $ret->data = null;
