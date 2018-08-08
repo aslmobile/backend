@@ -333,15 +333,32 @@ class VehiclesController extends BaseController
         $documents = [];
         foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-photos/' . $user->id, true);
 
+        $saved_photos = explode(',', Yii::$app->request->post('save_photos'));
+        $saved_photos_objects = [];
+        $saved_photos_objects_id = [];
+        if ($saved_photos && count($saved_photos) > 0) foreach ($saved_photos as $saved_photo)
+        {
+            $file = UploadFiles::findOne($saved_photo);
+            if ($file)
+            {
+                $saved_photos_objects[] = $file;
+                $saved_photos_objects_id[] = $file->id;
+            }
+        }
+
         if (!empty ($vehicle->photos))
         {
             $photos = $vehicle->getVehiclePhotos(2);
             /** @var \app\modules\api\models\UploadFiles $file */
-            if ($photos && count ($photos) > 0) foreach ($photos as $file) $file->delete();
+            if ($photos && count ($photos) > 0) foreach ($photos as $file)
+            {
+                if (!in_array($file->id, $saved_photos_objects_id)) $file->delete();
+            }
         }
 
         $_photos = [];
         foreach ($documents as $file) $_photos[] = $file['file_id'];
+        foreach ($saved_photos_objects as $file) $_photos[] = $file->id;
         $_photos = implode(',', $_photos);
 
         $vehicle->photos = (string) $_photos;
