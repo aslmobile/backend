@@ -180,7 +180,7 @@ class User extends ActiveRecord implements IdentityInterface
             if ($file) return $file->file;
         }
 
-        return '/files/images/photo-placeholder-256.jpg';
+        return '/files/images/photo-placeholder-256.png';
     }
 
     /**
@@ -312,7 +312,7 @@ class User extends ActiveRecord implements IdentityInterface
             }
         }
 
-        return '<img class="img-circle" src="https://placehold.it/128x128" alt="no-photo">';
+        return '<img class="img-circle" src="/files/images/photo-placeholder-256.png" alt="no-photo">';
     }
 
     public function getOnline()

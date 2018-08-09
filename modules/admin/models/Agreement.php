@@ -19,8 +19,8 @@ class Agreement extends \app\models\Agreement
     {
         $array = parent::toArray($fields, $expand, $recursive);
 
-//        $array['content'] = nl2br(strip_tags($array['content']));
-//        $array['content'] = str_replace(['\r', '\n'], ['<br />'], $array['content']);
+        $array['content'] = strip_tags($array['content'], '<br>');
+        $array['content'] = str_replace(['\r', '\n', '\\r', '\\n', '\r\n', '\\r\\n', "\n", "\r"], '<br />', $array['content']);
 
         return $array;
     }
