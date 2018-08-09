@@ -91,8 +91,8 @@ $statuses = Yii::$app->params['statuses'];
                                 <?php /** @var \app\modules\admin\models\User $user */
                                 foreach ($users as $user) : ?>
                                     <li>
-                                        <img src="<?= $user->getImageFile(); ?>" alt="<?= $user->fullName; ?>" class="img img-bordered" />
-                                        <a class="users-list-name" href="#"><?= $user->fullName; ?></a>
+                                        <?= Yii::$app->imageCache->img(Yii::getAlias('@webroot') . $user->getImageFile(), '128x128', ['class' => 'img-circle']) ?>
+                                        <a class="users-list-name" href="<?= \yii\helpers\Url::toRoute('/admin/user/view/' . $user->id); ?>"><?= $user->fullName; ?></a>
                                         <span class="users-list-date"><?= Yii::$app->formatter->asDatetime($user->created_at, "php:d.m.Y  H:i:s"); ?></span>
                                     </li>
                                 <?php endforeach; ?>
@@ -113,8 +113,8 @@ $statuses = Yii::$app->params['statuses'];
                             <?php /** @var \app\modules\admin\models\User $user */
                             foreach ($users as $user) : ?>
                             <li>
-                                <img src="<?= $user->getImageFile(); ?>" alt="<?= $user->fullName; ?>" class="img img-bordered" />
-                                <a class="users-list-name" href="#"><?= $user->fullName; ?></a>
+                                <?= Yii::$app->imageCache->img(Yii::getAlias('@webroot') . $user->getImageFile(), '128x128', ['class' => 'img-circle']) ?>
+                                <a class="users-list-name" href="<?= \yii\helpers\Url::toRoute('/admin/user/view/' . $user->id); ?>"><?= $user->fullName; ?></a>
                                 <span class="users-list-date"><?= Yii::$app->formatter->asDatetime($user->created_at, "php:d.m.Y  H:i:s"); ?></span>
                             </li>
                             <?php endforeach; ?>

@@ -165,21 +165,21 @@ use yii\widgets\DetailView;
 
                 <div class="box-footer">
                     <?php if ($file) : ?>
-                        <button class="btn btn-primary" data-toggle="modal" data-target=".v<?= $vehicle->id; ?>-insurance-modal-front">
+                        <button class="btn btn-primary margin-bottom" data-toggle="modal" data-target=".v<?= $vehicle->id; ?>-insurance-modal-front">
                             <?= Yii::t('app', "Страхование"); ?>
                         </button>
                     <?php else : ?>
-                        <button class="btn btn-primary disabled">
+                        <button class="btn btn-primary margin-bottom disabled">
                             <?= Yii::t('app', "Страхование"); ?>
                             <?= Yii::t('app', "(не загружен)"); ?>
                         </button>
                     <?php endif; ?>
                     <?php if ($file_r1 || $file_r2) : ?>
-                        <button class="btn btn-primary" data-toggle="modal" data-target=".v<?= $vehicle->id; ?>-registration-modal-front">
+                        <button class="btn btn-primary margin-bottom" data-toggle="modal" data-target=".v<?= $vehicle->id; ?>-registration-modal-front">
                             <?= Yii::t('app', "Тех. паспорт"); ?>
                         </button>
                     <?php else : ?>
-                        <button class="btn btn-primary disabled">
+                        <button class="btn btn-primary margin-bottom disabled">
                             <?= Yii::t('app', "Тех. паспорт"); ?>
                             <?= Yii::t('app', "(не загружен)"); ?>
                         </button>
