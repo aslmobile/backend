@@ -18,7 +18,7 @@ $statuses = Yii::$app->params['statuses'];
         <div class="row">
             <div class="col-md-8 col-xs-12">
                 <div class="box box-widget">
-                    <div class="box-header with-border text-uppercase bg-aqua"><strong><?= Yii::t('app' , "Автомобили"); ?></strong></div>
+                    <div class="box-header with-border text-uppercase bg-aqua"><i class="fa fa-car"></i><strong><?= Yii::t('app' , "Автомобили"); ?></strong></div>
                     <div class="box-body">
                         <div class="row">
                             <div class="col-sm-4 border-right">
