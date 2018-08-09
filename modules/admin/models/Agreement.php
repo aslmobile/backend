@@ -19,7 +19,7 @@ class Agreement extends \app\models\Agreement
     {
         $array = parent::toArray($fields, $expand, $recursive);
 
-        $array['content'] = strip_tags($array['content'], '<br />');
+        $array['content'] = nl2br(strip_tags($array['content'], '<br />'));
 
         return $array;
     }
