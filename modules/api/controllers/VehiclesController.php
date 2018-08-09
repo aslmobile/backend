@@ -32,6 +32,7 @@ class VehiclesController extends BaseController
                             'upload-vehicle-registration',
                             'upload-vehicle-photo',
                             'upload-vehicle-photos',
+                            'delete-vehicle-photos',
                             'get-vehicle'
                         ],
                         'allow' => true
@@ -54,6 +55,7 @@ class VehiclesController extends BaseController
                     'upload-vehicle-registration' => ['POST'],
                     'upload-vehicle-photo' => ['POST'],
                     'upload-vehicle-photos' => ['POST'],
+                    'delete-vehicle-photos' => ['DELETE'],
                 ]
             ]
         ];
@@ -372,6 +374,29 @@ class VehiclesController extends BaseController
             'vehicle' => $vehicle->toArray(),
             'photos' => $documents
         ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionDeleteVehiclePhotos($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $vehicle = Vehicles::findOne(['id' => $id]);
+        if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
+
+        if (!empty ($vehicle->photos))
+        {
+            $photos = $vehicle->getVehiclePhotos(2);
+            /** @var \app\modules\api\models\UploadFiles $file */
+            if ($photos && count ($photos) > 0) foreach ($photos as $file) if ($file && !empty ($file->file)) $file->delete();
+
+            $vehicle->photos = null;
+            $vehicle->save();
+        }
+
+        $this->module->data['vehicle'] = $vehicle->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
