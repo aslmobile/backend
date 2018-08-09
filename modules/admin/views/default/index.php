@@ -16,7 +16,7 @@ $statuses = Yii::$app->params['statuses'];
     <div class="container-fluid">
         <h2><?= Yii::t('app' , "Панель управления"); ?></h2>
         <div class="row">
-            <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="col-md-8 col-xs-12">
                 <div class="box">
                     <div class="box-body text-uppercase"><strong><?= Yii::t('app' , "Автомобили"); ?></strong></div>
                     <div class="box-footer">
@@ -29,7 +29,7 @@ $statuses = Yii::$app->params['statuses'];
                             </div>
                             <div class="col-sm-4 border-right">
                                 <div class="description-block">
-                                    <h5 class="description-header"><?= \app\models\Vehicles::find()->where(['status' => \app\models\Vehicles::STATUS_WAITING])->count(); ?></h5>
+                                    <h5 class="description-header"><?= \app\models\Vehicles::find()->where(['status' => [\app\models\Vehicles::STATUS_WAITING, \app\models\Vehicles::STATUS_ADDED]])->count(); ?></h5>
                                     <span class="description-text"><?= Yii::t('app' , "Ждут одобрения"); ?></span>
                                 </div>
                             </div>
@@ -47,7 +47,7 @@ $statuses = Yii::$app->params['statuses'];
             <div class="col-md-4 col-sm-6 col-xs-12"></div>
         </div>
         <div class="row">
-            <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="col-md-8 col-xs-12">
                 <div class="box">
                     <!-- /.box-header -->
                     <div class="box-body">
