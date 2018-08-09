@@ -83,8 +83,47 @@ $statuses = Yii::$app->params['statuses'];
             </div>
             <div class="col-md-4 col-xs-12">
                 <div class="box box-widget">
-                    <div class="box-header with-border bg-aqua">123</div>
-                    <div class="box-body"></div>
+                    <div class="box-header with-border text-uppercase bg-aqua"><i class="fa fa-users"></i><strong><?= Yii::t('app', "Водители"); ?></strong></div>
+                    <div class="box-body no-padding">
+                        <?php $users = \app\modules\admin\models\User::find()->where(['type' => \app\models\User::TYPE_DRIVER])->limit(10)->all(); ?>
+                        <?php if ($users && count ($users) > 0) : ?>
+                            <ul class="users-list clearfix">
+                                <?php /** @var \app\modules\admin\models\User $user */
+                                foreach ($users as $user) : ?>
+                                    <li>
+                                        <img src="<?= $user->getImageFile(); ?>" alt="<?= $user->fullName; ?>" class="img img-bordered" />
+                                        <a class="users-list-name" href="#"><?= $user->fullName; ?></a>
+                                        <span class="users-list-date"><?= Yii::$app->formatter->asDatetime($user->created_at, "php:d.m.Y  H:i:s"); ?></span>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+                    </div>
+                    <div class="box-footer text-center bg-gray-light">
+                        <a href="<?= \yii\helpers\Url::toRoute('/admin/user/drivers/'); ?>" class="uppercase"><?= Yii::t('app', "Список всех водителей"); ?></a>
+                    </div>
+                </div>
+
+                <div class="box box-widget">
+                    <div class="box-header with-border text-uppercase bg-aqua"><i class="fa fa-users"></i><strong><?= Yii::t('app', "Пассажиры"); ?></strong></div>
+                    <div class="box-body no-padding">
+                        <?php $users = \app\modules\admin\models\User::find()->where(['type' => \app\models\User::TYPE_PASSENGER])->limit(10)->all(); ?>
+                        <?php if ($users && count ($users) > 0) : ?>
+                        <ul class="users-list clearfix">
+                            <?php /** @var \app\modules\admin\models\User $user */
+                            foreach ($users as $user) : ?>
+                            <li>
+                                <img src="<?= $user->getImageFile(); ?>" alt="<?= $user->fullName; ?>" class="img img-bordered" />
+                                <a class="users-list-name" href="#"><?= $user->fullName; ?></a>
+                                <span class="users-list-date"><?= Yii::$app->formatter->asDatetime($user->created_at, "php:d.m.Y  H:i:s"); ?></span>
+                            </li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <?php endif; ?>
+                    </div>
+                    <div class="box-footer text-center bg-gray-light">
+                        <a href="<?= \yii\helpers\Url::toRoute('/admin/user/passengers/'); ?>" class="uppercase"><?= Yii::t('app', "Список всех пассажиров"); ?></a>
+                    </div>
                 </div>
             </div>
         </div>
