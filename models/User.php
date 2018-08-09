@@ -180,7 +180,7 @@ class User extends ActiveRecord implements IdentityInterface
             if ($file) return $file->file;
         }
 
-        return 'https://placehold.it/200x200';
+        return '/files/images/photo-placeholder-256.jpg';
     }
 
     /**

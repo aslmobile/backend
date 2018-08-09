@@ -85,7 +85,7 @@ $statuses = Yii::$app->params['statuses'];
                 <div class="box box-widget">
                     <div class="box-header with-border text-uppercase bg-aqua"><i class="fa fa-users"></i><strong><?= Yii::t('app', "Водители"); ?></strong></div>
                     <div class="box-body no-padding">
-                        <?php $users = \app\modules\admin\models\User::find()->where(['type' => \app\models\User::TYPE_DRIVER])->limit(10)->all(); ?>
+                        <?php $users = \app\modules\admin\models\User::find()->where(['type' => \app\models\User::TYPE_DRIVER])->limit(8)->all(); ?>
                         <?php if ($users && count ($users) > 0) : ?>
                             <ul class="users-list clearfix">
                                 <?php /** @var \app\modules\admin\models\User $user */
@@ -107,7 +107,7 @@ $statuses = Yii::$app->params['statuses'];
                 <div class="box box-widget">
                     <div class="box-header with-border text-uppercase bg-aqua"><i class="fa fa-users"></i><strong><?= Yii::t('app', "Пассажиры"); ?></strong></div>
                     <div class="box-body no-padding">
-                        <?php $users = \app\modules\admin\models\User::find()->where(['type' => \app\models\User::TYPE_PASSENGER])->limit(10)->all(); ?>
+                        <?php $users = \app\modules\admin\models\User::find()->where(['type' => \app\models\User::TYPE_PASSENGER])->limit(8)->all(); ?>
                         <?php if ($users && count ($users) > 0) : ?>
                         <ul class="users-list clearfix">
                             <?php /** @var \app\modules\admin\models\User $user */
