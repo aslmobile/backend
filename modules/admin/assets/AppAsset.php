@@ -11,6 +11,7 @@ class AppAsset extends AssetBundle
     public $css = [
         "dist/css/AdminLTE.min.css",
         "dist/css/skins/_all-skins.min.css",
+        "plugins/jQueryUI/jquery-ui.min.css",
         "plugins/iCheck/flat/blue.css",
         "plugins/iCheck/all.css",
         "plugins/morris/morris.css",
