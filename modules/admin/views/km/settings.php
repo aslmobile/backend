@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?= $form->field($model, 'description')->widget(TTinyMCE::className(), [
                                     'clientOptions' => [
                                         'language_url' => Yii::$app->homeUrl.'tiny_translates/ru.js',
-                                        'language' => Yii::$app->controller::getOldLangAssoc(Yii::$app->language),
+                                        'language' => Yii::$app->controller->getOldLangAssoc(Yii::$app->language),
                                         'plugins' => [
                                             "advlist autolink lists link image charmap print preview hr anchor pagebreak",
                                             "searchreplace visualblocks visualchars code fullscreen",

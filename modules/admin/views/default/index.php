@@ -23,19 +23,19 @@ $statuses = Yii::$app->params['statuses'];
                         <div class="row">
                             <div class="col-sm-4 border-right">
                                 <div class="description-block">
-                                    <h5 class="description-header"><?= \app\models\Vehicles::find()->count(); ?></h5>
+                                    <h5 class="description-header" style="font-size: 32px;"><?= \app\models\Vehicles::find()->count(); ?></h5>
                                     <span class="description-text"><?= Yii::t('app' , "Зарегистрировано"); ?></span>
                                 </div>
                             </div>
                             <div class="col-sm-4 border-right">
                                 <div class="description-block">
-                                    <h5 class="description-header"><?= \app\models\Vehicles::find()->where(['status' => [\app\models\Vehicles::STATUS_WAITING, \app\models\Vehicles::STATUS_ADDED]])->count(); ?></h5>
+                                    <h5 class="description-header" style="font-size: 32px;"><?= \app\models\Vehicles::find()->where(['status' => [\app\models\Vehicles::STATUS_WAITING, \app\models\Vehicles::STATUS_ADDED]])->count(); ?></h5>
                                     <span class="description-text"><?= Yii::t('app' , "Ждут одобрения"); ?></span>
                                 </div>
                             </div>
                             <div class="col-sm-4">
                                 <div class="description-block">
-                                    <h5 class="description-header"><?= \app\models\Vehicles::find()->where(['status' => \app\models\Vehicles::STATUS_APPROVED])->count(); ?></h5>
+                                    <h5 class="description-header" style="font-size: 32px;"><?= \app\models\Vehicles::find()->where(['status' => \app\models\Vehicles::STATUS_APPROVED])->count(); ?></h5>
                                     <span class="description-text"><?= Yii::t('app' , "Одобрено"); ?></span>
                                 </div>
                             </div>
