@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-sm-12 col-md-10 col-md-offset-1">
                 <div class="box box-widget">
                     <div class="box-header with-border bg-aqua"><?= $model->title; ?></div>
-                    <div class="box-body"><?= $model->content; ?></div>
+                    <div class="box-body"><?= nl2br($model->content); ?></div>
                     <div class="box-footer text-center">
                         <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
                         <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
