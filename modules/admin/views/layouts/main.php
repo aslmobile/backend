@@ -55,7 +55,7 @@ AppAsset::register($this);
         <script type="text/javascript" src="/admin_assets/js/libs/utils/respond.min.js?1403934956"></script>
         <![endif]-->
     </head>
-    <body class="hold-transition skin-black sidebar-mini">
+    <body class="hold-transition skin-black sidebar-mini sidebar-collapse">
 
     <div class="modal fade" id="action-result-modal" tabindex="-1" role="dialog" aria-labelledby="actionResultLabel">
         <div class="modal-dialog" role="document">
