@@ -5,6 +5,7 @@ namespace app\modules\admin\controllers;
 use app\components\Controller;
 use app\modules\admin\models\User;
 use app\modules\admin\models\UserSearch;
+use app\modules\api\models\UploadFiles;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -12,6 +13,7 @@ use yii\helpers\Url;
 use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\web\UploadedFile;
 
 /**
  * UserController implements the CRUD actions for User model.
@@ -179,20 +181,50 @@ class UserController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if (Yii::$app->request->post('roles') && Yii::$app->user->can('admin')) {
-                $model->unlinkAll('roles', true);
-                foreach (Yii::$app->request->post('roles') as $k => $v) {
-                    // over rbac
-                    $userRole = Yii::$app->authManager->getRole($v);
-                    if (!empty($userRole)) {
-                        Yii::$app->authManager->assign($userRole, $id);
+        if ($model->load(Yii::$app->request->post())) {
+
+            $uploaded = UploadedFile::getInstance($model, 'new_image');
+
+            if (!is_null($uploaded))
+            {
+                $path = '/files/user-photos/' . $model->id;
+
+                if (self::validatePath(Yii::getAlias('@webroot') . $path))
+                {
+                    $uploader = new UploadFiles();
+                    $path = $uploader->setPath($path);
+                    if ($path)
+                    {
+                        $uploader->uploadedFile = $uploaded;
+                        $file = $uploader->upload();
+
+                        if ($file)
+                        {
+                            $image = UploadFiles::findOne($model->image);
+                            if ($image) $image->delete();
+
+                            $model->image = $file['file_id'];
+                        }
                     }
                 }
             }
 
-            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved', [], 0));
-            return $this->redirect(['update', 'id' => $model->id]);
+            if ($model->save())
+            {
+                if (Yii::$app->request->post('roles') && Yii::$app->user->can('admin')) {
+                    $model->unlinkAll('roles', true);
+                    foreach (Yii::$app->request->post('roles') as $k => $v) {
+                        // over rbac
+                        $userRole = Yii::$app->authManager->getRole($v);
+                        if (!empty($userRole)) {
+                            Yii::$app->authManager->assign($userRole, $id);
+                        }
+                    }
+                }
+
+                Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Сохранено', [], 0));
+                return $this->redirect(['update', 'id' => $model->id]);
+            }
         } else {
             return $this->render('update', [
                 'model' => $model,
@@ -297,5 +329,17 @@ class UserController extends Controller
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+
+    public static function validatePath($path){
+        if (!file_exists($path)
+            && !@mkdir($path, 0777, true)
+            && !is_dir($path)
+        ) {
+            $error = 'Can not create a folder to upload a file';
+            return false;
+        }
+
+        return true;
     }
 }

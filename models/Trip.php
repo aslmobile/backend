@@ -155,6 +155,7 @@ class Trip extends \yii\db\ActiveRecord
         return [
             'id'                => Yii::t('app', "ID"),
             'user_id'           => Yii::t('app', "Пассажир"),
+            'driver_id'           => Yii::t('app', "Водитель"),
             'vehicle_type_id'   => Yii::t('app', "Тип автомобиля"),
             'startpoint_id'     => Yii::t('app', "Остановка"),
             'status'            => Yii::t('app', "Статус"),

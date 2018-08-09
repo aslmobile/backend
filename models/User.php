@@ -54,6 +54,8 @@ class User extends ActiveRecord implements IdentityInterface
     public $repeat_password;
     public $uip;
 
+    public $new_image;
+
     const STATUS_PENDING = 0;
     const STATUS_APPROVED = 1;
     const STATUS_BLOCKED = 9;

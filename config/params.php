@@ -41,8 +41,7 @@ $params = [
     ],
     'statuses' => [
         0 => Yii::t('app',"Ждет одобрения"),
-        1 => Yii::t('app',"Одобрен"),
-        9 => Yii::t('app',"Заблокирован"),
+        1 => Yii::t('app',"Одобрен")
     ],
     'feedback' => [
         0 => Yii::t('app',"Created"),

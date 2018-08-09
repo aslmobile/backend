@@ -69,6 +69,7 @@ class Faq extends \yii\db\ActiveRecord
             'title'         => Yii::t('app', "Заголовок"),
             'content'       => Yii::t('app', "Описание"),
             'type'          => Yii::t('app', "Тип"),
+            'weight'        => Yii::t('app', "Вес (сортировка)"),
             'created_at'    => Yii::t('app', "Создано"),
             'updated_at'    => Yii::t('app', "Обновлено")
         ];

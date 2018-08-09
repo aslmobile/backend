@@ -6,8 +6,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Blacklist */
 
-$this->title = 'New Blacklist';
-$this->params['breadcrumbs'][] = ['label' => 'Blacklists', 'url' => ['index']];
+$this->title = Yii::t('app', "Добавление в черный список");
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Черный список"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

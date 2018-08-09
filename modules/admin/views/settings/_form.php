@@ -242,14 +242,14 @@ JS
                 <div class="row">
                     <div class="col-sm-6">
                         <?= $form->field($model, 'maint')->dropdownList([
-                            0 => Yii::$app->mv->gt("Disabled", [], 0),
-                            1 => Yii::$app->mv->gt("Enabled", [], 0)
+                            0 => Yii::$app->mv->gt("Отключен", [], 0),
+                            1 => Yii::$app->mv->gt("Включен", [], 0)
                         ]); ?>
                     </div>
                     <div class="col-sm-6">
                         <?= $form->field($model, 'syscache')->dropdownList([
-                            0 => Yii::$app->mv->gt("Disabled", [], 0),
-                            1 => Yii::$app->mv->gt("Enabled", [], 0)
+                            0 => Yii::$app->mv->gt("Отключен", [], 0),
+                            1 => Yii::$app->mv->gt("Включен", [], 0)
                         ]); ?>
                     </div>
                 </div>
