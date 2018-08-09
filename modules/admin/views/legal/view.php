@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </section>
     <section class="content">
         <div class="row">
-            <div class="col-sm-12 col-md-6 col-lg-4 col-md-offset-3 col-lg-offset-4">
+            <div class="col-sm-12 col-md-10 col-md-offset-1">
                 <div class="box box-widget">
                     <div class="box-header with-border bg-aqua"><?= $model->title; ?></div>
                     <div class="box-body"><?= $model->content; ?></div>
