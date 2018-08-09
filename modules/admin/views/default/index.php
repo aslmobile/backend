@@ -17,9 +17,9 @@ $statuses = Yii::$app->params['statuses'];
         <h2><?= Yii::t('app' , "Панель управления"); ?></h2>
         <div class="row">
             <div class="col-md-8 col-xs-12">
-                <div class="box">
-                    <div class="box-body text-uppercase"><strong><?= Yii::t('app' , "Автомобили"); ?></strong></div>
-                    <div class="box-footer">
+                <div class="box box-widget">
+                    <div class="box-header with-border text-uppercase bg-aqua"><strong><?= Yii::t('app' , "Автомобили"); ?></strong></div>
+                    <div class="box-body">
                         <div class="row">
                             <div class="col-sm-4 border-right">
                                 <div class="description-block">
@@ -41,24 +41,15 @@ $statuses = Yii::$app->params['statuses'];
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-6 col-xs-12"></div>
-            <div class="col-md-4 col-sm-6 col-xs-12"></div>
-        </div>
-        <div class="row">
-            <div class="col-md-8 col-xs-12">
-                <div class="box">
-                    <!-- /.box-header -->
-                    <div class="box-body">
+                    <div class="box-body" style="border-top: 1px solid #F4F4F4;">
                         <ul class="products-list product-list-in-box">
                             <?php $vehicles = \app\modules\admin\models\Vehicles::find()->orderBy(['created_at' => SORT_DESC])->limit(10)->all(); ?>
                             <?php if ($vehicles && count($vehicles) > 0) foreach ($vehicles as $vehicle) : ?>
-                            <?php /** @var \app\models\Vehicles $vehicle */ ?>
+                                <?php /** @var \app\models\Vehicles $vehicle */ ?>
                                 <li class="item">
                                     <div class="product-img">
                                         <?php if (!empty ($vehicle->model->image)) : ?>
-                                        <img src="<?= $vehicle->model->image; ?>" style="height: auto;" />
+                                            <img src="<?= $vehicle->model->image; ?>" style="height: auto;" />
                                         <?php endif; ?>
                                     </div>
                                     <div class="product-info">
@@ -88,7 +79,12 @@ $statuses = Yii::$app->params['statuses'];
                     <div class="box-footer text-center bg-gray-light">
                         <a href="<?= \yii\helpers\Url::toRoute('/admin/vehicles/index/'); ?>" class="uppercase"><?= Yii::t('app', "Список всех автомобилей"); ?></a>
                     </div>
-                    <!-- /.box-footer -->
+                </div>
+            </div>
+            <div class="col-md-4 col-xs-12">
+                <div class="box box-widget">
+                    <div class="box-header with-border bg-aqua">123</div>
+                    <div class="box-body"></div>
                 </div>
             </div>
         </div>

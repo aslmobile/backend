@@ -46,7 +46,7 @@ class DefaultController extends BaseController
                 'actions' => [
                     'dispatch-phone' => ['GET'],
                     'legal' => ['GET'],
-                    'agreement' => ['POST'],
+                    'agreement' => ['GET'],
                     'cancel-trip-reasons' => ['GET'],
                     'cancel-passenger-reasons' => ['GET'],
                     'get-file' => ['GET'],
@@ -125,10 +125,6 @@ class DefaultController extends BaseController
 
     public function actionAgreement($id)
     {
-        $this->prepareBody();
-        $this->validateBodyParams(['phone']);
-        $this->TokenAuth(self::TOKEN_PHONE);
-
         switch ($id)
         {
             case Agreement::TYPE_DRIVER: $id = Agreement::TYPE_DRIVER; break;
