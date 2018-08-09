@@ -32,6 +32,7 @@ class TripController extends BaseController
                             'test',
                             'calculate-passenger-tariff',
 
+                            'accept-arrive',
                             'passenger-comments',
                             'driver-comments',
                             'trips',
@@ -50,6 +51,7 @@ class TripController extends BaseController
                 'actions' => [
                     'cities'  => ['GET'],
                     'passengers'  => ['GET'],
+                    'accept-arrive' => ['POST'],
                     'checkpoint-arrived' => ['POST'],
                     'taxi' => ['POST'],
                     'luggage-type' => ['GET'],
@@ -65,6 +67,20 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         return parent::beforeAction($event);
+    }
+
+    public function actionAcceptArrive($id)
+    {
+        /** @var \app\models\Line $line */
+        $line = Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        $line->status = Line::STATUS_IN_PROGRESS;
+        $line->save();
+
+        $this->module->data['line'] = $line->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionAcceptSeat($id)

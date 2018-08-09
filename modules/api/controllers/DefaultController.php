@@ -47,6 +47,7 @@ class DefaultController extends BaseController
                     'dispatch-phone' => ['GET'],
                     'legal' => ['GET'],
                     'agreement' => ['GET'],
+                    'faq' => ['GET'],
                     'cancel-trip-reasons' => ['GET'],
                     'cancel-passenger-reasons' => ['GET'],
                     'get-file' => ['GET'],
@@ -102,9 +103,6 @@ class DefaultController extends BaseController
 
     public function actionLegal($id)
     {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
         switch ($id)
         {
             case Legal::TYPE_DRIVER: $id = Legal::TYPE_DRIVER; break;
@@ -143,10 +141,14 @@ class DefaultController extends BaseController
         $this->module->sendResponse();
     }
 
-    public function actionFaq()
+    public function actionFaq($id)
     {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
+        switch ($id)
+        {
+            case Agreement::TYPE_DRIVER: $id = Agreement::TYPE_DRIVER; break;
+            case Agreement::TYPE_PASSENGER: $id = Agreement::TYPE_PASSENGER; break;
+            default: $id = Agreement::TYPE_DRIVER;
+        }
 
         $faqs = Faq::find()->orderBy(['weight' => SORT_ASC])->all();
         $faq_data = [];
