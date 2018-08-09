@@ -6,8 +6,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\Trip */
 
-$this->title = Yii::$app->mv->gt('New Trip',[],false);
-$this->params['breadcrumbs'][] = ['label' => 'Trips', 'url' => ['index']];
+$this->title = Yii::$app->mv->gt('Новая поездка',[],false);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Поездки"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

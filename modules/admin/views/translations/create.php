@@ -6,8 +6,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\modules\admin\models\Translations */
 
-$this->title = Yii::t('app', 'New Translations');
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Translations'), 'url' => ['index']];
+$this->title = Yii::t('app', 'Новый перевод');
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Переводы'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

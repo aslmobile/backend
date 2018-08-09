@@ -8,8 +8,8 @@ use yii\widgets\Breadcrumbs;
 /* @var $this yii\web\View */
 /* @var $model app\modules\admin\models\Translations */
 
-$this->title = Yii::$app->mv->gt('Edit translations', false);
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Translations'), 'url' => ['index']];
+$this->title = Yii::$app->mv->gt('Изменить перевод', false);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Переводы'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="col-md-8">
                         <div class="box">
                             <div class="box-header with-border">
-                                <h3 class="box-title"><?= Yii::$app->mv->gt('Data', [], false) ?></h3>
+                                <h3 class="box-title"><?= Yii::$app->mv->gt('Информация', [], false) ?></h3>
                                 <div class="box-tools pull-right">
                                     <button type="button" class="btn btn-box-tool" data-widget="collapse">
                                         <i class="fa fa-minus"></i></button>
@@ -46,14 +46,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                             <?= $form->field($model, 'val')->widget(Select2::classname(), [
                                                 'data' => $translations,
-                                                'options' => ['placeholder' => Yii::t('app', 'Translation')],
+                                                'options' => ['placeholder' => Yii::t('app', 'Перевод')],
                                                 'pluginOptions' => [
                                                     'allowClear' => true,
                                                 ],
-                                            ]); ?>
+                                            ])->label(Yii::t('app', 'Перевод')); ?>
 
-                                            <?= $form->field($model, 'new_val')->textarea() ?>
-
+                                            <?= $form->field($model, 'new_val')->textarea()->label(Yii::t('app', 'Новое значение')) ?>
 
                                         </div>
                                         <div class="col-sm-12"></div>

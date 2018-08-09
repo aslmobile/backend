@@ -5,8 +5,8 @@ use yii\widgets\Breadcrumbs;
 use yii\widgets\DetailView;
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt("Admin panel", [], 0), 'url' => ['/admin']];
-$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt("Languages", [], 0), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt("Панель управления", [], 0), 'url' => ['/admin']];
+$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt("Языки", [], 0), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="content-wrapper">
@@ -32,7 +32,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?= DetailView::widget([
                                     'model' => $model,
                                     'attributes' => [
-                                        'id',
                                         [
                                             'attribute' => 'flag',
                                             'value' => $model->flag,
@@ -43,7 +42,8 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'name',
                                         [
                                             'attribute' => 'default',
-                                            'value' => ($model->default == 0) ? 'Yes' : 'No',
+                                            'value' => ($model->default == 0) ? Yii::t('app', "Нет") : '<i class="fa fa-check text-success"></i>',
+                                            'format' => 'html'
                                         ],
                                         'created_at:datetime',
                                         'updated_at:datetime',

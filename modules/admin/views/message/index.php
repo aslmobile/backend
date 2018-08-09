@@ -9,7 +9,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = Yii::$app->mv->gt('Переводы', [], 0);
-$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Admin panel', [], false), 'url' => ['/admin']];
+$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Панель управления', [], false), 'url' => ['/admin']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -27,12 +27,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="box-tools pull-right">
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} новая', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false),
+                        Yii::$app->mv->gt('{i} Добавить', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
                     ); ?>
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} удалить выбранные', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false),
+                        Yii::$app->mv->gt('{i} Удалить', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false),
                         [''],
                         [
                             'class' => 'btn btn-danger btn-sm',

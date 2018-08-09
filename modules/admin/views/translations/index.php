@@ -8,7 +8,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $searchModel app\modules\admin\models\TranslationsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::t('app', 'Translations');
+$this->title = Yii::t('app', 'Переводы');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -26,12 +26,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="box-tools pull-right">
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} новая', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false),
+                        Yii::$app->mv->gt('{i} Добавить', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
                     ); ?>
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} удалить выбранные', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false),
+                        Yii::$app->mv->gt('{i} Удалить', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false),
                         [''],
                         [
                             'class' => 'btn btn-danger btn-sm',
@@ -67,12 +67,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'columns' => [
                     //['class' => 'yii\grid\SerialColumn'],
                     ['class' => 'yii\grid\CheckboxColumn'],
-
-                    'id',
-                    //'trans_key',
                     'original_val:ntext',
                     'val:ntext',
-                    //'descr',
                     'url:url',
                     [
                         'class' => 'yii\grid\ActionColumn',

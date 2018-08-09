@@ -44,11 +44,12 @@ class Translations extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
-            'trans_key' => Yii::t('app', 'Trans Key'),
-            'original_val' => Yii::t('app', 'Original Val'),
-            'val' => Yii::t('app', 'Val'),
-            'descr' => Yii::t('app', 'Descr'),
-            'url' => Yii::t('app', 'Url'),
+            'trans_key' => Yii::t('app', 'Ключ перевода'),
+            'original_val' => Yii::t('app', 'Оригинал'),
+            'val' => Yii::t('app', 'Значение'),
+            'new_val' => Yii::t('app', 'Новое значение'),
+            'descr' => Yii::t('app', 'Описание'),
+            'url' => Yii::t('app', 'Путь'),
         ];
     }
 

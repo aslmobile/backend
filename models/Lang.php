@@ -56,13 +56,13 @@ class Lang extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::$app->mv->gt("ID",[],0),
-            'flag' => Yii::$app->mv->gt("Icon",[],0),
+            'flag' => Yii::$app->mv->gt("Иконка",[],0),
             'url' => Yii::$app->mv->gt("URL",[],0),
-            'local' => Yii::$app->mv->gt("Locale",[],0),
-            'name' => Yii::$app->mv->gt("Name",[],0),
-            'default' => Yii::$app->mv->gt("Default",[],0),
-            'created_at' => Yii::$app->mv->gt("Created",[],0),
-            'updated_at' => Yii::$app->mv->gt("Updated",[],0),
+            'local' => Yii::$app->mv->gt("Локаль",[],0),
+            'name' => Yii::$app->mv->gt("Название",[],0),
+            'default' => Yii::$app->mv->gt("Стандартный",[],0),
+            'created_at' => Yii::$app->mv->gt("Создан",[],0),
+            'updated_at' => Yii::$app->mv->gt("Обновлен",[],0),
             'code' => Yii::$app->mv->gt("ISO 639-1",[],0),
         ];
     }

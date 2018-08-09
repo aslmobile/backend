@@ -8,7 +8,7 @@ use yii\widgets\DetailView;
 /* @var $model app\modules\admin\models\Translations */
 
 $this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Translations'), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Переводы'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

@@ -7,8 +7,8 @@ use app\components\widgets\Alert;
 /* @var $model app\modules\admin\models\Translations */
 
 
-$this->title = Yii::$app->mv->gt('Edit {title}',['title' => $model->id],false);
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Translations'), 'url' => ['index']];
+$this->title = Yii::$app->mv->gt('Редактирование {title}',['title' => $model->id],false);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Переводы'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

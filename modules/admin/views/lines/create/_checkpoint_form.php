@@ -117,7 +117,7 @@ use yii\web\JsExpression;
                     'attributeLongitude' => 'longitude',
                     'googleMapApiKey' => 'AIzaSyALfPPffcWHUHCDKccaIlBj5kLfQjIcD9w',
                     'draggable' => true,
-                ]); ?>
+                ])->label(Yii::t('app', "Местоположение")); ?>
             </div>
             <div class="box-footer clearfix text-right">
                 <?= \app\components\widgets\FormButtons::widget(['model' => $model]) ?>

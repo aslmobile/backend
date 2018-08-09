@@ -3,8 +3,8 @@ use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 
 
-$this->title = Yii::$app->mv->gt("Languages",[],0);
-$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt("Admin panel",[],0), 'url' => ['/admin']];
+$this->title = Yii::$app->mv->gt("Языки",[],0);
+$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt("Панель управления",[],0), 'url' => ['/admin']];
 $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

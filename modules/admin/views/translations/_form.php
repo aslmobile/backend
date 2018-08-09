@@ -15,7 +15,7 @@ use yii\widgets\ActiveForm;
     <div class="col-md-12">
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title"><?= Yii::$app->mv->gt('Data', [], false) ?></h3>
+                <h3 class="box-title"><?= Yii::$app->mv->gt('Информация', [], false) ?></h3>
                 <div class="box-tools pull-right">
                     <button type="button" class="btn btn-box-tool" data-widget="collapse">
                         <i class="fa fa-minus"></i></button>
@@ -25,7 +25,7 @@ use yii\widgets\ActiveForm;
             <div class="box-body" style="padding: 10px 0">
                 <ul class="nav nav-tabs">
                     <li class="active" style="margin-left: 15px;">
-                        <a data-toggle="tab" href="#top"><?= Yii::$app->mv->gt('Data', [], false) ?></a>
+                        <a data-toggle="tab" href="#top"><?= Yii::$app->mv->gt('Информация', [], false) ?></a>
                     </li>
                     <?php foreach (Lang::getBehaviorsList() as $k => $v) { ?>
                         <li>

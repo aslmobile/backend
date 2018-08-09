@@ -8,9 +8,9 @@ use yii\widgets\Breadcrumbs;
 /* @var $searchModel app\modules\admin\models\LangSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt("Languages", [], 0);
+$this->title = Yii::$app->mv->gt("Языки приложения", [], 0);
 $this->params['breadcrumbs'][] = [
-    'label' => Yii::$app->mv->gt("Admin panel", [], 0),
+    'label' => Yii::$app->mv->gt("Панель управления", [], 0),
     'url' => ['/admin'],
 ];
 $this->params['breadcrumbs'][] = $this->title;
@@ -33,12 +33,12 @@ $yes_no = Yii::$app->params['yes_no'];
 
                 <div class="box-tools pull-right">
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} новая', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false),
+                        Yii::$app->mv->gt('{i} Добавить', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
                     ); ?>
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} удалить выбранные', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false),
+                        Yii::$app->mv->gt('{i} Удалить', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false),
                         [''],
                         [
                             'class' => 'btn btn-danger btn-sm',
@@ -92,8 +92,9 @@ $yes_no = Yii::$app->params['yes_no'];
                         'attribute' => 'default',
                         'filter' => $yes_no,
                         'value' => function ($data) {
-                            return ($data->default == 0) ? 'No' : 'Yes';
+                            return ($data->default == 0) ? '' : '<i class="fa fa-check text-success"></i>';
                         },
+                        'format' => 'html'
                     ],
                     [
                         'attribute' => 'url',

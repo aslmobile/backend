@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
-$yes_no = Yii::$app->params['yesno'];
+$yes_no = Yii::$app->params['yes_no'];
 ?>
 
 <?php $form = ActiveForm::begin(['options' => ['class' => 'form']]); ?>
@@ -12,7 +12,7 @@ $yes_no = Yii::$app->params['yesno'];
     <div class="col-md-12">
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title"><?= Yii::$app->mv->gt('Languages', [], false) ?></h3>
+                <h3 class="box-title"><?= Yii::$app->mv->gt('Языки', [], false) ?></h3>
                 <div class="box-tools pull-right">
                     <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
                     </button>
@@ -22,7 +22,7 @@ $yes_no = Yii::$app->params['yesno'];
             <div class="box-body" style="padding: 10px 0">
                 <ul class="nav nav-tabs">
                     <li class="active" style="margin-left: 15px;">
-                        <a data-toggle="tab" href="#verif"><?= Yii::$app->mv->gt('Data', [], false) ?></a>
+                        <a data-toggle="tab" href="#verif"><?= Yii::$app->mv->gt('Информация', [], false) ?></a>
                     </li>
                 </ul>
                 <div class="tab-content" style="padding: 10px">
