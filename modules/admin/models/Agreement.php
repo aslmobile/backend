@@ -14,4 +14,13 @@ class Agreement extends \app\models\Agreement
             self::TYPE_PASSENGER => Yii::t('app', "Пассажир")
         ];
     }
+
+    public function toArray(array $fields = [], array $expand = [], $recursive = true)
+    {
+        $array = parent::toArray($fields, $expand, $recursive);
+
+        $array['content'] = strip_tags(nl2br($array['content']), '<br />');
+
+        return $array;
+    }
 }
