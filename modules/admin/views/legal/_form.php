@@ -43,8 +43,9 @@ use app\modules\admin\models\Lang;
                 <div class="row">
                     <div class="col-sm-12">
                         <?= $form->field($model, 'type')->dropDownList($model->typesList); ?>
+                        <?= $form->field($model, 'weight')->textInput(['type' => "number"]) ?>
                         <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
-                        <?= $form->field($model, 'content')->textarea(['maxlength' => true]) ?>
+                        <?= $form->field($model, 'content')->textarea(['rows' => 16]); ?>
                     </div>
                 </div>
             </div>

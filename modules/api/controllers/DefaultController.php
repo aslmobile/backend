@@ -110,7 +110,7 @@ class DefaultController extends BaseController
             default: $id = Legal::TYPE_DRIVER;
         }
 
-        $legals = Legal::find()->where(['type' => $id])->all();
+        $legals = Legal::find()->where(['type' => $id])->orderBy(['weight' => SORT_ASC])->all();
         $legal_data = [];
 
         /** @var \app\modules\api\models\Legal $legal */
@@ -130,7 +130,7 @@ class DefaultController extends BaseController
             default: $id = Agreement::TYPE_DRIVER;
         }
 
-        $agreements = Agreement::find()->where(['type' => $id])->all();
+        $agreements = Agreement::find()->where(['type' => $id])->orderBy(['weight' => SORT_ASC])->all();
         $agreement_data = [];
 
         /** @var \app\modules\api\models\Agreement $legal */
@@ -150,7 +150,7 @@ class DefaultController extends BaseController
             default: $id = Agreement::TYPE_DRIVER;
         }
 
-        $faqs = Faq::find()->orderBy(['weight' => SORT_ASC])->all();
+        $faqs = Faq::find()->where(['type' => $id])->orderBy(['weight' => SORT_ASC])->all();
         $faq_data = [];
 
         /** @var \app\modules\api\models\Faq $faq */
