@@ -44,6 +44,14 @@ JSON;
         }
         else $array['image_url'] = null;
 
+        $inAccept = RestFul::find()->where(['type' => RestFul::TYPE_DRIVER_ACCEPT, 'user_id' => $device->user->id, 'message' => json_encode(['status' => 'request'])])->one();
+        $array['accept'] = $inAccept ? 1 : 0;
+
+        $inQueue = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $this->id])->one();
+        $array['queue'] = $inQueue ? 1 : 0;
+
+        $array['rating'] = $this->getRating();
+
         return $array;
     }
 }

@@ -17,7 +17,11 @@ use yii\behaviors\TimestampBehavior;
  */
 class RestFul extends \yii\db\ActiveRecord
 {
-    const TYPE_LOG = -1;
+    const
+        TYPE_LOG = -1,
+        TYPE_DRIVER_ACCEPT = 1,
+        TYPE_DRIVER_ACCEPT_DONE = 2,
+        TYPE_DRIVER_ACCEPT_CANCELLED = 3;
 
     public static function tableName()
     {

@@ -4,6 +4,7 @@ namespace app\components\Socket;
 
 use app\components\Socket\models\Line;
 use app\models\Devices;
+use app\modules\api\models\RestFul;
 use Ratchet\ConnectionInterface;
 
 class Message
@@ -89,12 +90,32 @@ class Message
 
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
+        RestFul::updateAll(
+            ['message' => json_encode(['status' => 'closed'])],
+            ['AND',
+                ['<=', 'created_at', time() - 300],
+                ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT]
+            ]
+        );
+
+        $watchdog = RestFul::find()->where(['type' => RestFul::TYPE_DRIVER_ACCEPT, 'user_id' => $device->user->id, 'message' => json_encode(['status' => 'request'])])->one();
+        if (!$watchdog)
+        {
+            $watchdog = new RestFul([
+                'type' => RestFul::TYPE_DRIVER_ACCEPT,
+                'message' => json_encode(['status' => 'request']),
+                'user_id' => $device->user->id,
+                'uip' => '0.0.0.0'
+            ]);
+        }
+
         $response = [
             'message_id'    => $this->message_id,
             'device_id'     => $device->id,
             'user_id'       => $device->user_id,
             'data'          => [
-                'accept-time'   => 300,
+                'accept-from'   => $watchdog->created_at,
+                'accept-time'   => 300
             ]
         ];
 

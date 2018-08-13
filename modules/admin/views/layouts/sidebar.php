@@ -405,6 +405,7 @@ $act = Yii::$app->controller->action->id;
                 </ul>
             </li>
         </ul>
+        <div style="height: 80px;"></div>
     </section>
     <!-- /.sidebar -->
 </aside>
