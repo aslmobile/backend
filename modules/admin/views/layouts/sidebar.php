@@ -24,37 +24,9 @@ $act = Yii::$app->controller->action->id;
                 <a href="<?= Url::toRoute(['/admin/default/index']) ?>"> <i class="fa fa-dashboard"></i>
                     <span><?= Yii::$app->mv->gt('Панель управления', [], false); ?></span> </a>
             </li>
-            <li class="treeview<?= ($cont == 'translations' || $cont == 'message') ? ' active' : '' ?>">
-                <a href="#"> <i class="fa fa-language" aria-hidden="true"></i>
-                    <span><?= Yii::$app->mv->gt('Переводы', [], false); ?></span>
-                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
-                <ul class="treeview-menu">
-                    <li<?= ($cont == 'translations' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/translations/index') ?>"><i
-                                    class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Динамические', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'translations' && $act == 'create') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/translations/create') ?>"><i
-                                    class="fa fa-plus"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'translations' && $act == 'edit') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/translations/edit') ?>"><i
-                                    class="fa fa-pencil"></i> <?= Yii::$app->mv->gt('Изменить', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'message' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/message/index') ?>"><i
-                                    class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Статические', [], false) ?>
-                        </a>
-                    </li>
-                    <li<?= ($cont == 'message' && $act == 'create') ? ' class="active"' : '' ?>>
-                        <a href="<?= Url::toRoute('/admin/message/create') ?>"><i
-                                    class="fa fa-plus"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
-                        </a>
-                    </li>
-                </ul>
+            <li<?= ($cont == 'taxi') ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute(['/admin/taxi/index']) ?>"> <i class="fa fa-taxi"></i>
+                    <span><?= Yii::$app->mv->gt('Заказы Такси', [], false); ?></span> </a>
             </li>
             <li class="header"><?= Yii::$app->mv->gt('Контент', [], false); ?></li>
             <li class="treeview<?= ($cont == 'legal') ? ' active' : '' ?>">
@@ -382,6 +354,38 @@ $act = Yii::$app->controller->action->id;
             <li<?= ($cont == 'settings') ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute(['/admin/settings/index']) ?>"> <i class="fa fa-cogs"></i>
                     <span><?= Yii::$app->mv->gt('Настройки', [], false); ?></span> </a>
+            </li>
+            <li class="treeview<?= ($cont == 'translations' || $cont == 'message') ? ' active' : '' ?>">
+                <a href="#"> <i class="fa fa-language" aria-hidden="true"></i>
+                    <span><?= Yii::$app->mv->gt('Переводы', [], false); ?></span>
+                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span> </a>
+                <ul class="treeview-menu">
+                    <li<?= ($cont == 'translations' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/translations/index') ?>"><i
+                                    class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Динамические', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'translations' && $act == 'create') ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/translations/create') ?>"><i
+                                    class="fa fa-plus"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'translations' && $act == 'edit') ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/translations/edit') ?>"><i
+                                    class="fa fa-pencil"></i> <?= Yii::$app->mv->gt('Изменить', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'message' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/message/index') ?>"><i
+                                    class="fa fa-th-list"></i> <?= Yii::$app->mv->gt('Статические', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'message' && $act == 'create') ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/message/create') ?>"><i
+                                    class="fa fa-plus"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
+                        </a>
+                    </li>
+                </ul>
             </li>
             <li<?= ($cont == 'file') ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute(['/admin/file/index']) ?>"> <i class="fa fa-folder-open fa-fw"></i>

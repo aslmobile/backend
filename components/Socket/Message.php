@@ -128,6 +128,25 @@ class Message
         return $response;
     }
 
+    public function processingQuery($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        $response = [
+            'message_id'    => $this->message_id,
+            'device_id'     => $device->id,
+            'user_id'       => $device->user_id,
+            'data'          => [
+                'passengers'   => 0
+            ]
+        ];
+
+        return $response;
+    }
+
     /**
      * @param $conn ConnectionInterface
      *
