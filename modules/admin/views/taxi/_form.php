@@ -80,7 +80,7 @@ use yii\web\JsExpression;
                                 'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/lines/select-startpoints']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                             ],
                         ]); ?>
-                        <?= $form->field($model, 'address')->dropDownList($model->statusList) ?>
+                        <?= $form->field($model, 'status')->dropDownList($model->statusList) ?>
                     </div>
                     <div class="col-sm-6">
 
