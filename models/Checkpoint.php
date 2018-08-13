@@ -84,4 +84,6 @@ class Checkpoint extends \yii\db\ActiveRecord
     {
         return Route::findOne(['id' => $this->route]);
     }
+
+
 }

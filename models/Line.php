@@ -1,5 +1,6 @@
 <?php namespace app\models;
 
+use app\components\Socket\SocketPusher;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 
@@ -144,12 +145,25 @@ class Line extends \yii\db\ActiveRecord
 
         if ($this->freeseats == 0)
         {
+            $watchdog = new RestFul([
+                'type' => RestFul::TYPE_DRIVER_ACCEPT,
+                'message' => json_encode(['status' => 'request']),
+                'user_id' => $this->driver_id,
+                'uip' => '0.0.0.0'
+            ]);
+
+            $watchdog->save();
+
+            $socket = new SocketPusher();
+            $socket->push(json_encode(['action' => "acceptDriverTrip", 'data' => ['message_id' => time()]]));
+
             // TODO: Отправка в сокет что машина заполнена и подтверждение о выезде через 5 минут
         }
 
         if ($this->status == self::STATUS_IN_PROGRESS && $this->getOldAttribute('status') != self::STATUS_IN_PROGRESS)
         {
-            // TODO: Отправлять уведомление о выезде
+            // TODO: Отправлять уведомление всем пассажирам
+            Notifications::create(Notifications::NTP_TRIP_READY, $this->driver_id, true, \Yii::t('app', "Ваша машина готова к выезду."));
         }
     }
 }

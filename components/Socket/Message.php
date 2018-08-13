@@ -5,6 +5,7 @@ namespace app\components\Socket;
 use app\components\Socket\models\Line;
 use app\models\Devices;
 use app\modules\api\models\RestFul;
+use app\modules\api\models\Trip;
 use Ratchet\ConnectionInterface;
 
 class Message
@@ -107,15 +108,20 @@ class Message
                 'user_id' => $device->user->id,
                 'uip' => '0.0.0.0'
             ]);
+
+            $watchdog->save();
         }
+
+        $trip = Trip::find()->where(['status' => Trip::STATUS_WAITING, 'driver_id' => $device->user->id])->one();
 
         $response = [
             'message_id'    => $this->message_id,
             'device_id'     => $device->id,
             'user_id'       => $device->user_id,
             'data'          => [
-                'accept-from'   => $watchdog->created_at,
-                'accept-time'   => 300
+                'accept_from'   => $watchdog->created_at,
+                'accept_time'   => 300,
+                'trip'          => $trip ? $trip->toArray() : []
             ]
         ];
 

@@ -1,5 +1,7 @@
 <?php namespace app\modules\api\models;
 
+use app\models\Notifications;
+
 class Trip extends \app\models\Trip
 {
     const
@@ -33,6 +35,7 @@ class Trip extends \app\models\Trip
         if ($this->status != $this->oldStatus && $this->status == self::STATUS_TRIP)
         {
             // TODO: Отправка подтверждения о выезде
+            Notifications::create(Notifications::NTP_TRIP_READY, $this->user_id, true, \Yii::t('app', "Ваша машина готова к выезду."));
         }
     }
 
@@ -41,5 +44,18 @@ class Trip extends \app\models\Trip
         $this->oldStatus = $this->getOldAttribute('status');
 
         return parent::beforeSave($insert);
+    }
+
+    public function toArray(array $fields = [], array $expand = [], $recursive = true)
+    {
+        $array = parent::toArray($fields, $expand, $recursive);
+
+        if ($this->startpoint) $array['startpoint'] = $this->startpoint->toArray();
+        if ($this->endpoint) $array['endpoint'] = $this->endpoint->toArray();
+        if ($this->route) $array['route'] = $this->route->toArray();
+        if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
+        if ($this->driver) $array['driver'] = $this->driver->toArray();
+
+        return $array;
     }
 }
