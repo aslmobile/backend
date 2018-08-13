@@ -54,7 +54,7 @@ JSON;
 
         $array['rating'] = $this->getRating();
 
-        $blacklist = Blacklist::find()->where(['status' => Blacklist::STATUS_BLACKLISTED, 'user_id' => $this->id])->count();
+        $blacklist = Blacklist::find()->where(['status' => Blacklist::STATUS_BLACKLISTED, 'user_id' => $this->id])->one();
         $array['blacklisted'] = $blacklist ? 1 : 0;
 
         return $array;
