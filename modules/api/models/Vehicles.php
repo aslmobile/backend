@@ -45,4 +45,14 @@ class Vehicles extends \app\models\Vehicles
 
         return $array;
     }
+
+    public function getPhotoUrl()
+    {
+        if ($this->image && !empty ($this->image))
+        {
+
+        }
+
+        return $this->model->image;
+    }
 }

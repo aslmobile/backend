@@ -7,8 +7,8 @@ use yii\widgets\Breadcrumbs;
 /* @var $this yii\web\View */
 /* @var $model app\models\Taxi */
 
-$this->title = Yii::$app->mv->gt($model->id,[],false);
-$this->params['breadcrumbs'][] = ['label' => 'Taxis', 'url' => ['index']];
+$this->title = Yii::$app->mv->gt('Заказ №{id}',['id' => $model->id],false);
+$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Заказы такси',[],false), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -22,33 +22,45 @@ $this->params['breadcrumbs'][] = $this->title;
     <section class="content">
         <div class="row">
             <div class="col-sm-12">
-                <div class="box box-primary">
-                    <div class="box-header with-border">
-                        <h3></h3>
-                        <div class="box-tools pull-right">
-                            <?= Html::a('Edit', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-                            <?= Html::a('Remove', ['delete', 'id' => $model->id], [
-                            'class' => 'btn btn-danger',
-                            'data' => [
-                            'confirm' => 'Are you sure you want to delete this item?',
-                            'method' => 'post',
-                            ],
-                            ]) ?>
-                        </div>
-                    </div>
+                <div class="box box-widget">
                     <div class="box-body">
                         <div class="row">
                             <div class="col-lg-12">
                                 <?= DetailView::widget([
                                 'model' => $model,
                                 'attributes' => [
-                                            'id',
-            'user_id',
-            'address',
-            'checkpoint',
-            'created_at',
-            'updated_at',
-                                ],
+                                    'user_id' => [
+                                        'attribute' => 'user_id',
+                                        'value' => $model->user ? $model->user->fullName : false
+                                    ],
+                                    'address',
+                                    'checkpoint' => [
+                                        'attribute' => 'checkpoint',
+                                        'value' => $model->checkPoint ? $model->checkPoint->title : false
+                                    ],
+                                    'created_at:datetime',
+                                    'updated_at:datetime'
+                                ]
+                                ]) ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <?= Html::a('Редактировать', [
+                                    'update',
+                                    'id' => $model->id
+                                ], ['class' => 'btn btn-primary']) ?>
+                                <?= Html::a('Удалить', [
+                                    'delete',
+                                    'id' => $model->id
+                                ], [
+                                    'class' => 'btn btn-danger',
+                                    'data' => [
+                                        'confirm' => 'Вы действительно хотите удалить пользователя?',
+                                        'method' => 'post',
+                                    ],
                                 ]) ?>
                             </div>
                         </div>

@@ -1,6 +1,7 @@
 <?php namespace app\models;
 
 use app\components\Socket\SocketPusher;
+use app\modules\api\models\Users;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 
@@ -165,5 +166,30 @@ class Line extends \yii\db\ActiveRecord
             // TODO: Отправлять уведомление всем пассажирам
             Notifications::create(Notifications::NTP_TRIP_READY, $this->driver_id, true, \Yii::t('app', "Ваша машина готова к выезду."));
         }
+    }
+
+    public function getDriver()
+    {
+        return Users::findOne($this->driver_id);
+    }
+
+    public function getVehicle()
+    {
+        return \app\modules\api\models\Vehicles::findOne($this->vehicle_id);
+    }
+
+    public function getRoute()
+    {
+        return Route::findOne($this->route_id);
+    }
+
+    public function getStartPoint()
+    {
+        return Checkpoint::findOne($this->startpoint);
+    }
+
+    public function getEndPoint()
+    {
+        return Checkpoint::findOne($this->endpoint);
     }
 }

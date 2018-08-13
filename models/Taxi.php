@@ -52,12 +52,12 @@ class Taxi extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::$app->mv->gt('ID', [], 0),
-            'user_id' => Yii::$app->mv->gt('User ID', [], 0),
-            'status' => Yii::$app->mv->gt('Status', [], 0),
-            'address' => Yii::$app->mv->gt('Address', [], 0),
-            'checkpoint' => Yii::$app->mv->gt('Checkpoint', [], 0),
-            'created_at' => Yii::$app->mv->gt('Created At', [], 0),
-            'updated_at' => Yii::$app->mv->gt('Updated At', [], 0),
+            'user_id' => Yii::$app->mv->gt('Пассажир', [], 0),
+            'status' => Yii::$app->mv->gt('Статус', [], 0),
+            'address' => Yii::$app->mv->gt('Адрес', [], 0),
+            'checkpoint' => Yii::$app->mv->gt('Куда', [], 0),
+            'created_at' => Yii::$app->mv->gt('Создан', [], 0),
+            'updated_at' => Yii::$app->mv->gt('Изменен', [], 0),
         ];
     }
 
@@ -75,5 +75,15 @@ class Taxi extends \yii\db\ActiveRecord
             self::STATUS_PROCESSING => Yii::t('app', "В процессе"),
             self::STATUS_DONE => Yii::t('app', "Завершен")
         ];
+    }
+
+    public function getUser()
+    {
+        return \app\modules\admin\models\User::findOne($this->user_id);
+    }
+
+    public function getCheckPoint()
+    {
+        return \app\modules\admin\models\Checkpoint::findOne($this->checkpoint);
     }
 }

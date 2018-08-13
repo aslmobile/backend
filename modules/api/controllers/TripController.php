@@ -262,9 +262,41 @@ class TripController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $trips = [];
-        $_trips = Trip::find()->where(['driver_id' => $user->id])->all();
-        if ($_trips && count($_trips) > 0) foreach ($_trips as $trip) $trips[] = $trip->toArray();
+        $trips = [
+            'rating' => $user->getRating(),
+            'photo_url' => $user->getImageFile(),
+            'trips' => []
+        ];
+
+        $tariff = 0;
+
+        $lines = \app\modules\api\models\Line::find()->where(['status' => Line::STATUS_FINISHED, 'driver_id' => $user->id])->all();
+        foreach ($lines as $line)
+        {
+            /** @var \app\modules\api\models\Line $line */
+            $passengers = Trip::find()->where(['line_id' => $line->id])->count();
+
+            $trips['trips'][] = [
+                'created' => $line->created_at,
+                'passengers' => intval($passengers),
+                'vehicle_photo_url' => $line->vehicle->photoUrl,
+                'vehicle_type' => $line->vehicle->type->toArray(),
+                'start_time' => $line->starttime,
+                'end_time' => $line->endtime,
+                'wait_time' => intval($line->starttime - $line->created_at),
+                'way_time' => intval($line->endtime - $line->starttime),
+                'startpoint' => $line->startPoint->toArray(),
+                'endpoint' => $line->endPoint->toArray(),
+                'route' => $line->route->toArray(),
+                'tariff' => floatval(round($line->tariff * 0.8, 2))
+            ];
+
+            $tariff += $line->tariff;
+        }
+
+        $trips['tariff'] = floatval(round($tariff * 0.8, 2));
+
+//        echo '<pre>' . print_r(array_values($trips), true) . '</pre>'; exit;
 
         $this->module->data = $trips;
         $this->module->setSuccess();

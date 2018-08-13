@@ -49,4 +49,17 @@ class Line extends \app\models\Line
 
         return false;
     }
+
+    public function toArray(array $fields = [], array $expand = [], $recursive = true)
+    {
+        $array = parent::toArray($fields, $expand, $recursive);
+
+        if ($this->driver) $array['driver'] = $this->driver->toArray();
+        if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
+        if ($this->route) $array['route'] = $this->route->toArray();
+        if ($this->startPoint) $array['startpoint'] = $this->startPoint->toArray();
+        if ($this->endPoint) $array['endpoint'] = $this->endPoint->toArray();
+
+        return $array;
+    }
 }

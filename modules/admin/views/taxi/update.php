@@ -7,9 +7,9 @@ use app\components\widgets\Alert;
 /* @var $model app\models\Taxi */
 
 
-$this->title = Yii::$app->mv->gt('Edit {title}',['title' => $model->id],false);
-$this->params['breadcrumbs'][] = ['label' => 'Taxis', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
+$this->title = Yii::$app->mv->gt('Редактирование заказа',[],false);
+$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Заказы такси',[],false), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Заказ №{id}',['id' => $model->id],false), 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

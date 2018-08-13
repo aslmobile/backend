@@ -1,5 +1,7 @@
 <?php namespace app\modules\api\models;
 
+use app\models\Blacklist;
+
 class Users extends \app\models\User
 {
     public function getScheme()
@@ -51,6 +53,9 @@ JSON;
         $array['queue'] = $inQueue ? 1 : 0;
 
         $array['rating'] = $this->getRating();
+
+        $blacklist = Blacklist::find()->where(['status' => Blacklist::STATUS_BLACKLISTED, 'user_id' => $this->id])->count();
+        $array['blacklisted'] = $blacklist ? 1 : 0;
 
         return $array;
     }
