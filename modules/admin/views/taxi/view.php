@@ -33,6 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'attribute' => 'user_id',
                                         'value' => $model->user ? $model->user->fullName : false
                                     ],
+                                    'status' => [
+                                        'attribute' => 'status',
+                                        'value' => function ($data) {
+                                            $statuses = \app\models\Taxi::getStatusList();
+                                            return key_exists($data->status, $statuses) ? $statuses[$data->status] : false;
+                                        }
+                                    ],
                                     'address',
                                     'checkpoint' => [
                                         'attribute' => 'checkpoint',
