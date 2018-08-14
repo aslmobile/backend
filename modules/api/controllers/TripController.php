@@ -275,7 +275,7 @@ class TripController extends BaseController
             'AND',
             ['=', 'status', Line::STATUS_FINISHED],
             ['=', 'driver_id', $user->id]
-        ])->all();
+        ])->createCommand()->rawSql;
 
         echo '<pre>' . print_r($lines, true) . '</pre>'; exit;
 
