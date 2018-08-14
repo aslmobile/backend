@@ -272,6 +272,9 @@ class TripController extends BaseController
 
         $data_trips = [];
         $lines = \app\modules\api\models\Line::find()->where(['status' => Line::STATUS_FINISHED, 'driver_id' => $user->id])->all();
+
+        echo '<pre>' . print_r($lines, true) . '</pre>'; exit;
+
         foreach ($lines as $line)
         {
             /** @var \app\modules\api\models\Line $line */
