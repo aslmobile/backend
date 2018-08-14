@@ -270,21 +270,18 @@ class TripController extends BaseController
 
         $tariff = 0;
 
-        $data_trips = [];
         $lines = \app\modules\api\models\Line::find()->andWhere([
             'AND',
             ['=', 'status', Line::STATUS_FINISHED],
             ['=', 'driver_id', $user->id]
-        ])->createCommand()->rawSql;
-
-        echo '<pre>' . print_r($lines, true) . '</pre>'; exit;
+        ])->all();
 
         foreach ($lines as $line)
         {
             /** @var \app\modules\api\models\Line $line */
             $passengers = Trip::find()->where(['line_id' => $line->id])->count();
 
-            $data_trips[] = [
+            $trips['trips'][] = [
                 'created' => $line->created_at,
                 'passengers' => intval($passengers),
                 'vehicle_photo_url' => $line->vehicle->photoUrl,
@@ -302,7 +299,6 @@ class TripController extends BaseController
             $tariff += $line->tariff;
         }
 
-        $trips['trips'] = $data_trips;
         $trips['tariff'] = floatval(round($tariff * 0.8, 2));
 
 //        echo '<pre>' . print_r(array_values($trips), true) . '</pre>'; exit;
