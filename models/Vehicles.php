@@ -68,7 +68,20 @@ class Vehicles extends \yii\db\ActiveRecord
             [['main'], 'integer', 'min' => 0, 'max' => 1],
             [['weight'], 'integer', 'min' => 0],
             [['main'], 'filter', 'filter' => function ($value) {
-                // TODO: Check main for current user vehicle
+                if ($value && intval($value) == 1)
+                {
+                    $vehicle = Vehicles::find()->andWhere([
+                        'AND',
+                        ['=', 'user_id', $this->user_id],
+                        ['=', 'main', 1],
+                        ['!=', 'id', $this->id]
+                    ])->one();
+
+                    if (!$vehicle) return 1;
+                    else $this->addError('main', Yii::t('app', "У водителя уже выбран основной автомобиль"));
+                }
+
+                return 0;
             }],
             [['status'], 'default', 'value' => self::STATUS_ADDED],
             [['weight', 'main', 'rating'], 'default', 'value' => 0]

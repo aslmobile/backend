@@ -20,6 +20,7 @@ use app\components\MultilingualQuery;
  * @property string $maint_img
  * @property string $site_email
  * @property string $add_email
+ * @property int $driver_commission
  */
 class Settings extends \yii\db\ActiveRecord
 {
@@ -40,7 +41,7 @@ class Settings extends \yii\db\ActiveRecord
         return [
             [['name', 'copy', 'logo'], 'required'],
             [['descr','address','phone','addphone','title','description','keywords','head_scripts','body_scripts','end_scripts','social'], 'string'],
-            [['maint','syscache'], 'integer'],
+            [['maint','syscache', 'driver_commission'], 'integer'],
             [['site_email'], 'email'],
             [['name', 'copy', 'logo','logo_int', 'logo_small'], 'string', 'max' => 255],
             [['site_email'], 'email'],
@@ -77,6 +78,7 @@ class Settings extends \yii\db\ActiveRecord
             'google_api_key' => Yii::$app->mv->gt('Google API ключ',[],false),
             'add_email' => Yii::$app->mv->gt('Дополнительный Email',[],false),
             'copyright' => Yii::$app->mv->gt('Авторское право',[],false),
+            'driver_commission' => Yii::$app->mv->gt('Комиссия водителя',[],false),
 
         ];
     }

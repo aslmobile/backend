@@ -29,6 +29,9 @@ $yes_no = Yii::$app->params['yes_no'];
                     <div class="tab-pane active" id="verif">
                         <div class="row">
                             <div class="col-sm-6">
+                                <style type="text/css">
+                                    .field-lang-flag.has-error .yii2-elfinder-input-preview {display: none;}
+                                </style>
                                 <?= $form->field($model, 'flag')->widget(alexantr\elfinder\InputFile::className(), [
                                     'buttonText' => Yii::$app->mv->gt('Выбрать', [], false),
                                     'options' => [
@@ -38,12 +41,12 @@ $yes_no = Yii::$app->params['yes_no'];
                                     var changed = $(this);
                                     var val = $(changed).val();
                                     setTimeout(function() {
-                                    if($(".elfinder-input-preview").length){
-                                       $(".elfinder-input-preview").html($("<img/>", {src : val, width: 200, height: 200}));
-                                    }else{
-                                        $(changed).parent().after('<div class="help-block elfinder-input-preview"></div');
-                                        $(".elfinder-input-preview").html($("<img/>", {src : val, width: 200, height: 200}));
-                                    }
+                                        if ($(".elfinder-input-preview").length) $(".elfinder-input-preview").html($("<img/>", {src : val, width: 200, height: 200}));
+                                        else
+                                        {
+                                            $(changed).parent().after('<div class="help-block elfinder-input-preview"></div');
+                                            $(".elfinder-input-preview").html($("<img/>", {src : val, width: 200, height: 200}));
+                                        }
                                     }, 500);
 JS
                                     ],
@@ -52,7 +55,7 @@ JS
                                     'preview' => function ($value) {
                                         return yii\helpers\Html::img($value, ['width' => 200, 'id' => 'elfinder_preview']);
                                     },
-                                ])->label(false) ?>
+                                ])->hint(false) ?>
                                 <?= $form->field($model, 'code')->textInput(['maxlength' => true]) ?>
                                 <?= $form->field($model, 'local')->textInput(['maxlength' => true]) ?>
                                 <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>

@@ -37,7 +37,7 @@ class SettingsController extends Controller
 		}
 
 		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Changes saved',[],false));
+			Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Изменения сохранены',[],false));
 		}
 		
         return $this->render('index', [

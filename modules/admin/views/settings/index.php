@@ -1,16 +1,10 @@
 <?php
 use yii\widgets\Breadcrumbs;
-use zxbodya\yii2\elfinder\ElFinderWidget;
 use app\components\widgets\Alert;
 
-$this->title = Yii::$app->mv->gt('Configuration',[],false);
+$this->title = Yii::$app->mv->gt('Настройки сервиса',[],false);
 $this->params['breadcrumbs'][] = $this->title;
-
 ?>
-
-
-
-
 <div class="content-wrapper">
 	<section class="content-header">
         <h1>

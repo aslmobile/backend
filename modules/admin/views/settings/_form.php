@@ -1,9 +1,7 @@
 <?php
-
 use app\modules\admin\models\Lang;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-
 ?>
 
 
@@ -233,12 +231,15 @@ JS
     <div class="box-body" style="padding: 10px 0">
         <ul class="nav nav-tabs">
             <li class="active" style="margin-left: 15px;">
-                <a data-toggle="tab" href="#top"><?= Yii::$app->mv->gt('Данные', [], false) ?></a>
+                <a data-toggle="tab" href="#system-settings"><?= Yii::$app->mv->gt('Данные', [], false) ?></a>
+            </li>
+            <li>
+                <a data-toggle="tab" href="#driver-settings"><?= Yii::$app->mv->gt('Настройки водителя', [], false) ?></a>
             </li>
         </ul>
 
         <div class="tab-content" style="padding: 10px">
-            <div id="top" class="tab-pane fade in active">
+            <div id="system-settings" class="tab-pane fade in active">
                 <div class="row">
                     <div class="col-sm-6">
                         <?= $form->field($model, 'maint')->dropdownList([
@@ -252,6 +253,11 @@ JS
                             1 => Yii::$app->mv->gt("Включен", [], 0)
                         ]); ?>
                     </div>
+                </div>
+            </div>
+            <div id="driver-settings" class="tab-pane fade">
+                <div class="row">
+                    <div class="col-sm-12 col-lg-2"><?= $form->field($model, 'driver_commission')->textInput(['type' => 'number']); ?></div>
                 </div>
             </div>
         </div>

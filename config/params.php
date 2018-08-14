@@ -20,6 +20,10 @@ $params = [
         0 => 'image_count',
         1 => 'video_count',
     ],
+    'main_vehicle_yes_no' => [
+        0 => Yii::t('app', "Вторичная машина"),
+        1 => Yii::t('app', "Основаня машина")
+    ],
     'image_extensions' => 'bmp,gif,jpeg,jpg,jpe,jp2,png',
     'video_extensions' => 'avi,mpeg,mp4,mkv,flv',
     'api_salt' => "e54d713d1a6afca4305874c9a7bea030d5feeab3b61369bb7c940e6cfb7aa14e",

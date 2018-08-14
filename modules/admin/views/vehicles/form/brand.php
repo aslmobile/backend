@@ -49,11 +49,10 @@ JS
                 <?= $form->field($model, 'vehicle_type_id')->widget(Select2::classname(), [
                     'model' => [],
                     'theme' => Select2::THEME_DEFAULT,
-                    'attribute' => 'created_by',
+                    'attribute' => 'vehicle_type_id',
                     'hideSearch' => true,
                     'options' => [
-                        'placeholder' => Yii::t('app', "Тип автомобиля"),
-                        'multiple' => true
+                        'placeholder' => Yii::t('app', "Тип автомобиля")
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,

@@ -17,7 +17,7 @@ use yii\web\JsExpression;
         <div class="box">
             <div class="box-body">
                 <?= $form->field($model, 'status')->dropDownList($model->statusList) ?>
-                <?= $form->field($model, 'main')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'main')->dropDownList(Yii::$app->params['main_vehicle_yes_no']) ?>
                 <?= $form->field($model, 'seats')->textInput(['maxlength' => true]) ?>
 
                 <?= $form->field($model, 'license_plate')->textInput(['maxlength' => true]) ?>
@@ -130,41 +130,41 @@ use yii\web\JsExpression;
 </div>
 <div class="row">
     <div class="col-12 col-sm-4 col-md-6">
+        <?php if (!empty ($model->image) && intval($model->image) > 0) : ?>
         <div class="box">
             <div class="box-header with-border">
                 <?= Yii::t('app', "Фото автомобиля"); ?>
             </div>
-            <?php if (!empty ($model->image) && intval($model->image) > 0) : ?>
             <div class="box-body text-center">
                 <?php $image = \app\modules\api\models\UploadFiles::findOne($model->image); ?>
                 <?php if ($image) : ?><img class="img-responsive img-bordered" src="<?= $image->file; ?>" />
                 <?php else : ?><p class="text-center text-info"><?= Yii::t('app', "Фото не загружено"); ?></p>
                 <?php endif; ?>
             </div>
-            <?php endif; ?>
         </div>
+        <?php endif; ?>
     </div>
     <div class="col-12 col-sm-4 col-md-6">
+        <?php if (!empty ($model->insurance) && intval($model->insurance) > 0) : ?>
         <div class="box">
             <div class="box-header with-border">
                 <?= Yii::t('app', "Фото страховки"); ?>
             </div>
-            <?php if (!empty ($model->insurance) && intval($model->insurance) > 0) : ?>
             <div class="box-body text-center">
                 <?php $image = \app\modules\api\models\UploadFiles::findOne($model->insurance); ?>
                 <?php if ($image) : ?><img class="img-responsive img-bordered" src="<?= $image->file; ?>" />
                 <?php else : ?><p class="text-center text-info"><?= Yii::t('app', "Фото документа не загружено"); ?></p>
                 <?php endif; ?>
             </div>
-            <?php endif; ?>
         </div>
+        <?php endif; ?>
     </div>
     <div class="col-2 col-sm-4 col-md-12">
+        <?php if (!empty ($model->registration) && intval($model->registration) > 0 || !empty ($model->registration2) && intval($model->registration2) > 0) : ?>
         <div class="box">
             <div class="box-header with-border">
                 <?= Yii::t('app', "Фото тех. паспорта"); ?>
             </div>
-
             <div class="box-body">
                 <div class="row">
                     <?php if (!empty ($model->registration) && intval($model->registration) > 0) : ?>
@@ -187,6 +187,7 @@ use yii\web\JsExpression;
                 </div>
             </div>
         </div>
+        <?php endif; ?>
     </div>
 </div>
 <?php ActiveForm::end(); ?>
