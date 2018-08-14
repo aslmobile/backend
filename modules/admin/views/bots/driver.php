@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     ],
                                 ]); ?>
                             </div>
-                            <div class="col-sm-12 col-md-6">
+                            <div class="col-sm-12">
                                 <?= $form->field($model, 'route_id')->widget(Select2::classname(), [
                                     'model' => [],
                                     'theme' => Select2::THEME_DEFAULT,
@@ -102,8 +102,64 @@ $this->params['breadcrumbs'][] = $this->title;
                                     ],
                                 ]); ?>
                             </div>
-                            <div class="col-sm-12 col-md-6"></div>
+                            <div class="col-sm-12 col-md-6">
+                                <?= $form->field($model, 'start_point_id')->widget(Select2::classname(), [
+                                    'model' => [],
+                                    'theme' => Select2::THEME_DEFAULT,
+                                    'attribute' => 'start_point_id',
+                                    'hideSearch' => true,
+                                    'options' => [
+                                        'placeholder' => Yii::t('app', "Начальная точка")
+                                    ],
+                                    'pluginOptions' => [
+                                        'allowClear' => true,
+                                        'minimumInputLength' => 1,
+                                        'ajax' => [
+                                            'url' => \yii\helpers\Url::toRoute(['/admin/lines/select-startpoints']),
+                                            'dataType' => 'json',
+                                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                                        ],
+                                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                                        'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                                        'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/lines/select-startpoints']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                                    ],
+                                ]); ?>
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <?= $form->field($model, 'end_point_id')->widget(Select2::classname(), [
+                                    'model' => [],
+                                    'theme' => Select2::THEME_DEFAULT,
+                                    'attribute' => 'end_point_id',
+                                    'hideSearch' => true,
+                                    'options' => [
+                                        'placeholder' => Yii::t('app', "Конечная точка")
+                                    ],
+                                    'pluginOptions' => [
+                                        'allowClear' => true,
+                                        'minimumInputLength' => 1,
+                                        'ajax' => [
+                                            'url' => \yii\helpers\Url::toRoute(['/admin/lines/select-endpoints']),
+                                            'dataType' => 'json',
+                                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                                        ],
+                                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                                        'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                                        'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/lines/select-endpoints']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                                    ],
+                                ]); ?>
+                            </div>
+                            <div class="col-sm-12">
+                                <?= $form->field($model, 'status')->dropDownList(\app\models\Line::getStatusList()); ?>
+                            </div>
                         </div>
+                    </div>
+                    <div class="box-footer text-center">
+                        <?php echo \yii\helpers\Html::submitButton(
+                            Yii::$app->mv->gt('Создать', [], 0),
+                            ['class' => 'btn btn-success']
+                        ); ?>
                     </div>
                 </div>
                 <?php ActiveForm::end(); ?>

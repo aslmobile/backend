@@ -5,12 +5,6 @@ use app\models\Notifications;
 class Trip extends \app\models\Trip
 {
     const
-        STATUS_PENDING = 1,
-        STATUS_TRIP = 2,
-        STATUS_ENDED = 3,
-        STATUS_CANCELED = 4;
-
-    const
         PAYMENT_STATUS_WAITING = 1,
         PAYMENT_STATUS_REJECTED = 2,
         PAYMENT_STATUS_CANCELLED = 3,
@@ -32,7 +26,7 @@ class Trip extends \app\models\Trip
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if ($this->status != $this->oldStatus && $this->status == self::STATUS_TRIP)
+        if ($this->status != $this->oldStatus && $this->status == self::STATUS_WAY)
         {
             // TODO: Отправка подтверждения о выезде
             Notifications::create(Notifications::NTP_TRIP_READY, $this->user_id, true, \Yii::t('app', "Ваша машина готова к выезду."));
