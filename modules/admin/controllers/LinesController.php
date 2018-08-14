@@ -241,6 +241,13 @@ class LinesController extends Controller
         ]);
     }
 
+    public function actionView($id)
+    {
+        return $this->render('view', [
+            'model' => $this->findLineModel($id),
+        ]);
+    }
+
     public function actionSelectRoute($q = null, $id = null)
     {
         if (!empty($id)) $id = explode(',', $id);

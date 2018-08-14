@@ -93,7 +93,7 @@ class BotsController extends Controller
                 $trips[] = $trip;
             }
 
-            return $this->redirect(Url::toRoute(['/admin/lines/']));
+            return $this->redirect(Url::toRoute(['/admin/lines/view/' . $line->id . '/']));
         }
 
         return $this->render('driver', ['model' => $model]);
