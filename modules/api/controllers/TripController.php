@@ -265,7 +265,8 @@ class TripController extends BaseController
         $trips = [
             'rating' => $user->getRating(),
             'photo_url' => $user->getImageFile(),
-            'trips' => []
+            'trips' => [],
+            'driver_id' => $user->id
         ];
 
         $tariff = 0;

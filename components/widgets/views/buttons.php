@@ -12,7 +12,7 @@ echo \yii\helpers\Html::a(
 
 echo \yii\helpers\Html::submitButton((
     $model->isNewRecord ?
-        Yii::$app->mv->gt('{i} Добавить', ['i' => \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-save'])], 0)
-        : Yii::$app->mv->gt('{i} Сохранить', ['i' => \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-save'])], 0)),
+        Yii::$app->mv->gt('Добавить', ['i' => \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-save'])], 0)
+        : Yii::$app->mv->gt('Сохранить', ['i' => \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-save'])], 0)),
     ['class' => 'btn btn-success']
 );
