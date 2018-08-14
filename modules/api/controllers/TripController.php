@@ -271,7 +271,11 @@ class TripController extends BaseController
         $tariff = 0;
 
         $data_trips = [];
-        $lines = \app\modules\api\models\Line::find()->where(['status' => Line::STATUS_FINISHED, 'driver_id' => $user->id])->all();
+        $lines = \app\modules\api\models\Line::find()->andWhere([
+            'AND',
+            ['=', 'status', Line::STATUS_FINISHED],
+            ['=', 'driver_id', $user->id]
+        ])->all();
 
         echo '<pre>' . print_r($lines, true) . '</pre>'; exit;
 
