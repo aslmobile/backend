@@ -20,7 +20,8 @@ class PaymentController extends BaseController
                 'rules' => [
                     [
                         'actions' => [
-                            'transactions', 'transaction', 'cards', 'methods'
+                            'transactions', 'transaction', 'methods', 'in-out-amounts',
+                            'add-card', 'cards'
                         ],
                         'allow' => true
                     ]
@@ -29,12 +30,40 @@ class PaymentController extends BaseController
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'transactions'  => ['POST'],
-                    'transaction'  => ['GET'],
-                    'methods'  => ['GET'],
+                    'transactions'      => ['POST'],
+                    'transaction'       => ['GET'],
+                    'methods'           => ['GET'],
+                    'in-out-amounts'    => ['GET'],
+
+                    'create-card'       => ['POST']
                 ]
             ]
         ];
+    }
+
+    public function actionInOutAmounts()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $in = Transactions::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id],
+            ['=', 'type', Transactions::TYPE_INCOME],
+        ])->sum('amount');
+
+        $out = Transactions::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id],
+            ['=', 'type', Transactions::TYPE_OUTCOME],
+        ])->sum('amount');
+
+        $this->module->data = [
+            'income' => $in,
+            'outcome' => $out
+        ];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionTransactions()
@@ -86,5 +115,32 @@ class PaymentController extends BaseController
         $this->module->data = Transactions::getPaymentMethods();
         $this->module->setSuccess();
         $this->module->sendResponse();
+    }
+
+    public function actionCreateCard()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $request = [
+            'pg_merchant_id'    => Yii::$app->params['paybox']['merchant_id'],
+            'pg_user_id'        => Yii::$app->params['paybox']['user_id'],
+            'pg_order_id'       => $user->id . $user->type . Yii::$app->params['paybox']['merchant_id'],
+            'pg_post_link'      => 'https://aslmobile.net/api/paybox/knock-knock',
+            'pg_back_link'      => 'https://aslmobile.net/api/paybox/redirect',
+            'pg_salt'           => Yii::$app->params['salt']
+        ];
+
+        $request['pg_sig'] = hash('md5', 'add');
+
+        $curl = curl_init('https://paybox.kz/v1/merchant/:merchant_id/cardstorage/add');
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, "a=4&b=7");
+    }
+
+    private function PayBoxSignature()
+    {
+
     }
 }
