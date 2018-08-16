@@ -24,6 +24,7 @@ use app\components\MultilingualQuery;
  * @property integer $updated_by
  * @property string $uip
  * @property string $currency
+ * @property string $route_id
  * @property integer $type
  */
 class Transactions extends \yii\db\ActiveRecord
@@ -145,5 +146,10 @@ class Transactions extends \yii\db\ActiveRecord
     public function getUser()
     {
         return \app\modules\admin\models\User::findOne($this->user_id);
+    }
+
+    public function getRoute()
+    {
+        return \app\modules\admin\models\Route::findOne($this->route_id);
     }
 }

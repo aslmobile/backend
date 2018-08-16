@@ -1,6 +1,8 @@
 <?php namespace app\modules\api\models;
 
+use app\models\LuggageType;
 use app\models\Notifications;
+use app\models\TripLuggage;
 
 class Trip extends \app\models\Trip
 {
@@ -20,6 +22,28 @@ class Trip extends \app\models\Trip
     public function getUser()
     {
         return Users::findOne($this->user_id);
+    }
+
+    public function getBaggage()
+    {
+        $luggages = TripLuggage::find()->andWhere([
+            'AND',
+            ['=', 'unique_id', $this->luggage_unique_id]
+        ])->all();
+
+        $baggages = [];
+        if ($luggages && count($luggages) > 0) foreach ($luggages as $luggage)
+        {
+            /** @var \app\models\TripLuggage $luggage */
+            $baggage = LuggageType::findOne($luggage->luggage_type);
+            $baggages[] = [
+                'id' => $baggage->id,
+                'title' => $baggage->title,
+                'need_place' => $baggage->need_place
+            ];
+        }
+
+        return $baggages;
     }
 
     public function afterSave($insert, $changedAttributes)
@@ -45,10 +69,25 @@ class Trip extends \app\models\Trip
         $array = parent::toArray($fields, $expand, $recursive);
 
         if ($this->startpoint) $array['startpoint'] = $this->startpoint->toArray();
+        else $array['startpoint'] = null;
+
         if ($this->endpoint) $array['endpoint'] = $this->endpoint->toArray();
+        else $array['endpoint'] = null;
+
         if ($this->route) $array['route'] = $this->route->toArray();
+        else $array['route'] = null;
+
         if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
+        else $array['vehicle'] = null;
+
         if ($this->driver) $array['driver'] = $this->driver->toArray();
+        else $array['driver'] = null;
+
+        if ($this->user) $array['passenger'] = $this->user->toArray();
+        else $array['passenger'] = null;
+
+        if ($this->baggage) $array['baggage'] = $this->baggage;
+        else $array['baggage'] = null;
 
         return $array;
     }

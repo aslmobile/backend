@@ -333,7 +333,7 @@ class TripController extends BaseController
         $_passengers = [];
         /** @var \app\models\Trip $passenger */
         foreach ($trips as $passenger) $_passengers[] = [
-            'passenger' => $passenger->user->toArray(),
+            'passenger' => $passenger->toArray(),
             'seats' => intval($passenger->seats)
         ];
 

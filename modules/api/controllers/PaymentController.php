@@ -20,8 +20,7 @@ class PaymentController extends BaseController
                 'rules' => [
                     [
                         'actions' => [
-                            'transactions', 'transaction', 'methods', 'in-out-amounts',
-                            'add-card', 'cards'
+                            'transactions', 'transaction', 'methods', 'in-out-amounts'
                         ],
                         'allow' => true
                     ]
@@ -33,9 +32,7 @@ class PaymentController extends BaseController
                     'transactions'      => ['POST'],
                     'transaction'       => ['GET'],
                     'methods'           => ['GET'],
-                    'in-out-amounts'    => ['GET'],
-
-                    'create-card'       => ['POST']
+                    'in-out-amounts'    => ['GET']
                 ]
             ]
         ];
@@ -46,21 +43,21 @@ class PaymentController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $in = Transactions::find()->andWhere([
+        $income = Transactions::find()->andWhere([
             'AND',
             ['=', 'user_id', $user->id],
             ['=', 'type', Transactions::TYPE_INCOME],
         ])->sum('amount');
 
-        $out = Transactions::find()->andWhere([
+        $outcome = Transactions::find()->andWhere([
             'AND',
             ['=', 'user_id', $user->id],
             ['=', 'type', Transactions::TYPE_OUTCOME],
         ])->sum('amount');
 
         $this->module->data = [
-            'income' => floatval($in),
-            'outcome' => floatval($out)
+            'income' => floatval($income),
+            'outcome' => floatval($outcome)
         ];
         $this->module->setSuccess();
         $this->module->sendResponse();
@@ -77,17 +74,22 @@ class PaymentController extends BaseController
         $timestamp_min = intval($this->body->timestamp_min);
         $timestamp_max = intval($this->body->timestamp_max);
 
+        $limit = isset ($this->body->limit) ? intval($this->body->limit) : 10;
+        $offset = isset ($this->body->offset) ? intval($this->body->offset) : 0;
+
         $transactions = Transactions::find()->andWhere([
             'AND',
             ['between', 'created_at', $timestamp_min, $timestamp_max],
             ['=', 'user_id', $user->id]
-        ])->orderBy(['created_at' => SORT_DESC])->all();
+        ])->orderBy(['created_at' => SORT_DESC])->limit($limit)->offset($offset)->all();
 
         $transactions_data = [];
-        if ($transactions && count($transactions) > 0) foreach ($transactions as $transaction)
-        {
-            $transactions_data = $transaction->toArray();
-        }
+        if ($transactions && count($transactions) > 0)
+            foreach ($transactions as $transaction)
+                $transactions_data = [
+                    'transaction'   => $transaction->toArray(),
+                    'route'         => ($transaction->route) ? $transaction->route->toArray() : null
+                ];
 
         $this->module->data['transactions'] = $transactions_data;
         $this->module->setSuccess();
@@ -115,32 +117,5 @@ class PaymentController extends BaseController
         $this->module->data = Transactions::getPaymentMethods();
         $this->module->setSuccess();
         $this->module->sendResponse();
-    }
-
-    public function actionCreateCard()
-    {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
-        $request = [
-            'pg_merchant_id'    => Yii::$app->params['paybox']['merchant_id'],
-            'pg_user_id'        => Yii::$app->params['paybox']['user_id'],
-            'pg_order_id'       => $user->id . $user->type . Yii::$app->params['paybox']['merchant_id'],
-            'pg_post_link'      => 'https://aslmobile.net/api/paybox/knock-knock',
-            'pg_back_link'      => 'https://aslmobile.net/api/paybox/redirect',
-            'pg_salt'           => Yii::$app->params['salt']
-        ];
-
-        $request['pg_sig'] = hash('md5', 'add');
-
-        $curl = curl_init('https://paybox.kz/v1/merchant/:merchant_id/cardstorage/add');
-        curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, "a=4&b=7");
-    }
-
-    private function PayBoxSignature()
-    {
-
     }
 }
