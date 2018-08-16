@@ -128,6 +128,20 @@ class Transactions extends \yii\db\ActiveRecord
         ];
     }
 
+    public static function getPaymentMethods()
+    {
+        return [
+            [
+                'id' => self::GATEWAY_PAYBOX,
+                'value' => Yii::t('app', "PayBox")
+            ],
+            [
+                'id' => self::GATEWAY_CASH,
+                'value' => Yii::t('app', "Наличные")
+            ]
+        ];
+    }
+
     public function getUser()
     {
         return \app\modules\admin\models\User::findOne($this->user_id);
