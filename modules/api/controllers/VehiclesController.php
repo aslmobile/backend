@@ -67,6 +67,7 @@ class VehiclesController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
+        $qr_url = false;
         $vehicle = Vehicles::findOne($id);
         if ($vehicle)
         {
@@ -78,10 +79,26 @@ class VehiclesController extends BaseController
                 'driver_id'  => $vehicle->user_id
             ];
 
-            $qr = str_replace(['{data}'], urlencode(json_encode($data)), $qr);
-            $this->module->data['qr'] = $qr;
+            $qr_url = str_replace(['{data}'], urlencode(json_encode($data)), $qr);
         }
         else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найдена", [], false));
+
+        if ($qr_url)
+        {
+            $local = '/files/vehicle-qr/' . $vehicle->id . '/';
+            $path = Yii::getAlias('@webroot') . $local;
+            $name = 'qr-code.png';
+
+            if (UploadFiles::validatePath($path))
+            {
+                $image = $path . $name;
+                $file = file_put_contents($image, file_get_contents($qr_url));
+                if ($file) $this->module->data['file'] = Yii::getAlias('@web') . $local . $name;
+                else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось создать изображение QR кода", [], false));
+            }
+            else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось скопировать изображение QR кода", [], false));
+        }
+        else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось создать QR код", [], false));
 
         $this->module->setSuccess();
         $this->module->sendResponse();

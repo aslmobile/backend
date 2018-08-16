@@ -86,9 +86,31 @@ class Notifications extends \yii\db\ActiveRecord
         NTF_NOTIFICATIONS   = -1,
         NTF_GEO             = -2;
 
-    public function getTypes()
+    public static function getTypes()
     {
+        return [
+            self::NT_DEFAULT    => Yii::t('app', "Стандартная"),
+            self::NT_BLACKLIST  => Yii::t('app', "Черный список"),
 
+            self::NTP_TRIP_READY    => Yii::t('app', "Ваша поездка готова"),
+            self::NTP_TRIP_CANCEL   => Yii::t('app', "Ваша поездка отменена"),
+            self::NTP_TRIP_WAIT     => Yii::t('app', "Ожидание поездки"),
+            self::NTP_TRIP_FINISHED => Yii::t('app', "Ваша поездка завершена"),
+            self::NTP_FREE_KM       => Yii::t('app', "Бесплатные километры"),
+            self::NTP_TRIP_REVIEW   => Yii::t('app', "Отзыв"),
+            self::NTP_TRIP_RATING   => Yii::t('app', "Рейтинг"),
+
+            self::NTD_TRIP_SEATS    => Yii::t('app', "Ваша машина заполнена"),
+            self::NTD_TRIP_CANCEL   => Yii::t('app', "Ваша поездка отменена"),
+            self::NTD_TRIP_FINISHED => Yii::t('app', "Ваша поездка завершена"),
+            self::NTD_TRIP_REVIEW   => Yii::t('app', "Отзыв"),
+            self::NTD_TRIP_RATING   => Yii::t('app', "Рейтинг"),
+            self::NTD_TRIP_QUEUE    => Yii::t('app', "Вы стали в очередь"),
+            self::NTD_TRIP_READY    => Yii::t('app', "Ваша поездка готова"),
+
+            self::NTF_NOTIFICATIONS     => Yii::t('app', "Уведомления"),
+            self::NTF_GEO               => Yii::t('app', "Геолокация"),
+        ];
     }
 
     const
@@ -96,13 +118,29 @@ class Notifications extends \yii\db\ActiveRecord
         STATUS_DELIVERED    = 1,
         STATUS_WAITING      = 2;
 
-    public function getStatuses()
+    public static function getStatuses()
     {
-
+        return [
+            self::STATUS_NEW => Yii::t('app', "Новое уведомление"),
+            self::STATUS_DELIVERED => Yii::t('app', "Уведомление доставлено"),
+            self::STATUS_WAITING => Yii::t('app', "Уведомление в обработке"),
+        ];
     }
 
     public static function create($type = self::NT_DEFAULT, $user, $important = false, $message = null, $initiator = 0)
     {
+        $types = self::getTypes();
+        if (!isset ($types[$type]) || !in_array($type, $types)) return false;
 
+        $notification = new Notifications();
+        $notification->type = $type;
+        $notification->user_id = $user;
+        $notification->status = self::STATUS_NEW;
+        $notification->title = self::getTypes()[$type];
+        $notification->text = $message;
+        $notification->initiator_id = $initiator;
+
+        if ($notification->save()) return true;
+        return false;
     }
 }
