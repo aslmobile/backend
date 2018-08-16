@@ -23,7 +23,7 @@ class VehiclesController extends BaseController
                     [
                         'actions' => [
                             'types', 'brands', 'models',
-                            'list',
+                            'list', 'qr',
 
                             'create-vehicle',
                             'update-vehicle',
@@ -47,6 +47,7 @@ class VehiclesController extends BaseController
                     'brands'  => ['GET'],
                     'models'  => ['GET'],
                     'get-vehicle' => ['GET'],
+                    'qr' => ['GET'],
 
                     'create-vehicle' => ['PUT'],
                     'update-vehicle' => ['PUT'],
@@ -59,6 +60,31 @@ class VehiclesController extends BaseController
                 ]
             ]
         ];
+    }
+
+    public function actionQr($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $vehicle = Vehicles::findOne($id);
+        if ($vehicle)
+        {
+            $qr = isset (Yii::$app->params['qr_api_url']) ? Yii::$app->params['qr_api_url'] : false;
+            if (!$qr) $this->module->setError(422, '_qr', Yii::$app->mv->gt("Сервис генерации QR кода не задан", [], false));
+
+            $data = [
+                'vehicle_id' => $vehicle->id,
+                'driver_id'  => $vehicle->user_id
+            ];
+
+            $qr = str_replace(['{data}'], urlencode(json_encode($data)), $qr);
+            $this->module->data['qr'] = $qr;
+        }
+        else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найдена", [], false));
+
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionList()

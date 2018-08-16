@@ -28,6 +28,7 @@ $params = [
     'image_extensions' => 'bmp,gif,jpeg,jpg,jpe,jp2,png',
     'video_extensions' => 'avi,mpeg,mp4,mkv,flv',
     'api_salt' => "e54d713d1a6afca4305874c9a7bea030d5feeab3b61369bb7c940e6cfb7aa14e",
+    'qr_api_url' => "https://chart.googleapis.com/chart?cht=qr&chs=500x500&choe=UTF-8&chl={data}",
     'yes_no' => [
         1 => Yii::t('app', "Да"),
         0 => Yii::t('app', "Нет")

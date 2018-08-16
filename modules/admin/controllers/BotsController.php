@@ -1,5 +1,6 @@
 <?php namespace app\modules\admin\controllers;
 
+use app\models\Transactions;
 use app\modules\admin\models\Line;
 use app\modules\admin\models\User;
 use app\modules\api\models\Trip;
@@ -21,7 +22,7 @@ class BotsController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index', 'driver', 'passenger'],
+                        'actions' => ['index', 'driver', 'passenger', 'transactions'],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
                     ]
@@ -97,6 +98,30 @@ class BotsController extends Controller
         }
 
         return $this->render('driver', ['model' => $model]);
+    }
+
+    public function actionTransactions()
+    {
+        $model = new Bots(['type' => Bots::TYPE_USER]);
+
+        if ($model->load(Yii::$app->request->post()))
+        {
+            $transaction = new Transactions([
+                'status'    => $model->transaction_status,
+                'user_id'   => $model->user_id,
+                'amount'    => $model->transaction_amount,
+                'gateway'   => $model->transaction_gateway,
+                'uip'       => '0.0.0.0',
+                'currency'  => '₸',
+                'type'      => $model->transaction_type
+            ]);
+
+            $transaction->save(false);
+            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Транзакция успешно создана',[],0));
+            $this->redirect(Url::toRoute(['/admin/user/view/' . $model->user_id . '/']));
+        }
+
+        return $this->render('transactions', ['model' => $model]);
     }
 
     public function actionPassenger()

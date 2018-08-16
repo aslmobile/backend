@@ -1,3 +1,7 @@
+<?php
+use yii\helpers\Html;
+use yii\widgets\DetailView;
+?>
 <div class="row">
     <div class="col-sm-4">
         <div class="box box-widget widget-user-2">
