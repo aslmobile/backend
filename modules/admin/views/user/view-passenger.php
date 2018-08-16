@@ -1,5 +1,8 @@
 <?php
 use yii\helpers\Html;
+use yii\grid\GridView;
+use kartik\select2\Select2;
+use yii\web\JsExpression;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\User */
@@ -59,6 +62,56 @@ use yii\helpers\Html;
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="box box-widget">
+            <div class="box-header with-border bg-aqua">
+                <h3 class="box-title"><?= Yii::t('app', "Транзакции"); ?></h3>
+            </div>
+            <?= GridView::widget([
+                'dataProvider' => $model->transactionsDataProvider,
+                'id' => 'grid',
+                'rowOptions' => function ($model, $key, $index, $grid) {
+                    return [];
+                },
+                'layout' => "
+                    <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
+                    <div class='box-footer' style='display: block;'>{pager}</div>",
+                'tableOptions' => [
+                    'class' => 'table table-bordered table-hover dataTable',
+                ],
+                'filterModel' => $model->transactionsSearchModel,
+                'columns' => [
+                    [
+                        'attribute' => 'gateway',
+                        'content' => function ($data) {
+                            $gateways = \app\models\Transactions::getGatewayServices();
+                            return key_exists($data->gateway, $gateways) ? $gateways[$data->gateway] : false;
+                        },
+                        'filter' => \app\models\Transactions::getGatewayServices(),
+                    ],
+                    [
+                        'attribute' => 'type',
+                        'content' => function ($data) {
+                            $types = \app\models\Transactions::getTypeListArrows();
+                            return key_exists($data->type, $types) ? $types[$data->type] : false;
+                        },
+                        'filter' => \app\models\Transactions::getTypeList(),
+                        'format' => 'html'
+                    ],
+                    [
+                        'attribute' => 'status',
+                        'content' => function ($data) {
+                            $statuses = \app\models\Transactions::getStatusList();
+                            return key_exists($data->status, $statuses) ? $statuses[$data->status] : false;
+                        },
+                        'filter' => \app\models\Transactions::getStatusList(),
+                        'format' => 'html'
+                    ],
+                    'amount',
+                    'created_at:datetime'
+                ],
+            ]); ?>
         </div>
     </div>
 </div>

@@ -17,35 +17,48 @@ use yii\base\Model;
  */
 class Bots extends Model
 {
+    const TYPE_USER = 0;
     const TYPE_DRIVER = 3;
     const TYPE_PASSENGER = 4;
 
     public $type;
 
     public $status;
+    public $user_id;
     public $driver_id;
     public $vehicle_id;
     public $route_id;
     public $start_point_id;
     public $end_point_id;
+    public $transaction_type;
+    public $transaction_status;
+    public $transaction_amount;
+    public $transaction_gateway;
 
     public function rules()
     {
         return [
-            [['driver_id', 'passenger_id', 'vehicle_id', 'route_id', 'start_point_id', 'end_point_id', 'status'], 'integer']
+            [['user_id', 'driver_id', 'passenger_id', 'vehicle_id', 'route_id', 'start_point_id', 'end_point_id', 'status', 'transaction_type', 'transaction_gateway'], 'integer'],
+            [['transaction_status'], 'string'],
+            [['transaction_amount'], 'number']
         ];
     }
 
     public function attributeLabels()
     {
         return [
-            'status'            => Yii::t('app', "Статус"),
-            'driver_id'         => Yii::t('app', "Водитель"),
-            'passenger_id'      => Yii::t('app', "Пассажир"),
-            'vehicle_id'        => Yii::t('app', "Автомобиль"),
-            'route_id'          => Yii::t('app', "Маршрут"),
-            'start_point_id'    => Yii::t('app', "Начальная точка"),
-            'end_point_id'      => Yii::t('app', "Конечная точка"),
+            'status'                => Yii::t('app', "Статус"),
+            'user_id'               => Yii::t('app', "Пользователь"),
+            'driver_id'             => Yii::t('app', "Водитель"),
+            'passenger_id'          => Yii::t('app', "Пассажир"),
+            'vehicle_id'            => Yii::t('app', "Автомобиль"),
+            'route_id'              => Yii::t('app', "Маршрут"),
+            'start_point_id'        => Yii::t('app', "Начальная точка"),
+            'end_point_id'          => Yii::t('app', "Конечная точка"),
+            'transaction_type'      => Yii::t('app', "Тип транзакции"),
+            'transaction_status'    => Yii::t('app', "Статус транзакции"),
+            'transaction_amount'    => Yii::t('app', "Сумма транзакции"),
+            'transaction_gateway'    => Yii::t('app', "Шлюз оплаты"),
         ];
     }
 }

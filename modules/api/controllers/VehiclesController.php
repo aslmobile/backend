@@ -23,7 +23,7 @@ class VehiclesController extends BaseController
                     [
                         'actions' => [
                             'types', 'brands', 'models',
-                            'list',
+                            'list', 'qr',
 
                             'create-vehicle',
                             'update-vehicle',
@@ -47,6 +47,7 @@ class VehiclesController extends BaseController
                     'brands'  => ['GET'],
                     'models'  => ['GET'],
                     'get-vehicle' => ['GET'],
+                    'qr' => ['GET'],
 
                     'create-vehicle' => ['PUT'],
                     'update-vehicle' => ['PUT'],
@@ -59,6 +60,11 @@ class VehiclesController extends BaseController
                 ]
             ]
         ];
+    }
+
+    public function actionQr($id)
+    {
+        $vehicle
     }
 
     public function actionList()

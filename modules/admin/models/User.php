@@ -101,4 +101,14 @@ class User extends \app\models\User
         return $this->hasMany(AuthItem::className(), ['name' => 'item_name'])
             ->viaTable('auth_assignment', ['user_id' => 'id']);
     }
+
+    public function getTransactionsDataProvider()
+    {
+        return $this->transactionsSearchModel ? $this->transactionsSearchModel->search(Yii::$app->request->queryParams, $this->id) : false;
+    }
+
+    public function getTransactionsSearchModel()
+    {
+        return new TransactionSearch();
+    }
 }
