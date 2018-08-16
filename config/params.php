@@ -14,7 +14,8 @@ $params = [
         '217.24.160.240', '217.24.160.195', '217.24.161.64', // V-JET GROUP
 
         '93.75.225.50', '93.75.237.182', // Alexandr Tsymbal
-        '46.211.6.142', '46.119.87.237' // Kostya Batrak
+        '46.211.6.142', '46.119.87.237', // Kostya Batrak
+		'134.249.138.232', // Andrey Tregubenko
     ],
     'db_content_type' => [
         0 => 'image_count',
