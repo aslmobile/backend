@@ -105,6 +105,7 @@ class PaymentController extends BaseController
                     'route'         => ($transaction->route) ? $transaction->route->toArray() : null
                 ];
 
+        $this->module->data['user'] = $user->toArray();
         $this->module->data['transactions'] = $transactions_data;
         $this->module->setSuccess();
         $this->module->sendResponse();
