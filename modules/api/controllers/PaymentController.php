@@ -59,8 +59,8 @@ class PaymentController extends BaseController
         ])->sum('amount');
 
         $this->module->data = [
-            'income' => $in,
-            'outcome' => $out
+            'income' => floatval($in),
+            'outcome' => floatval($out)
         ];
         $this->module->setSuccess();
         $this->module->sendResponse();
