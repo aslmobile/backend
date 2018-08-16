@@ -100,12 +100,11 @@ class PaymentController extends BaseController
         $transactions_data = [];
         if ($transactions && count($transactions) > 0)
             foreach ($transactions as $transaction)
-                $transactions_data = [
+                $transactions_data[] = [
                     'transaction'   => $transaction->toArray(),
                     'route'         => ($transaction->route) ? $transaction->route->toArray() : null
                 ];
 
-        $this->module->data['user'] = $user->toArray();
         $this->module->data['transactions'] = $transactions_data;
         $this->module->setSuccess();
         $this->module->sendResponse();
