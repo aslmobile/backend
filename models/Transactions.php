@@ -26,6 +26,10 @@ use app\components\MultilingualQuery;
  * @property string $currency
  * @property string $route_id
  * @property integer $type
+ * @property string $request
+ * @property string $response
+ * @property int $payment_id
+ * @property string $payment_link
  */
 class Transactions extends \yii\db\ActiveRecord
 {
@@ -67,7 +71,7 @@ class Transactions extends \yii\db\ActiveRecord
         return [
             [['created_at', 'updated_at', 'status', 'user_id', 'gateway', 'cancel_reason', 'created_by', 'updated_by', 'type'], 'integer'],
             [['amount'], 'number'],
-            [['gateway_response'], 'string'],
+            [['gateway_response', 'request', 'response'], 'string'],
             [['gateway_status', 'uip', 'currency'], 'string', 'max' => 255],
         ];
     }
@@ -91,6 +95,9 @@ class Transactions extends \yii\db\ActiveRecord
             'uip' => Yii::$app->mv->gt('IP пользователя', [], 0),
             'currency' => Yii::$app->mv->gt('Валюта', [], 0),
             'type' => Yii::$app->mv->gt('Тип транзакции', [], 0),
+            'request' => Yii::$app->mv->gt('Запрос', [], 0),
+            'response' => Yii::$app->mv->gt('Ответ', [], 0),
+            'route_id'  => Yii::$app->mv->gt('Маршрут', [], 0),
         ];
     }
 

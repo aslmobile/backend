@@ -1,5 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
+use app\components\Payments\PaymentProvider;
 use app\models\Transactions;
 use Yii;
 use yii\filters\AccessControl;
@@ -20,7 +21,9 @@ class PaymentController extends BaseController
                 'rules' => [
                     [
                         'actions' => [
-                            'transactions', 'transaction', 'methods', 'in-out-amounts'
+                            'transactions', 'transaction', 'methods', 'in-out-amounts',
+
+                            'create-card'
                         ],
                         'allow' => true
                     ]
@@ -32,7 +35,9 @@ class PaymentController extends BaseController
                     'transactions'      => ['POST'],
                     'transaction'       => ['GET'],
                     'methods'           => ['GET'],
-                    'in-out-amounts'    => ['GET']
+                    'in-out-amounts'    => ['POST'],
+
+                    'create-card'       => ['PUT']
                 ]
             ]
         ];
@@ -43,21 +48,30 @@ class PaymentController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
+        $this->prepareBody();
+        $this->validateBodyParams(['timestamp_min', 'timestamp_max']);
+
+        $timestamp_min = intval($this->body->timestamp_min);
+        $timestamp_max = intval($this->body->timestamp_max);
+
         $income = Transactions::find()->andWhere([
             'AND',
+            ['between', 'created_at', $timestamp_min, $timestamp_max],
             ['=', 'user_id', $user->id],
             ['=', 'type', Transactions::TYPE_INCOME],
         ])->sum('amount');
 
         $outcome = Transactions::find()->andWhere([
             'AND',
+            ['between', 'created_at', $timestamp_min, $timestamp_max],
             ['=', 'user_id', $user->id],
             ['=', 'type', Transactions::TYPE_OUTCOME],
         ])->sum('amount');
 
         $this->module->data = [
             'income' => floatval($income),
-            'outcome' => floatval($outcome)
+            'outcome' => floatval($outcome),
+            'balance'   => $user->balance
         ];
         $this->module->setSuccess();
         $this->module->sendResponse();
@@ -115,6 +129,23 @@ class PaymentController extends BaseController
         if ($user) $user = $this->user;
 
         $this->module->data = Transactions::getPaymentMethods();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionCreateCard()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $paymentProvider = new PaymentProvider();
+
+        /** @var \app\components\Payments\Drivers\PayBox $payBox */
+        $payBox = $paymentProvider->getDriver(['driver' => 'PayBox']);
+        $iframe_url = $payBox->addCard($user);
+
+        $this->module->data['user'] = $user->toArray();
+        $this->module->data['iframe'] = $iframe_url;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

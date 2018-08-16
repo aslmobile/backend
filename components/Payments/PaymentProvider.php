@@ -1,8 +1,9 @@
-<?php namespace app\components\paysystem;
+<?php namespace app\components\Payments;
 
 class PaymentProvider
 {
-    private function __construct(){}
+    public function __construct()
+    {}
 
     public static function getDriver($params)
     {
