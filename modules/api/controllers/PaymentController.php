@@ -1,6 +1,7 @@
 <?php namespace app\modules\api\controllers;
 
 use app\components\Payments\PaymentProvider;
+use app\models\PaymentCards;
 use app\models\Transactions;
 use Yii;
 use yii\filters\AccessControl;
@@ -23,7 +24,7 @@ class PaymentController extends BaseController
                         'actions' => [
                             'transactions', 'transaction', 'methods', 'in-out-amounts',
 
-                            'create-card'
+                            'create-card', 'cards'
                         ],
                         'allow' => true
                     ]
@@ -129,6 +130,16 @@ class PaymentController extends BaseController
         if ($user) $user = $this->user;
 
         $this->module->data = Transactions::getPaymentMethods();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionCards()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->module->data['cards'] = PaymentCards::getCards($user->id);
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
