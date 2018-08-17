@@ -6,38 +6,29 @@ use app\components\widgets\Alert;
 /* @var $this yii\web\View */
 /* @var $model app\modules\admin\models\Mailtpl */
 
-$this->title = Yii::$app->mv->gt('Editing {modelClass}: ', [
-    'modelClass' => 'Шаблона письма',
-], false) . ' ' . $model->title;
-$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Admin panel',[],false), 'url' => ['/admin']];
+$this->title = $model->title;
+$this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Панель управления',[],false), 'url' => ['/admin']];
 $this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Шаблоны писем'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->title, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = Yii::$app->mv->gt('Editing {modelClass}', [
-    'modelClass' => 'Mailtpl',
-]);
+$this->params['breadcrumbs'][] = Yii::$app->mv->gt('Редактирование', [], false);
 ?>
 
 <div class="content-wrapper">
-	<section>
-		<div class="section-header">
-            <?= Breadcrumbs::widget([
-                'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-            ]) ?>			
-		</div>	
-		<div class="section-body contain-xlg">	
-		
-			<div class="row">
-				<div class="col-lg-12">
-				
-					<?= Alert::widget() ?>
+    <section class="content-header">
+        <?= Html::tag('h1', $this->title)?>
 
-					<?= $this->render('_form', [
-						'model' => $model,
-					]) ?>
-				
-				</div>
-			</div>
-		
-		</div>
-	</section>
+        <?= Breadcrumbs::widget([
+            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+        ]) ?>
+    </section>
+    <section class="content">
+        <?= Alert::widget() ?>
+        <div class="row">
+            <div class="col-lg-12">
+                <?= $this->render('_form', [
+                    'model' => $model,
+                ]) ?>
+            </div>
+        </div>
+    </section>
 </div>

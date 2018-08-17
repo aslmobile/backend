@@ -58,7 +58,7 @@ class TripController extends BaseController
                     'taxi' => ['POST'],
                     'luggage-type' => ['GET'],
                     'queue' => ['PUT'],
-                    'passengers-route'
+                    'passengers-route' => ['GET']
                 ]
             ]
         ];
@@ -77,12 +77,12 @@ class TripController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        /** @var \app\models\Line $line */
-        $line = Line::findOne($id);
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
-        /** @var \app\models\Route $route */
-        $route = Route::findOne($line->route_id);
+        /** @var \app\modules\api\models\Route $route */
+        $route = \app\modules\api\models\Route::findOne($line->route_id);
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         $trips = Trip::find()->andWhere([
@@ -95,14 +95,15 @@ class TripController extends BaseController
         if ($trips && count ($trips) > 0) foreach ($trips as $trip)
         {
             /** @var \app\modules\api\models\Trip $trip */
-            $checkpoints[$trip->startpoint_id][] = [
-                'passenger' => $trip->user ? $trip->user->toArray() : null,
+
+            $checkpoints[$trip->startpoint->id][] = [
+                'trip' => $trip->toArray(),
                 'position'  => $trip->position
             ];
         }
 
-        $this->module->data['route'] = $route->toArray();
-        $this->module->data['checkpoints'] = $checkpoints;
+        $this->module->data['line'] = $line->toArray();
+        $this->module->data['checkpoints'] = array_values($checkpoints);
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

@@ -7,7 +7,7 @@ use yii\web\JsExpression;
 
 /* @var $this yii\web\View */
 
-$this->title = Yii::$app->mv->gt('Водитель', [], false);
+$this->title = Yii::$app->mv->gt('Транзакции', [], false);
 $this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Боты', [], false), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php $form = ActiveForm::begin(['options' => ['class' => 'form']]); ?>
                 <div class="box box-widget">
                     <div class="box-header with-border bg-aqua">
-                        <h3 class="box-title"><?= Yii::t('app', "Создание поездки"); ?></h3>
+                        <h3 class="box-title"><?= Yii::t('app', "Создание транзакции"); ?></h3>
                     </div>
                     <div class="box-body">
                         <div class="row">

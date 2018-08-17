@@ -19,7 +19,7 @@ class MailtplSearch extends Mailtpl
     {
         return [
             [['id'], 'integer'],
-            [['title', 'descr'], 'safe'],
+            [['title', 'type'], 'safe'],
         ];
     }
 
@@ -61,6 +61,7 @@ class MailtplSearch extends Mailtpl
 
         $query->andFilterWhere([
             'id' => $this->id,
+            'type' => $this->type
         ]);
 
         $query->andFilterWhere(['like', 'title', $this->title])
