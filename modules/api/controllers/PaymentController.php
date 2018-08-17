@@ -24,7 +24,7 @@ class PaymentController extends BaseController
                         'actions' => [
                             'transactions', 'transaction', 'methods', 'in-out-amounts',
 
-                            'create-card', 'cards'
+                            'create-card', 'delete-card', 'cards'
                         ],
                         'allow' => true
                     ]
@@ -38,7 +38,8 @@ class PaymentController extends BaseController
                     'methods'           => ['GET'],
                     'in-out-amounts'    => ['POST'],
 
-                    'create-card'       => ['PUT']
+                    'create-card'       => ['PUT'],
+                    'delete-card'       => ['DELETE'],
                 ]
             ]
         ];
@@ -140,6 +141,25 @@ class PaymentController extends BaseController
         if ($user) $user = $this->user;
 
         $this->module->data['cards'] = PaymentCards::getCards($user->id);
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionDeleteCard($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $card = PaymentCards::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id],
+            ['=', 'status', PaymentCards::STATUS_ACTIVE]
+        ])->one();
+        if (!$card) $this->module->setError(422, '_card', Yii::$app->mv->gt("Не найдена", [], false));
+
+        if (!$card->delete()) $this->module->setError(422, '_card', Yii::$app->mv->gt("Не удалось удалить карту", [], false));
+
+        $this->module->data['message'] = Yii::$app->mv->gt("Карта {card} успешно удалена", ['card' => $card->pg_card_hash], false);
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
