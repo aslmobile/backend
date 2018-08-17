@@ -40,7 +40,9 @@ class TripController extends BaseController
                             'checkpoint-arrived',
                             'luggage-type',
                             'taxi',
-                            'queue'
+                            'queue',
+
+                            'passengers-route'
                         ],
                         'allow' => true
                     ]
@@ -55,7 +57,8 @@ class TripController extends BaseController
                     'checkpoint-arrived' => ['POST'],
                     'taxi' => ['POST'],
                     'luggage-type' => ['GET'],
-                    'queue' => ['PUT']
+                    'queue' => ['PUT'],
+                    'passengers-route'
                 ]
             ]
         ];
@@ -67,6 +70,41 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         return parent::beforeAction($event);
+    }
+
+    public function actionPassengersRoute($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        /** @var \app\models\Line $line */
+        $line = Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\models\Route $route */
+        $route = Route::findOne($line->route_id);
+        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
+
+        $trips = Trip::find()->andWhere([
+            'AND',
+            ['=', 'line_id', $line->id],
+            ['=', 'driver_id', $line->driver_id]
+        ])->all();
+
+        $checkpoints = [];
+        if ($trips && count ($trips) > 0) foreach ($trips as $trip)
+        {
+            /** @var \app\modules\api\models\Trip $trip */
+            $checkpoints[$trip->startpoint_id][] = [
+                'passenger' => $trip->user ? $trip->user->toArray() : null,
+                'position'  => $trip->position
+            ];
+        }
+
+        $this->module->data['route'] = $route->toArray();
+        $this->module->data['checkpoints'] = $checkpoints;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionAcceptArrive($id)
