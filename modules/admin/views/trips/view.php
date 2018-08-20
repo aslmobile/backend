@@ -73,7 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'attribute' => 'user_id',
                                     'value' => function ($model)
                                     {
-                                        return $model->user->fullName;
+                                        return $model->user ? $model->user->fullName : false;
                                     }
                                 ],
                                 [
