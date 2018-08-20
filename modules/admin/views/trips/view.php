@@ -81,7 +81,8 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'label' => Yii::t('app', "Телефон"),
                                     'value' => function ($model)
                                     {
-                                        return '<a href="tel:+' . $model->user ? $model->user->phone : 380000000000 . '">+' . $model->user ? $model->user->phone : 380000000000 . '</a>';
+                                        $phone = $model->user ? $model->user->phone : 380000000000;
+                                        return '<a href="tel:+' . $phone . '">+' . $phone . '</a>';
                                     }, 'format' => 'html'
                                 ],
                                 'seats' => [
