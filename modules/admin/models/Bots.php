@@ -22,12 +22,14 @@ class Bots extends Model
     const TYPE_PASSENGER = 4;
 
     public $type;
+    public $action_type;
 
     public $status;
     public $user_id;
     public $driver_id;
     public $vehicle_id;
     public $route_id;
+    public $line_id;
     public $start_point_id;
     public $end_point_id;
     public $transaction_type;
@@ -38,7 +40,23 @@ class Bots extends Model
     public function rules()
     {
         return [
-            [['user_id', 'driver_id', 'passenger_id', 'vehicle_id', 'route_id', 'start_point_id', 'end_point_id', 'status', 'transaction_type', 'transaction_gateway'], 'integer'],
+            [
+                [
+                    'user_id',
+                    'driver_id',
+                    'passenger_id',
+                    'vehicle_id',
+                    'route_id',
+                    'line_id',
+                    'start_point_id',
+                    'end_point_id',
+                    'status',
+                    'transaction_type',
+                    'transaction_gateway',
+                    'action_type'
+                ],
+                'integer'
+            ],
             [['transaction_status'], 'string'],
             [['transaction_amount'], 'number']
         ];
@@ -53,12 +71,13 @@ class Bots extends Model
             'passenger_id'          => Yii::t('app', "Пассажир"),
             'vehicle_id'            => Yii::t('app', "Автомобиль"),
             'route_id'              => Yii::t('app', "Маршрут"),
+            'line_id'               => Yii::t('app', "Линия"),
             'start_point_id'        => Yii::t('app', "Начальная точка"),
             'end_point_id'          => Yii::t('app', "Конечная точка"),
             'transaction_type'      => Yii::t('app', "Тип транзакции"),
             'transaction_status'    => Yii::t('app', "Статус транзакции"),
             'transaction_amount'    => Yii::t('app', "Сумма транзакции"),
-            'transaction_gateway'    => Yii::t('app', "Шлюз оплаты"),
+            'transaction_gateway'   => Yii::t('app', "Шлюз оплаты"),
         ];
     }
 }

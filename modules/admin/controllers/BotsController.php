@@ -1,12 +1,16 @@
 <?php namespace app\modules\admin\controllers;
 
+use app\models\Checkpoint;
 use app\models\Transactions;
 use app\modules\admin\models\Line;
 use app\modules\admin\models\User;
+use app\modules\api\models\Route;
 use app\modules\api\models\Trip;
+use app\modules\api\models\Users;
 use Yii;
 use app\components\Controller;
 use app\modules\admin\models\Bots;
+use yii\db\Expression;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\Url;
@@ -127,6 +131,120 @@ class BotsController extends Controller
     public function actionPassenger()
     {
         $model = new Bots(['type' => Bots::TYPE_PASSENGER]);
+
+        if ($model->load(Yii::$app->request->post()))
+        {
+            switch ($model->action_type)
+            {
+                case 1:
+                    $passengers = Users::find()->andWhere([
+                        'AND',
+                        ['=', 'type', Users::TYPE_PASSENGER],
+                        ['=', 'status', Users::STATUS_APPROVED]
+                    ])->all();
+
+                    /** @var \app\models\Checkpoint $startpoint */
+                    $startpoint = Checkpoint::find()->andWhere([
+                        'AND',
+                        ['=', 'type', Checkpoint::TYPE_STOP]
+                    ])->one();
+
+                    /** @var \app\models\Checkpoint $endpoint */
+                    $endpoint = Checkpoint::find()->andWhere([
+                        'AND',
+                        ['=', 'type', Checkpoint::TYPE_END]
+                    ])->one();
+
+                    /** @var \app\modules\api\models\Users $passenger */
+                    if ($passengers && $startpoint && $endpoint && count($passengers) > 0)
+                    {
+                        $passengers_count = [];
+
+                        foreach ($passengers as $passenger)
+                        {
+                            $trip = new Trip();
+                            $trip->status = Trip::STATUS_WAITING;
+                            $trip->user_id = $passenger->id;
+                            $trip->startpoint_id = $startpoint->id;
+                            $trip->position = '48.4579235,35.026574';
+                            $trip->seats = 1;
+                            $trip->endpoint_id = $endpoint->id;
+                            $trip->start_time = -1;
+                            $trip->route_id = $startpoint->route;
+                            $trip->amount = 100;
+                            $trip->tariff = 100;
+                            $trip->payment_type = Trip::PAYMENT_TYPE_CARD;
+                            $trip->payment_status = Trip::PAYMENT_STATUS_PAID;
+                            $trip->currency = 'T';
+                            $trip->passenger_comment = 'БОТ';
+
+                            $trip->driver_id = 0;
+                            $trip->vehicle_id = 0;
+                            $trip->line_id = 0;
+
+                            if ($trip->save()) $passengers_count[] = [
+                                'trip_id' => $trip->id,
+                                'passenger_id' => $trip->user_id
+                            ];
+                        }
+
+                        Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Очередь успешно создана',[],0));
+                        return $this->redirect(['/admin/trips/index']);
+                    }
+
+                    Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось создать очередь из за нехватки данных',[],0));
+                    break;
+
+                case 2:
+                    /** @var \app\modules\api\models\Line $line */
+                    $line = Line::find()->andWhere([
+                        'AND',
+                        ['=', 'driver_id', $model->driver_id],
+                        ['=', 'status', Line::STATUS_WAITING]
+                    ])->all();
+
+                    if ($line)
+                    {
+                        $trips = \app\models\Trip::find()->andWhere([
+                            'AND',
+                            ['=', 'route_id', $line->route_id],
+                            ['=', 'status', Trip::STATUS_WAITING],
+                            ['=', 'payment_status', Trip::PAYMENT_STATUS_PAID],
+                            ['=', 'passenger_comment', 'БОТ']
+                        ])->all();
+
+                        /** @var \app\models\Trip $trip */
+                        if ($trips && count($trips) > 0)
+                        {
+                            foreach ($trips as $trip)
+                            {
+                                $trip->driver_id = $line->driver_id;
+                                $trip->vehicle_id = $line->vehicle_id;
+                                $trip->vehicle_type_id = $line->vehicle->type->id;
+                                $trip->line_id = $line->id;
+                                $trip->status = Trip::STATUS_WAY;
+
+                                if ($trip->save()) $passengers_count[] = [
+                                    'trip_id' => $trip->id,
+                                    'passenger_id' => $trip->user_id
+                                ];
+                            }
+
+                            $line->status = Line::STATUS_IN_PROGRESS;
+                            if ($line->save())
+                            {
+                                Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажиры успешно посаженны',[],0));
+                                return $this->redirect(['/admin/trips/index']);
+                            }
+                            else Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось сохранить информацию о поездке',[],0));
+                        }
+                        else Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось найти пассажиров',[],0));
+                    }
+                    else Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось найти линию',[],0));
+                    break;
+            }
+        }
+
         return $this->render('passenger', ['model' => $model]);
     }
 }

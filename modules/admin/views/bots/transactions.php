@@ -4,6 +4,7 @@ use yii\widgets\Breadcrumbs;
 use yii\widgets\ActiveForm;
 use kartik\select2\Select2;
 use yii\web\JsExpression;
+use app\components\widgets\Alert;
 
 /* @var $this yii\web\View */
 
@@ -20,6 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </section>
     <section class="content">
+        <?= Alert::widget() ?>
         <div class="row">
             <div class="col-sm-12 col-md-4">
                 <?php $form = ActiveForm::begin(['options' => ['class' => 'form']]); ?>
