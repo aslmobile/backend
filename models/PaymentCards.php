@@ -82,6 +82,19 @@ class PaymentCards extends \yii\db\ActiveRecord
         return $this->save();
     }
 
+    public function toArray(array $fields = [], array $expand = [], $recursive = true)
+    {
+        $array = parent::toArray($fields, $expand, $recursive);
+
+        // XXXX-XXXX-XXXX-XXXX
+        $chash = $array['pg_card_hash'];
+        $card = substr($chash, 0, 4);
+        $card = $card . ' XXXX XXXX ' . substr($chash, 15, 4);
+
+        $array['mask'] = $card;
+        return $array;
+    }
+
     public static function getCards($user_id)
     {
         $cards = self::find()->andWhere([

@@ -140,6 +140,7 @@ class PaymentController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
+        $this->module->data['user_id'] = $user->id;
         $this->module->data['cards'] = PaymentCards::getCards($user->id);
         $this->module->setSuccess();
         $this->module->sendResponse();

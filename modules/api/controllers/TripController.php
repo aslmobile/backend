@@ -88,7 +88,8 @@ class TripController extends BaseController
         $trips = Trip::find()->andWhere([
             'AND',
             ['=', 'line_id', $line->id],
-            ['=', 'driver_id', $line->driver_id]
+            ['=', 'driver_id', $line->driver_id],
+            ['=', 'status', Line::STATUS_WAITING]
         ])->all();
 
         $checkpoints = [];
@@ -102,8 +103,24 @@ class TripController extends BaseController
             ];
         }
 
+
+        $passengers_seat = Trip::find()->andWhere([
+            'AND',
+            ['=', 'line_id', $line->id],
+            ['=', 'driver_id', $line->driver_id],
+            ['=', 'status', Line::STATUS_IN_PROGRESS]
+        ])->all();
+
+        $passengers = [];
+        if ($passengers_seat && count($passengers_seat) > 0) foreach ($passengers_seat as $passenger)
+        {
+            $passengers[] = $passenger->toArray();
+        }
+
+
         $this->module->data['line'] = $line->toArray();
         $this->module->data['checkpoints'] = array_values($checkpoints);
+        $this->module->data['passengers'] = $passengers;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
