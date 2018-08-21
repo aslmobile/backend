@@ -146,21 +146,34 @@ class PaymentController extends BaseController
         $this->module->sendResponse();
     }
 
-    public function actionDeleteCard($id)
+    public function actionDeleteCard()
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $card = PaymentCards::find()->andWhere([
+        $this->prepareBody();
+        $this->validateBodyParams(['cards']);
+
+        $cards = PaymentCards::find()->andWhere([
             'AND',
             ['=', 'user_id', $user->id],
-            ['=', 'status', PaymentCards::STATUS_ACTIVE]
-        ])->one();
-        if (!$card) $this->module->setError(422, '_card', Yii::$app->mv->gt("Не найдена", [], false));
+            ['=', 'status', PaymentCards::STATUS_ACTIVE],
+            ['IN', 'id', $this->body->cards]
+        ])->all();
 
-        if (!$card->delete()) $this->module->setError(422, '_card', Yii::$app->mv->gt("Не удалось удалить карту", [], false));
+        if (!$cards || count($cards) == 0) $this->module->setError(422, '_card', Yii::$app->mv->gt("Не найдены", [], false));
 
-        $this->module->data['message'] = Yii::$app->mv->gt("Карта {card} успешно удалена", ['card' => $card->pg_card_hash], false);
+        /** @var \app\models\PaymentCards $card */
+        $deleted_cards = [];
+        foreach ($cards as $card)
+        {
+            if ($card->delete()) $deleted_cards[] = [
+                'mask' => $card->getCardMask(),
+                'message' => Yii::$app->mv->gt("Карта {card} успешно удалена", ['card' => $card->getCardMask()], false)
+            ];
+        }
+
+        $this->module->data['cards'] = $deleted_cards;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

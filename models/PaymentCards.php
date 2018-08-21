@@ -86,13 +86,18 @@ class PaymentCards extends \yii\db\ActiveRecord
     {
         $array = parent::toArray($fields, $expand, $recursive);
 
-        // XXXX-XXXX-XXXX-XXXX
-        $chash = $array['pg_card_hash'];
-        $card = substr($chash, 0, 4);
-        $card = $card . ' XXXX XXXX ' . substr($chash, 15, 4);
+        $array['mask'] = $this->getCardMask();
 
-        $array['mask'] = $card;
         return $array;
+    }
+
+    public function getCardMask()
+    {
+        // XXXX-XXXX-XXXX-XXXX
+        $card_number_f4 = substr($this->pg_card_hash, 0, 4);
+        $card_number_l4 = substr($this->pg_card_hash, 15, 4);
+
+        return $card_number_f4 . ' XXXX XXXX ' . $card_number_l4;
     }
 
     public static function getCards($user_id)
