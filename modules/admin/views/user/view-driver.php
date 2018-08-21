@@ -260,7 +260,7 @@ use yii\grid\GridView;
                 <div class="modal fade v<?= $vehicle->id; ?>-insurance-modal-front" tabindex="-1" role="dialog" aria-labelledby="registration-photo">
                     <div class="modal-dialog modal-lg" role="document">
                         <div class="modal-content">
-                            <?php if ($file) : ?><img class="img-responsive img-bordered margin" src="<?= $file->file; ?>" /><hr />
+                            <?php if ($file) : ?><img class="img-responsive img-bordered" src="<?= $file->file; ?>" /><hr />
                             <?php endif; ?>
                         </div>
                     </div>
@@ -270,10 +270,10 @@ use yii\grid\GridView;
                 <div class="modal fade v<?= $vehicle->id; ?>-registration-modal-front" tabindex="-1" role="dialog" aria-labelledby="registration-photo">
                     <div class="modal-dialog modal-lg" role="document">
                         <div class="modal-content">
-                            <?php if ($file_r1) : ?><img class="img-responsive img-bordered margin" src="<?= $file_r1->file; ?>" /><hr />
+                            <?php if ($file_r1) : ?><img class="img-responsive img-bordered" src="<?= $file_r1->file; ?>" /><hr />
                             <?php endif; ?>
 
-                            <?php if ($file_r2) : ?><img class="img-responsive img-bordered margin" src="<?= $file_r2->file; ?>" /><hr />
+                            <?php if ($file_r2) : ?><img class="img-responsive img-bordered" src="<?= $file_r2->file; ?>" /><hr />
                             <?php endif; ?>
                         </div>
                     </div>
