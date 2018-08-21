@@ -44,8 +44,8 @@ class LoginForm extends Model
     public function attributeLabels()
     {
         return [
-            'email' => Yii::t('app', 'E-mail'),
-            'password' => Yii::t('app', 'Password'),
+            'email' => Yii::t('app', 'Эл. почта'),
+            'password' => Yii::t('app', 'Пароль'),
         ];
     } 	
 
@@ -59,11 +59,11 @@ class LoginForm extends Model
             $user = $this->getUser();
  
             if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError('password', Yii::$app->mv->gt('Password is invalid',[],false));
+                $this->addError('password', Yii::$app->mv->gt('Пароль не верный',[],false));
             } elseif ($user && $user->status == User::STATUS_BLOCKED) {
-                $this->addError('email', Yii::$app->mv->gt('Blocked account',[],false));
+                $this->addError('email', Yii::$app->mv->gt('Аккаунт заблокирован',[],false));
             } elseif ($user && $user->status == User::STATUS_PENDING) {
-                $this->addError('email', Yii::$app->mv->gt('Account is not verified',[],false));
+                $this->addError('email', Yii::$app->mv->gt('Аккаунт не подтвержден',[],false));
             }
         }
     }

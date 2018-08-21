@@ -8,7 +8,7 @@ use yii\helpers\Url;
 /* @var $form yii\bootstrap\ActiveForm */
 /* @var $model \models\LoginForm */
 
-$this->title = Yii::$app->mv->gt('Sign in',[],false);
+$this->title = Yii::$app->mv->gt('Авторизация',[],false);
 ?>
 
 <div class="login-box">
@@ -31,17 +31,17 @@ $this->title = Yii::$app->mv->gt('Sign in',[],false);
                         'class' => 'form-group has-feedback'
                     ]
                 ])
-                ->textInput(['placeholder'=>'Email']); ?>
+                ->textInput(['placeholder' => $model->getAttributeLabel('email')]); ?>
             <?= $form->field($model, 'password', [
                     'template' => '{input}<span class="glyphicon glyphicon-lock form-control-feedback"></span>{error}{hint}',
                     'options' => [
                         'class' => 'form-group has-feedback'
                     ]
                 ])
-                ->passwordInput(['placeholder'=>'Password']) ?>
+                ->passwordInput(['placeholder' => $model->getAttributeLabel('password')]) ?>
 
 <!--            <div class="row">-->
-                    <?= Html::submitButton(Yii::t('app', 'Sign In'), ['class' => 'btn btn-primary btn-block btn-flat', 'name' => 'login-button']) ?>
+                    <?= Html::submitButton(Yii::t('app', 'Войти'), ['class' => 'btn btn-primary btn-block btn-flat', 'name' => 'login-button']) ?>
 <!--            </div>-->
         <?php ActiveForm::end(); ?>
     </div>
