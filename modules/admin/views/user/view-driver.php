@@ -232,8 +232,30 @@ use yii\grid\GridView;
                             <?= Yii::t('app', "(не загружен)"); ?>
                         </button>
                     <?php endif; ?>
+
+                    <button class="btn btn-primary margin-bottom" data-toggle="modal" data-target=".v<?= $vehicle->id; ?>-qr-modal-front">
+                        <?= Yii::t('app', "QR код"); ?>
+                    </button>
                 </div>
 
+                <div class="modal fade v<?= $vehicle->id; ?>-qr-modal-front" tabindex="-1" role="dialog" aria-labelledby="registration-photo">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content text-center">
+                            <?php
+                            $qr = isset (Yii::$app->params['qr_api_url']) ? Yii::$app->params['qr_api_url'] : false;
+                            if (!$qr) $qr = 'https://placehold.it/500x500';
+
+                            $data = [
+                                'vehicle_id' => $vehicle->id,
+                                'driver_id'  => $vehicle->user_id
+                            ];
+
+                            $qr_url = str_replace(['{data}'], urlencode(json_encode($data)), $qr);
+                            ?>
+                            <img src="<?= $qr_url; ?>" class="img margin" />
+                        </div>
+                    </div>
+                </div>
                 <?php if ($file) : ?>
                 <div class="modal fade v<?= $vehicle->id; ?>-insurance-modal-front" tabindex="-1" role="dialog" aria-labelledby="registration-photo">
                     <div class="modal-dialog modal-lg" role="document">

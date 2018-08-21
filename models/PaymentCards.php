@@ -93,7 +93,6 @@ class PaymentCards extends \yii\db\ActiveRecord
 
     public function getCardMask()
     {
-        // XXXX-XXXX-XXXX-XXXX
         $card_number_f4 = substr($this->pg_card_hash, 0, 4);
         $card_number_l4 = substr($this->pg_card_hash, 15, 4);
 
