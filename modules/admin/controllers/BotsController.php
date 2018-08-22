@@ -146,13 +146,15 @@ class BotsController extends Controller
                     /** @var \app\models\Checkpoint $startpoint */
                     $startpoint = Checkpoint::find()->andWhere([
                         'AND',
-                        ['=', 'type', Checkpoint::TYPE_STOP]
+                        ['=', 'type', Checkpoint::TYPE_START],
+                        ['=', 'route', 5]
                     ])->one();
 
                     /** @var \app\models\Checkpoint $endpoint */
                     $endpoint = Checkpoint::find()->andWhere([
                         'AND',
-                        ['=', 'type', Checkpoint::TYPE_END]
+                        ['=', 'type', Checkpoint::TYPE_END],
+                        ['=', 'route', 5]
                     ])->one();
 
                     /** @var \app\modules\api\models\Users $passenger */
