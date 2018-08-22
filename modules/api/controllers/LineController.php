@@ -146,7 +146,6 @@ class LineController extends BaseController
         $line->route_id = $route->id;
         $line->seats = $seats;
         $line->freeseats = $freeseats;
-        $line->status = Line::STATUS_WAITING;
         $line->startpoint = $startpoint->id;
         $line->endpoint = $endpoint->id;
 
