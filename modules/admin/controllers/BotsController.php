@@ -205,6 +205,15 @@ class BotsController extends Controller
 
                     if ($line)
                     {
+                        echo \app\models\Trip::find()->andWhere([
+                            'AND',
+                            ['=', 'route_id', $line->route_id],
+                            ['=', 'status', Trip::STATUS_WAITING],
+                            ['=', 'payment_status', Trip::PAYMENT_STATUS_PAID],
+                            ['=', 'passenger_comment', 'БОТ']
+                        ])->createCommand()->rawSql;
+                        exit;
+
                         $trips = \app\models\Trip::find()->andWhere([
                             'AND',
                             ['=', 'route_id', $line->route_id],
