@@ -200,7 +200,7 @@ class BotsController extends Controller
                     $line = Line::find()->andWhere([
                         'AND',
                         ['=', 'driver_id', $model->driver_id],
-                        ['=', 'status', Line::STATUS_WAITING]
+                        ['=', 'status', Line::STATUS_QUEUE]
                     ])->one();
 
                     if ($line)
