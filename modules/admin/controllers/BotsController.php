@@ -201,7 +201,7 @@ class BotsController extends Controller
                         'AND',
                         ['=', 'driver_id', $model->driver_id],
                         ['=', 'status', Line::STATUS_WAITING]
-                    ])->all();
+                    ])->one();
 
                     if ($line)
                     {
