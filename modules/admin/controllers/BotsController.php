@@ -1,5 +1,6 @@
 <?php namespace app\modules\admin\controllers;
 
+use app\components\Socket\SocketPusher;
 use app\models\Checkpoint;
 use app\models\Transactions;
 use app\modules\admin\models\Line;
@@ -237,6 +238,8 @@ class BotsController extends Controller
                             {
                                 Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажиры успешно посаженны',[],0));
                                 return $this->redirect(['/admin/trips/index']);
+
+                                $socket = new SocketPusher();
                             }
                             else Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось сохранить информацию о поездке',[],0));
                         }

@@ -108,6 +108,10 @@ class PaymentController extends BaseController
                 ];
 
         $this->module->data['transactions'] = $transactions_data;
+        $this->module->data['count'] = Transactions::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id]
+        ])->count();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
