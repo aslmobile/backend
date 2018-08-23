@@ -233,13 +233,20 @@ class BotsController extends Controller
                                 ];
                             }
 
-                            $line->status = Line::STATUS_IN_PROGRESS;
+                            $line->status = Line::STATUS_WAITING;
                             if ($line->save())
                             {
                                 Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажиры успешно посаженны',[],0));
-                                return $this->redirect(['/admin/trips/index']);
 
                                 $socket = new SocketPusher();
+                                $socket->push(json_encode([
+                                    'action' => 'acceptDriverTrip',
+                                    'data' => [
+                                        'message_id' => time()
+                                    ]
+                                ]));
+
+                                return $this->redirect(['/admin/trips/index']);
                             }
                             else Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось сохранить информацию о поездке',[],0));
                         }
