@@ -239,12 +239,12 @@ class BotsController extends Controller
                                 Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажиры успешно посаженны',[],0));
 
                                 $socket = new SocketPusher();
-                                $socket->push(json_encode([
-                                    'action' => 'acceptDriverTrip',
+                                $socket->push(base64_encode(json_encode([
+                                    'action' => "acceptDriverTrip",
                                     'data' => [
                                         'message_id' => time()
                                     ]
-                                ]));
+                                ])));
 
                                 return $this->redirect(['/admin/trips/index']);
                             }

@@ -34,12 +34,19 @@ class SocketPusher extends Model
     public function push($message)
     {
         $connection = \Ratchet\Client\connect($this->scheme . $this->host . ':' . $this->port . '?auth=' . $this->authkey);
+        if (!$connection)
+        {
+            echo 'Connection failed';
+            exit;
+        }
+
         $connection->then(function ($conn) use ($message) {
             /** @var ConnectionInterface $conn */
             $conn->send($message);
             $conn->close();
         }, function ($e) {
             echo "Could not connect: {$e->getMessage()}\n";
+            exit;
         });
 
         return true;

@@ -70,9 +70,18 @@ class DefaultController extends BaseController
 
     public function actionForTesting()
     {
-//        Trip::getQueue(true);
+        $socket = new SocketPusher();
+        $message = $socket->push(base64_encode(json_encode([
+            'action' => "acceptDriverTrip",
+            'data' => [
+                'message_id' => time()
+            ]
+        ])));
 
-        $this->module->setError(404, 'method', Yii::$app->mv->gt("Не найден", [], false));
+        if (!$message) $this->module->setError(422, 'socket.push', 'failed');
+
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionGetFile($id)
