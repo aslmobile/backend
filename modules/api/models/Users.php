@@ -55,9 +55,7 @@ JSON;
         ])->one();
 
         $array['accept'] = 0;
-        if ($inAccept && ($inAccept->created_at + 300 < time())) $array['accept'] = 1;
-
-        $array['accept'] = $inAccept ? 1 : 0;
+        if ($inAccept && ($inAccept->created_at + 300 > time())) $array['accept'] = 1;
 
         $inQueue = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $this->id])->one();
         $array['queue'] = $inQueue ? 1 : 0;
