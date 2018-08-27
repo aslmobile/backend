@@ -46,13 +46,16 @@ JSON;
         }
         else $array['image_url'] = null;
 
+        /** @var \app\models\RestFul $inAccept */
         $inAccept = RestFul::find()->andWhere([
             'AND',
             ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT],
             ['=', 'user_id', $this->id],
-            ['=', 'message', json_encode(['status' => 'request'])],
-            ['between', 'created_at', time() - 300, time()]
+            ['=', 'message', json_encode(['status' => 'request'])]
         ])->one();
+
+        $array['accept'] = 0;
+        if ($inAccept && ($inAccept->created_at + 300 < time())) $array['accept'] = 1;
 
         $array['accept'] = $inAccept ? 1 : 0;
 
