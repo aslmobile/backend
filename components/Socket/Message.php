@@ -112,7 +112,7 @@ class Message
             $watchdog->save();
         }
 
-        $trip = Trip::find()->where(['status' => Trip::STATUS_WAITING, 'driver_id' => $device->user->id])->one();
+        $trip = Trip::find()->where(['status' => [Trip::STATUS_WAITING, Trip::STATUS_WAY], 'driver_id' => $device->user->id])->one();
 
         $response = [
             'message_id'    => $this->message_id,

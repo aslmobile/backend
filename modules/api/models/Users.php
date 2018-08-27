@@ -53,6 +53,7 @@ JSON;
             ['=', 'message', json_encode(['status' => 'request'])],
             ['between', 'created_at', time() - 300, time()]
         ])->one();
+
         $array['accept'] = $inAccept ? 1 : 0;
 
         $inQueue = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $this->id])->one();
