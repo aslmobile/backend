@@ -383,7 +383,13 @@ class TripController extends BaseController
         if (!$line) $this->module->setError(422, 'line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
-        $trips = Trip::find()->andWhere(['route_id' => $line->route_id, 'vehicle_id' => $line->vehicle_id, 'driver_id' => $line->driver_id])->all();
+        $trips = Trip::find()->andWhere([
+            'AND',
+            ['=', 'route_id', $line->route_id],
+            ['=', 'vehicle_id', $line->vehicle_id],
+            ['=', 'driver_id', $line->driver_id],
+            ['=', 'line_id', $line->id]
+        ])->all();
         if (!$trips) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $_passengers = [];
