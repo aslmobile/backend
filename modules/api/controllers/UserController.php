@@ -23,7 +23,7 @@ class UserController extends BaseController
                 'rules' => [
                     [
                         'actions' => [
-                            'auth', 'sms',
+                            'auth', 'sms', 'verify-phone',
                             'registration',
                             'upload-driver-licence',
                             'upload-user-photo',
@@ -51,7 +51,8 @@ class UserController extends BaseController
                     'get' => ['GET'],
                     'get-own' => ['GET'],
                     'get-rating' => ['GET'],
-                    'settings' => ['POST']
+                    'settings' => ['POST'],
+                    'verify-phone' => ['POST'],
                 ]
             ]
         ];
@@ -140,6 +141,33 @@ class UserController extends BaseController
         $this->module->sendResponse();
     }
 
+    public function actionVerifyPhone()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['code']);
+
+        $code = intval($this->body->code);
+        if ($code == 0) $this->module->setError(422, 'code', Yii::$app->mv->gt("Не верный формат кода подтверждения", [], false));
+
+        if ($this->device->sms_code != $code) $this->module->setError(422, 'code', Yii::$app->mv->gt("Не верный код подтверждения", [], false));
+        else
+        {
+            $this->device->sms_code = null;
+            $user->phone = $user->phone_on_verify;
+            $user->phone_on_verify = null;
+
+            $this->device->save();
+            $user->save();
+        }
+
+        $this->module->data['verify'] = 'success';
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
     public function actionSettings()
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -159,16 +187,35 @@ class UserController extends BaseController
 
     public function actionUpdateProfile($id)
     {
+        /** @var \app\modules\api\models\Users $user */
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
         $this->prepareBody();
+        $phone = false;
+
+        if (isset ($this->body->phone) && !empty($this->body->phone))
+        {
+            $phone = $this->body->phone;
+            unset($this->body->phone);
+        }
 
         $data = [
             'Users' => (array) $this->body
         ];
 
         if (!$user->load($data)) $this->module->setError(422, '_user', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
+
+        if ($phone && $user->phone != $phone)
+        {
+            $device = $this->module->verifyPhone($this->device, $phone);
+            if (!$device) $this->module->setError(422, '_sms', Yii::$app->mv->gt("Не удалось отправить СМС", [], false));
+
+            $this->module->data['sms'] = 1;
+
+            $user->phone_on_verify = $phone;
+        }
+
         if (!$user->validate() || !$user->save())
         {
             if ($user->hasErrors())

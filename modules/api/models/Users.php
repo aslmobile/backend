@@ -46,7 +46,13 @@ JSON;
         }
         else $array['image_url'] = null;
 
-        $inAccept = RestFul::find()->where(['type' => RestFul::TYPE_DRIVER_ACCEPT, 'user_id' => $this->id, 'message' => json_encode(['status' => 'request'])])->one();
+        $inAccept = RestFul::find()->andWhere([
+            'AND',
+            ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT],
+            ['=', 'user_id', $this->id],
+            ['=', 'message', json_encode(['status' => 'request'])],
+            ['between', 'created_at', time() - 300, time()]
+        ])->one();
         $array['accept'] = $inAccept ? 1 : 0;
 
         $inQueue = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $this->id])->one();

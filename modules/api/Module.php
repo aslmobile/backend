@@ -118,6 +118,7 @@ class Module extends \yii\base\Module
 
     /**
      * @param $device \app\modules\api\models\Devices
+     * @param $sandbox bool
      * @return bool|Devices
      * @throws \yii\base\Exception
      */
@@ -152,7 +153,43 @@ class Module extends \yii\base\Module
                 if ($template) $template = Yii::t('app', $template->template, ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
                 else $template = Yii::t('app','{name} | Авторизация: {code}', ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
 
-                $response = $SMSCenter->send($device->user->phone, $template);
+                $response = $SMSCenter->send($device->user->phone, $template, Yii::$app->params['smsc']['sender']);
+                $send = new \SimpleXMLElement($response);
+            }
+            else $send = (object) ['cnt' => 1];
+        }
+        else $this->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
+
+        return isset ($send->cnt) && isset ($device) ? $device : false;
+    }
+
+    /**
+     * @param $device \app\modules\api\models\Devices
+     * @param $sandbox bool
+     * @param $phone float
+     * @return bool|Devices
+     */
+    public function verifyPhone($device, $phone, $sandbox = false)
+    {
+        if ($device && isset ($device->user->phone))
+        {
+            $SMSCenter = new SMSCenter(true, ['charset' => SMSCenter::CHARSET_UTF8, 'fmt' => SMSCenter::FMT_XML]);
+            $code = (string) mt_rand(100000, 999999);
+
+            $device->sms_code = $code;
+            $device->save();
+
+            if (!$sandbox)
+            {
+                if (!is_numeric($phone) || empty($phone) || intval($phone) == 0)
+                    $this->setError(422, 'phone', Yii::$app->mv->gt("Не верный формат. " . $device->user->phone, [], false));
+
+                /** @var \app\models\SmsTemplates $template */
+                $template = SmsTemplates::find()->where(['name' => "verify-phone-template"])->one();
+                if ($template) $template = Yii::t('app', $template->template, ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
+                else $template = Yii::t('app','{name} | Подтверждение: {code}', ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
+
+                $response = $SMSCenter->send($phone, $template, Yii::$app->params['smsc']['sender']);
                 $send = new \SimpleXMLElement($response);
             }
             else $send = (object) ['cnt' => 1];

@@ -24,6 +24,7 @@ use yii\web\IdentityInterface;
  * @property integer $city_id
  * @property integer $image
  * @property float $phone
+ * @property float $phone_on_verify
  * @property string $password_hash
  * @property string $password_reset_token
  * @property integer $status
@@ -88,6 +89,7 @@ class User extends ActiveRecord implements IdentityInterface
                 'message' => Yii::t('app', 'This phone has already been taken.')
             ],
             ['phone', 'phoneValidate'],
+            ['phone_on_verify', 'number'],
             [[
                 'type', 'status', 'gender',
                 'image',
