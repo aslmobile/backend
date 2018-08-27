@@ -465,7 +465,7 @@ class LineController extends BaseController
             ['=', 'route_id', $route_id]
         ])->all();
 
-        if (!$lines) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+        if (!$lines) return 1;
 
         $seats = 0;
         foreach ($lines as $line) $seats += $line->freeseats;
