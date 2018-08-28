@@ -52,11 +52,6 @@ class LineSearchVehicles extends Line
             return $dataProvider;
         }
 
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'status' => $this->status
-        ]);
-
         return $dataProvider;
     }
 }
