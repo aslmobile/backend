@@ -284,7 +284,7 @@ class TripController extends BaseController
                 'rating' => $trip->passenger_rating,
                 'comment' => $trip->passenger_comment,
                 'date'    => $trip->created_at,
-                'route'    => $trip->route,
+                'route'    => $trip->route->toArray(),
             ];
         }
 
@@ -308,7 +308,7 @@ class TripController extends BaseController
                 'rating' => $trip->passenger_rating,
                 'comment' => $trip->passenger_comment,
                 'date'    => $trip->created_at,
-                'route'    => $trip->created_at,
+                'route'    => $trip->route->toArray(),
             ];
         }
 
