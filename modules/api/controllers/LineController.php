@@ -399,7 +399,7 @@ class LineController extends BaseController
             foreach ($trips as $trip)
             {
                 $trip->cancel_reason = $this->body->cancel_reason_trip;
-                $trip->status = Trip::STATUS_CANCELED;
+                $trip->status = Trip::STATUS_CANCELLED;
 
                 if (!$trip->validate() || !$trip->save())
                 {

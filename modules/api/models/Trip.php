@@ -87,7 +87,7 @@ class Trip extends \app\models\Trip
         else $array['passenger'] = null;
 
         if ($this->baggage) $array['baggage'] = $this->baggage;
-        else $array['baggage'] = null;
+        else $array['baggage'] = [];
 
         return $array;
     }
