@@ -282,7 +282,9 @@ class TripController extends BaseController
         {
             if (!empty($trip->passenger_comment) && intval($trip->passenger_rating)) $reviews[] = [
                 'rating' => $trip->passenger_rating,
-                'comment' => $trip->passenger_comment
+                'comment' => $trip->passenger_comment,
+                'date'    => $trip->created_at,
+                'route'    => $trip->route,
             ];
         }
 
@@ -304,7 +306,9 @@ class TripController extends BaseController
         {
             if (!empty($trip->passenger_comment) && intval($trip->passenger_rating)) $reviews[] = [
                 'rating' => $trip->passenger_rating,
-                'comment' => $trip->passenger_comment
+                'comment' => $trip->passenger_comment,
+                'date'    => $trip->created_at,
+                'route'    => $trip->created_at,
             ];
         }
 
