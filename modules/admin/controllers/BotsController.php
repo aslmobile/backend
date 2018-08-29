@@ -249,7 +249,7 @@ class BotsController extends Controller
                                 $device = Devices::findOne(['user_id' => $model->driver_id]);
                                 if ($device)
                                 {
-                                    $socket = new SocketPusher(['authkey' => $]);
+                                    $socket = new SocketPusher(['authkey' => $device->auth_token]);
                                     $socket->push(base64_encode(json_encode([
                                         'action' => "acceptDriverTrip",
                                         'data' => [
