@@ -8,6 +8,7 @@ use app\models\TariffDependence;
 use app\models\Taxi;
 use app\models\TripLuggage;
 use app\modules\admin\models\Checkpoint;
+use app\modules\api\models\RestFul;
 use app\modules\api\models\Trip;
 use app\modules\api\models\Users;
 use Yii;
@@ -133,6 +134,14 @@ class TripController extends BaseController
 
         $line->status = Line::STATUS_IN_PROGRESS;
         $line->save();
+
+        RestFul::updateAll([
+            'message' => json_encode(['status' => 'accepted'])
+        ], [
+            'AND',
+            ['=', 'user_id', $line->driver_id],
+            ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT]
+        ]);
 
         $this->module->data['line'] = $line->toArray();
         $this->module->setSuccess();
