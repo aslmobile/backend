@@ -113,24 +113,42 @@ class Message
             ['=', 'status', Line::STATUS_IN_PROGRESS]
         ])->one();
 
-        $trip = false;
-        if ($line) $trip = Trip::find()->andWhere([
-            'AND',
-            ['IN', 'status', [Trip::STATUS_WAITING, Trip::STATUS_WAY]],
-            ['=', 'line_id', $line->id],
-            ['=', 'driver_id', $device->user_id]
-        ])->one();
+        if ($line)
+        {
+            $trips = Trip::find()->andWhere([
+                'AND',
+                ['IN', 'status', [Trip::STATUS_WAITING, Trip::STATUS_WAY]],
+                ['=', 'line_id', $line->id],
+                ['=', 'driver_id', $device->user_id]
+            ])->all();
 
-        $response = [
-            'message_id'    => $this->message_id,
-            'device_id'     => $device->id,
-            'user_id'       => $device->user_id,
-            'data'          => [
-                'accept_from'   => $watchdog->created_at,
-                'accept_time'   => 300,
-                'trip'          => $trip ? $trip->toArray() : ['line' => 'не найден']
-            ]
-        ];
+            $trips_list = [];
+            if ($trips && count ($trips)) foreach ($trips as $trip) $trips_list[] = $trip->toArray();
+
+            $response = [
+                'message_id'    => $this->message_id,
+                'device_id'     => $device->id,
+                'user_id'       => $device->user_id,
+                'data'          => [
+                    'accept_from'   => $watchdog->created_at,
+                    'accept_time'   => 300,
+                    'trip'          => $trips_list
+                ]
+            ];
+        }
+        else
+        {
+            $response = [
+                'message_id'    => $this->message_id,
+                'device_id'     => $device->id,
+                'user_id'       => $device->user_id,
+                'data'          => [
+                    'accept_from'   => $watchdog->created_at,
+                    'accept_time'   => 300,
+                    'trip'          => ['line' => "Не найден"]
+                ]
+            ];
+        }
 
         return $response;
     }
