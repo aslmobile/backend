@@ -35,7 +35,8 @@
         "alexantr/yii2-tinymce": "^1.0@dev",
         "cboden/ratchet": "dev-master",
         "ratchet/pawl": "dev-master",
-        "yiisoft/yii2-redis": "^2.0@dev"
+        "yiisoft/yii2-redis": "^2.0@dev",
+        "yii2tech/html2pdf": "^1.0@dev"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

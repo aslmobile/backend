@@ -3,6 +3,7 @@
 use app\models\Checkpoint;
 use app\models\Line;
 use app\models\Route;
+use app\modules\api\models\RestFul;
 use app\modules\api\models\Trip;
 use app\modules\api\models\Users;
 use app\modules\api\models\Vehicles;
@@ -421,6 +422,14 @@ class LineController extends BaseController
 
             $this->module->data['trips'] = $_trips;
         }
+
+        RestFul::updateAll([
+            'message' => json_encode(['status' => 'cancel'])
+        ], [
+            'AND',
+            ['=', 'user_id', $line->driver_id],
+            ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT]
+        ]);
 
         $this->module->data['line'] = $line->toArray();
         $this->module->setSuccess();
