@@ -110,7 +110,7 @@ class Message
         $line = \app\models\Line::find()->andWhere([
             'AND',
             ['=', 'driver_id', $device->user_id],
-            ['=', 'status', Line::STATUS_IN_PROGRESS]
+            ['=', 'status', Line::STATUS_WAITING]
         ])->one();
 
         if ($line)
