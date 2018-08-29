@@ -18,12 +18,12 @@ class SocketPusher extends Model
     protected $port;
     public $authkey;
 
-    public function init()
+    public function init($auth = false)
     {
         $this->scheme = Yii::$app->params['socket']['scheme'];
         $this->host = Yii::$app->params['socket']['host'];
         $this->port = Yii::$app->params['socket']['port'];
-        $this->authkey = Yii::$app->params['socket']['authkey_server'];
+        $this->authkey = $this->authkey ? $this->authkey : Yii::$app->params['socket']['authkey_server'];
     }
 
     /**

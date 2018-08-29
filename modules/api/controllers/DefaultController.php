@@ -4,6 +4,7 @@ use app\components\Socket\SocketPusher;
 use app\models\Answers;
 use app\models\Trip;
 use app\modules\admin\models\Agreement;
+use app\modules\api\models\Devices;
 use app\modules\api\models\Faq;
 use app\modules\api\models\Legal;
 use app\modules\api\models\UploadFiles;
@@ -70,7 +71,9 @@ class DefaultController extends BaseController
 
     public function actionForTesting()
     {
-        $socket = new SocketPusher();
+        /** @var \app\models\Devices $device */
+        $device = Devices::findOne(['user_id' => 48]);
+        $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $message = $socket->push(base64_encode(json_encode([
             'action' => "acceptDriverTrip",
             'data' => [

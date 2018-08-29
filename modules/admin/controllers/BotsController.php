@@ -5,6 +5,7 @@ use app\models\Checkpoint;
 use app\models\Transactions;
 use app\modules\admin\models\Line;
 use app\modules\admin\models\User;
+use app\modules\api\models\Devices;
 use app\modules\api\models\Route;
 use app\modules\api\models\Trip;
 use app\modules\api\models\Users;
@@ -183,7 +184,7 @@ class BotsController extends Controller
                             $trip->passenger_comment = 'БОТ';
                             $trip->passenger_description = 'БОТ';
                             $trip->passenger_rating = 5;
-                            
+
                             $trip->driver_comment = 'БОТ';
                             $trip->driver_description = 'БОТ';
                             $trip->driver_rating = 5;
@@ -245,15 +246,21 @@ class BotsController extends Controller
                             {
                                 Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажиры успешно посаженны',[],0));
 
-                                $socket = new SocketPusher();
-                                $socket->push(base64_encode(json_encode([
-                                    'action' => "acceptDriverTrip",
-                                    'data' => [
-                                        'message_id' => time()
-                                    ]
-                                ])));
+                                $device = Devices::findOne(['user_id' => $model->driver_id]);
+                                if ($device)
+                                {
+                                    $socket = new SocketPusher(['authkey' => $]);
+                                    $socket->push(base64_encode(json_encode([
+                                        'action' => "acceptDriverTrip",
+                                        'data' => [
+                                            'message_id' => time()
+                                        ]
+                                    ])));
 
-                                return $this->redirect(['/admin/trips/index']);
+                                    return $this->redirect(['/admin/trips/index']);
+                                }
+
+                                Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось отправить сообщение на сокет',[],0));
                             }
                             else Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось сохранить информацию о поездке',[],0));
                         }
