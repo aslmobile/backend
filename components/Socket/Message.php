@@ -91,13 +91,7 @@ class Message
 
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        RestFul::updateAll(
-            ['message' => json_encode(['status' => 'closed'])],
-            ['AND',
-                ['<=', 'created_at', time() - 300],
-                ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT]
-            ]
-        );
+        RestFul::updateDriverAccept();
 
         $watchdog = RestFul::find()->where(['type' => RestFul::TYPE_DRIVER_ACCEPT, 'user_id' => $device->user->id, 'message' => json_encode(['status' => 'request'])])->one();
         if (!$watchdog)

@@ -46,6 +46,8 @@ JSON;
         }
         else $array['image_url'] = null;
 
+        RestFul::updateDriverAccept();
+
         /** @var \app\models\RestFul $inAccept */
         $inAccept = RestFul::find()->andWhere([
             'AND',
