@@ -113,22 +113,8 @@ class Message
             ['=', 'status', Line::STATUS_WAITING]
         ])->one();
 
-        if ($line)
-        {
-            $trips = Trip::find()->andWhere([
-                'AND',
-                ['IN', 'status', [Trip::STATUS_WAITING, Trip::STATUS_WAY]],
-                ['=', 'line_id', $line->id],
-                ['=', 'driver_id', $device->user_id]
-            ])->all();
-
-            $trips_list = [];
-            if ($trips && count ($trips)) foreach ($trips as $trip) $trips_list[] = $trip->toArray();
-        }
-        else
-        {
-            $trips_list = ['line' => "Не найден"];
-        }
+        if ($line) $line_data = $line->toArray();
+        else $line_data = [];
 
         $response = [
             'message_id'    => $this->message_id,
@@ -137,7 +123,7 @@ class Message
             'data'          => [
                 'accept_from'   => $watchdog->created_at,
                 'accept_time'   => 300,
-                'trip'          => $trips_list
+                'trip'          => $line_data
             ]
         ];
 
