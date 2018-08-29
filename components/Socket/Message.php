@@ -124,31 +124,22 @@ class Message
 
             $trips_list = [];
             if ($trips && count ($trips)) foreach ($trips as $trip) $trips_list[] = $trip->toArray();
-
-            $response = [
-                'message_id'    => $this->message_id,
-                'device_id'     => $device->id,
-                'user_id'       => $device->user_id,
-                'data'          => [
-                    'accept_from'   => $watchdog->created_at,
-                    'accept_time'   => 300,
-                    'trip'          => $trips_list
-                ]
-            ];
         }
         else
         {
-            $response = [
-                'message_id'    => $this->message_id,
-                'device_id'     => $device->id,
-                'user_id'       => $device->user_id,
-                'data'          => [
-                    'accept_from'   => $watchdog->created_at,
-                    'accept_time'   => 300,
-                    'trip'          => ['line' => "Не найден"]
-                ]
-            ];
+            $trips_list = ['line' => "Не найден"];
         }
+
+        $response = [
+            'message_id'    => $this->message_id,
+            'device_id'     => $device->id,
+            'user_id'       => $device->user_id,
+            'data'          => [
+                'accept_from'   => $watchdog->created_at,
+                'accept_time'   => 300,
+                'trip'          => $trips_list
+            ]
+        ];
 
         return $response;
     }
