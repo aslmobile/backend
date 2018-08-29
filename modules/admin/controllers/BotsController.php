@@ -179,7 +179,14 @@ class BotsController extends Controller
                             $trip->payment_type = Trip::PAYMENT_TYPE_CARD;
                             $trip->payment_status = Trip::PAYMENT_STATUS_PAID;
                             $trip->currency = 'T';
+
                             $trip->passenger_comment = 'БОТ';
+                            $trip->passenger_description = 'БОТ';
+                            $trip->passenger_rating = 5;
+                            
+                            $trip->driver_comment = 'БОТ';
+                            $trip->driver_description = 'БОТ';
+                            $trip->driver_rating = 5;
 
                             $trip->driver_id = 0;
                             $trip->vehicle_id = 0;
