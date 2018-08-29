@@ -128,7 +128,7 @@ class Message
             'data'          => [
                 'accept_from'   => $watchdog->created_at,
                 'accept_time'   => 300,
-                'trip'          => $trip ? $trip->toArray() : []
+                'trip'          => $trip ? $trip->toArray() : ['trip' => 'не найден']
             ]
         ];
 
