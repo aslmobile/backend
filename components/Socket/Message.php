@@ -112,7 +112,20 @@ class Message
             $watchdog->save();
         }
 
-        $trip = Trip::find()->where(['status' => [Trip::STATUS_WAITING, Trip::STATUS_WAY], 'driver_id' => $device->user_id])->one();
+        /** @var \app\models\Line $line */
+        $line = \app\models\Line::find()->andWhere([
+            'AND',
+            ['=', 'driver_id', $device->user_id],
+            ['=', 'status', Line::STATUS_IN_PROGRESS]
+        ])->one();
+
+        $trip = false;
+        if ($line) $trip = Trip::find()->andWhere([
+            'AND',
+            ['IN', 'status', [Trip::STATUS_WAITING, Trip::STATUS_WAY]],
+            ['=', 'line_id', $line->id],
+            ['=', 'driver_id', $device->user_id]
+        ])->one();
 
         $response = [
             'message_id'    => $this->message_id,
