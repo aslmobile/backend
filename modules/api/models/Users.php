@@ -1,6 +1,7 @@
 <?php namespace app\modules\api\models;
 
 use app\models\Blacklist;
+use app\modules\user\models\User;
 
 class Users extends \app\models\User
 {
@@ -48,23 +49,26 @@ JSON;
 
         RestFul::updateDriverAccept();
 
-        /** @var \app\models\RestFul $inAccept */
-        $inAccept = RestFul::find()->andWhere([
-            'AND',
-            ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT],
-            ['=', 'user_id', $this->id],
-            ['=', 'message', json_encode(['status' => 'request'])]
-        ])->one();
+        if ($this->type == User::TYPE_DRIVER)
+        {
+            /** @var \app\models\RestFul $inAccept */
+            $inAccept = RestFul::find()->andWhere([
+                'AND',
+                ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT],
+                ['=', 'user_id', $this->id],
+                ['=', 'message', json_encode(['status' => 'request'])]
+            ])->one();
 
-        $array['accept'] = 0;
-        if ($inAccept && ($inAccept->created_at + 300 > time())) $array['accept'] = 1;
+            $array['accept'] = 0;
+            if ($inAccept && ($inAccept->created_at + 300 > time())) $array['accept'] = 1;
 
-        $inQueue = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $this->id])->one();
-        $array['queue'] = $inQueue ? 1 : 0;
+            $inQueue = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $this->id])->one();
+            $array['queue'] = $inQueue ? 1 : 0;
 
-        /** @var \app\models\Line $onLine */
-        $onLine = Line::find()->where(['status' => Line::STATUS_IN_PROGRESS, 'driver_id' => $this->id])->one();
-        $array['line_id'] = $onLine ? $onLine->id : 0;
+            /** @var \app\models\Line $onLine */
+            $onLine = Line::find()->where(['status' => Line::STATUS_IN_PROGRESS, 'driver_id' => $this->id])->one();
+            $array['line_id'] = $onLine ? $onLine->id : 0;
+        }
 
         $array['rating'] = $this->getRating();
 
