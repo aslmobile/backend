@@ -23,6 +23,7 @@ class PaymentController extends BaseController
                     [
                         'actions' => [
                             'transactions', 'transaction', 'methods', 'in-out-amounts',
+                            'transactions-km',
 
                             'create-card', 'delete-card', 'cards'
                         ],
@@ -34,6 +35,7 @@ class PaymentController extends BaseController
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'transactions'      => ['POST'],
+                    'transactions-km'   => ['POST'],
                     'transaction'       => ['GET'],
                     'methods'           => ['GET'],
                     'in-out-amounts'    => ['POST'],
@@ -97,6 +99,44 @@ class PaymentController extends BaseController
             'AND',
             ['between', 'created_at', $timestamp_min, $timestamp_max],
             ['=', 'user_id', $user->id]
+        ])->orderBy(['created_at' => SORT_DESC])->limit($limit)->offset($offset)->all();
+
+        $transactions_data = [];
+        if ($transactions && count($transactions) > 0)
+            foreach ($transactions as $transaction)
+                $transactions_data[] = [
+                    'transaction'   => $transaction->toArray(),
+                    'route'         => ($transaction->route) ? $transaction->route->toArray() : null
+                ];
+
+        $this->module->data['transactions'] = $transactions_data;
+        $this->module->data['count'] = Transactions::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id]
+        ])->count();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionTransactionsKm()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['timestamp_min', 'timestamp_max']);
+
+        $timestamp_min = intval($this->body->timestamp_min);
+        $timestamp_max = intval($this->body->timestamp_max);
+
+        $limit = isset ($this->body->limit) ? intval($this->body->limit) : 10;
+        $offset = isset ($this->body->offset) ? intval($this->body->offset) : 0;
+
+        $transactions = Transactions::find()->andWhere([
+            'AND',
+            ['between', 'created_at', $timestamp_min, $timestamp_max],
+            ['=', 'user_id', $user->id],
+            ['=', 'gateway', Transactions::GATEWAY_KM]
         ])->orderBy(['created_at' => SORT_DESC])->limit($limit)->offset($offset)->all();
 
         $transactions_data = [];
