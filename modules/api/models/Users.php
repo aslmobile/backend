@@ -62,6 +62,10 @@ JSON;
         $inQueue = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $this->id])->one();
         $array['queue'] = $inQueue ? 1 : 0;
 
+        /** @var \app\models\Line $onLine */
+        $onLine = Line::find()->where(['status' => Line::STATUS_IN_PROGRESS, 'driver_id' => $this->id])->one();
+        $array['line_id'] = $onLine ? $onLine->id : 0;
+
         $array['rating'] = $this->getRating();
 
         $blacklist = Blacklist::find()->where(['status' => Blacklist::STATUS_BLACKLISTED, 'user_id' => $this->id])->one();

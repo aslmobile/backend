@@ -61,11 +61,66 @@ class Message
         return $response;
     }
 
+    public function driverAnglePosition($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        $position['lat'] = $lat = (isset ($data['data']['lat']) && !empty ($data['data']['lat'])) ? $data['data']['lat'] : '0,0';
+        $position['lng'] = $lng = (isset ($data['data']['lng']) && !empty ($data['data']['lng'])) ? $data['data']['lng'] : '0,0';
+
+        $position = implode(';', $position);
+        $angle = (isset ($data['data']['angle']) && !empty ($data['data']['angle'])) ? $data['data']['angle'] : '0,0';
+
+
+        /** @var \app\models\Line $line */
+        $line = Line::find()->andWhere([
+            'AND',
+            ['=', 'driver_id', $device->user_id],
+            ['=', 'status', Line::STATUS_IN_PROGRESS]
+        ])->one();
+
+        if ($line)
+        {
+            $line->position = $position;
+            $line->angle = $angle;
+            $line->save();
+
+            $response = [
+                'message_id'    => $this->message_id,
+                'device_id'     => $device->id,
+                'user_id'       => $device->user_id,
+                'data'          => [
+                    'lat'       => $lat,
+                    'lng'       => $lng,
+                    'angle'     => $angle,
+                    'line_id'   => $line->id
+                ]
+            ];
+        }
+        else
+        {
+            $response = [
+                'message_id'    => $this->message_id,
+                'device_id'     => $device->id,
+                'user_id'       => $device->user_id,
+                'data'          => [
+                    'lat'   => $lat,
+                    'lng'   => $lng,
+                    'angle' => $angle,
+                    'line_id'  => 0
+                ]
+            ];
+        }
+
+        return $response;
+    }
+
     public function driverQueue($data, $from, $connections)
     {
         /** @var Devices $device */
         if ($this->validateDevice($from)) $device = $from->device;
-
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
         $lines = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $device->user_id])->orderBy(['freeseats' => SORT_DESC, 'created_at' => SORT_DESC])->all();

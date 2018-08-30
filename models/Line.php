@@ -21,6 +21,8 @@ use yii\behaviors\TimestampBehavior;
  * @property int $starttime
  * @property int $endtime
  * @property string $cancel_reason
+ * @property string $angle
+ * @property string $position
  * @property int $created_at
  * @property int $updated_at
  */
@@ -109,7 +111,9 @@ class Line extends \yii\db\ActiveRecord
                 [
 
                     'starttime',
-                    'endtime'
+                    'endtime',
+
+                    'angle', 'position'
                 ],
                 'safe'
             ],
@@ -135,6 +139,8 @@ class Line extends \yii\db\ActiveRecord
             'starttime'         => Yii::t('app', "Время отправления"),
             'endtime'           => Yii::t('app', "Время прибытия"),
             'cancel_reason'     => Yii::t('app', "Причина отмены"),
+            'angle'             => Yii::t('app', "Угол поворота"),
+            'position'          => Yii::t('app', "GEO позиция"),
             'created_at'        => Yii::t('app', "Создано"),
             'updated_at'        => Yii::t('app', "Обновлено")
         ];
