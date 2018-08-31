@@ -7,7 +7,7 @@ use yii\helpers\Html;
 
 $this->title = Yii::$app->mv->gt('Создание &laquo;{mt}&raquo; автомобиля',['mt' => $model->modelTitle], false);
 $this->params['breadcrumbs'][] = ['label' => Yii::$app->mv->gt('Автомобили',[],false), 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->params['breadcrumbs'][] = Yii::$app->mv->gt('Создание {mt} автомобиля',['mt' => $model->modelTitle], false);
 ?>
 
 <div class="content-wrapper">
