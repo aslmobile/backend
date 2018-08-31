@@ -29,6 +29,8 @@ class LineController extends BaseController
                             'startpoints', 'endpoints', 'checkpoints',
                             'startpoints-route', 'endpoints-route', 'checkpoints-route',
 
+                            'accept-arrive',
+
                             'update-line', 'passengers', 'seats',
                             'cancel', 'passenger-decline', 'on-line', 'calculate-tariff'
                         ],
@@ -45,6 +47,8 @@ class LineController extends BaseController
                     'startpoints-route'  => ['GET'],
                     'endpoints-route'  => ['GET'],
                     'checkpoints-route'  => ['GET'],
+
+                    'accept-arrive' => ['POST'],
 
                     'passengers'  => ['GET'],
                     'seats'  => ['GET'],
@@ -70,6 +74,28 @@ class LineController extends BaseController
             $this->module->setError(403, 'user', Yii::$app->mv->gt("У пользователя нет прав на данное действие", [], false));
 
         return parent::beforeAction($event);
+    }
+
+    public function actionAcceptArrive($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $checkpoint = Checkpoint::findOne($id);
+        if (!$checkpoint) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найден", [], false));
+
+        $line = Line::find()->andWhere([
+            'AND',
+            ['=', 'driver_id', $user->id],
+            ['=', 'status', Line::STATUS_IN_PROGRESS]
+        ])->one();
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        // TODO: Notification прибытие на точку
+
+        $this->module->data['amount'] = [];
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionCalculateTariff()
