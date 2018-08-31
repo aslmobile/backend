@@ -34,6 +34,7 @@ class TripController extends BaseController
                             'calculate-passenger-tariff',
 
                             'accept-arrive',
+                            'accept-passenger',
                             'passenger-comments',
                             'driver-comments',
                             'trips',
@@ -55,6 +56,7 @@ class TripController extends BaseController
                     'cities'  => ['GET'],
                     'passengers'  => ['GET'],
                     'accept-arrive' => ['POST'],
+                    'accept-passenger' => ['POST'],
                     'checkpoint-arrived' => ['POST'],
                     'taxi' => ['POST'],
                     'luggage-type' => ['GET'],
@@ -71,6 +73,41 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         return parent::beforeAction($event);
+    }
+
+    public function actionAcceptPassenger($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        $this->prepareBody();
+        $this->validateBodyParams(['passenger_id']);
+
+        /** @var \app\modules\api\models\Trip $trip */
+        $trip = Trip::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $this->body->passenger_id],
+            ['IN', 'status', [Trip::STATUS_WAITING]]
+        ])->one();
+
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+
+        $trip->status = Trip::STATUS_WAY;
+        $trip->driver_id = $line->driver_id;
+        $trip->line_id = $line->id;
+        $trip->driver_comment = Yii::$app->mv->gt("Посадка подтверждена водителем", [], false);
+        $trip->vehicle_id = $line->vehicle_id;
+        $trip->start_time = time();
+        $trip->save();
+
+        $this->module->data['line'] = $line->toArray();
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionPassengersRoute($id)
