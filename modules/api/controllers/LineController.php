@@ -326,7 +326,7 @@ class LineController extends BaseController
 
         $_passengers = [];
         /** @var \app\models\Trip $passenger */
-        foreach ($passengers as $passenger) $_passengers[] = $passenger->user->toArray();
+        foreach ($passengers as $passenger) $_passengers[] = $passenger->toArray();
 
         $this->module->data['passengers'] = $_passengers;
         $this->module->setSuccess();
