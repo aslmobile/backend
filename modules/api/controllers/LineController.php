@@ -73,8 +73,8 @@ class LineController extends BaseController
         /**
          * Проверка прав на тип пользователя. Должен быть водителем, для доступа к методам
          */
-        if ($user->type != Users::TYPE_DRIVER)
-            $this->module->setError(403, 'user', Yii::$app->mv->gt("У пользователя нет прав на данное действие", [], false));
+//        if ($user->type != Users::TYPE_DRIVER)
+//            $this->module->setError(403, 'user', Yii::$app->mv->gt("У пользователя нет прав на данное действие", [], false));
 
         return parent::beforeAction($event);
     }

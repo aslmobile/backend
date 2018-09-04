@@ -177,7 +177,7 @@ class BaseController extends RestFul
 
         if (!$device && !empty ($this->body->phone))
         {
-            $user = Users::find()->where(['phone' => $this->body->phone])->one();
+            $user = Users::find()->where(['phone' => $this->body->phone, 'type' => $this->body->type])->one();
             if (!$user)
             {
                 $user = new Users([
