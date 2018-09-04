@@ -30,6 +30,7 @@ class LineController extends BaseController
                             'startpoints-route', 'endpoints-route', 'checkpoints-route',
 
                             'accept-arrive',
+                            'route', 'handle-route-points',
 
                             'update-line', 'passengers', 'seats',
                             'cancel', 'passenger-decline', 'on-line', 'calculate-tariff'
@@ -49,6 +50,8 @@ class LineController extends BaseController
                     'checkpoints-route'  => ['GET'],
 
                     'accept-arrive' => ['POST'],
+                    'handle-route-points' => ['POST'],
+                    'route' => ['GET'],
 
                     'passengers'  => ['GET'],
                     'seats'  => ['GET'],
@@ -76,6 +79,179 @@ class LineController extends BaseController
         return parent::beforeAction($event);
     }
 
+    public function actionHandleRoutePoints($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $line = Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        $this->prepareBody();
+        $this->validateBodyParams(['points']);
+
+        $points = $this->body->points;
+        $log = RestFul::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id],
+            ['=', 'type', RestFul::TYPE_DRIVER_HANDLE_ROUTE]
+        ])->one();
+
+        if (!$log) $log = new RestFul();
+        $log->type = RestFul::TYPE_DRIVER_HANDLE_ROUTE;
+        $log->message = json_encode(['points' => array_values($points), 'line' => $line->id]);
+        $log->user_id = $user->id;
+        $log->uip = $_SERVER['REMOTE_ADDR'];
+        $log->save();
+
+        $this->module->data = array_values($points);
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionRoute($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $line = Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        if (in_array($line->status, [Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]))
+        {
+            $passengers_trips = [];
+            $trips = Trip::find()->andWhere([
+                'AND',
+                ['=', 'line_id', $line->id],
+                ['=', 'driver_id', $line->driver_id],
+                ['IN', 'status', [Trip::STATUS_WAITING, Trip::STATUS_WAY]]
+            ])->all();
+
+            $passengers = [
+                'route' => [],
+                'cabin' => [],
+                'total' => [
+                    'cabin' => 0,
+                    'route' => 0,
+                    'total' => 0
+                ]
+            ];
+            $checkpoints = [];
+
+            /** @var \app\models\Trip $trip */
+            if ($trips && count ($trips) > 0) {
+                foreach ($trips as $trip)
+                {
+                    // TODO: SORT BY WEIGHT OF CHECKPOINT
+                    $passed_checkpoint = RestFul::find()->where([
+                        'AND',
+                        ['=', 'user_id', $user->id],
+                        ['=', 'type', RestFul::TYPE_DRIVER_CHECKPOINT_ARRIVE],
+                        ['=', 'message', json_encode(['status' => 'passed', 'checkpoint' => $trip->startpoint->id, 'line' => $line->id])]
+                    ])->one();
+
+                    if ($trip->status == Trip::STATUS_WAY)
+                    {
+                        $passengers['total']['cabin']++;
+                        $passengers['cabin'][] = [
+                            'id'    => $trip->user->id,
+                            'name'  => $trip->user->fullName,
+                            'phone' => $trip->user->phone,
+                            'baggage'       => $trip->baggages,
+                            'image_url'     => $trip->user->getImageFile(),
+                            'payment_type'  => $trip->payment_type,
+                            'seats'         => $trip->seats,
+                            'comment'       => $trip->passenger_comment,
+                            'rating'        => $trip->passenger_rating
+                        ];
+                    }
+
+                    if ($trip->status == Trip::STATUS_WAITING)
+                    {
+                        $passengers['total']['route']++;
+                        $passengers['route'][] = [
+                            'id'    => $trip->user->id,
+                            'name'  => $trip->user->fullName,
+                            'phone' => $trip->user->phone,
+                            'baggage'       => $trip->baggages,
+                            'image_url'     => $trip->user->getImageFile(),
+                            'payment_type'  => $trip->payment_type,
+                            'seats'         => $trip->seats,
+                            'comment'       => $trip->passenger_comment,
+                            'rating'        => $trip->passenger_rating
+                        ];
+                    }
+
+                    if (isset ($checkpoints[(int) $trip->startpoint->id]))
+                    {
+                        $checkpoints[(int) $trip->startpoint->id]['passengers'][] = [
+                            'id' => $trip->user->id,
+                            'name'  => $trip->user->fullName,
+                            'phone' => $trip->user->phone,
+                            'baggage'       => $trip->baggages,
+                            'image_url'     => $trip->user->getImageFile(),
+                            'payment_type'  => $trip->payment_type,
+                            'seats'         => $trip->seats,
+                            'comment'       => $trip->passenger_comment,
+                            'rating'        => $trip->passenger_rating
+                        ];
+                    }
+                    else
+                    {
+                        $checkpoints[(int) $trip->startpoint->id] = [
+                            'id'        => $trip->startpoint->id,
+                            'title'     => $trip->startpoint->title,
+                            'latitude'  => $trip->startpoint->latitude,
+                            'longitude' => $trip->startpoint->longitude,
+                            'weight'    => intval($trip->startpoint->weight),
+                            'passed'    => $passed_checkpoint ? 1 : 0,
+                            'passengers' => [
+                                [
+                                    'id' => $trip->user->id,
+                                    'name'  => $trip->user->fullName,
+                                    'phone' => $trip->user->phone,
+                                    'baggage'       => $trip->baggages,
+                                    'image_url'     => $trip->user->getImageFile(),
+                                    'payment_type'  => $trip->payment_type,
+                                    'seats'         => $trip->seats,
+                                    'comment'       => $trip->passenger_comment,
+                                    'rating'        => $trip->passenger_rating
+                                ]
+                            ]
+                        ];
+                    }
+
+                    $passengers['total']['total']++;
+                }
+
+                $passengers_trips['line'] = [
+                    'id'    => $line->id,
+                    'startpoint' => [
+                        'id'        => $line->startPoint->id,
+                        'longitude' => $line->startPoint->longitude,
+                        'latitude'  => $line->startPoint->latitude
+                    ],
+                    'endpoint'  => [
+                        'id'        => $line->endPoint->id,
+                        'longitude' => $line->endPoint->longitude,
+                        'latitude'  => $line->endPoint->latitude
+                    ],
+                    'tariff' => $line->tariff
+                ];
+                $passengers_trips['passengers']['route'] = array_values($passengers{'route'});
+                $passengers_trips['passengers']['cabin'] = array_values($passengers{'cabin'});
+                $passengers_trips['passengers']['total'] = $passengers['total'];
+                $passengers_trips['checkpoints']    = array_values($checkpoints);
+
+                $this->module->data = $passengers_trips;
+                $this->module->setSuccess();
+                $this->module->sendResponse();
+            }
+            else $this->module->setError(422, '_trips', Yii::t('app', "Данные по пассажирам не найдены"));
+        }
+        else $this->module->setError(422, '_line', Yii::$app->mv->gt("Маршрут не может быть построен. Не верный статус поездки.", [], false));
+    }
+
     public function actionAcceptArrive($id)
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -84,12 +260,21 @@ class LineController extends BaseController
         $checkpoint = Checkpoint::findOne($id);
         if (!$checkpoint) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найден", [], false));
 
+        /** @var \app\models\Line $line */
         $line = Line::find()->andWhere([
             'AND',
             ['=', 'driver_id', $user->id],
             ['=', 'status', Line::STATUS_IN_PROGRESS]
         ])->one();
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        $log = new RestFul([
+            'type' => RestFul::TYPE_DRIVER_CHECKPOINT_ARRIVE,
+            'message' => json_encode(['status' => 'passed', 'checkpoint' => $checkpoint->id, 'line' => $line->id]),
+            'user_id' => $user->id,
+            'uip' => $_SERVER['REMOTE_ADDR']
+        ]);
+        $log->save();
 
         // TODO: Notification прибытие на точку
 

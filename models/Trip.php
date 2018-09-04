@@ -45,6 +45,9 @@ use yii\behaviors\TimestampBehavior;
  * @property int $created_by
  * @property int $updated_at
  * @property int $updated_by
+ *
+ * @property \app\models\Checkpoint $startpoint
+ * @property \app\models\User $user
  */
 class Trip extends \yii\db\ActiveRecord
 {
@@ -54,6 +57,7 @@ class Trip extends \yii\db\ActiveRecord
         STATUS_WAITING = 2,
         STATUS_WAY = 3,
         STATUS_FINISHED = 4,
+        STATUS_SCHEDULED = 5,
         STATUS_CANCELLED_DRIVER = 9;
 
     const
@@ -290,6 +294,28 @@ class Trip extends \yii\db\ActiveRecord
     public function getDriver()
     {
         return Users::findOne($this->driver_id);
+    }
+
+    public function getBaggages()
+    {
+        $baggage_list = [];
+        $baggages = TripLuggage::find()->where([
+            'AND',
+            ['=', 'unique_id', $this->luggage_unique_id]
+        ])->all();
+
+        /** @var \app\models\TripLuggage $baggage */
+        if ($baggages && count($baggages) > 0) foreach ($baggages as $baggage)
+        {
+            $baggage_list[] = [
+                'id' => $baggage->id,
+                'size' => $baggage->luggageType->title,
+                'need_seat' => intval($baggage->need_place),
+                'amount'    => $baggage->amount
+            ];
+        }
+
+        return $baggage_list;
     }
 
     public function getCalculatedAmount()

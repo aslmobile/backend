@@ -129,10 +129,6 @@ class SocketServer implements MessageComponentInterface
             'data' => $result->message,
         ];
 
-        if ($response['action'] == 'sign_out') {
-            unset($response['data']);
-        }
-
         $response = json_encode($response);
         $response = base64_encode($response);
 

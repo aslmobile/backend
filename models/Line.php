@@ -25,6 +25,9 @@ use yii\behaviors\TimestampBehavior;
  * @property string $position
  * @property int $created_at
  * @property int $updated_at
+ *
+ * @property \app\models\Checkpoint $startPoint
+ * @property \app\models\Checkpoint $endPoint
  */
 class Line extends \yii\db\ActiveRecord
 {

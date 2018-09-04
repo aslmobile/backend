@@ -32,7 +32,7 @@ class TripController extends BaseController
                         'actions' => [
                             'test',
                             'calculate-passenger-tariff',
-
+                            'arrive-endpoint',
                             'accept-arrive',
                             'accept-passenger',
                             'passenger-comments',
@@ -43,8 +43,8 @@ class TripController extends BaseController
                             'luggage-type',
                             'taxi',
                             'queue',
-
-                            'passengers-route'
+                            'passengers-route',
+                            'passenger-trips'
                         ],
                         'allow' => true
                     ]
@@ -61,7 +61,9 @@ class TripController extends BaseController
                     'taxi' => ['POST'],
                     'luggage-type' => ['GET'],
                     'queue' => ['PUT'],
-                    'passengers-route' => ['GET']
+                    'passengers-route' => ['GET'],
+                    'arrive-endpoint' => ['POST'],
+                    'passenger-trips' => ['GET']
                 ]
             ]
         ];
@@ -73,6 +75,51 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         return parent::beforeAction($event);
+    }
+
+    public function actionPassengerTrips()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $trips_list_past = [];
+        $trips_list_feature = [];
+        $trips_list_current = [];
+
+        $trips = Trip::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id]
+        ])->all();
+
+        /** @var \app\modules\api\models\Trip $trip */
+        if ($trips && count ($trips)) foreach ($trips as $trip)
+        {
+            $past = [
+                Trip::STATUS_FINISHED,
+                Trip::STATUS_CANCELLED,
+                Trip::STATUS_CANCELLED_DRIVER
+            ];
+
+            $feature = [
+                Trip::STATUS_CREATED,
+                Trip::STATUS_SCHEDULED
+            ];
+
+            $current = [
+                Trip::STATUS_WAITING,
+                Trip::STATUS_WAY
+            ];
+
+            if (in_array($trip->status, $past)) $trips_list_past[] = $trip->toArray();
+            if (in_array($trip->status, $feature)) $trips_list_feature[] = $trip->toArray();
+            if (in_array($trip->status, $current)) $trips_list_current[] = $trip->toArray();
+        }
+
+        $this->module->data['trips']['past'] = $trips_list_past;
+        $this->module->data['trips']['feature'] = $trips_list_feature;
+        $this->module->data['trips']['current'] = $trips_list_current;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionAcceptPassenger($id)
@@ -239,7 +286,7 @@ class TripController extends BaseController
         $_trips = [];
         foreach ($trips as $trip)
         {
-            $trip->status = Trip::STATUS_ENDED;
+            $trip->status = Trip::STATUS_FINISHED;
 
             if (!$trip->validate() || !$trip->save())
             {
@@ -469,7 +516,7 @@ class TripController extends BaseController
         $trip = Trip::find()->where(['route_id' => $line->route_id, 'driver_id' => $line->driver_id, 'user_id' => $user->id])->one();
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
-        $trip->status = Trip::STATUS_TRIP;
+        $trip->status = Trip::STATUS_WAY;
 
         $this->module->data['trip'] = $trip->toArray();
         $this->module->data['line'] = $line->toArray();

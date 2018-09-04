@@ -21,7 +21,9 @@ class RestFul extends \yii\db\ActiveRecord
         TYPE_LOG = -1,
         TYPE_DRIVER_ACCEPT = 1,
         TYPE_DRIVER_ACCEPT_DONE = 2,
-        TYPE_DRIVER_ACCEPT_CANCELLED = 3;
+        TYPE_DRIVER_ACCEPT_CANCELLED = 3,
+        TYPE_DRIVER_CHECKPOINT_ARRIVE = 4,
+        TYPE_DRIVER_HANDLE_ROUTE = 5;
 
     public static function tableName()
     {

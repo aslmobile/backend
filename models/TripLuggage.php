@@ -20,6 +20,8 @@ use app\components\MultilingualQuery;
  * @property double $amount
  * @property string $currency
  * @property integer $luggage_type
+ *
+ * @property \app\models\LuggageType $luggageType
  */
 class TripLuggage extends \yii\db\ActiveRecord
 {
