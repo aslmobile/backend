@@ -22,7 +22,7 @@ class PaymentController extends BaseController
                 'rules' => [
                     [
                         'actions' => [
-                            'transactions', 'transaction', 'methods', 'in-out-amounts',
+                            'transactions', 'transaction', 'methods', 'in-out-methods', 'in-out-amounts',
                             'transactions-km',
 
                             'create-card', 'delete-card', 'cards'
@@ -38,6 +38,7 @@ class PaymentController extends BaseController
                     'transactions-km'   => ['POST'],
                     'transaction'       => ['GET'],
                     'methods'           => ['GET'],
+                    'in-out-methods'    => ['GET'],
                     'in-out-amounts'    => ['POST'],
 
                     'create-card'       => ['PUT'],
@@ -180,6 +181,16 @@ class PaymentController extends BaseController
         $this->module->sendResponse();
     }
 
+    public function actionInOutMethods()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->module->data = Transactions::getInOutMethods();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
     public function actionCards()
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -234,16 +245,16 @@ class PaymentController extends BaseController
         $payBox = $paymentProvider->getDriver(['driver' => 'PayBox']);
         $iframe_url = $payBox->addCard($user);
 
-        $card = new PaymentCards();
-        $card->pg_card_id = uniqid($user->id);
-        $card->pg_card_hash = rand(100000,999999) . "-XX-XXXX-" . rand(1000,9999);
-        $card->pg_merchant_id = Yii::$app->params['payments']['PayBox']['merchant_id'];
-        $card->user_id = $user->id;
-        $card->status = PaymentCards::STATUS_ACTIVE;
-        $card->save();
+//        $card = new PaymentCards();
+//        $card->pg_card_id = uniqid($user->id);
+//        $card->pg_card_hash = rand(100000,999999) . "-XX-XXXX-" . rand(1000,9999);
+//        $card->pg_merchant_id = Yii::$app->params['payments']['PayBox']['merchant_id'];
+//        $card->user_id = $user->id;
+//        $card->status = PaymentCards::STATUS_ACTIVE;
+//        $card->save();
 
         $this->module->data['user_id'] = $user->id;
-        $this->module->data['card'] = $card->toArray();
+//        $this->module->data['card'] = $card->toArray();
         $this->module->data['iframe'] = $iframe_url ? $iframe_url : "https://paybox.kz/api/v2/cardstorage/view?pg_payment_id=2858b79d574a1ed9ca549adb6a102cdc";
         $this->module->setSuccess();
         $this->module->sendResponse();

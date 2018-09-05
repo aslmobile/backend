@@ -150,6 +150,16 @@ class Transactions extends \yii\db\ActiveRecord
         ];
     }
 
+    public static function getInOutMethods()
+    {
+        return [
+            [
+                'id' => self::GATEWAY_PAYBOX,
+                'value' => Yii::t('app', "PayBox")
+            ]
+        ];
+    }
+
     public function getUser()
     {
         return \app\modules\admin\models\User::findOne($this->user_id);
