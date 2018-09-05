@@ -8,9 +8,12 @@ class VehicleBrands extends \app\models\VehicleBrand
         $list = self::find()->where(['vehicle_type_id' => $type_id])->all();
 
         $_list = [];
+
+        /** @var \app\models\VehicleBrand $brand */
         if ($list && count ($list) > 0) foreach ($list as $brand) $_list[] = [
             'id' => $brand->id,
-            'value' => $brand->title
+            'value' => $brand->title,
+            'seats' => $brand->max_seats
         ];
 
         return $asArray ? $_list : $list;

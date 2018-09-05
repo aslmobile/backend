@@ -8,9 +8,12 @@ class VehicleTypes extends \app\models\VehicleType
         $list = self::find()->all();
 
         $_list = [];
+
+        /** @var \app\models\VehicleType $type */
         if ($list && count ($list) > 0) foreach ($list as $type) $_list[] = [
             'id' => $type->id,
-            'value' => $type->title
+            'value' => $type->title,
+            'seats' => $type->max_seats
         ];
 
         return $asArray ? $_list : $list;

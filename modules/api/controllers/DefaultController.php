@@ -35,7 +35,6 @@ class DefaultController extends BaseController
                             'cancel-passenger-reasons',
                             'get-file',
                             'update-device',
-
                             'for-testing'
                         ],
                         'allow' => true

@@ -42,6 +42,7 @@ class PaymentController extends BaseController
 
                     'create-card'       => ['PUT'],
                     'delete-card'       => ['DELETE'],
+                    'cards'             => ['GET']
                 ]
             ]
         ];
