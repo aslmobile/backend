@@ -668,6 +668,7 @@ class TripController extends BaseController
 
         if ($this->body->schedule)
         {
+            // TODO: Сделать расписание
             $trip->scheduled = 1;
             $trip->schedule_id = 0;
         }

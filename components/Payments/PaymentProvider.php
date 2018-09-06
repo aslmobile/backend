@@ -3,7 +3,9 @@
 class PaymentProvider
 {
     public function __construct()
-    {}
+    {
+
+    }
 
     public static function getDriver($params)
     {

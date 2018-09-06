@@ -1,4 +1,5 @@
 <?php namespace app\modules\api\controllers;
+use app\modules\user\models\User;
 use Yii;
 use yii\helpers\Url;
 use yii\web\UploadedFile;
@@ -211,6 +212,12 @@ class BaseController extends RestFul
             {
                 $user->type = $this->body->type;
                 $user->save(false);
+            }
+
+            if ($user->type == User::TYPE_PASSENGER)
+            {
+                $user->approved = 1;
+                $user->save();
             }
 
             if (!$device->save())
