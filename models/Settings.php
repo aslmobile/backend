@@ -41,7 +41,7 @@ class Settings extends \yii\db\ActiveRecord
         return [
             [['name', 'copy', 'logo'], 'required'],
             [['descr','address','phone','addphone','title','description','keywords','head_scripts','body_scripts','end_scripts','social'], 'string'],
-            [['maint','syscache', 'driver_commission'], 'integer'],
+            [['maint','syscache', 'driver_commission', 'passenger_fine'], 'integer'],
             [['site_email'], 'email'],
             [['name', 'copy', 'logo','logo_int', 'logo_small'], 'string', 'max' => 255],
             [['site_email'], 'email'],
@@ -79,6 +79,7 @@ class Settings extends \yii\db\ActiveRecord
             'add_email' => Yii::$app->mv->gt('Дополнительный Email',[],false),
             'copyright' => Yii::$app->mv->gt('Авторское право',[],false),
             'driver_commission' => Yii::$app->mv->gt('Комиссия водителя',[],false),
+            'passenger_fine' => Yii::$app->mv->gt('Штраф',[],false),
 
         ];
     }
