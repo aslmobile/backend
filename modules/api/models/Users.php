@@ -70,6 +70,26 @@ JSON;
             $array['line_id'] = $onLine ? $onLine->id : 0;
         }
 
+        if ($this->type == User::TYPE_PASSENGER)
+        {
+            /** @var \app\models\RestFul $inAccept */
+            $inAccept = RestFul::find()->andWhere([
+                'AND',
+                ['=', 'type', RestFul::TYPE_PASSENGER_ACCEPT],
+                ['=', 'user_id', $this->id],
+                ['=', 'message', json_encode(['status' => 'request'])]
+            ])->one();
+
+            $array['accept'] = 0;
+            if ($inAccept && ($inAccept->created_at + 300 > time())) $array['accept'] = 1;
+
+            /** @var \app\models\Line $inQueue */
+            $inQueue = Trip::find()->where(['status' => Trip::STATUS_WAITING, 'user_id' => $this->id])->one();
+            $array['queue'] = $inQueue ? 1 : 0;
+
+            $array['trip_id'] = $inQueue ? $inQueue->id : 0;
+        }
+
         $array['rating'] = $this->getRating();
 
         $blacklist = Blacklist::find()->where(['status' => Blacklist::STATUS_BLACKLISTED, 'user_id' => $this->id])->one();

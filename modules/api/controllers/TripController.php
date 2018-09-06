@@ -128,7 +128,7 @@ class TripController extends BaseController
         $trip = Trip::find()->andWhere([
             'AND',
             ['=', 'user_id', $user->id],
-            ['=', 'status', Line::STATUS_QUEUE]
+            ['=', 'status', Trip::STATUS_WAITING]
         ])->one();
         if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
