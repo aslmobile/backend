@@ -44,7 +44,9 @@ class TripController extends BaseController
                             'taxi',
                             'queue',
                             'passengers-route',
-                            'passenger-trips'
+                            'passenger-trips',
+                            'cancel-trip',
+                            'cancel-trip-queue'
                         ],
                         'allow' => true
                     ]
@@ -54,6 +56,7 @@ class TripController extends BaseController
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'cities'  => ['GET'],
+                    'calculate-passenger-tariff'  => ['GET'],
                     'passengers'  => ['GET'],
                     'accept-arrive' => ['POST'],
                     'accept-passenger' => ['POST'],
@@ -63,7 +66,9 @@ class TripController extends BaseController
                     'queue' => ['PUT'],
                     'passengers-route' => ['GET'],
                     'arrive-endpoint' => ['POST'],
-                    'passenger-trips' => ['GET']
+                    'passenger-trips' => ['GET'],
+                    'cancel-trip'   => ['POST'],
+                    'cancel-trip-queue'   => ['POST'],
                 ]
             ]
         ];
@@ -75,6 +80,67 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         return parent::beforeAction($event);
+    }
+
+    public function actionCalculatePassengerTariff()
+    {
+
+    }
+
+    public function actionCancelTrip($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\models\Trip $trip */
+        $trip = Trip::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id],
+            ['=', 'line_id', $line->id]
+        ])->one();
+        if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
+
+        $trip->status = Trip::STATUS_CANCELLED;
+        $trip->cancel_reason = $this->body->cancel_reason;
+        $trip->save();
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionCancelTripQueue()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+
+        /** @var \app\models\Trip $trip */
+        $trip = Trip::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id],
+            ['=', 'status', Line::STATUS_QUEUE]
+        ])->one();
+        if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
+
+        $trip->status = Trip::STATUS_CANCELLED;
+        $trip->cancel_reason = $this->body->cancel_reason;
+        $trip->save();
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionPassengerTrips()

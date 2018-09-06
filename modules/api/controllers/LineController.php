@@ -31,6 +31,7 @@ class LineController extends BaseController
 
                             'accept-arrive',
                             'route', 'handle-route-points',
+                            'passenger-accept',
 
                             'update-line', 'passengers', 'seats',
                             'cancel', 'passenger-decline', 'on-line', 'calculate-tariff'
@@ -52,6 +53,7 @@ class LineController extends BaseController
                     'accept-arrive' => ['POST'],
                     'handle-route-points' => ['POST'],
                     'route' => ['GET'],
+                    'passenger-accept' => ['POST'],
 
                     'passengers'  => ['GET'],
                     'seats'  => ['GET'],
@@ -77,6 +79,34 @@ class LineController extends BaseController
 //            $this->module->setError(403, 'user', Yii::$app->mv->gt("У пользователя нет прав на данное действие", [], false));
 
         return parent::beforeAction($event);
+    }
+
+    public function actionPassengerAccept($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $line = Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        $this->prepareBody();
+        $this->validateBodyParams(['passenger']);
+
+        /** @var \app\models\Trip $trip */
+        $trip = Trip::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id],
+            ['=', 'line_id', $line->id]
+        ])->one();
+
+        if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        $trip->status = Trip::STATUS_WAY;
+        $trip->save();
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionHandleRoutePoints($id)
