@@ -118,9 +118,12 @@ class LineController extends BaseController
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $this->prepareBody();
-        $this->validateBodyParams(['points']);
+        $this->validateBodyParams(['points', 'duration', 'distance']);
 
         $points = $this->body->points;
+        $duration = $this->body->duration;
+        $distance = $this->body->distance;
+
         $log = RestFul::find()->andWhere([
             'AND',
             ['=', 'user_id', $user->id],
@@ -129,10 +132,12 @@ class LineController extends BaseController
 
         if (!$log) $log = new RestFul();
         $log->type = RestFul::TYPE_DRIVER_HANDLE_ROUTE;
-        $log->message = json_encode(['points' => array_values($points), 'line' => $line->id]);
+        $log->message = json_encode(['duration' => $duration, 'distance' => $distance, 'points' => array_values($points), 'line' => $line->id]);
         $log->user_id = $user->id;
         $log->uip = $_SERVER['REMOTE_ADDR'];
         $log->save();
+
+        // TODO: Тут хранится вся информация о поездке. Расстояние (можно посчитать для цены поездки за КМ). Время до точки (что бы посчитать приблизительное время).
 
         $this->module->data = array_values($points);
         $this->module->setSuccess();

@@ -10,7 +10,6 @@ use Ratchet\ConnectionInterface;
 
 class Message
 {
-
     public $message = null;
     public $error_code = 0;
     public $action;
@@ -305,6 +304,9 @@ class Message
         if ($this->validateDevice($from)) $device = $from->device;
 
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        // TODO: обработка очереди (приходит с девайсов на создание поездки и поиск пассажиров
+
 
         $response = [
             'message_id'    => $this->message_id,

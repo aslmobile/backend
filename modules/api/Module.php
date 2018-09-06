@@ -221,7 +221,7 @@ class Module extends \yii\base\Module
 
     public function getNotificationsList()
     {
-        /**
+        /** TODO: Пока то что из понятного прописано ниже
          * STATUS
          * - CREATED = 1
          * - DELIVERED = 2
@@ -244,4 +244,23 @@ class Module extends \yii\base\Module
          * #1 - Пассажир | Водитель выехал
          */
     }
+
+    // TODO: Нотификации по беклогу (Оля должна подготовить)
+    // TODO: Пуши по беклогу (Оля должна подготовить)
+    // TODO: Пуши на сокет (Оля должна подготовить) + добавить екшн для них
+
+    // TODO: Нужно создать моки данных для Александра Цимбал
+    // TODO: https://docs.google.com/spreadsheets/d/1_RAQWgENQQXslVy6cdjEKPfF2Sgy8F57hybWiFuommk/edit#gid=2140603620
+
+    // TODO: PayBox (транзации, добавление карты, вывод денег, пополнение)
+
+    // TODO: BaseController - базовый контроллер с обзими методами (отправка смс и авторизация и т.д.)
+    // TODO: LineController - контроллер для водительских методов, либо пассажира связаных с водителем
+    // TODO: TripController - контроллер для пассажирских методов, либо водительских связаных с пассажиром
+    // TODO: VehiclesController - контроллер для методов связанных с автомобилями
+    // TODO: PayBoxController - контроллер для методов PayBox колбеков
+    // TODO: PaymentController - контроллер для методов платежек
+    // TODO: DefaultController - контроллер для общих методов и данных
+
+    // TODO: Архитектура API сделано по примеру MyPlace (брал частично от туда)
 }
