@@ -12,4 +12,15 @@ class RestFul extends \app\models\RestFul
             ]
         );
     }
+
+    public static function updatePassengerAccept()
+    {
+        self::updateAll(
+            ['message' => json_encode(['status' => 'closed'])],
+            ['AND',
+                ['<=', 'created_at', time() - 300],
+                ['=', 'type', RestFul::TYPE_PASSENGER_ACCEPT]
+            ]
+        );
+    }
 }

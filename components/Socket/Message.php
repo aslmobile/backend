@@ -214,7 +214,7 @@ class Message
 
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        RestFul::updateDriverAccept();
+        RestFul::updatePassengerAccept();
 
         $watchdog = RestFul::find()->where(['type' => RestFul::TYPE_PASSENGER_ACCEPT, 'user_id' => $device->user->id, 'message' => json_encode(['status' => 'request'])])->one();
         if (!$watchdog)
