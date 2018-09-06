@@ -207,6 +207,52 @@ class Message
         return $response;
     }
 
+    public function acceptPassengerTrip($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        RestFul::updateDriverAccept();
+
+        $watchdog = RestFul::find()->where(['type' => RestFul::TYPE_PASSENGER_ACCEPT, 'user_id' => $device->user->id, 'message' => json_encode(['status' => 'request'])])->one();
+        if (!$watchdog)
+        {
+            $watchdog = new RestFul([
+                'type' => RestFul::TYPE_PASSENGER_ACCEPT,
+                'message' => json_encode(['status' => 'request']),
+                'user_id' => $device->user->id,
+                'uip' => '0.0.0.0'
+            ]);
+
+            $watchdog->save();
+        }
+
+        /** @var \app\models\Trip $line */
+        $line = \app\models\Trip::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $device->user_id],
+            ['=', 'status', Trip::STATUS_WAITING]
+        ])->one();
+
+        if ($line) $line_data = $line->toArray();
+        else $line_data = [];
+
+        $response = [
+            'message_id'    => $this->message_id,
+            'device_id'     => $device->id,
+            'user_id'       => $device->user_id,
+            'data'          => [
+                'accept_from'   => $watchdog->created_at,
+                'accept_time'   => 300,
+                'trip'          => $line_data
+            ]
+        ];
+
+        return $response;
+    }
+
     public function acceptDriverTrip($data, $from, $connections)
     {
         /** @var Devices $device */
