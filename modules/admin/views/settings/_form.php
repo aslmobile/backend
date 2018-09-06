@@ -236,6 +236,9 @@ JS
             <li>
                 <a data-toggle="tab" href="#driver-settings"><?= Yii::$app->mv->gt('Настройки водителя', [], false) ?></a>
             </li>
+            <li>
+                <a data-toggle="tab" href="#passenger-settings"><?= Yii::$app->mv->gt('Настройки пассажира', [], false) ?></a>
+            </li>
         </ul>
 
         <div class="tab-content" style="padding: 10px">
@@ -258,6 +261,11 @@ JS
             <div id="driver-settings" class="tab-pane fade">
                 <div class="row">
                     <div class="col-sm-12 col-lg-2"><?= $form->field($model, 'driver_commission')->textInput(['type' => 'number']); ?></div>
+                </div>
+            </div>
+            <div id="passenger-settings" class="tab-pane fade">
+                <div class="row">
+                    <div class="col-sm-12 col-lg-2"><?= $form->field($model, 'passenger_fine')->textInput(['type' => 'number']); ?></div>
                 </div>
             </div>
         </div>
