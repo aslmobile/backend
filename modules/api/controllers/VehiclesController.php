@@ -149,12 +149,12 @@ class VehiclesController extends BaseController
         $this->module->sendResponse();
     }
 
-    public function actionModels($type, $brand)
+    public function actionModels($param1, $param2)
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $this->module->data = VehicleModels::getModelsList($type, $brand,true);
+        $this->module->data = VehicleModels::getModelsList($param1, $param2,true);
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
