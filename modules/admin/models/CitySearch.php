@@ -16,7 +16,7 @@ class CitySearch extends City
     public function rules()
     {
         return [
-            [['id'], 'integer'],
+            [['id', 'status', 'country_id'], 'integer'],
             [['title'], 'safe'],
         ];
     }
@@ -43,10 +43,10 @@ class CitySearch extends City
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'pagination' => [
-				'pageSize' => 30,
-			],
-			'sort'=> ['defaultOrder' => ['id' => SORT_ASC]]
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+            'sort' => ['defaultOrder' => ['id' => SORT_ASC]]
         ]);
 
         $this->load($params);
@@ -58,7 +58,9 @@ class CitySearch extends City
         }
 
         $query->andFilterWhere([
-            'id' => $this->id
+            'id' => $this->id,
+            'status' => $this->status,
+            'country_id' => $this->country_id,
         ]);
 
         $query->andFilterWhere(['like', 'title', $this->title]);

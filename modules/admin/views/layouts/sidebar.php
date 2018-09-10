@@ -13,8 +13,10 @@ $act = Yii::$app->controller->action->id;
         <!-- Sidebar user panel -->
         <div class="user-panel">
             <div class="info" style="min-height: 60px; position: relative; left: 0;">
-                <div class="col-sm-12 text-center" style="color: white;"><?= Yii::$app->user->identity->fullName ?></div>
-                <small class="col-sm-12 text-center" style="color: white;"><?= Yii::$app->user->identity->email ?></small>
+                <div class="col-sm-12 text-center"
+                     style="color: white;"><?= Yii::$app->user->identity->fullName ?></div>
+                <small class="col-sm-12 text-center"
+                       style="color: white;"><?= Yii::$app->user->identity->email ?></small>
             </div>
         </div>
         <!-- sidebar menu: : style can be found in sidebar.less -->
@@ -323,6 +325,24 @@ $act = Yii::$app->controller->action->id;
                     <li<?= ($cont == 'lang' && $act == 'create') ? ' class="active"' : '' ?>>
                         <a href="<?= Url::toRoute('/admin/lang/create') ?>">
                             <i class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новый', [], false) ?>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="treeview<?= ($cont == 'cities') ? ' active' : '' ?>">
+                <a href="#"> <i class="fa fa-map-marker"></i>
+                    <span><?= Yii::$app->mv->gt('Города', [], false); ?></span>
+                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                </a>
+                <ul class="treeview-menu">
+                    <li<?= ($cont == 'cities' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/cities/index') ?>">
+                            <i class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'cities' && $act == 'create') ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/cities/create') ?>">
+                            <i class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
                         </a>
                     </li>
                 </ul>

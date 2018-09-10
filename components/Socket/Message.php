@@ -10,6 +10,7 @@ use Ratchet\ConnectionInterface;
 
 class Message
 {
+
     public $message = null;
     public $error_code = 0;
     public $action;

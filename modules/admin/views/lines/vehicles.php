@@ -1,9 +1,10 @@
 <?php
+
+use kartik\select2\Select2;
 use yii\grid\GridView;
 use yii\helpers\Html;
-use yii\widgets\Breadcrumbs;
-use kartik\select2\Select2;
 use yii\web\JsExpression;
+use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\admin\models\LineSearch */
@@ -50,7 +51,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     'driver_id' => [
                         'attribute' => 'driver_id',
                         'value' => function ($model) {
-                            return $model->driver->fullName . '<br /><a href="tel:+' . $model->driver->phone . '">+' . $model->driver->phone . '</a>';
+                            return isset($model->driver) ?
+                                $model->driver->fullName . '<br /><a href="tel:+' . $model->driver->phone . '">+' . $model->driver->phone . '</a>' :
+                                null;
                         },
                         'filter' => Select2::widget([
                             'model' => $searchModel,
@@ -71,41 +74,45 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                                 'templateResult' => new JsExpression('function(user) { return user.text; }'),
                                 'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-                                'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/user/select-users']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                                'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("' . \yii\helpers\Url::toRoute(['/admin/user/select-users']) . '", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                             ]
                         ]),
                         'format' => 'html'
                     ],
                     [
                         'attribute' => 'driver_id',
-                        'label'     => Yii::t('app', "Рейтинг"),
-                        'value'     => function ($model) {
-                            return $model->driver->rating;
+                        'label' => Yii::t('app', "Рейтинг"),
+                        'value' => function ($model) {
+                            return isset($model->driver) ? $model->driver->rating : null;
                         }
                     ],
                     [
                         'attribute' => 'driver_id',
-                        'label'     => Yii::t('app', "В сети"),
-                        'value'     => function ($model) {
-                            return $model->driver->online ? '<span class="fa fa-circle text-green"></span> <small class="text-uppercase text-green">' . Yii::t('app', "В сети") . '</small>' : '<span class="fa fa-circle text-red"></span> <small class="text-uppercase text-red">' . Yii::t('app', "Оффлайн") . '</small>';
+                        'label' => Yii::t('app', "В сети"),
+                        'value' => function ($model) {
+                            return isset($model->driver) ?
+                                $model->driver->online ? '<span class="fa fa-circle text-green"></span> <small class="text-uppercase text-green">' . Yii::t('app', "В сети") . '</small>' : '<span class="fa fa-circle text-red"></span> <small class="text-uppercase text-red">' . Yii::t('app', "Оффлайн") . '</small>' :
+                                null;
                         },
-                        'format'    => 'html'
+                        'format' => 'html'
                     ],
                     'vehicle_id' => [
                         'attribute' => 'vehicle_id',
-                        'value'     => function ($model) {
-                            return '<span>' . $model->vehicle->license_plate . '</span> &nbsp; ' . $model->vehicle->vehicleName;
+                        'value' => function ($model) {
+                            return isset($model->vehicle) ?
+                                '<span>' . $model->vehicle->license_plate . '</span> &nbsp; ' . $model->vehicle->vehicleName :
+                                null;
                         },
-                        'format'    => 'html'
+                        'format' => 'html'
                     ],
                     'freeseats',
-                    'route_id' => [
-                        'attribute' => 'route_id',
-                        'value'     => function ($model) {
-                            return $model->route->title;
-                        },
-                        'format'    => 'html'
-                    ],
+//                    'route_id' => [
+//                        'attribute' => 'route_id',
+//                        'value' => function ($model) {
+//                            return isset($model->route) ? $model->route->title : null;
+//                        },
+//                        'format' => 'html'
+//                    ],
                     'route_id' => [
                         'attribute' => 'route_id',
                         'content' => function ($model) {
@@ -130,7 +137,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                                 'templateResult' => new JsExpression('function(user) { return user.text; }'),
                                 'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-                                'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/lines/select-route']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                                'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("' . \yii\helpers\Url::toRoute(['/admin/lines/select-route']) . '", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                             ]
                         ]),
                     ],

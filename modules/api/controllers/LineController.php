@@ -137,8 +137,6 @@ class LineController extends BaseController
         $log->uip = $_SERVER['REMOTE_ADDR'];
         $log->save();
 
-        // TODO: Тут хранится вся информация о поездке. Расстояние (можно посчитать для цены поездки за КМ). Время до точки (что бы посчитать приблизительное время).
-
         $this->module->data = array_values($points);
         $this->module->setSuccess();
         $this->module->sendResponse();

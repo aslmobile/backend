@@ -1,10 +1,11 @@
 <?php
-use yii\helpers\Html;
-use yii\widgets\Breadcrumbs;
-use yii\widgets\ActiveForm;
-use kartik\select2\Select2;
-use yii\web\JsExpression;
+
 use app\components\widgets\Alert;
+use kartik\select2\Select2;
+use yii\helpers\Html;
+use yii\web\JsExpression;
+use yii\widgets\ActiveForm;
+use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
 
@@ -34,7 +35,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div class="col-sm-12"><?= $form->errorSummary($model, ['class' => 'alert-danger alert fade in']); ?></div>
                             <div class="col-sm-12 col-md-6">
                                 <?= $form->field($model, 'driver_id')->widget(Select2::classname(), [
-                                    'model' => [],
+                                    'data' => \yii\helpers\ArrayHelper::map(\app\modules\admin\models\User::find()
+                                        ->select(['id', 'name' => 'CONCAT(first_name,\' \',second_name)'])
+                                        ->andWhere([
+                                            'AND',
+                                            ['=', 'type', \app\modules\admin\models\User::TYPE_DRIVER]
+                                        ])->asArray()->all(), 'id', 'name'),
                                     'theme' => Select2::THEME_DEFAULT,
                                     'attribute' => 'driver_id',
                                     'hideSearch' => true,
@@ -43,16 +49,17 @@ $this->params['breadcrumbs'][] = $this->title;
                                     ],
                                     'pluginOptions' => [
                                         'allowClear' => true,
-                                        'minimumInputLength' => 1,
-                                        'ajax' => [
-                                            'url' => \yii\helpers\Url::toRoute(['/admin/user/select-drivers']),
-                                            'dataType' => 'json',
-                                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                                        ],
-                                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                                        'templateResult' => new JsExpression('function(user) { return user.text; }'),
-                                        'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/user/select-drivers']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+//                                        'minimumInputLength' => 1,
+//                                        'ajax' => [
+//                                            'url' => \yii\helpers\Url::toRoute(['/admin/user/select-drivers']),
+//                                            'dataType' => 'json',
+//                                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+//                                        ],
+//                                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+//                                        'templateResult' => new JsExpression('function(user) { return user.text; }'),
+//                                        'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+//                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("' . \yii\helpers\Url::toRoute(['/admin/user/select-drivers']) . '", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+//
                                     ],
                                 ]); ?>
                             </div>
@@ -76,8 +83,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                                         'templateResult' => new JsExpression('function(user) { return user.text; }'),
                                         'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/vehicles/select-vehicles']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
-                                    ],
+                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("' . \yii\helpers\Url::toRoute(['/admin/vehicles/select-vehicles']) . '", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+
+                                        ],
                                 ]); ?>
                             </div>
                             <div class="col-sm-12">
@@ -100,7 +108,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                                         'templateResult' => new JsExpression('function(user) { return user.text; }'),
                                         'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/lines/select-route']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("' . \yii\helpers\Url::toRoute(['/admin/lines/select-route']) . '", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                                     ],
                                 ]); ?>
                             </div>
@@ -124,7 +132,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                                         'templateResult' => new JsExpression('function(user) { return user.text; }'),
                                         'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/lines/select-startpoints']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("' . \yii\helpers\Url::toRoute(['/admin/lines/select-startpoints']) . '", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                                     ],
                                 ]); ?>
                             </div>
@@ -148,7 +156,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                                         'templateResult' => new JsExpression('function(user) { return user.text; }'),
                                         'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/lines/select-endpoints']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                                        'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("' . \yii\helpers\Url::toRoute(['/admin/lines/select-endpoints']) . '", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                                     ],
                                 ]); ?>
                             </div>

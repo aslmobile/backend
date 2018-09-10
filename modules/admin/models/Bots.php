@@ -65,19 +65,19 @@ class Bots extends Model
     public function attributeLabels()
     {
         return [
-            'status'                => Yii::t('app', "Статус"),
-            'user_id'               => Yii::t('app', "Пользователь"),
-            'driver_id'             => Yii::t('app', "Водитель"),
-            'passenger_id'          => Yii::t('app', "Пассажир"),
-            'vehicle_id'            => Yii::t('app', "Автомобиль"),
-            'route_id'              => Yii::t('app', "Маршрут"),
-            'line_id'               => Yii::t('app', "Линия"),
-            'start_point_id'        => Yii::t('app', "Начальная точка"),
-            'end_point_id'          => Yii::t('app', "Конечная точка"),
-            'transaction_type'      => Yii::t('app', "Тип транзакции"),
-            'transaction_status'    => Yii::t('app', "Статус транзакции"),
-            'transaction_amount'    => Yii::t('app', "Сумма транзакции"),
-            'transaction_gateway'   => Yii::t('app', "Шлюз оплаты"),
+            'status' => Yii::t('app', "Статус"),
+            'user_id' => Yii::t('app', "Пользователь"),
+            'driver_id' => Yii::t('app', "Водитель"),
+            'passenger_id' => Yii::t('app', "Пассажир"),
+            'vehicle_id' => Yii::t('app', "Автомобиль"),
+            'route_id' => Yii::t('app', "Маршрут"),
+            'line_id' => Yii::t('app', "Линия"),
+            'start_point_id' => Yii::t('app', "Начальная точка"),
+            'end_point_id' => Yii::t('app', "Конечная точка"),
+            'transaction_type' => Yii::t('app', "Тип транзакции"),
+            'transaction_status' => Yii::t('app', "Статус транзакции"),
+            'transaction_amount' => Yii::t('app', "Сумма транзакции"),
+            'transaction_gateway' => Yii::t('app', "Шлюз оплаты"),
         ];
     }
 }

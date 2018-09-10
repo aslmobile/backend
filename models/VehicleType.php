@@ -37,9 +37,9 @@ class VehicleType extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'max_seats'], 'required'],
+            [['title'], 'required'],
             [['max_seats', 'status'], 'integer'],
-            [['max_seats'], 'integer', 'min' => 1],
+//            [['max_seats'], 'integer', 'min' => 1],
             ['status', 'default', 'value' => self::STATUS_ACTIVE]
         ];
     }

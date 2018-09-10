@@ -39,6 +39,14 @@ $form = ActiveForm::begin(['options' => ['class' => 'form']]); ?>
                 <div class="row">
                     <div class="col-sm-6">
                         <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
+                        <?= $form->field($model, 'country')->widget(
+                            \kartik\select2\Select2::className(), [
+                                'data' => \app\models\Countries::filter()
+                            ]
+                        ) ?>
+                    </div>
+                    <div class="col-sm-6">
+                        <?= $form->field($model, 'status')->dropDownList($model->statusList) ?>
                     </div>
                 </div>
             </div>

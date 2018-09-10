@@ -11,5 +11,12 @@ namespace app\modules\admin\models;
 
 class City extends \app\models\City
 {
+    public static function getStatusList()
+    {
+        return [
+            self::STATUS_DISABLED => \Yii::t('app', "Отключен"),
+            self::STATUS_ACTIVE => \Yii::t('app', "Активный")
+        ];
+    }
 
 }

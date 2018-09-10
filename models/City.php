@@ -2,20 +2,27 @@
 
 namespace app\models;
 
-use Yii;
-use yii\db\ActiveQuery;
 use app\components\MultilingualBehavior;
 use app\components\MultilingualQuery;
+use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "city".
  *
  * @property integer $id
+ * @property integer $status
  * @property string $title
  */
 class City extends \yii\db\ActiveRecord
 {
+
+    const
+        STATUS_DISABLED = 0,
+        STATUS_ACTIVE = 1;
+
     /**
      * @inheritdoc
      */
@@ -24,12 +31,13 @@ class City extends \yii\db\ActiveRecord
         return 'city';
     }
 
-    public static function getCitiesList($asArray = false) {
+    public static function getCitiesList($asArray = false)
+    {
         $list = self::find()->all();
 
         $cities = [];
         /** @var \app\models\City $city */
-        if ($asArray && $list && count ($list) > 0) foreach ($list as $city) $cities[] = [
+        if ($asArray && $list && count($list) > 0) foreach ($list as $city) $cities[] = [
             'id' => $city->id,
             'value' => $city->title
         ];
@@ -38,7 +46,6 @@ class City extends \yii\db\ActiveRecord
         elseif ($asArray === 2) return $cities;
         return $list;
     }
-
 
     public function behaviors()
     {
@@ -55,6 +62,7 @@ class City extends \yii\db\ActiveRecord
                 'tableName' => "{{%city_lang}}",
                 'attributes' => ['title']
             ],
+            TimestampBehavior::className(),
         ];
     }
 
@@ -64,6 +72,7 @@ class City extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['status'], 'integer'],
             [['title'], 'string', 'max' => 64],
         ];
     }
@@ -76,18 +85,24 @@ class City extends \yii\db\ActiveRecord
         return [
             'id' => Yii::$app->mv->gt('ID', [], 0),
             'title' => Yii::$app->mv->gt('Title', [], 0),
+            'status' => Yii::$app->mv->gt('Статус', [], 0),
+            'country_id' => Yii::$app->mv->gt('Страна', [], 0),
         ];
     }
 
     /**
-    * @inheritdoc
-    * @return ActiveQuery the active query used by this AR class.
-    */
+     * @inheritdoc
+     * @return ActiveQuery the active query used by this AR class.
+     */
     public static function find()
     {
         $q = new MultilingualQuery(get_called_class());
         $q->localized();
         return $q;
+    }
+
+    public function getCountry(){
+        return $this->hasOne(Countries::className(), ['id' => 'country_id']);
     }
 
 }

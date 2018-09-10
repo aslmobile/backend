@@ -76,7 +76,7 @@ class VehiclesController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Сохранено', [], 0));
-            return $this->redirect(['update', 'id' => $model->id]);
+            return $this->redirect(['index']);
         } else {
             return $this->render('update', [
                 'model' => $model,
@@ -94,7 +94,7 @@ class VehiclesController extends Controller
     {
         $model = new Vehicles();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) return $this->redirect(['update', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post()) && $model->save()) return $this->redirect(['index']);
 
         return $this->render('create', [
             'model' => $model,
@@ -127,7 +127,7 @@ class VehiclesController extends Controller
         $model = new VehicleBrand();
 
         if ($model->load(Yii::$app->request->post()) && $model->save())
-            return $this->redirect(['brand', 'id' => $model->id]);
+            return $this->redirect(['brands']);
 
         return $this->render('create', [
             'model' => $model,
@@ -141,7 +141,7 @@ class VehiclesController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save())
         {
             Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved', [], 0));
-            return $this->redirect(['brand', 'id' => $model->id]);
+            return $this->redirect(['brands']);
         }
 
         return $this->render('brand', [
@@ -182,7 +182,7 @@ class VehiclesController extends Controller
         $model = new VehicleModel();
 
         if ($model->load(Yii::$app->request->post()) && $model->save())
-            return $this->redirect(['model', 'id' => $model->id]);
+            return $this->redirect(['models']);
 
         return $this->render('create', [
             'model' => $model,
@@ -196,7 +196,7 @@ class VehiclesController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save())
         {
             Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved', [], 0));
-            return $this->redirect(['model', 'id' => $model->id]);
+            return $this->redirect(['models']);
         }
 
         return $this->render('model', [
@@ -237,7 +237,7 @@ class VehiclesController extends Controller
         $model = new VehicleType();
 
         if ($model->load(Yii::$app->request->post()) && $model->save())
-            return $this->redirect(['type', 'id' => $model->id]);
+            return $this->redirect(['types']);
 
         return $this->render('create', [
             'model' => $model,
@@ -251,7 +251,7 @@ class VehiclesController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save())
         {
             Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved', [], 0));
-            return $this->redirect(['type', 'id' => $model->id]);
+            return $this->redirect(['types']);
         }
 
         return $this->render('type', [

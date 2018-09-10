@@ -3,20 +3,20 @@
 namespace app\modules\admin\controllers;
 
 
-use Yii;
 use app\components\Controller;
-use app\modules\admin\models\CitySearch;
 use app\modules\admin\models\City;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
+use app\modules\admin\models\CitySearch;
+use Yii;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
+use yii\web\NotFoundHttpException;
 
 /**
  * CitiesController implements the CRUD actions for City model.
  */
 class CitiesController extends Controller
 {
-	public $layout = "./sidebar";
+    public $layout = "./sidebar";
 
     public function behaviors()
     {
@@ -35,7 +35,7 @@ class CitiesController extends Controller
                         'roles' => ['admin'],
                     ],
                 ],
-            ],		
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -46,23 +46,24 @@ class CitiesController extends Controller
     }
 
     /**
-     * Lists all Cities models.
-     * @return mixed
+     * @return string|\yii\web\Response
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionIndex()
     {
-		if (Yii::$app->request->isAjax) {
-			$keys = (isset($_POST['keys']))?$_POST['keys']:[];
-			if (count($keys)) {
-				foreach ($keys as $k => $v) {
-					if (($model = City::findOne($v)) !== null) {
-						$model->delete();
-					}
-				}
-				return $this->redirect(['index']);
-			}
-		}
-		
+        if (Yii::$app->request->isAjax) {
+            $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
+            if (count($keys)) {
+                foreach ($keys as $k => $v) {
+                    if (($model = City::findOne($v)) !== null) {
+                        $model->delete();
+                    }
+                }
+                return $this->redirect(['index']);
+            }
+        }
+
         $searchModel = new CitySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -73,9 +74,9 @@ class CitiesController extends Controller
     }
 
     /**
-     * Displays a single Cities model.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
@@ -85,9 +86,7 @@ class CitiesController extends Controller
     }
 
     /**
-     * Creates a new City model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
@@ -103,17 +102,16 @@ class CitiesController extends Controller
     }
 
     /**
-     * Updates an existing City model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt("Saved",[],0));
+            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt("Saved", [], 0));
             return $this->redirect(['update', 'id' => $model->id]);
         } else {
             return $this->render('update', [
@@ -123,10 +121,11 @@ class CitiesController extends Controller
     }
 
     /**
-     * Deletes an existing Cities model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id)
     {
@@ -134,13 +133,12 @@ class CitiesController extends Controller
 
         return $this->redirect(['index']);
     }
+
     /**
-     * Finds the Cities model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
+     * @param $id
      * @param bool $ml
-     * @return City the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * @return City|null
+     * @throws NotFoundHttpException
      */
     protected function findModel($id, $ml = true)
     {

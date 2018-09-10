@@ -1,7 +1,7 @@
 <?php
 
-use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="box-tools pull-right">
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} Добавить',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
+                        Yii::$app->mv->gt('{i} Добавить', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
                     ); ?>
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/blacklist/view/" . $key) . "'"
                     ];
                 },
-                'layout'=>"
+                'layout' => "
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
                     <div class='box-footer' style='display: block;'>{pager}</div>
                 ",
@@ -53,9 +53,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'columns' => [
                     [
                         'attribute' => 'user_id',
-                        'value' => function ($model)
-                        {
-                            return $model->user->fullName;
+                        'value' => function ($model) {
+                            return isset($model->user) ? $model->user->fullName : null;
                         }
                     ],
                     'add_comment',

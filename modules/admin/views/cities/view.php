@@ -40,6 +40,19 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'attributes' => [
                                         'id',
                                         'title',
+                                        'country_id' => [
+                                            'attribute' => 'country_id',
+                                            'value' => function ($model) {
+                                                return isset($model->country) ? $model->country->title : null;
+                                            },
+                                        ],
+                                        'status' => [
+                                            'attribute' => 'status',
+                                            'value' => function ($model){
+                                                $statuses =\app\modules\admin\models\City::getStatusList();
+                                                return isset($statuses[$model->status]) ? $statuses[$model->status] : null;
+                                            }
+                                        ]
                                     ],
                                 ]) ?>
                             </div>

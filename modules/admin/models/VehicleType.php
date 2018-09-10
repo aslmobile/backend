@@ -23,7 +23,7 @@ class VehicleType extends \app\models\VehicleType
         return 'type';
     }
 
-    public function getStatusList()
+    public static function getStatusList()
     {
         return [
             self::STATUS_ACTIVE => Yii::t('app', "Активный"),

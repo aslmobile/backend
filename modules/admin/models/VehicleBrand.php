@@ -7,6 +7,7 @@ use yii\helpers\ArrayHelper;
  * @property string $modelTitle
  * @property string $sc
  */
+
 class VehicleBrand extends \app\models\VehicleBrand
 {
     public function getModelTitle()
@@ -23,7 +24,7 @@ class VehicleBrand extends \app\models\VehicleBrand
         return 'brand';
     }
 
-    public function getStatusList()
+    public static function getStatusList()
     {
         return [
             self::STATUS_ACTIVE => Yii::t('app', "Активный"),

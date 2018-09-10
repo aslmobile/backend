@@ -39,10 +39,10 @@ class VehicleBrand extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'max_seats', 'vehicle_type_id'], 'required'],
+            [['title'], 'required'],
             [['max_seats', 'status', 'vehicle_type_id'], 'integer'],
             [['image'], 'string'],
-            [['max_seats'], 'integer', 'min' => 1],
+//            [['max_seats'], 'integer', 'min' => 1],
             ['status', 'default', 'value' => self::STATUS_ACTIVE]
         ];
     }
@@ -53,14 +53,14 @@ class VehicleBrand extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'                => Yii::t('app', "ID"),
-            'title'             => Yii::t('app', "Название"),
-            'status'            => Yii::t('app', "Статус"),
-            'max_seats'         => Yii::t('app', "Мест"),
-            'image'             => Yii::t('app', "Фото"),
-            'vehicle_type_id'   => Yii::t('app', "Тип"),
-            'created_at'        => Yii::t('app', "Создано"),
-            'updated_at'        => Yii::t('app', "Обновлено")
+            'id' => Yii::t('app', "ID"),
+            'title' => Yii::t('app', "Название"),
+            'status' => Yii::t('app', "Статус"),
+            'max_seats' => Yii::t('app', "Мест"),
+            'image' => Yii::t('app', "Фото"),
+            'vehicle_type_id' => Yii::t('app', "Тип"),
+            'created_at' => Yii::t('app', "Создано"),
+            'updated_at' => Yii::t('app', "Обновлено")
         ];
     }
 }

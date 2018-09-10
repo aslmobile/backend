@@ -1,7 +1,7 @@
 <?php
 
-use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
@@ -27,8 +27,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="box-tools pull-right">
                     <?= Html::a(Yii::$app->mv->gt('{i} новая', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false), ['create'], ['class' => 'btn btn-default btn-sm']); ?>
                     <?= Html::a(Yii::$app->mv->gt('{i} удалить выбранные', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false), [''], [
-                            'class' => 'btn btn-danger btn-sm',
-                            'onclick' => "
+                        'class' => 'btn btn-danger btn-sm',
+                        'onclick' => "
 								var keys = $('#grid').yiiGridView('getSelectedRows');
 								if (keys!='') {
 									if (confirm('" . Yii::$app->mv->gt('Вы уверены, что хотите удалить выбранные элементы?', [], false) . "')) {
@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
 								}
 								return false;
 							",
-                        ]); ?>
+                    ]); ?>
                 </div>
             </div>
             <!-- /.box-header -->
@@ -57,12 +57,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'filterModel' => $searchModel,
                 'columns' => [
-                    ['class' => 'yii\grid\CheckboxColumn'],
+                    ['class' => 'yii\grid\CheckboxColumn', 'headerOptions' => ['style' => 'width: 50px;']],
                     'id' => [
                         'attribute' => 'id',
                         'headerOptions' => ['style' => 'width: 50px;']
                     ],
                     'title',
+                    'country_id' => [
+                        'attribute' => 'country_id',
+                        'value' => function ($model) {
+                            return isset($model->country) ? $model->country->title : null;
+                        },
+                        'filter' => \app\models\Countries::filter()
+                    ],
+                    'status' => [
+                        'attribute' => 'status',
+                        'filter' => \app\modules\admin\models\City::getStatusList(),
+                        'value' => function ($model) {
+                            $statuses = \app\modules\admin\models\City::getStatusList();
+                            return isset($statuses[$model->status]) ? $statuses[$model->status] : null;
+                        }
+                    ],
                     [
                         'class' => 'yii\grid\ActionColumn',
                         'headerOptions' => ['style' => 'width: 125px;'],
@@ -76,12 +91,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             },
                             'delete' => function ($url, $model) {
                                 return Html::a('<button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>', $url, [
-                                        'data' => [
-                                            'confirm' => Yii::$app->mv->gt('Are you sure you want to delete this item?', [], false),
-                                            'method' => 'post',
-                                            'pjax' => '0'
-                                        ]
-                                    ]);
+                                    'data' => [
+                                        'confirm' => Yii::$app->mv->gt('Are you sure you want to delete this item?', [], false),
+                                        'method' => 'post',
+                                        'pjax' => '0'
+                                    ]
+                                ]);
                             },
                         ]
                     ],

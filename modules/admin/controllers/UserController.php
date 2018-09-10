@@ -185,21 +185,17 @@ class UserController extends Controller
 
             $uploaded = UploadedFile::getInstance($model, 'new_image');
 
-            if (!is_null($uploaded))
-            {
+            if (!is_null($uploaded)) {
                 $path = '/files/user-photos/' . $model->id;
 
-                if (self::validatePath(Yii::getAlias('@webroot') . $path))
-                {
+                if (self::validatePath(Yii::getAlias('@webroot') . $path)) {
                     $uploader = new UploadFiles();
                     $path = $uploader->setPath($path);
-                    if ($path)
-                    {
+                    if ($path) {
                         $uploader->uploadedFile = $uploaded;
                         $file = $uploader->upload();
 
-                        if ($file)
-                        {
+                        if ($file) {
                             $image = UploadFiles::findOne($model->image);
                             if ($image) $image->delete();
 
@@ -209,8 +205,7 @@ class UserController extends Controller
                 }
             }
 
-            if ($model->save())
-            {
+            if ($model->save()) {
                 if (Yii::$app->request->post('roles') && Yii::$app->user->can('admin')) {
                     $model->unlinkAll('roles', true);
                     foreach (Yii::$app->request->post('roles') as $k => $v) {
@@ -238,8 +233,7 @@ class UserController extends Controller
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
 
-        if (!is_null($q))
-        {
+        if (!is_null($q)) {
             $out['results'] = User::find()
                 ->select(['id', 'text' => 'CONCAT(first_name,\' \',second_name)'])
                 ->andWhere([
@@ -249,9 +243,7 @@ class UserController extends Controller
                     ['like', 'email', $q]
                 ])
                 ->limit(10)->asArray()->all();
-        }
-        elseif (is_array($id))
-        {
+        } elseif (is_array($id)) {
             $out['results'] = User::find()
                 ->select(['id', 'text' => 'CONCAT(first_name,\' \',second_name)'])
                 ->andWhere(['in', 'id', $id])->asArray()->all();
@@ -266,8 +258,7 @@ class UserController extends Controller
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
 
-        if (!is_null($q))
-        {
+        if (!is_null($q)) {
             $out['results'] = User::find()
                 ->select(['id', 'text' => 'CONCAT(first_name,\' \',second_name)'])
                 ->andWhere([
@@ -280,9 +271,7 @@ class UserController extends Controller
                     ['like', 'second_name', $q],
                     ['like', 'email', $q]
                 ])->limit(10)->asArray()->all();
-        }
-        elseif (is_array($id))
-        {
+        } elseif (is_array($id)) {
             $out['results'] = User::find()
                 ->select(['id', 'text' => 'CONCAT(first_name,\' \',second_name)'])
                 ->andWhere(['in', 'id', $id])->asArray()->all();
@@ -304,8 +293,7 @@ class UserController extends Controller
         $redirect = ['index'];
 
         $model = $this->findModel($id);
-        if ($model)
-        {
+        if ($model) {
             if ($model->type == $model::TYPE_PASSENGER) $redirect = ['passengers'];
             elseif ($model->type == $model::TYPE_DRIVER) $redirect = ['drivers'];
 
@@ -331,7 +319,8 @@ class UserController extends Controller
         }
     }
 
-    public static function validatePath($path){
+    public static function validatePath($path)
+    {
         if (!file_exists($path)
             && !@mkdir($path, 0777, true)
             && !is_dir($path)

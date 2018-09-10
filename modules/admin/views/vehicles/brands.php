@@ -1,4 +1,5 @@
 <?php
+
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
@@ -46,7 +47,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filterModel' => $searchModel,
                 'columns' => [
                     'title',
-                    'max_seats'
+                    'status' => [
+                        'attribute' => 'status',
+                        'filter' => \app\modules\admin\models\VehicleBrand::getStatusList(),
+                        'value' => function ($model){
+                            $statuses =\app\modules\admin\models\VehicleBrand::getStatusList();
+                            return isset($statuses[$model->status]) ? $statuses[$model->status] : null;
+                        }
+                    ]
                 ],
             ]); ?>
         </div>

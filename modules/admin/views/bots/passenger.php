@@ -1,10 +1,11 @@
 <?php
-use yii\helpers\Html;
-use yii\widgets\Breadcrumbs;
-use yii\widgets\ActiveForm;
-use kartik\select2\Select2;
-use yii\web\JsExpression;
+
 use app\components\widgets\Alert;
+use kartik\select2\Select2;
+use yii\helpers\Html;
+use yii\web\JsExpression;
+use yii\widgets\ActiveForm;
+use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
 
@@ -69,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                                 'templateResult' => new JsExpression('function(user) { return user.text; }'),
                                 'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-                                'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/user/select-drivers']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                                'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("' . \yii\helpers\Url::toRoute(['/admin/user/select-drivers']) . '", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                             ],
                         ]); ?>
                     </div>
