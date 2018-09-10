@@ -3,19 +3,24 @@
 namespace app\modules\admin\controllers;
 
 use app\components\Controller;
-use app\models\Trip;
-use app\modules\admin\models\TripSearch;
+use app\modules\admin\models\BotTrip;
+use app\modules\admin\models\BotTripSearch;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\NotFoundHttpException;
 
 /**
- * TripsController implements the CRUD actions for Trip model.
+ * BotTripController implements the CRUD actions for Trip model.
  */
-class TripsController extends Controller
+class BotTripController extends Controller
 {
     public $layout = "./sidebar";
+
+    public function getViewPath()
+    {
+        return Yii::getAlias('@app/modules/admin/views/bots/trip');
+    }
 
     public function behaviors()
     {
@@ -45,8 +50,9 @@ class TripsController extends Controller
     }
 
     /**
-     * Lists all Trip models.
-     * @return mixed
+     * @return string|\yii\web\Response
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionIndex()
     {
@@ -54,7 +60,7 @@ class TripsController extends Controller
             $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
             if (count($keys)) {
                 foreach ($keys as $k => $v) {
-                    if (($model = Trip::findOne($v)) !== null) {
+                    if (($model = BotTrip::findOne($v)) !== null) {
                         $model->delete();
                     }
                 }
@@ -62,7 +68,7 @@ class TripsController extends Controller
             }
         }
 
-        $searchModel = new TripSearch();
+        $searchModel = new BotTripSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -72,9 +78,9 @@ class TripsController extends Controller
     }
 
     /**
-     * Displays a single Trip model.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
@@ -84,13 +90,11 @@ class TripsController extends Controller
     }
 
     /**
-     * Creates a new Trip model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new Trip();
+        $model = new BotTrip();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['index', 'id' => $model->id]);
@@ -102,10 +106,9 @@ class TripsController extends Controller
     }
 
     /**
-     * Updates an existing Trip model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
@@ -122,10 +125,11 @@ class TripsController extends Controller
     }
 
     /**
-     * Deletes an existing Trip model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id)
     {
@@ -135,15 +139,13 @@ class TripsController extends Controller
     }
 
     /**
-     * Finds the Trip model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Trip the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return BotTrip|null
+     * @throws NotFoundHttpException
      */
     protected function findModel($id)
     {
-        if (($model = Trip::findOne($id)) !== null) {
+        if (($model = BotTrip::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

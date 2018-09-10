@@ -1,16 +1,15 @@
 <?php
 
+use kartik\grid\GridView;
 use kartik\select2\Select2;
-use yii\grid\GridView;
 use yii\helpers\Html;
-use yii\web\JsExpression;
 use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\admin\models\TripSearch */
+/* @var $searchModel app\modules\admin\models\BotTripSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt('Пассажиры в очереди', [], false);
+$this->title = Yii::$app->mv->gt('Поездки', [], false);
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -41,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'rowOptions' => function ($model, $key, $index, $grid) {
                     return [
                         'role' => 'button',
-                        'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/trips/view/" . $key) . "'"
+                        'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/bot-trip/view/" . $key) . "'"
                     ];
                 },
                 'layout' => "
@@ -56,28 +55,24 @@ $this->params['breadcrumbs'][] = $this->title;
                     'user_id' => [
                         'attribute' => 'user_id',
                         'content' => function ($data) {
-                            return ($data->user) ? $data->user->fullName . '<br /><a href="tel:+' . $data->user->phone . '">+' . $data->user->phone . '</a>' : Yii::t('app', "Удален");
+                            return isset($data->user) ?
+                                $data->user->fullName . '<br /><a href="tel:+' . $data->user->phone . '">+' . $data->user->phone . '</a>' :
+                                Yii::t('app', "Удален");
                         },
                         'filter' => Select2::widget([
                             'model' => $searchModel,
+                            'data' => \yii\helpers\ArrayHelper::map(
+                                \app\modules\admin\models\User::find()
+                                    ->select(['id', 'name' => 'CONCAT(phone, \' \',first_name,\' \',second_name)'])
+                                    ->where(['=', 'type', \app\modules\admin\models\User::TYPE_PASSENGER])->asArray()->all(),
+                                'id', 'name'),
                             'theme' => Select2::THEME_DEFAULT,
                             'attribute' => 'user_id',
-                            'hideSearch' => true,
                             'options' => [
-                                'placeholder' => Yii::$app->mv->gt('Найти пользователя', [], false)
+                                'placeholder' => Yii::$app->mv->gt('Пользователя', [], false)
                             ],
                             'pluginOptions' => [
                                 'allowClear' => true,
-                                'minimumInputLength' => 1,
-                                'ajax' => [
-                                    'url' => \yii\helpers\Url::toRoute(['/admin/user/select-users']),
-                                    'dataType' => 'json',
-                                    'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                                ],
-                                'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                                'templateResult' => new JsExpression('function(user) { return user.text; }'),
-                                'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-                                'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("' . \yii\helpers\Url::toRoute(['/admin/user/select-users']) . '", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                             ]
                         ]),
                     ],

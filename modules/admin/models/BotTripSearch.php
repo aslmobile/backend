@@ -7,9 +7,9 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
 /**
- * TripSearch represents the model behind the search form about `app\models\Trip`.
+ * BotTripSearch represents the model behind the search form about `app\models\BotTrip`.
  */
-class TripSearch extends Trip
+class BotTripSearch extends BotTrip
 {
     /**
      * @inheritdoc

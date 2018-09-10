@@ -205,7 +205,29 @@ $act = Yii::$app->controller->action->id;
                     <i class="fa fa-users"></i> <span><?= Yii::$app->mv->gt('Пассажиры в очереди', [], false) ?></span>
                 </a>
             </li>
+
+            <!-- --------------------------------------BOTS BEGIN-------------------------------------------->
             <li class="header"><?= Yii::$app->mv->gt('Боты', [], false); ?></li>
+
+            <li class="treeview<?= ($cont == 'bot-trip') ? ' active' : '' ?>">
+                <a href="#"> <i class="fa fa-android"></i>
+                    <span><?= Yii::$app->mv->gt('Поездки', [], false); ?></span>
+                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                </a>
+                <ul class="treeview-menu">
+                    <li<?= ($cont == 'bot-trip' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/bot-trip/index') ?>">
+                            <i class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'bot-trip' && $act == 'create') ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/bot-trip/create') ?>">
+                            <i class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Добавить', [], false) ?>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
             <li<?= ($cont == 'bots' && ($act == 'index')) ? ' class="active"' : '' ?>>
                 <a href="<?= Url::toRoute('/admin/bots/index') ?>">
                     <i class="fa fa-tachometer"></i> <span><?= Yii::$app->mv->gt('Управление', [], false) ?></span>
@@ -226,6 +248,8 @@ $act = Yii::$app->controller->action->id;
                     <i class="fa fa-money"></i> <span><?= Yii::$app->mv->gt('Транзакции', [], false) ?></span>
                 </a>
             </li>
+            <!-- --------------------------------------BOTS END----------------------------------------------->
+
             <li class="header"><?= Yii::$app->mv->gt('Автомобили', [], false); ?></li>
             <li class="treeview<?= (($cont == 'vehicles' || ($cont == 'lines' && $act == 'vehicles')) && $act != 'vehicles') ? ' active' : '' ?>">
                 <a href="<?= Url::toRoute('/admin/vehicles') ?>">

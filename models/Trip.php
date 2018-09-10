@@ -157,42 +157,42 @@ class Trip extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'                => Yii::t('app', "ID"),
-            'user_id'           => Yii::t('app', "Пассажир"),
-            'driver_id'           => Yii::t('app', "Водитель"),
-            'vehicle_type_id'   => Yii::t('app', "Тип автомобиля"),
-            'startpoint_id'     => Yii::t('app', "Остановка"),
-            'status'            => Yii::t('app', "Статус"),
-            'created_at'        => Yii::t('app', "Создана"),
-            'updated_at'        => Yii::t('app', "Обновлена"),
-            'position'          => Yii::t('app', "Позиция на карте"),
-            'taxi_status'       => Yii::t('app', "Статус заказа"),
-            'taxi_cancel_reason'     => Yii::t('app', "Причина отказа"),
-            'taxi_address'      => Yii::t('app', "Адрес подачи"),
-            'taxi_time'         => Yii::t('app', "На какое время"),
-            'seats'             => Yii::t('app', "Места"),
-            'endpoint_id'       => Yii::t('app', "Конечная"),
-            'start_time'        => Yii::t('app', "Время"),
-            'line_id'           => Yii::t('app', "Линия"),
-            'route_id'          => Yii::t('app', "Маршрут"),
-            'amount'            => Yii::t('app', "Сумма"),
-            'tariff'            => Yii::t('app', "Тариф"),
-            'cancel_reason'            => Yii::t('app', "Причина отмены"),
-            'passenger_description'            => Yii::t('app', "Комментарий пассажира"),
-            'currency'            => Yii::t('app', "Валюта"),
-            'payment_type'            => Yii::t('app', "Тип оплаты"),
-            'passenger_rating'            => Yii::t('app', "Рейтинг пассажира"),
-            'driver_comment'            => Yii::t('app', "Комментарий водителя"),
-            'payment_status'            => Yii::t('app', "Статус оплаты"),
-            'luggage_unique_id'            => Yii::t('app', "Уникальный ID багажа"),
-            'passenger_comment'            => Yii::t('app', "Комментарий пассажира"),
-            'driver_rating'            => Yii::t('app', "Рейтинг водителя"),
-            'vehicle_id'            => Yii::t('app', "Автомобиль"),
-            'need_taxi'            => Yii::t('app', "Заказ такси"),
-            'scheduled'            => Yii::t('app', "По расписанию"),
-            'schedule_id'            => Yii::t('app', "Номер расписания"),
-            'finish_time'            => Yii::t('app', "Время окончания"),
-            'driver_description'            => Yii::t('app', "Комментарий водителя"),
+            'id' => Yii::t('app', "ID"),
+            'user_id' => Yii::t('app', "Пассажир"),
+            'driver_id' => Yii::t('app', "Водитель"),
+            'vehicle_type_id' => Yii::t('app', "Тип автомобиля"),
+            'startpoint_id' => Yii::t('app', "Остановка"),
+            'status' => Yii::t('app', "Статус"),
+            'created_at' => Yii::t('app', "Создана"),
+            'updated_at' => Yii::t('app', "Обновлена"),
+            'position' => Yii::t('app', "Позиция на карте"),
+            'taxi_status' => Yii::t('app', "Статус заказа"),
+            'taxi_cancel_reason' => Yii::t('app', "Причина отказа"),
+            'taxi_address' => Yii::t('app', "Адрес подачи"),
+            'taxi_time' => Yii::t('app', "На какое время"),
+            'seats' => Yii::t('app', "Места"),
+            'endpoint_id' => Yii::t('app', "Конечная"),
+            'start_time' => Yii::t('app', "Время"),
+            'line_id' => Yii::t('app', "Линия"),
+            'route_id' => Yii::t('app', "Маршрут"),
+            'amount' => Yii::t('app', "Сумма"),
+            'tariff' => Yii::t('app', "Тариф"),
+            'cancel_reason' => Yii::t('app', "Причина отмены"),
+            'passenger_description' => Yii::t('app', "Комментарий пассажира"),
+            'currency' => Yii::t('app', "Валюта"),
+            'payment_type' => Yii::t('app', "Тип оплаты"),
+            'passenger_rating' => Yii::t('app', "Рейтинг пассажира"),
+            'driver_comment' => Yii::t('app', "Комментарий водителя"),
+            'payment_status' => Yii::t('app', "Статус оплаты"),
+            'luggage_unique_id' => Yii::t('app', "Уникальный ID багажа"),
+            'passenger_comment' => Yii::t('app', "Комментарий пассажира"),
+            'driver_rating' => Yii::t('app', "Рейтинг водителя"),
+            'vehicle_id' => Yii::t('app', "Автомобиль"),
+            'need_taxi' => Yii::t('app', "Заказ такси"),
+            'scheduled' => Yii::t('app', "По расписанию"),
+            'schedule_id' => Yii::t('app', "Номер расписания"),
+            'finish_time' => Yii::t('app', "Время окончания"),
+            'driver_description' => Yii::t('app', "Комментарий водителя"),
         ];
     }
 
@@ -211,14 +211,12 @@ class Trip extends \yii\db\ActiveRecord
         if ($cache) $queue = Yii::$app->cache->get('queue');
         else $queue = false;
 
-        if (!$queue)
-        {
+        if (!$queue) {
             $_trips = self::find()->select(['id', 'user_id', 'vehicle_type_id', 'MAX(created_at) as created_at'])->where(['status' => self::STATUS_WAITING])->orderBy(['created_at' => SORT_DESC])->groupBy(['id', 'user_id', 'vehicle_type_id'])->all();
             /** @var \app\models\Trip $trip */
 
             $queue = [];
-            foreach ($_trips as $trip)
-            {
+            foreach ($_trips as $trip) {
                 $queue[$trip->vehicle_type_id]['vehicle_type_id'] = $trip->vehicle_type_id;
                 $queue[$trip->vehicle_type_id]['queue'][] = [
                     'trip' => \app\modules\api\models\Trip::findOne($trip->id)->toArray(),
@@ -305,13 +303,12 @@ class Trip extends \yii\db\ActiveRecord
         ])->all();
 
         /** @var \app\models\TripLuggage $baggage */
-        if ($baggages && count($baggages) > 0) foreach ($baggages as $baggage)
-        {
+        if ($baggages && count($baggages) > 0) foreach ($baggages as $baggage) {
             $baggage_list[] = [
                 'id' => $baggage->id,
                 'size' => $baggage->luggageType->title,
                 'need_seat' => intval($baggage->need_place),
-                'amount'    => $baggage->amount
+                'amount' => $baggage->amount
             ];
         }
 
@@ -324,8 +321,7 @@ class Trip extends \yii\db\ActiveRecord
         $luggage_amount = 0.0;
 
         $luggages = TripLuggage::find(['unique_id' => $this->luggage_unique_id])->all();
-        if ($luggages) foreach ($luggages as $luggage)
-        {
+        if ($luggages) foreach ($luggages as $luggage) {
             if (floatval($luggage->amount) > 0) $luggage_amount += floatval($luggage->amount);
         }
 
@@ -339,8 +335,7 @@ class Trip extends \yii\db\ActiveRecord
         $amount = floatval($this->amount);
 
         $luggages = TripLuggage::find(['unique_id' => $this->luggage_unique_id])->all();
-        if ($luggages) foreach ($luggages as $luggage)
-        {
+        if ($luggages) foreach ($luggages as $luggage) {
             if (floatval($luggage->amount) > 0) $amount += floatval($luggage->amount);
         }
 
@@ -352,8 +347,7 @@ class Trip extends \yii\db\ActiveRecord
         $seats = intval($this->seats);
 
         $luggages = TripLuggage::find(['unique_id' => $this->luggage_unique_id, 'need_place' => 1])->all();
-        if ($luggages) foreach ($luggages as $luggage)
-        {
+        if ($luggages) foreach ($luggages as $luggage) {
             if (intval($luggage->seats) > 0) $seats += intval($luggage->seats);
         }
 
@@ -363,16 +357,14 @@ class Trip extends \yii\db\ActiveRecord
     public static function getVehicleTypeList()
     {
         $types = Yii::$app->cache->get('vehicle_types');
-        if (!$types)
-        {
+        if (!$types) {
             $types = \app\modules\admin\models\VehicleType::find()->orderBy(['title' => SORT_ASC])->all();
             Yii::$app->cache->set('vehicle_types', $types, 900);
         }
 
         $list = [];
         /** @var \app\modules\admin\models\VehicleType $type */
-        if ($types && count($types) > 0) foreach ($types as $type)
-        {
+        if ($types && count($types) > 0) foreach ($types as $type) {
             $list[$type->id] = $type->title;
         }
 

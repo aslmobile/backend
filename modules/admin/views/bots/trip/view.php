@@ -9,7 +9,7 @@ use yii\widgets\DetailView;
 /* @var $model app\models\Trip */
 
 $this->title = Yii::$app->mv->gt($model->id, [], false);
-$this->params['breadcrumbs'][] = ['label' => 'Trips', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Bot trips', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-12 col-sm-6 col-md-8">
                 <div class="box box-widget">
                     <div class="box-header bg-aqua with-border">
-                        <i class="fa fa-info"></i> <?= Yii::t('app', "Ифномация о заказе"); ?>
+                        <i class="fa fa-info"></i> <?= Yii::t('app', "Ифномация о поездке"); ?>
                         <div class="box-tools">
                             <span class="btn btn-sm btn-success" role="button" data-toggle="modal"
                                   data-target="#map-location" data-map-location="<?= $model->position; ?>">
