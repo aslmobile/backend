@@ -4,7 +4,7 @@ namespace app\modules\api\models;
 
 class VehicleBrands extends \app\models\VehicleBrand
 {
-    public static function getBrandsList($type_id, $asArray = false)
+    public static function getBrandsList($asArray = false)
     {
 
         $list = self::find()->all();
