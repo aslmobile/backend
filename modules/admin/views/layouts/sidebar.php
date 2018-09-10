@@ -203,7 +203,27 @@ $act = Yii::$app->controller->action->id;
                     <i class="fa fa-users"></i> <span><?= Yii::$app->mv->gt('Пассажиры в очереди', [], false) ?></span>
                 </a>
             </li>
-
+            <li class="header"><?= Yii::$app->mv->gt('Боты', [], false); ?></li>
+            <li<?= ($cont == 'bots' && ($act == 'index')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute('/admin/bots/index') ?>">
+                    <i class="fa fa-tachometer"></i> <span><?= Yii::$app->mv->gt('Управление', [], false) ?></span>
+                </a>
+            </li>
+            <li<?= ($cont == 'bots' && ($act == 'driver')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute('/admin/bots/driver') ?>">
+                    <i class="fa fa-taxi"></i> <span><?= Yii::$app->mv->gt('Водитель', [], false) ?></span>
+                </a>
+            </li>
+            <li<?= ($cont == 'bots' && ($act == 'passenger')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute('/admin/bots/passenger') ?>">
+                    <i class="fa fa-user"></i> <span><?= Yii::$app->mv->gt('Пассажир', [], false) ?></span>
+                </a>
+            </li>
+            <li<?= ($cont == 'bots' && ($act == 'transactions')) ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute('/admin/bots/transactions') ?>">
+                    <i class="fa fa-money"></i> <span><?= Yii::$app->mv->gt('Транзакции', [], false) ?></span>
+                </a>
+            </li>
             <li class="header"><?= Yii::$app->mv->gt('Автомобили', [], false); ?></li>
             <li class="treeview<?= (($cont == 'vehicles' || ($cont == 'lines' && $act == 'vehicles')) && $act != 'vehicles') ? ' active' : '' ?>">
                 <a href="<?= Url::toRoute('/admin/vehicles') ?>">
