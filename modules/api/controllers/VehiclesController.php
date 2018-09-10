@@ -1,10 +1,10 @@
 <?php namespace app\modules\api\controllers;
 
+use app\modules\api\models\UploadFiles;
 use app\modules\api\models\VehicleBrands;
 use app\modules\api\models\VehicleModels;
 use app\modules\api\models\Vehicles;
 use app\modules\api\models\VehicleTypes;
-use app\modules\api\models\UploadFiles;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -43,9 +43,9 @@ class VehiclesController extends BaseController
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'list' => ['GET'],
-                    'types'  => ['GET'],
-                    'brands'  => ['GET'],
-                    'models'  => ['GET'],
+                    'types' => ['GET'],
+                    'brands' => ['GET'],
+                    'models' => ['GET'],
                     'get-vehicle' => ['GET'],
                     'qr' => ['GET'],
 
@@ -69,36 +69,30 @@ class VehiclesController extends BaseController
 
         $qr_url = false;
         $vehicle = Vehicles::findOne($id);
-        if ($vehicle)
-        {
+        if ($vehicle) {
             $qr = isset (Yii::$app->params['qr_api_url']) ? Yii::$app->params['qr_api_url'] : false;
             if (!$qr) $this->module->setError(422, '_qr', Yii::$app->mv->gt("Сервис генерации QR кода не задан", [], false));
 
             $data = [
                 'vehicle_id' => $vehicle->id,
-                'driver_id'  => $vehicle->user_id
+                'driver_id' => $vehicle->user_id
             ];
 
             $qr_url = str_replace(['{data}'], urlencode(json_encode($data)), $qr);
-        }
-        else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найдена", [], false));
+        } else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найдена", [], false));
 
-        if ($qr_url)
-        {
+        if ($qr_url) {
             $local = '/files/vehicle-qr/' . $vehicle->id . '/';
             $path = Yii::getAlias('@webroot') . $local;
             $name = 'qr-code.png';
 
-            if (UploadFiles::validatePath($path))
-            {
+            if (UploadFiles::validatePath($path)) {
                 $image = $path . $name;
                 $file = file_put_contents($image, file_get_contents($qr_url));
                 if ($file) $this->module->data['file'] = Yii::getAlias('@web') . $local . $name;
                 else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось создать изображение QR кода", [], false));
-            }
-            else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось скопировать изображение QR кода", [], false));
-        }
-        else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось создать QR код", [], false));
+            } else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось скопировать изображение QR кода", [], false));
+        } else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось создать QR код", [], false));
 
         $this->module->setSuccess();
         $this->module->sendResponse();
@@ -112,8 +106,7 @@ class VehiclesController extends BaseController
         $_vehicles = [];
         $vehicles = Vehicles::find()->where(['user_id' => $user->id])->orderBy(['created_at' => SORT_DESC])->all();
 
-        if ($vehicles && count ($vehicles)) foreach ($vehicles as $vehicle)
-        {
+        if ($vehicles && count($vehicles)) foreach ($vehicles as $vehicle) {
             $_vehicles[] = $vehicle->toArray();
         }
 
@@ -176,18 +169,15 @@ class VehiclesController extends BaseController
         $this->validateBodyParams(['user_id', 'vehicle_type_id', 'vehicle_brand_id', 'vehicle_model_id', 'license_plate', 'seats']);
 
         $vehicle = new Vehicles();
-        $data['Vehicles'] = (array) $this->body;
+        $data['Vehicles'] = (array)$this->body;
         if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle.load', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
-        if (!$vehicle->validate() || !$vehicle->save())
-        {
-            if ($vehicle->hasErrors())
-            {
+        if (!$vehicle->validate() || !$vehicle->save()) {
+            if ($vehicle->hasErrors()) {
                 foreach ($vehicle->errors as $field => $error)
                     $this->module->setError(422, 'vehicle.' . $field, Yii::$app->mv->gt($error[0], [], false), true, false);
 
                 $this->module->sendResponse();
-            }
-            else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data = [
@@ -208,19 +198,16 @@ class VehiclesController extends BaseController
         if (!$vehicle) $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
         $data = [
-            'Vehicles' => (array) $this->body
+            'Vehicles' => (array)$this->body
         ];
 
         if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
-        if (!$vehicle->validate() || !$vehicle->save())
-        {
-            if ($vehicle->hasErrors())
-            {
+        if (!$vehicle->validate() || !$vehicle->save()) {
+            if ($vehicle->hasErrors()) {
                 foreach ($vehicle->errors as $field => $error_message)
                     $this->module->setError(422, 'vehicle.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
-            }
-            else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data = [
@@ -261,11 +248,9 @@ class VehiclesController extends BaseController
         $documents = [];
         foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-insurance/' . $user->id, true);
 
-        if (!empty ($vehicle->insurance))
-        {
+        if (!empty ($vehicle->insurance)) {
             $file = UploadFiles::findOne(['id' => $vehicle->insurance]);
-            if ($file && !empty($file->file))
-            {
+            if ($file && !empty($file->file)) {
                 $oldDocument = Yii::getAlias('@webroot') . $file->file;
                 if ($oldDocument && file_exists($oldDocument)) unlink($oldDocument);
                 $file->delete();
@@ -296,22 +281,18 @@ class VehiclesController extends BaseController
         $documents = [];
         foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-registration/' . $user->id, true);
 
-        if (!empty ($vehicle->registration))
-        {
+        if (!empty ($vehicle->registration)) {
             $file = UploadFiles::findOne(['id' => $vehicle->registration]);
-            if ($file && !empty($file->file))
-            {
+            if ($file && !empty($file->file)) {
                 $oldDocument = Yii::getAlias('@webroot') . $file->file;
                 if ($oldDocument && file_exists($oldDocument)) unlink($oldDocument);
                 $file->delete();
             }
         }
 
-        if (!empty ($vehicle->registration2))
-        {
+        if (!empty ($vehicle->registration2)) {
             $file = UploadFiles::findOne(['id' => $vehicle->registration2]);
-            if ($file && !empty($file->file))
-            {
+            if ($file && !empty($file->file)) {
                 $oldDocument = Yii::getAlias('@webroot') . $file->file;
                 if ($oldDocument && file_exists($oldDocument)) unlink($oldDocument);
                 $file->delete();
@@ -343,11 +324,9 @@ class VehiclesController extends BaseController
         $documents = [];
         foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'vehicle-photos/' . $user->id, true);
 
-        if (!empty ($vehicle->image))
-        {
+        if (!empty ($vehicle->image)) {
             $file = UploadFiles::findOne(['id' => $vehicle->image]);
-            if ($file && !empty($file->file))
-            {
+            if ($file && !empty($file->file)) {
                 $oldDocument = Yii::getAlias('@webroot') . $file->file;
                 if ($oldDocument && file_exists($oldDocument)) unlink($oldDocument);
                 $file->delete();
@@ -381,26 +360,21 @@ class VehiclesController extends BaseController
         $saved_photos_objects = [];
         $saved_photos_objects_id = [];
 
-        if (Yii::$app->request->post('save_photos'))
-        {
+        if (Yii::$app->request->post('save_photos')) {
             $saved_photos = explode(',', Yii::$app->request->post('save_photos'));
-            if ($saved_photos && count($saved_photos) > 0) foreach ($saved_photos as $saved_photo)
-            {
+            if ($saved_photos && count($saved_photos) > 0) foreach ($saved_photos as $saved_photo) {
                 $file = UploadFiles::findOne($saved_photo);
-                if ($file)
-                {
+                if ($file) {
                     $saved_photos_objects[] = $file;
                     $saved_photos_objects_id[] = $file->id;
                 }
             }
         }
 
-        if (!empty ($vehicle->photos))
-        {
+        if (!empty ($vehicle->photos)) {
             $photos = $vehicle->getVehiclePhotos(2);
             /** @var \app\modules\api\models\UploadFiles $file */
-            if ($photos && count ($photos) > 0) foreach ($photos as $file)
-            {
+            if ($photos && count($photos) > 0) foreach ($photos as $file) {
                 if (!in_array($file->id, $saved_photos_objects_id)) $file->delete();
             }
         }
@@ -410,7 +384,7 @@ class VehiclesController extends BaseController
         foreach ($saved_photos_objects as $file) $_photos[] = $file->id;
         $_photos = implode(',', $_photos);
 
-        $vehicle->photos = (string) $_photos;
+        $vehicle->photos = (string)$_photos;
         $vehicle->save();
 
         $this->module->data = [
@@ -429,11 +403,10 @@ class VehiclesController extends BaseController
         $vehicle = Vehicles::findOne(['id' => $id]);
         if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
-        if (!empty ($vehicle->photos))
-        {
+        if (!empty ($vehicle->photos)) {
             $photos = $vehicle->getVehiclePhotos(2);
             /** @var \app\modules\api\models\UploadFiles $file */
-            if ($photos && count ($photos) > 0) foreach ($photos as $file) if ($file && !empty ($file->file)) $file->delete();
+            if ($photos && count($photos) > 0) foreach ($photos as $file) if ($file && !empty ($file->file)) $file->delete();
 
             $vehicle->photos = null;
             $vehicle->save();
