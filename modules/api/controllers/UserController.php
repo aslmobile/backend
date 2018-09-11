@@ -5,6 +5,7 @@ use app\modules\api\models\Trip;
 use app\modules\api\models\UploadFiles;
 use app\modules\api\models\Users;
 use app\modules\api\models\Vehicles;
+use app\modules\user\models\User;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -29,6 +30,7 @@ class UserController extends BaseController
                             'upload-user-photo',
                             'update-profile',
                             'trips',
+                            'delete',
                             'get',
                             'get-own',
                             'settings',
@@ -47,6 +49,7 @@ class UserController extends BaseController
                     'upload-driver-licence' => ['POST'],
                     'upload-user-photo' => ['POST'],
                     'update-profile' => ['POST'],
+                    'delete' => ['POST'],
                     'trips' => ['GET'],
                     'get' => ['GET'],
                     'get-own' => ['GET'],
@@ -75,6 +78,17 @@ class UserController extends BaseController
 
         if ($user->id == $id) $this->module->data = $user->toArray();
         else $this->module->data = Users::findOne($id)->toArray();
+
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionDelete($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        if ($user->id == $id) $user->delete();
 
         $this->module->setSuccess();
         $this->module->sendResponse();

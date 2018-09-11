@@ -33,6 +33,13 @@ class TripLuggage extends \yii\db\ActiveRecord
         return 'trip_luggage';
     }
 
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::className()
+        ];
+    }
+
 
     /**
      * @inheritdoc

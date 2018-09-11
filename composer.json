@@ -36,7 +36,8 @@
         "cboden/ratchet": "dev-master",
         "ratchet/pawl": "dev-master",
         "yiisoft/yii2-redis": "^2.0@dev",
-        "yii2tech/html2pdf": "^1.0@dev"
+        "yii2tech/html2pdf": "^1.0@dev",
+        "kartik-v/yii2-widget-datetimepicker": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

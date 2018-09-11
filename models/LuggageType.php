@@ -16,6 +16,7 @@ use app\components\MultilingualQuery;
  * @property integer $updated_at
  * @property integer $status
  * @property integer $need_place
+ * @property integer $seats
  * @property double $tariff_key
  */
 class LuggageType extends \yii\db\ActiveRecord
@@ -32,6 +33,13 @@ class LuggageType extends \yii\db\ActiveRecord
         return 'luggage_type';
     }
 
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::className()
+        ];
+    }
+
 
     /**
      * @inheritdoc
@@ -39,7 +47,7 @@ class LuggageType extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['created_at', 'updated_at', 'status', 'need_place'], 'integer'],
+            [['created_at', 'updated_at', 'status', 'need_place', 'seats'], 'integer'],
             [['tariff_key'], 'number'],
             [['title'], 'string', 'max' => 255],
             ['need_place', 'default', 'value' => 0],
@@ -70,4 +78,15 @@ class LuggageType extends \yii\db\ActiveRecord
             self::STATUS_DISABLED => Yii::t('app', "Отключен")
         ];
     }
+
+    public static function getAll($where = null)
+    {
+        $q = self::find()->select(['title', 'id']);
+        if ($where) {
+            $q->andWhere($where);
+        }
+
+        return $q->orderBy(['title' => SORT_ASC])->indexBy('id')->column();
+    }
+
 }

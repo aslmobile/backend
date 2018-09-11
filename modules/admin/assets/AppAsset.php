@@ -35,7 +35,7 @@ class AppAsset extends AssetBundle
         "plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js",
         "plugins/slimScroll/jquery.slimscroll.min.js",
         "plugins/fastclick/fastclick.js",
-        "plugins/x-editable/bootstrap3-editable/js/bootstrap-editable.min.js",
+        //"plugins/x-editable/bootstrap3-editable/js/bootstrap-editable.min.js",
         "plugins/jquery.tmpl.min.js",
         "plugins/select2/select2.full.js",
         "/admin_assets/js/jquery.blockUI.js",
@@ -44,6 +44,7 @@ class AppAsset extends AssetBundle
         "dist/js/save-sidebar-collapse.js",
         "dist/js/app.min.js",
         "dist/js/all.js",
+        "/admin_assets/js/all.js",
     ];
     public $depends = [
         'yii\bootstrap\BootstrapAsset',

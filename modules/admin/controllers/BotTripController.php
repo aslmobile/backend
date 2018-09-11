@@ -3,11 +3,14 @@
 namespace app\modules\admin\controllers;
 
 use app\components\Controller;
+use app\models\Trip;
 use app\modules\admin\models\BotTrip;
 use app\modules\admin\models\BotTripSearch;
+use kartik\grid\EditableColumnAction;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -29,7 +32,7 @@ class BotTripController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index', 'create', 'update', 'view'],
+                        'actions' => ['index', 'create', 'update', 'view', 'status', 'startpoint_id'],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
                     ],
@@ -47,6 +50,61 @@ class BotTripController extends Controller
                 ],
             ],
         ];
+    }
+
+    public function actions()
+    {
+        return ArrayHelper::merge(parent::actions(), [
+            'status' => [                                       // identifier for your editable column action
+                'class' => EditableColumnAction::className(),     // action class name
+                'modelClass' => Trip::className(),                // the model for the record being edited
+                'outputValue' => function ($model, $attribute, $key, $index) {
+                    return $model->$attribute;      // return any custom output value if desired
+                },
+                'outputMessage' => function ($model, $attribute, $key, $index) {
+                    return '';                                  // any custom error to return after model save
+                },
+                'showModelErrors' => true,                        // show model validation errors after save
+                'errorOptions' => ['header' => '']                // error summary HTML options
+                // 'postOnly' => true,
+                // 'ajaxOnly' => true,
+                // 'findModel' => function($id, $action) {},
+                // 'checkAccess' => function($action, $model) {}
+            ],
+            'startpoint_id' => [                                       // identifier for your editable column action
+                'class' => EditableColumnAction::className(),     // action class name
+                'modelClass' => Trip::className(),                // the model for the record being edited
+                'outputValue' => function ($model, $attribute, $key, $index) {
+                    return $model->$attribute;      // return any custom output value if desired
+                },
+                'outputMessage' => function ($model, $attribute, $key, $index) {
+                    return '';                                  // any custom error to return after model save
+                },
+                'showModelErrors' => true,                        // show model validation errors after save
+                'errorOptions' => ['header' => '']                // error summary HTML options
+                // 'postOnly' => true,
+                // 'ajaxOnly' => true,
+                // 'findModel' => function($id, $action) {},
+                // 'checkAccess' => function($action, $model) {}
+            ],
+            'line_id' => [                                       // identifier for your editable column action
+                'class' => EditableColumnAction::className(),     // action class name
+                'modelClass' => Trip::className(),                // the model for the record being edited
+                'outputValue' => function ($model, $attribute, $key, $index) {
+                    return $model->$attribute;      // return any custom output value if desired
+                },
+                'outputMessage' => function ($model, $attribute, $key, $index) {
+                    return '';                                  // any custom error to return after model save
+                },
+                'showModelErrors' => true,                        // show model validation errors after save
+                'errorOptions' => ['header' => '']                // error summary HTML options
+                // 'postOnly' => true,
+                // 'ajaxOnly' => true,
+                // 'findModel' => function($id, $action) {},
+                // 'checkAccess' => function($action, $model) {}
+            ],
+
+        ]);
     }
 
     /**

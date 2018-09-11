@@ -7,37 +7,38 @@ $(document).ready(function(){
         stop: function(e) { save_order(e); }
     });
         */
-   
 
-    if($(".sel2").length){
-        $('.sel2').select2();
-        if($('.mpsel').length){
-            var vn = parseInt($('select.mpsel').attr('vn'));
-            if(vn>1){
-                $(".mpsel").select2('val',$('select.mpsel').attr('selvalue').split(','));
-            }
-            else{
-                $(".mpsel").select2('val',$('select.mpsel').attr('selvalue'));
-            }
 
+    var selects = $(".sel2.mpsel.outst");
+    $.each(selects, function () {
+        var select = $(this);
+        if ($(select).length) {
+            var vn = parseInt($(select).attr('vn'));
+            if (vn > 1) {
+                $(select).val($(select).attr('selvalue').split(','));
+                $(select).select2();
+            } else {
+                $(select).val($(select).attr('selvalue'));
+                $(select).select2();
+            }
         }
-    }
+    });
 
-    if($('.rangepick').length){
-       $('.rangepick').daterangepicker({
-        locale: {
-            format: 'DD/MM/YYYY'
-        }
-      });
-    }
-    if($('.tags').length) {
-        $('.tags').tagsinput({
-            tagClass: function (item) {
-                return (item.length > 10 ? 'big' : 'small');
-            }
-        });
-    }
-    masks();
+    // if($('.rangepick').length){
+    //    $('.rangepick').daterangepicker({
+    //     locale: {
+    //         format: 'DD/MM/YYYY'
+    //     }
+    //   });
+    // }
+    // if($('.tags').length) {
+    //     $('.tags').tagsinput({
+    //         tagClass: function (item) {
+    //             return (item.length > 10 ? 'big' : 'small');
+    //         }
+    //     });
+    // }
+    // masks();
 });
 
 

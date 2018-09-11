@@ -7,6 +7,35 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\modules\admin\models\BotTrip */
 /* @var $form yii\widgets\ActiveForm */
+
+$luggages = [];
+if (!$model->isNewRecord) {
+    $luggages = $model->luggages;
+    if (!empty($luggages)) {
+        $luggages = \yii\helpers\ArrayHelper::getColumn($luggages, 'luggage_type');
+    }
+}
+$luggages_v = implode(",", $luggages);
+$all_luggages = \app\models\LuggageType::getAll();
+
+//$script = <<< JS
+//    function loadCheckpooints() {
+//        $.ajax($(button).attr('href'), {
+//            type: "POST",
+//            async: false,
+//            data: {sum: sum},
+//            beforeSend: function (xhr) { },
+//            error: function (xhr) { console.log(xhr); },
+//            success: function (response) {
+//
+//            }
+//        });
+//    }
+//    loadCheckpooints();
+//    $('')
+//JS;
+//$this->registerJs($script, \yii\web\View::POS_READY);
+
 ?>
 
 <?php $form = ActiveForm::begin(['options' => ['class' => 'form']]); ?>
@@ -35,8 +64,6 @@ use yii\widgets\ActiveForm;
                 <div class="row">
 
                     <div class="col-sm-6">
-
-                        <?= $form->field($model, 'status')->dropDownList($model::getStatusList()) ?>
 
                         <?= $form->field($model, 'user_id')->widget(Select2::classname(), [
                             'data' => \yii\helpers\ArrayHelper::map
@@ -69,7 +96,10 @@ use yii\widgets\ActiveForm;
                         <?= $form->field($model, 'startpoint_id')->widget(Select2::classname(), [
                             'data' => \yii\helpers\ArrayHelper::map
                             (\app\modules\admin\models\Checkpoint::find()
-                                ->where(['status' => \app\models\Checkpoint::STATUS_ACTIVE])->all(), 'id', 'title'),
+                                ->where([
+                                    'status' => \app\models\Checkpoint::STATUS_ACTIVE,
+                                    //'type' => \app\models\Checkpoint::TYPE_STOP
+                                ])->all(), 'id', 'title'),
                             'theme' => Select2::THEME_DEFAULT,
                             'attribute' => 'startpoint_id',
                             'hideSearch' => true,
@@ -79,16 +109,39 @@ use yii\widgets\ActiveForm;
                             'pluginOptions' => ['allowClear' => true]
                         ]); ?>
 
+                        <?= $form->field($model, 'vehicle_type_id')->widget(Select2::classname(), [
+                            'data' => \yii\helpers\ArrayHelper::map
+                            (\app\modules\admin\models\VehicleType::find()
+                                ->where(['status' => \app\models\Checkpoint::STATUS_ACTIVE,])->all(), 'id', 'title'),
+                            'theme' => Select2::THEME_DEFAULT,
+                            'attribute' => 'vehicle_type_id',
+                            'hideSearch' => true,
+                            'options' => [
+                                'placeholder' => Yii::t('app', "Тип авто")
+                            ],
+                            'pluginOptions' => ['allowClear' => true]
+                        ]); ?>
+
                     </div>
 
                     <div class="col-sm-6">
 
+                        <?= $form->field($model, 'status')->dropDownList($model::getStatusList()) ?>
+
+                        <?= $form->field($model, 'seats')->textInput(['type' => 'number']) ?>
+
                         <?= $form->field($model, 'passenger_description')->textarea(['maxlength' => true, 'rows' => 3]) ?>
 
-                        <?= $form->field($model, 'passenger_comment')->textarea(['maxlength' => true, 'rows' => 3]) ?>
-
-                        <?= $form->field($model, 'luggage_unique_id')->textInput() ?>
-
+                        <?= $form->field($model, 'luggage', ['template' => '{label}<br>{input}{error}{hint}'])->dropdownList(
+                            $all_luggages,
+                            [
+                                'placeholder' => Yii::$app->mv->gt('Типы кухни', [], false),
+                                'selvalue' => $luggages_v,
+                                'vn' => count($luggages),
+                                'class' => 'sel2 mpsel outst',
+                                'multiple' => 'true'
+                            ]
+                        )->label(Yii::$app->mv->gt('Багаж', [], false)); ?>
                     </div>
 
                 </div>

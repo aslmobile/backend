@@ -30,6 +30,9 @@ $config = [
         'gii' => [
             'class' => 'app\modules\gii\Module',
         ],
+        'gridview' =>  [
+            'class' => '\kartik\grid\Module',
+        ]
     ],
     'components' => [
         'mv' => [
