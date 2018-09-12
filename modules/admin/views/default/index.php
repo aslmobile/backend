@@ -76,7 +76,7 @@ $statuses = Yii::$app->params['statuses'];
                                         <a href="<?= \yii\helpers\Url::toRoute('/admin/vehicles/update/' . $vehicle->id); ?>"
                                            class="product-title">
                                             <i class="fa fa-pencil"></i> &nbsp; <span class="badge bg-aqua-active"
-                                                                                      style="border-radius: 0;"><?= $vehicle->type->title; ?></span>
+                                                                                      style="border-radius: 0;"><?= isset($vehicle->type) ? $vehicle->type->title :  $vehicle->vehicleName; ?></span>
                                         </a>
                                         <span class="product-description">
                                             <span class="badge no-border"
