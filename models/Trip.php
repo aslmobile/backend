@@ -232,8 +232,14 @@ class Trip extends \yii\db\ActiveRecord
 
                 $line = Line::findOne($this->line_id);
                 if (!empty($line)) {
+
                     $this->driver_id = $line->driver_id;
                     $this->vehicle_id = $line->vehicle_id;
+
+                    $this->passenger_comment = '';
+                    $this->driver_comment = '';
+                    $this->driver_description = '';
+
                 } else return false;
 
                 break;
