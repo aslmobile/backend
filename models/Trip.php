@@ -304,20 +304,20 @@ class Trip extends \yii\db\ActiveRecord
 
     public function getLines()
     {
-        return ArrayHelper::map(Line::findAll([
+        return ArrayHelper::map(Line::find()->where([
             'route_id' => $this->route_id,
             'status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
-        ]), 'id', 'title');
+        ])->joinWith('route')->all(), 'id', 'route.title');
     }
 
     public static function getAllLines()
     {
         $route_ids = ArrayHelper::getColumn(Trip::find()->all(), 'route_id');
         if (!empty($route_ids)) {
-            return ArrayHelper::map(Line::findAll([
+            return ArrayHelper::map(Line::find()->where([
                 'route_id' => $route_ids,
                 'status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
-            ]), 'id', 'title');
+            ])->joinWith('route')->all(), 'id', 'route.title');
         }
         return [];
     }
