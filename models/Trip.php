@@ -240,6 +240,33 @@ class Trip extends \yii\db\ActiveRecord
                     $this->driver_comment = '';
                     $this->driver_description = '';
 
+                    $this->status = self::STATUS_WAITING;
+
+                    if ($line->freeseats > $this->seats) {
+
+                        $line->freeseats = $line->freeseats - $this->seats;
+
+                    } elseif ($line->freeseats == $this->seats) {
+
+                        $line->freeseats = 0;
+                        $line->status = Line::STATUS_WAITING;
+
+                        if ($line->save()) {
+                            $device = Devices::findOne(['user_id' => $this->driver_id]);
+                            if ($device) {
+                                $socket = new SocketPusher(['authkey' => $device->auth_token]);
+                                $socket->push(base64_encode(json_encode([
+                                    'action' => "acceptDriverTrip",
+                                    'data' => ['message_id' => time()]
+                                ])));
+                            }
+
+                        }
+
+                    } else {
+                        return false;
+                    }
+
                 } else return false;
 
                 break;
@@ -262,45 +289,17 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_WAY:
 
-                        if ($line->freeseats > $this->seats) {
+                        $this->payment_status = \app\modules\api\models\Trip::PAYMENT_STATUS_PAID;
+                        $this->driver_comment = Yii::$app->mv->gt("Посадка подтверждена", [], false);
+                        $this->start_time = time();
 
-                            $line->freeseats = $line->freeseats - $this->seats;
-
-                        } elseif ($line->freeseats == $this->seats) {
-
-                            $this->payment_status = \app\modules\api\models\Trip::PAYMENT_STATUS_PAID;
-                            $this->driver_comment = Yii::$app->mv->gt("Посадка подтверждена", [], false);
-                            $this->start_time = time();
-
-                            self::updateAll(
-                                [
-                                    'start_time' => time(),
-                                    'driver_comment' => Yii::$app->mv->gt("Посадка подтверждена", [], false),
-                                    'payment_status' => \app\modules\api\models\Trip::PAYMENT_STATUS_PAID,
-                                ],
-                                ['driver_id' => $this->driver_id, 'status' => Trip::STATUS_WAY]
-                            );
-
-                            $line->freeseats = $line->freeseats - $this->seats;
-                            $line->status = Line::STATUS_WAITING;
-
-                            if ($line->save()) {
-                                Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажир успешно посажен', [], 0));
-
-                                $device = Devices::findOne(['user_id' => $this->driver_id]);
-                                if ($device) {
-                                    $socket = new SocketPusher(['authkey' => $device->auth_token]);
-                                    $socket->push(base64_encode(json_encode([
-                                        'action' => "acceptDriverTrip",
-                                        'data' => ['message_id' => time()]
-                                    ])));
-                                }
-
-                                Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось отправить сообщение на сокет', [], 0));
-                            }
-
-                        } else {
-                            return false;
+                        $device = Devices::findOne(['user_id' => $this->driver_id]);
+                        if ($device) {
+                            $socket = new SocketPusher(['authkey' => $device->auth_token]);
+                            $socket->push(base64_encode(json_encode([
+                                'action' => "acceptDriverTrip",
+                                'data' => ['message_id' => time()]
+                            ])));
                         }
 
                         break;
