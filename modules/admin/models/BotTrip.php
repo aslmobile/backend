@@ -18,6 +18,7 @@ class BotTrip extends \app\models\Trip
     {
         $rules = parent::rules();
         $rules[] = [['luggage'], 'safe'];
+        $rules[] = [['route_id', 'startpoint_id', 'endpoint_id', 'vehicle_type_id', 'seats'], 'required'];
         return $rules;
     }
 
