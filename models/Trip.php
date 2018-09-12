@@ -231,7 +231,7 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_WAY:
 
-                        $line->seats = $line->seats - $this->seats;
+                        $line->freeseats = $line->freeseats - $this->seats;
                         $line->status = Line::STATUS_WAITING;
 
                         if ($line->save()) {
