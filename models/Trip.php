@@ -278,10 +278,14 @@ class Trip extends \yii\db\ActiveRecord
                 $this->payment_type = \app\modules\api\models\Trip::PAYMENT_TYPE_CARD;
                 $this->currency = 'T';
 
-                if (empty($line)) return false;
+                if (empty($line)) break;
 
 
                 switch ($this->status) {
+
+                    case Trip::STATUS_CREATED:
+
+                        break;
 
                     case Trip::STATUS_WAITING:
 
