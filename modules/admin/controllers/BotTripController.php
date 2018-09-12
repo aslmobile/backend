@@ -3,6 +3,7 @@
 namespace app\modules\admin\controllers;
 
 use app\components\Controller;
+use app\models\Checkpoint;
 use app\models\Trip;
 use app\modules\admin\models\BotTrip;
 use app\modules\admin\models\BotTripSearch;
@@ -12,6 +13,7 @@ use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * BotTripController implements the CRUD actions for Trip model.
@@ -32,7 +34,7 @@ class BotTripController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index', 'create', 'update', 'view', 'status', 'startpoint_id', 'line_id'],
+                        'actions' => ['index', 'create', 'update', 'view', 'status', 'startpoint_id', 'line_id', 'start-points', 'end-points'],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
                     ],
@@ -186,6 +188,26 @@ class BotTripController extends Controller
                 'model' => $model,
             ]);
         }
+    }
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function actionStartPoints($id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return  ArrayHelper::map(Checkpoint::findAll(['route' => intval($id), 'type' => [Checkpoint::TYPE_STOP, Checkpoint::TYPE_START]]), 'id', 'title');
+    }
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function actionEndPoints($id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return  ArrayHelper::map(Checkpoint::findAll(['route' => intval($id), 'type' => [Checkpoint::TYPE_STOP, Checkpoint::TYPE_END]]), 'id', 'title');
     }
 
     /**
