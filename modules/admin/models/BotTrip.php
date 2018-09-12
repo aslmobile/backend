@@ -25,11 +25,9 @@ class BotTrip extends \app\models\Trip
     public function beforeSave($insert)
     {
 
-        if ($this->isNewRecord) {
-            $this->line_id = 0;
-            $this->driver_id = 0;
-            $this->vehicle_id = 0;
-        }
+        $this->line_id = 0;
+        $this->driver_id = 0;
+        $this->vehicle_id = 0;
 
         $route = Route::findOne($this->route_id);
         if (!$route) {
@@ -112,6 +110,24 @@ class BotTrip extends \app\models\Trip
         }
 
         parent::afterSave($insert, $changedAttributes);
+    }
+
+    public function afterDelete()
+    {
+        TripLuggage::deleteAll(['unique_id' => $this->luggage_unique_id]);
+        parent::afterDelete();
+    }
+
+    public static function getStatusList()
+    {
+        return [
+            self::STATUS_CANCELLED => Yii::t('app', "Отменена"),
+            self::STATUS_CANCELLED_DRIVER => Yii::t('app', "Отмена водителем"),
+            self::STATUS_CREATED => Yii::t('app', "Создана"),
+            self::STATUS_WAITING => Yii::t('app', "Ожидает"),
+            self::STATUS_WAY => Yii::t('app', "В пути"),
+            self::STATUS_FINISHED => Yii::t('app', "Завершена"),
+        ];
     }
 
     protected function calculateLuggageTariff($id)

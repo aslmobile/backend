@@ -3,6 +3,7 @@
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
+use app\modules\admin\models\BotTrip;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\admin\models\BotTripSearch */
@@ -10,6 +11,10 @@ use yii\widgets\Breadcrumbs;
 
 $this->title = Yii::$app->mv->gt('Поездки', [], false);
 $this->params['breadcrumbs'][] = $this->title;
+
+$statuses = BotTrip::getStatusList();
+unset($statuses[BotTrip::STATUS_CREATED]);
+
 ?>
 
 <div class="content-wrapper">
@@ -104,7 +109,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'attribute' => 'startpoint_id',
-                        'filter' => \app\models\Trip::getAllRoutePoints(),
+                        'filterType' => GridView::FILTER_SELECT2,
+                        'filterWidgetOptions' => [
+                            'data' => [null => 'Все'] + \app\models\Trip::getVehicleTypeList(),
+                        ],
                         'headerOptions' => ['style' => 'width: 150px;'],
                         'value' => function ($model) {
                             return isset($model->startpoint) ? $model->startpoint->title : null;
@@ -149,7 +157,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'attribute' => 'status',
-                        'filter' => \app\models\Trip::getStatusList(),
+                        'filter' => $statuses,
                         'headerOptions' => ['style' => 'width: 150px;'],
                         'value' => function ($model) {
                             return isset($model->statusList[$model->status])
@@ -157,10 +165,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'refreshGrid' => true,
                         'class' => '\kartik\grid\EditableColumn',
-                        'editableOptions' => function ($model, $key, $index) {
+                        'editableOptions' => function ($model, $key, $index) use ($statuses) {
                             return [
                                 'inputType' => \kartik\editable\Editable::INPUT_DROPDOWN_LIST,
-                                'data' => $model->statusList,
+                                'data' => $statuses,
                                 'format' => \kartik\editable\Editable::FORMAT_BUTTON,
                                 'placement' => \kartik\popover\PopoverX::ALIGN_BOTTOM,
                                 'formOptions' => [
@@ -183,8 +191,40 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'todayHighlight' => true,
                                 'todayBtn' => true,
                                 'autoclose' => true,
+                                'format' => 'dd.mm.yyyy h:ii',
                             ],
                         ],
+                    ],
+                    [
+                        'class' => 'yii\grid\ActionColumn',
+                        'template' => '{update} {delete}',
+                        'contentOptions' => ['style' => ['width' => '90px']],
+                        'buttons' => [
+                            'update' => function ($url, $model) {
+                                return Html::a(
+                                    '<button type="button" class="btn btn-success btn-sm"><i class="fa fa-pencil"></i></button>',
+                                    $url,
+                                    [
+                                        'data' => [
+                                            'pjax' => '0'
+                                        ]
+                                    ]
+                                );
+                            },
+                            'delete' => function ($url, $model) {
+                                return Html::a(
+                                    '<button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>',
+                                    $url,
+                                    [
+                                        'data' => [
+                                            'confirm' => Yii::$app->mv->gt('Вы уверены, что хотите удалить это ?', [], false),
+                                            'method' => 'post',
+                                            'pjax' => '0'
+                                        ]
+                                    ]
+                                );
+                            },
+                        ]
                     ],
                 ],
             ]); ?>

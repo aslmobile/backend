@@ -123,6 +123,19 @@ $this->registerJs($script, \yii\web\View::POS_READY);
                             'pluginOptions' => ['allowClear' => true]
                         ]); ?>
 
+                        <?= $form->field($model, 'vehicle_type_id')->widget(Select2::classname(), [
+                            'data' => \yii\helpers\ArrayHelper::map
+                            (\app\modules\admin\models\VehicleType::find()
+                                ->where(['status' => \app\models\Checkpoint::STATUS_ACTIVE,])->all(), 'id', 'title'),
+                            'theme' => Select2::THEME_DEFAULT,
+                            'attribute' => 'vehicle_type_id',
+                            'hideSearch' => true,
+                            'options' => [
+                                'placeholder' => Yii::t('app', "Тип авто")
+                            ],
+                            'pluginOptions' => ['allowClear' => true]
+                        ]); ?>
+
                         <?= $form->field($model, 'startpoint_id')->widget(Select2::classname(), [
                             'data' => \yii\helpers\ArrayHelper::map
                             (\app\modules\admin\models\Checkpoint::find()
@@ -155,24 +168,13 @@ $this->registerJs($script, \yii\web\View::POS_READY);
                             'pluginOptions' => ['allowClear' => true]
                         ]); ?>
 
-                        <?= $form->field($model, 'vehicle_type_id')->widget(Select2::classname(), [
-                            'data' => \yii\helpers\ArrayHelper::map
-                            (\app\modules\admin\models\VehicleType::find()
-                                ->where(['status' => \app\models\Checkpoint::STATUS_ACTIVE,])->all(), 'id', 'title'),
-                            'theme' => Select2::THEME_DEFAULT,
-                            'attribute' => 'vehicle_type_id',
-                            'hideSearch' => true,
-                            'options' => [
-                                'placeholder' => Yii::t('app', "Тип авто")
-                            ],
-                            'pluginOptions' => ['allowClear' => true]
-                        ]); ?>
-
                     </div>
 
                     <div class="col-sm-6">
 
-                        <?= $form->field($model, 'status')->dropDownList($model::getStatusList()) ?>
+                        <?php if ($model->isNewRecord) { ?>
+                            <?= $form->field($model, 'status')->hiddenInput(['value' => \app\models\Trip::STATUS_CREATED])->label(false) ?>
+                        <?php } ?>
 
                         <?= $form->field($model, 'seats')->textInput(['type' => 'number']) ?>
 
@@ -188,6 +190,7 @@ $this->registerJs($script, \yii\web\View::POS_READY);
                                 'multiple' => 'true'
                             ]
                         )->label(Yii::$app->mv->gt('Багаж', [], false)); ?>
+
                     </div>
 
                 </div>
