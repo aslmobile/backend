@@ -1,7 +1,6 @@
 <?php
 
 use kartik\grid\GridView;
-use kartik\select2\Select2;
 use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
 
@@ -132,14 +131,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         'headerOptions' => ['style' => 'width: 150px;'],
                         'value' => function ($model) {
-                            return isset($model->line) && isset($model->line->driver) ? $model->line->driver->name .' '. $model->line->title : '';
+                            return isset($model->line) && isset($model->line->driver) ? $model->line->driver->fullName . ' ' . $model->route->title : '';
                         },
                         'refreshGrid' => true,
                         'class' => '\kartik\grid\EditableColumn',
                         'editableOptions' => function ($model, $key, $index) {
                             return [
                                 'inputType' => \kartik\editable\Editable::INPUT_DROPDOWN_LIST,
-                                'data' => $model->lines,
+                                'data' => [0 => 'Не установлено'] + $model->lines,
                                 'format' => \kartik\editable\Editable::FORMAT_BUTTON,
                                 'placement' => \kartik\popover\PopoverX::ALIGN_BOTTOM,
                                 'formOptions' => [

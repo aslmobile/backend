@@ -23,6 +23,13 @@ class BotTrip extends \app\models\Trip
 
     public function beforeSave($insert)
     {
+
+        if ($this->isNewRecord) {
+            $this->line_id = 0;
+            $this->driver_id = 0;
+            $this->vehicle_id = 0;
+        }
+
         $route = Route::findOne($this->route_id);
         if (!$route) {
             $this->addError('route_id', Yii::$app->mv->gt("Не найден маршрут", [], false));
@@ -75,11 +82,6 @@ class BotTrip extends \app\models\Trip
 
     public function beforeValidate()
     {
-        if ($this->isNewRecord) {
-            $this->line_id = 0;
-            $this->driver_id = 0;
-            $this->vehicle_id = 0;
-        }
         return parent::beforeValidate();
     }
 
