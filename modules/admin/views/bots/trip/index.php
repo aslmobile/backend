@@ -132,7 +132,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         'headerOptions' => ['style' => 'width: 150px;'],
                         'value' => function ($model) {
-                            return isset($model->line) && isset($model->line->driver) ? $model->line->driver->name .' '. $model->line->title : null;
+                            return isset($model->line) && isset($model->line->driver) ? $model->line->driver->name .' '. $model->line->title : '';
                         },
                         'refreshGrid' => true,
                         'class' => '\kartik\grid\EditableColumn',

@@ -219,8 +219,8 @@ class Trip extends \yii\db\ActiveRecord
                 if (!empty($line)) {
                     $this->driver_id = $line->driver_id;
                     $this->vehicle_id = $line->vehicle_id;
-                    $line->seats -= $this->seats;
-                    $line->update();
+//                    $line->seats = $line->seats - $this->seats;
+//                    $line->update();
                 } else {
                     return false;
                 }
