@@ -214,7 +214,7 @@ class Trip extends \yii\db\ActiveRecord
 
         switch ($action) {
             case 'line_id':
-                $this->line_id = 0;
+//                $this->line_id = 0;
                 $line = Line::findOne($this->line_id);
                 if (!empty($line)) {
                     $this->driver_id = $line->driver_id;
