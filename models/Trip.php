@@ -278,7 +278,7 @@ class Trip extends \yii\db\ActiveRecord
                                     'driver_comment' => Yii::$app->mv->gt("Посадка подтверждена", [], false),
                                     'payment_status' => \app\modules\api\models\Trip::PAYMENT_STATUS_PAID,
                                 ],
-                                ['driver_id' => $this->driver_id, 'status']
+                                ['driver_id' => $this->driver_id, 'status' => Trip::STATUS_WAY]
                             );
 
                             $line->freeseats = $line->freeseats - $this->seats;
