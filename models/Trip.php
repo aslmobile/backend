@@ -305,8 +305,8 @@ class Trip extends \yii\db\ActiveRecord
     public function getLines()
     {
         return ArrayHelper::map(Line::find()->where([
-            'route_id' => $this->route_id,
-            'status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
+            'line.route_id' => $this->route_id,
+            'line.status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
         ])->joinWith('routeR')->all(), 'id', 'routeR.title');
     }
 
@@ -315,8 +315,8 @@ class Trip extends \yii\db\ActiveRecord
         $route_ids = ArrayHelper::getColumn(Trip::find()->all(), 'route_id');
         if (!empty($route_ids)) {
             return ArrayHelper::map(Line::find()->where([
-                'route_id' => $route_ids,
-                'status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
+                'line.route_id' => $route_ids,
+                'line.status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
             ])->joinWith('routeR')->all(), 'id', 'routeR.title');
         }
         return [];
