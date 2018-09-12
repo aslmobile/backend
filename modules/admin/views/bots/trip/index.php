@@ -129,7 +129,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'filterWidgetOptions' => [
                             'data' => [null => 'Все'] + \app\models\Trip::getAllLines(),
                         ],
-                        'headerOptions' => ['style' => 'width: 150px;'],
+                        'headerOptions' => ['style' => 'width: 250px;'],
                         'value' => function ($model) {
                             return isset($model->line) && isset($model->line->driver) ? $model->line->driver->fullName . ' ' . $model->route->title : '';
                         },
