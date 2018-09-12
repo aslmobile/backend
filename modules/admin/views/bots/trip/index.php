@@ -1,9 +1,9 @@
 <?php
 
+use app\modules\admin\models\BotTrip;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
-use app\modules\admin\models\BotTrip;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\admin\models\BotTripSearch */
@@ -138,8 +138,10 @@ unset($statuses[BotTrip::STATUS_CREATED]);
                             'data' => [null => 'Все'] + \app\models\Trip::getAllLines(),
                         ],
                         'headerOptions' => ['style' => 'width: 250px;'],
-                        'value' => function ($model) {
-                            return isset($model->line) && isset($model->line->driver) ? $model->line->driver->fullName . ' ' . $model->route->title : '';
+                        'content' => function ($model) {
+                            $title = isset($model->line) && isset($model->line->driver) ? $model->line->driver->fullName . ' ' . $model->route->title : '';
+                            $seats = isset($model->line) ? '<br>Свободных мест: '.$model->line->freeseats : '';
+                            return $title.$seats;
                         },
                         'refreshGrid' => true,
                         'class' => '\kartik\grid\EditableColumn',

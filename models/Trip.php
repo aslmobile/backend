@@ -470,22 +470,38 @@ class Trip extends \yii\db\ActiveRecord
 
     public function getLines()
     {
-        return ArrayHelper::map(Line::find()->where([
+        $result = [];
+        $data = Line::find()->where([
             'line.route_id' => $this->route_id,
             'line.status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
-        ])->joinWith('routeR')->all(), 'id', 'driver.fullName');
+        ])->joinWith(['routeR', 'driverR'])->all();
+        foreach ($data as $line) {
+            $title = $line->driver->fullName . ' ' . $line->route->title;
+            $seats = '. Свободных мест: ' . $line->freeseats;
+            $result[$line->id] = $title . $seats;
+        }
+        return $result;
+
     }
 
     public static function getAllLines()
     {
         $route_ids = ArrayHelper::getColumn(Trip::find()->all(), 'route_id');
+        $result = [];
+
         if (!empty($route_ids)) {
-            return ArrayHelper::map(Line::find()->where([
+            $data = Line::find()->where([
                 'line.route_id' => $route_ids,
                 'line.status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
-            ])->joinWith('routeR')->all(), 'id', 'driver.fullName');
+            ])->joinWith(['routeR', 'driverR'])->all();
+            foreach ($data as $line) {
+                $title = $line->driver->fullName . ' ' . $line->route->title;
+                $seats = '. Свободных мест: ' . $line->freeseats;
+                $result[$line->id] = $title . $seats;
+            }
         }
-        return [];
+        return $result;
+
     }
 
     public function getEndpoint()
@@ -496,6 +512,11 @@ class Trip extends \yii\db\ActiveRecord
     public function getLine()
     {
         return \app\modules\admin\models\Line::findOne($this->line_id);
+    }
+
+    public function getLineR()
+    {
+        return $this->hasOne(Line::className(), ['id' => 'line_id']);
     }
 
     public function getRoute()

@@ -41,7 +41,7 @@ class BotTripSearch extends BotTrip
      */
     public function search($params)
     {
-        $query = BotTrip::find();
+        $query = Trip::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
