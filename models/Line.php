@@ -192,6 +192,10 @@ class Line extends \yii\db\ActiveRecord
         return Route::findOne($this->route_id);
     }
 
+    public function getRouteR(){
+        return $this->hasOne(Route::className(), ['id' => 'route_id']);
+    }
+
     public function getStartPoint()
     {
         return Checkpoint::findOne($this->startpoint);
