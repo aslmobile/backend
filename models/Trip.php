@@ -215,37 +215,56 @@ class Trip extends \yii\db\ActiveRecord
 
         switch ($action) {
             case 'startpoint_id':
+
+                $this->line_id = 0;
+                $this->driver_id = 0;
+                $this->vehicle_id = 0;
+                
                 $position = Checkpoint::findOne($this->startpoint_id);
+
                 if (!empty($position)) {
                     $this->position = $position->latitude . ',' . $position->longitude;
                 } else return false;
+
                 break;
+
             case 'line_id':
+
                 $line = Line::findOne($this->line_id);
                 if (!empty($line)) {
                     $this->driver_id = $line->driver_id;
                     $this->vehicle_id = $line->vehicle_id;
                 } else return false;
+
                 break;
+
             case 'status':
+
                 $line = Line::findOne($this->line_id);
 
                 $this->payment_type = \app\modules\api\models\Trip::PAYMENT_TYPE_CARD;
                 $this->payment_status = \app\modules\api\models\Trip::PAYMENT_STATUS_PAID;
                 $this->currency = 'T';
 
-                if (empty($line))  return false;
+                if (empty($line)) return false;
 
 
                 switch ($this->status) {
 
+                    case Trip::STATUS_WAITING:
+
+                        break;
+
                     case Trip::STATUS_WAY:
+
+                        $this->driver_comment = Yii::$app->mv->gt("Посадка подтверждена", [], false);
+                        $this->start_time = time();
 
                         $line->freeseats = $line->freeseats - $this->seats;
                         $line->status = Line::STATUS_WAITING;
 
                         if ($line->save()) {
-                            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажиры успешно посаженны', [], 0));
+                            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажир успешно посажен', [], 0));
 
                             $device = Devices::findOne(['user_id' => $this->driver_id]);
                             if ($device) {
@@ -260,6 +279,30 @@ class Trip extends \yii\db\ActiveRecord
 
                             Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось отправить сообщение на сокет', [], 0));
                         }
+                        break;
+
+                    case Trip::STATUS_CANCELLED:
+
+                        $this->status = Trip::STATUS_CANCELLED;
+                        $this->cancel_reason = Yii::$app->mv->gt('Поездка отменена', [], 0);
+
+                        $line->freeseats = $line->freeseats + $this->seats;
+                        $line->save();
+
+                        break;
+
+                    case Trip::STATUS_CANCELLED_DRIVER:
+
+                        $this->status = Trip::STATUS_CANCELLED;
+                        $this->cancel_reason = Yii::$app->mv->gt('Поездка отменена водителем', [], 0);
+
+                        $line->freeseats = $line->freeseats + $this->seats;
+                        $line->save();
+
+                        break;
+
+                    case Trip::STATUS_FINISHED:
+
                         break;
                 }
 
