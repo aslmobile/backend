@@ -64,7 +64,7 @@ class BotTripSearch extends BotTrip
 
             //'id' => $this->id,
 
-            "to_char(date(to_timestamp(created_at)),'dd.mm.yyyy h:ii')" => $this->created_at,
+            "to_char(date(to_timestamp(created_at)),'dd.mm.yyyy hh:ii')" => $this->created_at,
 
             //'updated_at' => $this->updated_at,
 
