@@ -245,11 +245,11 @@ class Trip extends \yii\db\ActiveRecord
 
                     if ($line->freeseats > $this->seats) {
 
-                        $line->freeseats = $line->freeseats - $this->seats;
+                        //$line->freeseats = $line->freeseats - $this->seats;
 
                     } else if ($line->freeseats == $this->seats) {
 
-                        $line->freeseats = 0;
+                        //$line->freeseats = 0;
                         $line->status = Line::STATUS_WAITING;
 
                         if ($line->save()) {
@@ -315,7 +315,7 @@ class Trip extends \yii\db\ActiveRecord
                         $this->driver_id = 0;
                         $this->vehicle_id = 0;
 
-                        $line->freeseats = $line->freeseats + $this->seats;
+                        //$line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
 
                         break;
@@ -328,7 +328,7 @@ class Trip extends \yii\db\ActiveRecord
                         $this->driver_id = 0;
                         $this->vehicle_id = 0;
 
-                        $line->freeseats = $line->freeseats + $this->seats;
+                        //$line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
 
                         break;
