@@ -1,5 +1,6 @@
 <?php namespace app\models;
 
+use app\components\Socket\SocketPusher;
 use app\modules\api\models\Users;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -220,6 +221,27 @@ class Trip extends \yii\db\ActiveRecord
                     $this->driver_id = $line->driver_id;
                     $this->vehicle_id = $line->vehicle_id;
                     $line->seats = $line->seats - $this->seats;
+                    $line->status = Line::STATUS_WAITING;
+                    if ($line->save())
+                    {
+                        Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажиры успешно посаженны',[],0));
+
+                        $device = Devices::findOne(['user_id' => $this->driver_id]);
+                        if ($device)
+                        {
+                            $socket = new SocketPusher(['authkey' => $device->auth_token]);
+                            $socket->push(base64_encode(json_encode([
+                                'action' => "acceptDriverTrip",
+                                'data' => [
+                                    'message_id' => time()
+                                ]
+                            ])));
+
+                        }
+
+                        Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось отправить сообщение на сокет',[],0));
+                    }
+
                     $line->update();
                 } else {
                     return false;
