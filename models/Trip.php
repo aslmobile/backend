@@ -220,11 +220,11 @@ class Trip extends \yii\db\ActiveRecord
 
                     if ($line->freeseats > $this->seats) {
 
-                        //$line->freeseats = $line->freeseats - $this->seats;
+                        $line->freeseats = $line->freeseats - $this->seats;
 
                     } else if ($line->freeseats == $this->seats) {
 
-                        //$line->freeseats = 0;
+                        $line->freeseats = 0;
                         $line->status = Line::STATUS_WAITING;
 
                         if ($line->save()) {
@@ -276,16 +276,16 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_CANCELLED:
 
-                        //$line->freeseats = $line->freeseats + $this->seats;
-                        //$line->save();
+                        $line->freeseats = $line->freeseats + $this->seats;
+                        $line->save();
 
                         break;
 
                     case Trip::STATUS_CANCELLED_DRIVER:
 
 
-                        //$line->freeseats = $line->freeseats + $this->seats;
-                        //$line->save();
+                        $line->freeseats = $line->freeseats + $this->seats;
+                        $line->save();
 
                         break;
 
