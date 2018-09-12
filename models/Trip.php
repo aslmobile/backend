@@ -219,7 +219,7 @@ class Trip extends \yii\db\ActiveRecord
                 $this->line_id = 0;
                 $this->driver_id = 0;
                 $this->vehicle_id = 0;
-                
+
                 $position = Checkpoint::findOne($this->startpoint_id);
 
                 if (!empty($position)) {
@@ -243,7 +243,6 @@ class Trip extends \yii\db\ActiveRecord
                 $line = Line::findOne($this->line_id);
 
                 $this->payment_type = \app\modules\api\models\Trip::PAYMENT_TYPE_CARD;
-                $this->payment_status = \app\modules\api\models\Trip::PAYMENT_STATUS_PAID;
                 $this->currency = 'T';
 
                 if (empty($line)) return false;
@@ -257,6 +256,7 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_WAY:
 
+                        $this->payment_status = \app\modules\api\models\Trip::PAYMENT_STATUS_PAID;
                         $this->driver_comment = Yii::$app->mv->gt("Посадка подтверждена", [], false);
                         $this->start_time = time();
 
@@ -279,12 +279,16 @@ class Trip extends \yii\db\ActiveRecord
 
                             Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось отправить сообщение на сокет', [], 0));
                         }
+
                         break;
 
                     case Trip::STATUS_CANCELLED:
 
                         $this->status = Trip::STATUS_CANCELLED;
                         $this->cancel_reason = Yii::$app->mv->gt('Поездка отменена', [], 0);
+                        $this->line_id = 0;
+                        $this->driver_id = 0;
+                        $this->vehicle_id = 0;
 
                         $line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
@@ -295,6 +299,9 @@ class Trip extends \yii\db\ActiveRecord
 
                         $this->status = Trip::STATUS_CANCELLED;
                         $this->cancel_reason = Yii::$app->mv->gt('Поездка отменена водителем', [], 0);
+                        $this->line_id = 0;
+                        $this->driver_id = 0;
+                        $this->vehicle_id = 0;
 
                         $line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
