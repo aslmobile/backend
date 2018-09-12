@@ -262,28 +262,45 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_WAY:
 
-                        $this->payment_status = \app\modules\api\models\Trip::PAYMENT_STATUS_PAID;
-                        $this->driver_comment = Yii::$app->mv->gt("Посадка подтверждена", [], false);
-                        $this->start_time = time();
+                        if ($line->freeseats > $this->seats) {
 
-                        $line->freeseats = $line->freeseats - $this->seats;
-                        $line->status = Line::STATUS_WAITING;
+                            $line->freeseats = $line->freeseats - $this->seats;
 
-                        if ($line->save()) {
-                            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажир успешно посажен', [], 0));
+                        } elseif ($line->freeseats == $this->seats) {
 
-                            $device = Devices::findOne(['user_id' => $this->driver_id]);
-                            if ($device) {
-                                $socket = new SocketPusher(['authkey' => $device->auth_token]);
-                                $socket->push(base64_encode(json_encode([
-                                    'action' => "acceptDriverTrip",
-                                    'data' => [
-                                        'message_id' => time()
-                                    ]
-                                ])));
+                            $this->payment_status = \app\modules\api\models\Trip::PAYMENT_STATUS_PAID;
+                            $this->driver_comment = Yii::$app->mv->gt("Посадка подтверждена", [], false);
+                            $this->start_time = time();
+
+                            self::updateAll(
+                                [
+                                    'start_time' => time(),
+                                    'driver_comment' => Yii::$app->mv->gt("Посадка подтверждена", [], false),
+                                    'payment_status' => \app\modules\api\models\Trip::PAYMENT_STATUS_PAID,
+                                ],
+                                ['driver_id' => $this->driver_id, 'status']
+                            );
+
+                            $line->freeseats = $line->freeseats - $this->seats;
+                            $line->status = Line::STATUS_WAITING;
+
+                            if ($line->save()) {
+                                Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Пассажир успешно посажен', [], 0));
+
+                                $device = Devices::findOne(['user_id' => $this->driver_id]);
+                                if ($device) {
+                                    $socket = new SocketPusher(['authkey' => $device->auth_token]);
+                                    $socket->push(base64_encode(json_encode([
+                                        'action' => "acceptDriverTrip",
+                                        'data' => ['message_id' => time()]
+                                    ])));
+                                }
+
+                                Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось отправить сообщение на сокет', [], 0));
                             }
 
-                            Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось отправить сообщение на сокет', [], 0));
+                        } else {
+                            return false;
                         }
 
                         break;
