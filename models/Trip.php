@@ -246,7 +246,7 @@ class Trip extends \yii\db\ActiveRecord
 
                         $line->freeseats = $line->freeseats - $this->seats;
 
-                    } elseif ($line->freeseats == $this->seats) {
+                    } else if ($line->freeseats == $this->seats) {
 
                         $line->freeseats = 0;
                         $line->status = Line::STATUS_WAITING;
@@ -263,9 +263,7 @@ class Trip extends \yii\db\ActiveRecord
 
                         }
 
-                    } else {
-                        return false;
-                    }
+                    } else return false;
 
                 } else return false;
 
@@ -297,11 +295,11 @@ class Trip extends \yii\db\ActiveRecord
                         $this->driver_comment = Yii::$app->mv->gt("Посадка подтверждена", [], false);
                         $this->start_time = time();
 
-                        $device = Devices::findOne(['user_id' => $this->driver_id]);
+                        $device = Devices::findOne(['user_id' => $this->user_id]);
                         if ($device) {
                             $socket = new SocketPusher(['authkey' => $device->auth_token]);
                             $socket->push(base64_encode(json_encode([
-                                'action' => "acceptDriverTrip",
+                                'action' => "acceptPassengerTrip",
                                 'data' => ['message_id' => time()]
                             ])));
                         }
