@@ -32,7 +32,7 @@ class BotTripController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index', 'create', 'update', 'view', 'status', 'startpoint_id'],
+                        'actions' => ['index', 'create', 'update', 'view', 'status', 'startpoint_id', 'line_id'],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
                     ],
