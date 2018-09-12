@@ -239,7 +239,7 @@ class Trip extends \yii\db\ActiveRecord
 
                         }
 
-                    } else return false;
+                    };
 
                 } else return false;
 
@@ -328,35 +328,10 @@ class Trip extends \yii\db\ActiveRecord
 
                     $this->driver_id = $line->driver_id;
                     $this->vehicle_id = $line->vehicle_id;
-
                     $this->passenger_comment = '';
                     $this->driver_comment = '';
                     $this->driver_description = '';
-
                     $this->status = self::STATUS_WAITING;
-
-//                    if ($line->freeseats > $this->seats) {
-//
-//                        //$line->freeseats = $line->freeseats - $this->seats;
-//
-//                    } else if ($line->freeseats == $this->seats) {
-//
-//                        //$line->freeseats = 0;
-//                        $line->status = Line::STATUS_WAITING;
-//
-//                        if ($line->save()) {
-//                            $device = Devices::findOne(['user_id' => $this->driver_id]);
-//                            if ($device) {
-//                                $socket = new SocketPusher(['authkey' => $device->auth_token]);
-//                                $socket->push(base64_encode(json_encode([
-//                                    'action' => "acceptDriverTrip",
-//                                    'data' => ['message_id' => time()]
-//                                ])));
-//                            }
-//
-//                        }
-//
-//                    } else return false;
 
                 } else return false;
 
@@ -388,15 +363,6 @@ class Trip extends \yii\db\ActiveRecord
                         $this->driver_comment = Yii::$app->mv->gt("Посадка подтверждена", [], false);
                         $this->start_time = time();
 
-//                        $device = Devices::findOne(['user_id' => $this->driver_id]);
-//                        if ($device) {
-//                            $socket = new SocketPusher(['authkey' => $device->auth_token]);
-//                            $socket->push(base64_encode(json_encode([
-//                                'action' => "acceptPassengerTrip",
-//                                'data' => ['message_id' => time()]
-//                            ])));
-//                        }
-
                         break;
 
                     case Trip::STATUS_CANCELLED:
@@ -407,9 +373,6 @@ class Trip extends \yii\db\ActiveRecord
                         $this->driver_id = 0;
                         $this->vehicle_id = 0;
 
-                        //$line->freeseats = $line->freeseats + $this->seats;
-                        //$line->save();
-
                         break;
 
                     case Trip::STATUS_CANCELLED_DRIVER:
@@ -419,9 +382,6 @@ class Trip extends \yii\db\ActiveRecord
                         $this->line_id = 0;
                         $this->driver_id = 0;
                         $this->vehicle_id = 0;
-
-                        //$line->freeseats = $line->freeseats + $this->seats;
-                        //$line->save();
 
                         break;
 
