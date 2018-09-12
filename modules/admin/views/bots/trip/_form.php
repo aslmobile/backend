@@ -98,13 +98,29 @@ $all_luggages = \app\models\LuggageType::getAll();
                             (\app\modules\admin\models\Checkpoint::find()
                                 ->where([
                                     'status' => \app\models\Checkpoint::STATUS_ACTIVE,
-                                    //'type' => \app\models\Checkpoint::TYPE_STOP
+                                    'type' => [\app\models\Checkpoint::TYPE_START, \app\models\Checkpoint::TYPE_STOP]
                                 ])->all(), 'id', 'title'),
                             'theme' => Select2::THEME_DEFAULT,
                             'attribute' => 'startpoint_id',
                             'hideSearch' => true,
                             'options' => [
                                 'placeholder' => Yii::t('app', "Остановка")
+                            ],
+                            'pluginOptions' => ['allowClear' => true]
+                        ]); ?>
+
+                        <?= $form->field($model, 'endpoint_id')->widget(Select2::classname(), [
+                            'data' => \yii\helpers\ArrayHelper::map
+                            (\app\modules\admin\models\Checkpoint::find()
+                                ->where([
+                                    'status' => \app\models\Checkpoint::STATUS_ACTIVE,
+                                    'type' => [\app\models\Checkpoint::TYPE_STOP, \app\models\Checkpoint::TYPE_END]
+                                ])->all(), 'id', 'title'),
+                            'theme' => Select2::THEME_DEFAULT,
+                            'attribute' => 'endpoint_id',
+                            'hideSearch' => true,
+                            'options' => [
+                                'placeholder' => Yii::t('app', "Конечная")
                             ],
                             'pluginOptions' => ['allowClear' => true]
                         ]); ?>
