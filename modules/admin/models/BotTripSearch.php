@@ -41,7 +41,7 @@ class BotTripSearch extends BotTrip
      */
     public function search($params)
     {
-        $query = Trip::find();
+        $query = BotTrip::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -102,8 +102,6 @@ class BotTripSearch extends BotTrip
             //'finish_time' => $this->finish_time,
 
         ]);
-
-        //var_dump($dataProvider->models);die();
 
 
 //        $query->andFilterWhere(['like', 'passenger_description', $this->passenger_description])
