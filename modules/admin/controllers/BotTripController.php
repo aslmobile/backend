@@ -62,7 +62,7 @@ class BotTripController extends Controller
                     return $model->$attribute;      // return any custom output value if desired
                 },
                 'outputMessage' => function ($model, $attribute, $key, $index) {
-                    return json_encode($model->errors);                                  // any custom error to return after model save
+                    return '';                                  // any custom error to return after model save
                 },
                 'showModelErrors' => true,                        // show model validation errors after save
                 'errorOptions' => ['header' => '']                // error summary HTML options
@@ -78,7 +78,7 @@ class BotTripController extends Controller
                     return $model->$attribute;      // return any custom output value if desired
                 },
                 'outputMessage' => function ($model, $attribute, $key, $index) {
-                    return json_encode($model->errors);                                  // any custom error to return after model save
+                    return '';                                  // any custom error to return after model save
                 },
                 'showModelErrors' => true,                        // show model validation errors after save
                 'errorOptions' => ['header' => '']                // error summary HTML options
@@ -94,7 +94,7 @@ class BotTripController extends Controller
                     return $model->$attribute;      // return any custom output value if desired
                 },
                 'outputMessage' => function ($model, $attribute, $key, $index) {
-                    return json_encode($model->errors);                                  // any custom error to return after model save
+                    return '';                                  // any custom error to return after model save
                 },
                 'showModelErrors' => true,                        // show model validation errors after save
                 'errorOptions' => ['header' => '']                // error summary HTML options
