@@ -18,23 +18,53 @@ if (!$model->isNewRecord) {
 $luggages_v = implode(",", $luggages);
 $all_luggages = \app\models\LuggageType::getAll();
 
-//$script = <<< JS
-//    function loadCheckpooints() {
-//        $.ajax($(button).attr('href'), {
-//            type: "POST",
-//            async: false,
-//            data: {sum: sum},
-//            beforeSend: function (xhr) { },
-//            error: function (xhr) { console.log(xhr); },
-//            success: function (response) {
-//
-//            }
-//        });
-//    }
-//    loadCheckpooints();
-//    $('')
-//JS;
-//$this->registerJs($script, \yii\web\View::POS_READY);
+$script = <<< JS
+    function loadStartpoints(id) {
+        $.ajax('/admin/bot-trip/start-points?id='+id, {
+            type: "POST",
+            async: false,
+            data: {route: id},
+            beforeSend: function (xhr) { },
+            error: function (xhr) { console.log(xhr); },
+            success: function (response) {
+                console.log(response);
+                $('#bottrip-startpoint_id').html('');
+                $.each(response, function(key, value) {
+                    var newOption = new Option(value, key, false, false);
+                    $('#bottrip-startpoint_id').append(newOption).trigger('change');
+                });
+                $('#bottrip-startpoint_id').select2({
+                    data: response
+                });
+            }
+        });
+    }
+    function loadEndpoints(id) {
+        $.ajax('/admin/bot-trip/end-points?id='+id, {
+            type: "POST",
+            async: false,
+            data: {route: id},
+            beforeSend: function (xhr) { },
+            error: function (xhr) { console.log(xhr); },
+            success: function (response) {
+                console.log(response);
+                $('#bottrip-endpoint_id').html('');
+                $.each(response, function(key, value) {
+                    var newOption = new Option(value, key, false, false);
+                    $('#bottrip-endpoint_id').append(newOption).trigger('change');
+                });
+                $('#bottrip-endpoint_id').select2({
+                    data: response
+                });
+            }
+        });
+    }
+    $('#bottrip-route_id').change(function() {
+        loadStartpoints($(this).val());
+        loadEndpoints($(this).val());
+    });
+JS;
+$this->registerJs($script, \yii\web\View::POS_READY);
 
 ?>
 
