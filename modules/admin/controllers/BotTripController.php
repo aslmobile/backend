@@ -153,6 +153,9 @@ class BotTripController extends Controller
     public function actionCreate()
     {
         $model = new BotTrip();
+        $model->line_id = 0;
+        $model->driver_id = 0;
+        $model->vehicle_id = 0;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['index', 'id' => $model->id]);
@@ -171,6 +174,9 @@ class BotTripController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $model->line_id = 0;
+        $model->driver_id = 0;
+        $model->vehicle_id = 0;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved', [], 0));
