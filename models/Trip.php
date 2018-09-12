@@ -214,18 +214,28 @@ class Trip extends \yii\db\ActiveRecord
         $action = Yii::$app->controller->action->id;
 
         switch ($action) {
+            case 'startpoint_id':
+                $position = Checkpoint::findOne($this->startpoint_id);
+                if (!empty($position)) {
+                    $this->position = $position->latitude . ',' . $position->longitude;
+                } else return false;
+                break;
             case 'line_id':
                 $line = Line::findOne($this->line_id);
                 if (!empty($line)) {
                     $this->driver_id = $line->driver_id;
                     $this->vehicle_id = $line->vehicle_id;
-                } else {
-                    return false;
-                }
+                } else return false;
                 break;
             case 'status':
                 $line = Line::findOne($this->line_id);
-                if (empty($line)) {return false;}
+
+                $this->payment_type = \app\modules\api\models\Trip::PAYMENT_TYPE_CARD;
+                $this->payment_status = \app\modules\api\models\Trip::PAYMENT_STATUS_PAID;
+                $this->currency = 'T';
+
+                if (empty($line))  return false;
+
 
                 switch ($this->status) {
 
@@ -250,8 +260,6 @@ class Trip extends \yii\db\ActiveRecord
 
                             Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Не удалось отправить сообщение на сокет', [], 0));
                         }
-
-                        $line->update();
                         break;
                 }
 
