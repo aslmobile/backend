@@ -88,7 +88,7 @@ class Module extends \yii\base\Module
 
     /**
      * @param $data string
-     * @param $scheme array|object
+     * @param $scheme array|object|bool
      */
     public function JSONValidate ($data, $scheme)
     {

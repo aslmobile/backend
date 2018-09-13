@@ -308,7 +308,6 @@ class Message
 
         // TODO: обработка очереди (приходит с девайсов на создание поездки и поиск пассажиров
 
-
         $response = [
             'message_id'    => $this->message_id,
             'device_id'     => $device->id,
