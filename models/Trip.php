@@ -221,6 +221,7 @@ class Trip extends \yii\db\ActiveRecord
                     if ($line->freeseats > intval($this->seats)) {
 
                         $line->freeseats = $line->freeseats - $this->seats;
+                        $line->save();
 
                     } else if ($line->freeseats == intval($this->seats)) {
 
