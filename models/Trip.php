@@ -220,7 +220,7 @@ class Trip extends \yii\db\ActiveRecord
 
                     if ($line->freeseats > intval($this->seats)) {
 
-                        $line->freeseats -= $this->seats;
+                        $line->freeseats = $line->freeseats - $this->seats;
 
                     } else if ($line->freeseats == intval($this->seats)) {
 
@@ -265,7 +265,7 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_CANCELLED:
 
-                        $line->freeseats += $this->seats;
+                        $line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
 
                         break;
@@ -273,7 +273,7 @@ class Trip extends \yii\db\ActiveRecord
                     case Trip::STATUS_CANCELLED_DRIVER:
 
 
-                        $line->freeseats += $this->seats;
+                        $line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
 
                         break;
@@ -453,6 +453,11 @@ class Trip extends \yii\db\ActiveRecord
     public function getStartpoint()
     {
         return Checkpoint::findOne($this->startpoint_id);
+    }
+
+    public function getStartpointR()
+    {
+        return $this->hasOne(Checkpoint::className(), ['id' => 'startpoint_id']);
     }
 
     public function getRoutePoints()
