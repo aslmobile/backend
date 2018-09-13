@@ -220,24 +220,13 @@ class Trip extends \yii\db\ActiveRecord
 
                     if ($line->freeseats > intval($this->seats)) {
 
-                        $line->freeseats = $line->freeseats - $this->seats;
+                        $line->freeseats -= $this->seats;
 
                     } else if ($line->freeseats == intval($this->seats)) {
 
                         $line->freeseats = 0;
                         $line->status = Line::STATUS_WAITING;
-
-                        if ($line->save()) {
-                            $device = Devices::findOne(['user_id' => $this->driver_id]);
-                            if ($device) {
-                                $socket = new SocketPusher(['authkey' => $device->auth_token]);
-                                $socket->push(base64_encode(json_encode([
-                                    'action' => "acceptDriverTrip",
-                                    'data' => ['message_id' => time()]
-                                ])));
-                            }
-
-                        }
+                        $line->save();
 
                     };
 
@@ -276,7 +265,7 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_CANCELLED:
 
-                        $line->freeseats = $line->freeseats + $this->seats;
+                        $line->freeseats += $this->seats;
                         $line->save();
 
                         break;
@@ -284,7 +273,7 @@ class Trip extends \yii\db\ActiveRecord
                     case Trip::STATUS_CANCELLED_DRIVER:
 
 
-                        $line->freeseats = $line->freeseats + $this->seats;
+                        $line->freeseats += $this->seats;
                         $line->save();
 
                         break;
@@ -317,7 +306,10 @@ class Trip extends \yii\db\ActiveRecord
 
                 if (!empty($position)) {
                     $this->position = $position->latitude . ',' . $position->longitude;
-                } else return false;
+                } else {
+                    $this->addError('startpoint_id', Yii::$app->mv->gt("Точки не существует", [], false));
+                    return false;
+                };
 
                 break;
 
@@ -327,7 +319,10 @@ class Trip extends \yii\db\ActiveRecord
 
                 if (!empty($line)) {
 
-                    if ($line->freeseats < intval($this->seats)) return false;
+                    if ($line->freeseats < intval($this->seats)) {
+                        $this->addError('line_id', Yii::$app->mv->gt("Не хватает мест", [], false));
+                        return false;
+                    };
 
                     $this->driver_id = $line->driver_id;
                     $this->vehicle_id = $line->vehicle_id;
@@ -336,7 +331,10 @@ class Trip extends \yii\db\ActiveRecord
                     $this->driver_description = '';
                     $this->status = self::STATUS_WAITING;
 
-                } else return false;
+                } else {
+                    $this->addError('line_id', Yii::$app->mv->gt("Линии не существует", [], false));
+                    return false;
+                };
 
                 break;
 

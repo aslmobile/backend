@@ -115,6 +115,13 @@ class BotTrip extends \app\models\Trip
     public function afterDelete()
     {
         TripLuggage::deleteAll(['unique_id' => $this->luggage_unique_id]);
+
+        $line = \app\models\Line::findOne($this->line_id);
+        if(!empty($line)){
+            $line->freeseats += $this->seats;
+        }
+        $line->update();
+
         parent::afterDelete();
     }
 
