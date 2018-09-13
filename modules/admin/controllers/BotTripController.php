@@ -207,7 +207,7 @@ class BotTripController extends Controller
     public function actionEndPoints($id)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
-        return  ArrayHelper::map(Checkpoint::findAll(['route' => intval($id), 'type' => [Checkpoint::TYPE_STOP, Checkpoint::TYPE_END]]), 'id', 'title');
+        return  ArrayHelper::map(Checkpoint::findAll(['route' => intval($id), 'type' => [Checkpoint::TYPE_END]]), 'id', 'title');
     }
 
     /**

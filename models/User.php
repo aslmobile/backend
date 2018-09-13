@@ -8,6 +8,7 @@ use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 use yii\web\IdentityInterface;
 
 /**
@@ -181,10 +182,10 @@ class User extends ActiveRecord implements IdentityInterface
         if ($file_id > 0)
         {
             $file = UploadFiles::findOne(['id' => $file_id]);
-            if ($file) return $file->file;
+            if ($file) return Url::to($file->file, true);
         }
 
-        return '/files/images/photo-placeholder-256.png';
+        return Url::to('/files/images/photo-placeholder-256.png', true);
     }
 
     /**

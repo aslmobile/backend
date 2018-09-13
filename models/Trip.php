@@ -218,11 +218,11 @@ class Trip extends \yii\db\ActiveRecord
                 $line = Line::findOne($this->line_id);
                 if (!empty($line)) {
 
-                    if ($line->freeseats > $this->seats) {
+                    if ($line->freeseats > intval($this->seats)) {
 
                         $line->freeseats = $line->freeseats - $this->seats;
 
-                    } else if ($line->freeseats == $this->seats) {
+                    } else if ($line->freeseats == intval($this->seats)) {
 
                         $line->freeseats = 0;
                         $line->status = Line::STATUS_WAITING;
@@ -263,8 +263,8 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_WAY:
 
-                        $device = Devices::findOne(['user_id' => $this->driver_id]);
-                        if ($device) {
+                        $device = Devices::findOne(['user_id' => $this->user_id]);
+                        if (!empty($device)) {
                             $socket = new SocketPusher(['authkey' => $device->auth_token]);
                             $socket->push(base64_encode(json_encode([
                                 'action' => "acceptPassengerTrip",
@@ -324,7 +324,10 @@ class Trip extends \yii\db\ActiveRecord
             case 'line_id':
 
                 $line = Line::findOne($this->line_id);
+
                 if (!empty($line)) {
+
+                    if ($line->freeseats < intval($this->seats)) return false;
 
                     $this->driver_id = $line->driver_id;
                     $this->vehicle_id = $line->vehicle_id;
@@ -341,11 +344,10 @@ class Trip extends \yii\db\ActiveRecord
 
                 $line = Line::findOne($this->line_id);
 
-                $this->payment_type = \app\modules\api\models\Trip::PAYMENT_TYPE_CARD;
-                $this->currency = 'T';
-
                 if (empty($line)) break;
 
+                $this->payment_type = \app\modules\api\models\Trip::PAYMENT_TYPE_CARD;
+                $this->currency = 'T';
 
                 switch ($this->status) {
 
@@ -359,7 +361,6 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_WAY:
 
-                        $this->payment_status = \app\modules\api\models\Trip::PAYMENT_STATUS_PAID;
                         $this->driver_comment = Yii::$app->mv->gt("Посадка подтверждена", [], false);
                         $this->start_time = time();
 
@@ -367,25 +368,27 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_CANCELLED:
 
-                        $this->status = Trip::STATUS_CANCELLED;
                         $this->cancel_reason = Yii::$app->mv->gt('Поездка отменена', [], 0);
                         $this->line_id = 0;
                         $this->driver_id = 0;
                         $this->vehicle_id = 0;
+                        $this->finish_time = time();
 
                         break;
 
                     case Trip::STATUS_CANCELLED_DRIVER:
 
-                        $this->status = Trip::STATUS_CANCELLED;
                         $this->cancel_reason = Yii::$app->mv->gt('Поездка отменена водителем', [], 0);
                         $this->line_id = 0;
                         $this->driver_id = 0;
                         $this->vehicle_id = 0;
+                        $this->finish_time = time();
 
                         break;
 
                     case Trip::STATUS_FINISHED:
+
+                        $this->finish_time = time();
 
                         break;
                 }

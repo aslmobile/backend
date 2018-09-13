@@ -194,7 +194,7 @@ class LineController extends BaseController
                             'image_url'     => $trip->user->getImageFile(),
                             'payment_type'  => $trip->payment_type,
                             'seats'         => $trip->seats,
-                            'comment'       => $trip->passenger_comment,
+                            'comment'       => $trip->passenger_description,
                             'rating'        => $trip->passenger_rating
                         ];
                     }
@@ -210,7 +210,7 @@ class LineController extends BaseController
                             'image_url'     => $trip->user->getImageFile(),
                             'payment_type'  => $trip->payment_type,
                             'seats'         => $trip->seats,
-                            'comment'       => $trip->passenger_comment,
+                            'comment'       => $trip->passenger_description,
                             'rating'        => $trip->passenger_rating
                         ];
                     }
@@ -225,7 +225,7 @@ class LineController extends BaseController
                             'image_url'     => $trip->user->getImageFile(),
                             'payment_type'  => $trip->payment_type,
                             'seats'         => $trip->seats,
-                            'comment'       => $trip->passenger_comment,
+                            'comment'       => $trip->passenger_description,
                             'rating'        => $trip->passenger_rating
                         ];
                     }
@@ -247,7 +247,7 @@ class LineController extends BaseController
                                     'image_url'     => $trip->user->getImageFile(),
                                     'payment_type'  => $trip->payment_type,
                                     'seats'         => $trip->seats,
-                                    'comment'       => $trip->passenger_comment,
+                                    'comment'       => $trip->passenger_description,
                                     'rating'        => $trip->passenger_rating
                                 ]
                             ]
