@@ -261,6 +261,8 @@ class UserController extends BaseController
         ];
 
         if (!$user->load($data)) $this->module->setError(422, 'user', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
+        if ($user->type == User::TYPE_PASSENGER) $user->status = User::STATUS_APPROVED;
+
         if (!$user->validate() || !$user->save())
         {
             if ($user->hasErrors())
