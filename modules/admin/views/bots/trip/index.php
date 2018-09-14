@@ -111,7 +111,7 @@ unset($statuses[BotTrip::STATUS_CREATED]);
                         'attribute' => 'startpoint_id',
                         'filterType' => GridView::FILTER_SELECT2,
                         'filterWidgetOptions' => [
-                            'data' => [null => 'Все'] + \app\models\Trip::getVehicleTypeList(),
+                            'data' => [null => 'Все'] + \app\models\Trip::getAllRoutePoints(),
                         ],
                         'headerOptions' => ['style' => 'width: 150px;'],
                         'value' => function ($model) {
