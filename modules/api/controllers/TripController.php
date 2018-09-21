@@ -10,12 +10,9 @@ use app\models\TripLuggage;
 use app\modules\admin\models\Checkpoint;
 use app\modules\api\models\RestFul;
 use app\modules\api\models\Trip;
-use app\modules\api\models\Users;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-
-use app\modules\api\models\City;
 
 /** @property \app\modules\api\Module $module */
 class TripController extends BaseController
@@ -55,9 +52,9 @@ class TripController extends BaseController
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'cities'  => ['GET'],
-                    'calculate-passenger-tariff'  => ['GET'],
-                    'passengers'  => ['GET'],
+                    'cities' => ['GET'],
+                    'calculate-passenger-tariff' => ['GET'],
+                    'passengers' => ['GET'],
                     'accept-arrive' => ['POST'],
                     'accept-passenger' => ['POST'],
                     'checkpoint-arrived' => ['POST'],
@@ -67,8 +64,8 @@ class TripController extends BaseController
                     'passengers-route' => ['GET'],
                     'arrive-endpoint' => ['POST'],
                     'passenger-trips' => ['GET'],
-                    'cancel-trip'   => ['POST'],
-                    'cancel-trip-queue'   => ['POST'],
+                    'cancel-trip' => ['POST'],
+                    'cancel-trip-queue' => ['POST'],
                 ]
             ]
         ];
@@ -158,8 +155,7 @@ class TripController extends BaseController
         ])->all();
 
         /** @var \app\modules\api\models\Trip $trip */
-        if ($trips && count ($trips)) foreach ($trips as $trip)
-        {
+        if ($trips && count($trips)) foreach ($trips as $trip) {
             $past = [
                 Trip::STATUS_FINISHED,
                 Trip::STATUS_CANCELLED,
@@ -244,13 +240,12 @@ class TripController extends BaseController
         ])->all();
 
         $checkpoints = [];
-        if ($trips && count ($trips) > 0) foreach ($trips as $trip)
-        {
+        if ($trips && count($trips) > 0) foreach ($trips as $trip) {
             /** @var \app\modules\api\models\Trip $trip */
 
             $checkpoints[$trip->startpoint->id][] = [
                 'trip' => $trip->toArray(),
-                'position'  => $trip->position
+                'position' => $trip->position
             ];
         }
 
@@ -263,8 +258,7 @@ class TripController extends BaseController
         ])->all();
 
         $passengers = [];
-        if ($passengers_seat && count($passengers_seat) > 0) foreach ($passengers_seat as $passenger)
-        {
+        if ($passengers_seat && count($passengers_seat) > 0) foreach ($passengers_seat as $passenger) {
             $passengers[] = $passenger->toArray();
         }
 
@@ -316,15 +310,12 @@ class TripController extends BaseController
 
         $trip->status = Trip::STATUS_TRIP;
 
-        if (!$trip->validate() || !$trip->save())
-        {
-            if ($trip->hasErrors())
-            {
+        if (!$trip->validate() || !$trip->save()) {
+            if ($trip->hasErrors()) {
                 foreach ($trip->errors as $field => $error_message)
                     $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
-            }
-            else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['line'] = $line->toArray();
@@ -350,19 +341,15 @@ class TripController extends BaseController
         if (!$trips) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $_trips = [];
-        foreach ($trips as $trip)
-        {
+        foreach ($trips as $trip) {
             $trip->status = Trip::STATUS_FINISHED;
 
-            if (!$trip->validate() || !$trip->save())
-            {
-                if ($trip->hasErrors())
-                {
+            if (!$trip->validate() || !$trip->save()) {
+                if ($trip->hasErrors()) {
                     foreach ($trip->errors as $field => $error_message)
                         $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                     $this->module->sendResponse();
-                }
-                else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+                } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
             }
 
             $_trips[] = $trip->toArray();
@@ -393,15 +380,12 @@ class TripController extends BaseController
         $trip->passenger_rating = floatval($this->body->passenger_rating);
         $trip->driver_comment = $this->body->driver_comment;
 
-        if (!$trip->validate() || !$trip->save())
-        {
-            if ($trip->hasErrors())
-            {
+        if (!$trip->validate() || !$trip->save()) {
+            if ($trip->hasErrors()) {
                 foreach ($trip->errors as $field => $error_message)
                     $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
-            }
-            else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['line'] = $line->toArray();
@@ -437,13 +421,12 @@ class TripController extends BaseController
         $reviews = [];
 
         /** @var \app\modules\api\models\Trip $trip */
-        if ($trips && count($trips) > 0) foreach ($trips as $trip)
-        {
+        if ($trips && count($trips) > 0) foreach ($trips as $trip) {
             if (!empty($trip->passenger_comment) && intval($trip->passenger_rating)) $reviews[] = [
                 'rating' => $trip->passenger_rating,
                 'comment' => $trip->passenger_comment,
-                'date'    => $trip->created_at,
-                'route'    => $trip->route->toArray(),
+                'date' => $trip->created_at,
+                'route' => $trip->route->toArray(),
             ];
         }
 
@@ -461,13 +444,12 @@ class TripController extends BaseController
         $reviews = [];
 
         /** @var \app\modules\api\models\Trip $trip */
-        if ($trips && count($trips) > 0) foreach ($trips as $trip)
-        {
+        if ($trips && count($trips) > 0) foreach ($trips as $trip) {
             if (!empty($trip->passenger_comment) && intval($trip->passenger_rating)) $reviews[] = [
                 'rating' => $trip->passenger_rating,
                 'comment' => $trip->passenger_comment,
-                'date'    => $trip->created_at,
-                'route'    => $trip->route->toArray(),
+                'date' => $trip->created_at,
+                'route' => $trip->route->toArray(),
             ];
         }
 
@@ -495,8 +477,7 @@ class TripController extends BaseController
             ['=', 'driver_id', $user->id]
         ])->all();
 
-        foreach ($lines as $line)
-        {
+        foreach ($lines as $line) {
             /** @var \app\modules\api\models\Line $line */
             $passengers = Trip::find()->where(['line_id' => $line->id])->count();
 
@@ -546,7 +527,7 @@ class TripController extends BaseController
         if (!$line) $this->module->setError(422, 'line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
-        $trips = Trip::find()->andWhere([
+        $trips = Trip::find()->where([
             'AND',
             ['=', 'route_id', $line->route_id],
             ['=', 'vehicle_id', $line->vehicle_id],
@@ -597,8 +578,7 @@ class TripController extends BaseController
 
         /** @var \app\models\LuggageType $luggage_type */
         $luggage_types = LuggageType::find()->where(['status' => LuggageType::STATUS_ACTIVE])->all();
-        if ($luggage_types && count($luggage_types) > 0) foreach ($luggage_types as $luggage_type)
-        {
+        if ($luggage_types && count($luggage_types) > 0) foreach ($luggage_types as $luggage_type) {
             $this->module->data['types'][] = $luggage_type->toArray();
         }
 
@@ -630,15 +610,12 @@ class TripController extends BaseController
         $taxi->address = $this->body->address;
         $taxi->checkpoint = $checkpoint->id;
 
-        if (!$taxi->validate() || !$taxi->save())
-        {
-            if ($taxi->hasErrors())
-            {
+        if (!$taxi->validate() || !$taxi->save()) {
+            if ($taxi->hasErrors()) {
                 foreach ($taxi->errors as $field => $error_message)
                     $this->module->setError(422, 'taxi.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
-            }
-            else $this->module->setError(422, '_taxi', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422, '_taxi', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['taxi'] = $taxi->toArray();
@@ -678,7 +655,7 @@ class TripController extends BaseController
         /** @var \app\models\Route $route */
         $route = Route::find()->andWhere([
             'AND',
-            ['=', 'status' , Route::STATUS_ACTIVE],
+            ['=', 'status', Route::STATUS_ACTIVE],
             ['=', 'id', $this->body->route]
         ])->one();
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
@@ -686,8 +663,7 @@ class TripController extends BaseController
         $seats = $this->body->seats;
         $_luggages = [];
         $luggages = $this->body->luggage;
-        if (is_array($luggages) && count($luggages) > 0) foreach ($luggages as $luggage)
-        {
+        if (is_array($luggages) && count($luggages) > 0) foreach ($luggages as $luggage) {
             $luggage = LuggageType::findOne($luggage);
             if (!$luggage) $this->module->setError(422, '_luggage', Yii::$app->mv->gt("Не найден", [], false));
             $_luggages[] = $luggage->toArray();
@@ -696,16 +672,14 @@ class TripController extends BaseController
         }
 
         $luggage_unique = false;
-        if ($_luggages && count($_luggages) > 0)
-        {
+        if ($_luggages && count($_luggages) > 0) {
             foreach ($_luggages as $luggage) $luggage_unique .= $luggage['id'] . '+';
             $luggage_unique .= $user->id . '+' . $route->id;
             $luggage_unique = hash('sha256', md5($luggage_unique) . time());
         }
 
         $taxi = false;
-        if ($this->body->taxi)
-        {
+        if ($this->body->taxi) {
             $taxi = Taxi::findOne($this->body->taxi);
             if (!$taxi) $this->module->setError(422, '_taxi', Yii::$app->mv->gt("Не найден", [], false));
         }
@@ -725,43 +699,36 @@ class TripController extends BaseController
         $trip->need_taxi = $this->body->taxi ? 1 : 0;
         $trip->start_time = $this->body->time == -1 ? time() + 1800 : $this->body->time;
 
-        if ($taxi)
-        {
+        if ($taxi) {
             $trip->taxi_status = $taxi->status;
             $trip->taxi_address = $taxi->address;
             $trip->taxi_time = time() + 900;
         }
 
-        if ($this->body->schedule)
-        {
+        if ($this->body->schedule) {
             // TODO: Сделать расписание
             $trip->scheduled = 1;
             $trip->schedule_id = 0;
-        }
-        else $trip->scheduled = 0;
+        } else $trip->scheduled = 0;
 
-        if ($luggage_unique)
-        {
-            $trip->luggage_unique_id = (string) $luggage_unique;
+        if ($luggage_unique) {
+            $trip->luggage_unique_id = (string)$luggage_unique;
 
             /** @var \app\models\TripLuggage $luggage */
-            if ($_luggages && count ($$_luggages) > 0) foreach ($_luggages as $luggage)
-            {
-                if ($luggage['need_place'])
-                {
+            if ($_luggages && count($$_luggages) > 0) foreach ($_luggages as $luggage) {
+                if ($luggage['need_place']) {
                     $tariff = $this->calculateLuggageTariff($route->id);
-                    $amount = (int) intval($luggage['seats']) * (float) floatval($tariff);
-                }
-                else $amount = (float) floatval(0.0);
+                    $amount = (int)intval($luggage['seats']) * (float)floatval($tariff);
+                } else $amount = (float)floatval(0.0);
 
                 $_luggage = new TripLuggage();
-                $_luggage->unique_id = (string) $luggage_unique;
-                $_luggage->amount = (float) floatval($amount);
-                $_luggage->status = (int) 0;
-                $_luggage->need_place = (int) intval($luggage['need_place']);
-                $_luggage->seats = (int) intval($luggage['seats']);
-                $_luggage->currency = (string) "₸";
-                $_luggage->luggage_type = (int) intval($luggage['id']);
+                $_luggage->unique_id = (string)$luggage_unique;
+                $_luggage->amount = (float)floatval($amount);
+                $_luggage->status = (int)0;
+                $_luggage->need_place = (int)intval($luggage['need_place']);
+                $_luggage->seats = (int)intval($luggage['seats']);
+                $_luggage->currency = (string)"₸";
+                $_luggage->luggage_type = (int)intval($luggage['id']);
 
                 $_luggage->save(false);
             }
@@ -771,15 +738,12 @@ class TripController extends BaseController
         $trip->vehicle_id = 0;
         $trip->line_id = 0;
 
-        if (!$trip->validate() || !$trip->save())
-        {
-            if ($trip->hasErrors())
-            {
+        if (!$trip->validate() || !$trip->save()) {
+            if ($trip->hasErrors()) {
                 foreach ($trip->errors as $field => $error_message)
                     $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
-            }
-            else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['trip'] = $trip->toArray();
@@ -810,8 +774,7 @@ class TripController extends BaseController
 
         if ($seats == 0) $rate = 1.5;
         elseif ($passengers == 0) $rate = 1;
-        else
-        {
+        else {
             $hard_rate = round($passengers / $seats, 2);
 
             if ($hard_rate <= .35) $rate = 1;
@@ -843,13 +806,12 @@ class TripController extends BaseController
         if (!$checkpoint_end) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найдена", [], false));
 
         $dependence = TariffDependence::find()->where([
-            'route_id'              => $route->id,
-            'start_checkpoint_id'   => $checkpoint_start->id,
-            'end_checkpoint_id'     => $checkpoint_end->id
+            'route_id' => $route->id,
+            'start_checkpoint_id' => $checkpoint_start->id,
+            'end_checkpoint_id' => $checkpoint_end->id
         ])->one();
 
-        if (!$dependence)
-        {
+        if (!$dependence) {
             $dependence = new TariffDependence();
             $dependence->route_id = $route->id;
             $dependence->start_checkpoint_id = $checkpoint_start->id;
@@ -891,7 +853,7 @@ class TripController extends BaseController
 
         $tariff = $route->base_tariff * $rate;
 
-        return (object) [
+        return (object)[
             'base_tariff' => $route->base_tariff,
             'tariff' => $tariff
         ];
@@ -899,12 +861,13 @@ class TripController extends BaseController
 
     protected function getTrips($id, $type = 'user')
     {
-        switch ($type)
-        {
-            case 'user': return $this->getUserTrips($id);
+        switch ($type) {
+            case 'user':
+                return $this->getUserTrips($id);
                 break;
 
-            case 'driver': return $this->getDriverTrips($id);
+            case 'driver':
+                return $this->getDriverTrips($id);
                 break;
         }
 

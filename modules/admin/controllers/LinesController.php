@@ -1,5 +1,6 @@
 <?php namespace app\modules\admin\controllers;
 
+use app\components\Controller;
 use app\modules\admin\models\Checkpoint;
 use app\modules\admin\models\CheckpointSearch;
 use app\modules\admin\models\Line;
@@ -8,9 +9,9 @@ use app\modules\admin\models\LineSearchVehicles;
 use app\modules\admin\models\Route;
 use app\modules\admin\models\RouteSearch;
 use Yii;
-use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use app\components\Controller;
+use yii\filters\VerbFilter;
+use yii\web\Response;
 
 class LinesController extends Controller
 {
@@ -30,7 +31,9 @@ class LinesController extends Controller
 
                             'select-route', 'select-startpoints', 'select-endpoints',
 
-                            'vehicles-queue', 'vehicles-ready', 'vehicles-trip'
+                            'vehicles-queue', 'vehicles-ready', 'vehicles-trip',
+
+                            'children'
                         ],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
@@ -129,11 +132,9 @@ class LinesController extends Controller
 
     public function actionRoutes()
     {
-        if (Yii::$app->request->isAjax)
-        {
+        if (Yii::$app->request->isAjax) {
             $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
-            if (count($keys))
-            {
+            if (count($keys)) {
                 foreach ($keys as $k => $v) if (($model = Route::findOne($v)) !== null) $model->delete();
                 return $this->redirect(['routes']);
             }
@@ -189,11 +190,9 @@ class LinesController extends Controller
 
     public function actionCheckpoints()
     {
-        if (Yii::$app->request->isAjax)
-        {
+        if (Yii::$app->request->isAjax) {
             $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
-            if (count($keys))
-            {
+            if (count($keys)) {
                 foreach ($keys as $k => $v) if (($model = Checkpoint::findOne($v)) !== null) $model->delete();
                 return $this->redirect(['checkpoints']);
             }
@@ -254,8 +253,7 @@ class LinesController extends Controller
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
 
-        if (!is_null($q))
-        {
+        if (!is_null($q)) {
             $out['results'] = Route::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere([
@@ -263,9 +261,7 @@ class LinesController extends Controller
                     ['like', 'title', $q]
                 ])
                 ->limit(10)->asArray()->all();
-        }
-        elseif (is_array($id))
-        {
+        } elseif (is_array($id)) {
             $out['results'] = Route::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere(['in', 'id', $id])->asArray()->all();
@@ -280,8 +276,7 @@ class LinesController extends Controller
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
 
-        if (!is_null($q))
-        {
+        if (!is_null($q)) {
             $out['results'] = Checkpoint::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere([
@@ -293,9 +288,7 @@ class LinesController extends Controller
                     ['like', 'title', $q]
                 ])
                 ->limit(10)->asArray()->all();
-        }
-        elseif (is_array($id))
-        {
+        } elseif (is_array($id)) {
             $out['results'] = Checkpoint::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere(['in', 'id', $id])->asArray()->all();
@@ -310,8 +303,7 @@ class LinesController extends Controller
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
 
-        if (!is_null($q))
-        {
+        if (!is_null($q)) {
             $out['results'] = Checkpoint::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere([
@@ -323,9 +315,7 @@ class LinesController extends Controller
                     ['like', 'title', $q]
                 ])
                 ->limit(10)->asArray()->all();
-        }
-        elseif (is_array($id))
-        {
+        } elseif (is_array($id)) {
             $out['results'] = Checkpoint::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere(['in', 'id', $id])->asArray()->all();
@@ -356,5 +346,15 @@ class LinesController extends Controller
             return $model;
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function actionChildren($id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return Checkpoint::getAllChildren(['route' => intval($id)]);
     }
 }

@@ -1,4 +1,7 @@
 $(document).ready(function(){
+
+    initSelect2();
+
     /*
     $('.sortable').nestedSortable({
         handle: 'div',
@@ -7,22 +10,6 @@ $(document).ready(function(){
         stop: function(e) { save_order(e); }
     });
         */
-
-
-    var selects = $(".sel2.mpsel.outst");
-    $.each(selects, function () {
-        var select = $(this);
-        if ($(select).length) {
-            var vn = parseInt($(select).attr('vn'));
-            if (vn > 1) {
-                $(select).val($(select).attr('selvalue').split(','));
-                $(select).select2();
-            } else {
-                $(select).val($(select).attr('selvalue'));
-                $(select).select2();
-            }
-        }
-    });
 
     // if($('.rangepick').length){
     //    $('.rangepick').daterangepicker({
@@ -41,7 +28,22 @@ $(document).ready(function(){
     // masks();
 });
 
-
+function initSelect2() {
+    var selects = $(".sel2.mpsel.outst");
+    $.each(selects, function () {
+        var select = $(this);
+        if ($(select).length) {
+            var vn = parseInt($(select).attr('vn'));
+            if (vn > 1) {
+                $(select).val($(select).attr('selvalue').split(','));
+                $(select).select2();
+            } else {
+                $(select).val($(select).attr('selvalue'));
+                $(select).select2();
+            }
+        }
+    });
+}
 
 function select2html(targ, html){
     targ

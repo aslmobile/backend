@@ -1,16 +1,16 @@
 <?php
 
-use yii\helpers\Html;
-use yii\grid\GridView;
-use yii\widgets\Breadcrumbs;
 use kartik\select2\Select2;
+use yii\grid\GridView;
+use yii\helpers\Html;
 use yii\web\JsExpression;
+use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\admin\models\TaxiSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt('Заказы такси',[],false);
+$this->title = Yii::$app->mv->gt('Заказы такси', [], false);
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="box-tools pull-right">
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} Добавить',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
+                        Yii::$app->mv->gt('{i} Добавить', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
                     ); ?>
@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/taxi/view/" . $key) . "'"
                     ];
                 },
-                'layout'=>"
+                'layout' => "
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
                     <div class='box-footer' style='display: block;'>{pager}</div>
                 ",
@@ -77,7 +77,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                                 'templateResult' => new JsExpression('function(user) { return user.text; }'),
                                 'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-                                'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/user/select-users']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
+                                'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("' . \yii\helpers\Url::toRoute(['/admin/user/select-users']) . '", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                             ]
                         ]),
                     ],
@@ -94,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'checkpoint',
                         'content' => function ($data) {
                             $checkpoint = \app\models\Checkpoint::findOne($data->checkpoint);
-                            return $checkpoint->title;
+                            return !empty($checkpoint) ? $checkpoint->title : null;
                         },
                     ]
                 ],

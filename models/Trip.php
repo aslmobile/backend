@@ -227,7 +227,18 @@ class Trip extends \yii\db\ActiveRecord
 
                         $line->freeseats = 0;
                         $line->status = Line::STATUS_WAITING;
-                        $line->save();
+
+                        if ($line->save()) {
+                            $device = Devices::findOne(['user_id' => $this->driver_id]);
+                            if ($device) {
+                                $socket = new SocketPusher(['authkey' => $device->auth_token]);
+                                $socket->push(base64_encode(json_encode([
+                                    'action' => "acceptDriverTrip",
+                                    'data' => ['message_id' => time()]
+                                ])));
+                            }
+
+                        }
 
                     };
 
@@ -404,10 +415,13 @@ class Trip extends \yii\db\ActiveRecord
         else $queue = false;
 
         if (!$queue) {
-            $_trips = self::find()->select(['id', 'user_id', 'vehicle_type_id', 'MAX(created_at) as created_at'])->where(['status' => self::STATUS_WAITING])->orderBy(['created_at' => SORT_DESC])->groupBy(['id', 'user_id', 'vehicle_type_id'])->all();
-            /** @var \app\models\Trip $trip */
+            $_trips = self::find()->select(['id', 'user_id', 'vehicle_type_id', 'MAX(created_at) as created_at'])
+                ->where(['status' => self::STATUS_WAITING])
+                ->orderBy(['created_at' => SORT_DESC])
+                ->groupBy(['id', 'user_id', 'vehicle_type_id'])->all();
 
             $queue = [];
+            /** @var \app\models\Trip $trip */
             foreach ($_trips as $trip) {
                 $queue[$trip->vehicle_type_id]['vehicle_type_id'] = $trip->vehicle_type_id;
                 $queue[$trip->vehicle_type_id]['queue'][] = [
@@ -483,7 +497,10 @@ class Trip extends \yii\db\ActiveRecord
             'line.status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
         ])->joinWith(['routeR', 'driverR'])->all();
         foreach ($data as $line) {
-            $title = $line->driver->fullName . ' ' . $line->route->title;
+            $title =
+                (!empty($line->driver) ? $line->driver->fullName : 'Удален')
+                . ' ' .
+                (!empty($line->route) ? $line->route->title : 'Удален');
             $seats = '. Свободных мест: ' . $line->freeseats;
             $result[$line->id] = $title . $seats;
         }
@@ -502,7 +519,10 @@ class Trip extends \yii\db\ActiveRecord
                 'line.status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
             ])->joinWith(['routeR', 'driverR'])->all();
             foreach ($data as $line) {
-                $title = $line->driver->fullName . ' ' . $line->route->title;
+                $title =
+                    (!empty($line->driver) ? $line->driver->fullName : 'Удален')
+                    . ' ' .
+                    (!empty($line->route) ? $line->route->title : 'Удален');
                 $seats = '. Свободных мест: ' . $line->freeseats;
                 $result[$line->id] = $title . $seats;
             }
