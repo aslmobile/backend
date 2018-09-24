@@ -26,6 +26,7 @@ $(document).ready(function(){
     //     });
     // }
     // masks();
+
 });
 
 function initSelect2() {
@@ -53,10 +54,6 @@ function select2html(targ, html){
         .select2();
 }
 
-
-
-
-
 function intval( mixed_var, base ) {	// Get the integer value of a variable
 
     var tmp;
@@ -80,9 +77,7 @@ function masks(){
     $("input[type='tel']").inputmask("+99 (999) 999 99 99");
 }
 
-
-function update_search(key, el)
-{
+function update_search(key, el) {
     var value = $(el).val();
 
     key = encodeURI(key); value = encodeURI(value);

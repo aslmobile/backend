@@ -43,7 +43,9 @@ class TripController extends BaseController
                             'passengers-route',
                             'passenger-trips',
                             'cancel-trip',
-                            'cancel-trip-queue'
+                            'cancel-trip-queue',
+                            'rate-passenger',
+                            'comment-passenger',
                         ],
                         'allow' => true
                     ]
@@ -52,7 +54,6 @@ class TripController extends BaseController
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'cities' => ['GET'],
                     'calculate-passenger-tariff' => ['GET'],
                     'passengers' => ['GET'],
                     'accept-arrive' => ['POST'],
@@ -66,6 +67,8 @@ class TripController extends BaseController
                     'passenger-trips' => ['GET'],
                     'cancel-trip' => ['POST'],
                     'cancel-trip-queue' => ['POST'],
+                    'rate-passenger' => ['POST'],
+                    'comment-passenger' => ['POST'],
                 ]
             ]
         ];
@@ -367,7 +370,7 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['passenger_id', 'passenger_rating', 'driver_comment']);
+        $this->validateBodyParams(['passenger_id', 'passenger_rating']);
 
         /** @var \app\models\Line $line */
         $line = Line::findOne($id);
@@ -378,6 +381,37 @@ class TripController extends BaseController
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $trip->passenger_rating = floatval($this->body->passenger_rating);
+
+        if (!$trip->validate() || !$trip->save()) {
+            if ($trip->hasErrors()) {
+                foreach ($trip->errors as $field => $error_message)
+                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                $this->module->sendResponse();
+            } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+        }
+
+        $this->module->data['line'] = $line->toArray();
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionCommentPassenger($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['passenger_id', 'driver_comment']);
+
+        /** @var \app\models\Line $line */
+        $line = Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\models\Trip $trip */
+        $trip = Trip::find()->where(['route_id' => $line->route_id, 'driver_id' => $line->driver_id, 'user_id' => $this->body->passenger_id])->one();
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+
         $trip->driver_comment = $this->body->driver_comment;
 
         if (!$trip->validate() || !$trip->save()) {

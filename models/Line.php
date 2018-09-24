@@ -23,6 +23,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string $cancel_reason
  * @property string $angle
  * @property string $position
+ * @property string $path
  * @property int $created_at
  * @property int $updated_at
  *
@@ -105,7 +106,8 @@ class Line extends \yii\db\ActiveRecord
 
             [
                 [
-                    'cancel_reason'
+                    'cancel_reason',
+                    'path'
                 ],
                 'string'
             ],
@@ -129,23 +131,24 @@ class Line extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'                => Yii::t('app', "ID"),
-            'driver_id'         => Yii::t('app', "Водитель"),
-            'vehicle_id'        => Yii::t('app', "Автомобиль"),
-            'route_id'          => Yii::t('app', "Маршрут"),
-            'startpoint'        => Yii::t('app', "Начальная точка"),
-            'endpoint'          => Yii::t('app', "Конечная точка"),
-            'tariff'            => Yii::t('app', "Тариф"),
-            'status'            => Yii::t('app', "Статус"),
-            'seats'             => Yii::t('app', "Мест"),
-            'freeseats'         => Yii::t('app', "Свободных мест"),
-            'starttime'         => Yii::t('app', "Время отправления"),
-            'endtime'           => Yii::t('app', "Время прибытия"),
-            'cancel_reason'     => Yii::t('app', "Причина отмены"),
-            'angle'             => Yii::t('app', "Угол поворота"),
-            'position'          => Yii::t('app', "GEO позиция"),
-            'created_at'        => Yii::t('app', "Создано"),
-            'updated_at'        => Yii::t('app', "Обновлено")
+            'id' => Yii::t('app', "ID"),
+            'driver_id' => Yii::t('app', "Водитель"),
+            'vehicle_id' => Yii::t('app', "Автомобиль"),
+            'route_id' => Yii::t('app', "Маршрут"),
+            'startpoint' => Yii::t('app', "Начальная точка"),
+            'endpoint' => Yii::t('app', "Конечная точка"),
+            'tariff' => Yii::t('app', "Тариф"),
+            'status' => Yii::t('app', "Статус"),
+            'seats' => Yii::t('app', "Мест"),
+            'freeseats' => Yii::t('app', "Свободных мест"),
+            'starttime' => Yii::t('app', "Время отправления"),
+            'endtime' => Yii::t('app', "Время прибытия"),
+            'cancel_reason' => Yii::t('app', "Причина отмены"),
+            'angle' => Yii::t('app', "Угол поворота"),
+            'position' => Yii::t('app', "GEO позиция"),
+            'path' => Yii::t('app', "Путь"),
+            'created_at' => Yii::t('app', "Создано"),
+            'updated_at' => Yii::t('app', "Обновлено")
         ];
     }
 
@@ -153,8 +156,7 @@ class Line extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if ($this->freeseats == 0)
-        {
+        if ($this->freeseats == 0) {
             $watchdog = new RestFul([
                 'type' => RestFul::TYPE_DRIVER_ACCEPT,
                 'message' => json_encode(['status' => 'request']),
@@ -170,8 +172,7 @@ class Line extends \yii\db\ActiveRecord
             // TODO: Отправка в сокет что машина заполнена и подтверждение о выезде через 5 минут
         }
 
-        if ($this->status == self::STATUS_IN_PROGRESS && $this->getOldAttribute('status') != self::STATUS_IN_PROGRESS)
-        {
+        if ($this->status == self::STATUS_IN_PROGRESS && $this->getOldAttribute('status') != self::STATUS_IN_PROGRESS) {
             // TODO: Отправлять уведомление всем пассажирам
             Notifications::create(Notifications::NTP_TRIP_READY, $this->driver_id, true, \Yii::t('app', "Ваша машина готова к выезду."));
         }
@@ -192,12 +193,14 @@ class Line extends \yii\db\ActiveRecord
         return Route::findOne($this->route_id);
     }
 
-    public function getRouteR(){
-        return $this->hasOne(Route::className(), ['id' => 'route_id']);
+    public function getRouteR()
+    {
+        return $this->hasOne(Route::class, ['id' => 'route_id']);
     }
 
-    public function getDriverR(){
-        return $this->hasOne(User::className(), ['id' => 'driver_id']);
+    public function getDriverR()
+    {
+        return $this->hasOne(User::class, ['id' => 'driver_id']);
     }
 
     public function getStartPoint()

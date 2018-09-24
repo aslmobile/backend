@@ -81,7 +81,7 @@ class Checkpoint extends \yii\db\ActiveRecord
             'type' => Yii::t('app', "Тип"),
             'pid' => Yii::t('app', "Начальная остановка маршрута"),
             'children' => Yii::t('app', "Городские остановки"),
-            'weight' => Yii::t('app', "Вес сортировки"),
+            'weight' => Yii::t('app', "Порядок"),
             'image' => Yii::t('app', "Изображение"),
             'country_id' => Yii::t('app', "Страна"),
             'region_id' => Yii::t('app', "Регион"),
