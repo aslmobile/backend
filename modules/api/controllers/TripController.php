@@ -1,5 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
+use app\components\Socket\SocketPusher;
 use app\models\Countries;
 use app\models\Line;
 use app\models\LuggageType;
@@ -8,6 +9,7 @@ use app\models\TariffDependence;
 use app\models\Taxi;
 use app\models\TripLuggage;
 use app\modules\admin\models\Checkpoint;
+use app\modules\api\models\Devices;
 use app\modules\api\models\RestFul;
 use app\modules\api\models\Trip;
 use Yii;
@@ -208,12 +210,12 @@ class TripController extends BaseController
 
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
-        $trip->status = Trip::STATUS_WAY;
-        $trip->driver_id = $line->driver_id;
+//        $trip->status = Trip::STATUS_WAY;
         $trip->line_id = $line->id;
-        $trip->driver_comment = Yii::$app->mv->gt("Посадка подтверждена водителем", [], false);
+        $trip->driver_id = $line->driver_id;
         $trip->vehicle_id = $line->vehicle_id;
-        $trip->start_time = time();
+//        $trip->driver_comment = Yii::$app->mv->gt("Посадка подтверждена водителем", [], false);
+//        $trip->start_time = time();
         $trip->save();
 
         $this->module->data['line'] = $line->toArray();
@@ -308,10 +310,19 @@ class TripController extends BaseController
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
-        $trip = Trip::find()->where(['route_id' => $line->route_id, 'driver_id' => $line->driver_id, 'user_id' => $this->body->passenger_id])->one();
+        $trip = Trip::find()->where([
+            'line_id' => $line->id,
+            'route_id' => $line->route_id,
+            'driver_id' => $line->driver_id,
+            'user_id' => $this->body->passenger_id
+        ])->one();
+
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $trip->status = Trip::STATUS_WAY;
+
+        $trip->driver_comment = Yii::$app->mv->gt("Посадка подтверждена водителем", [], false);
+        $trip->start_time = time();
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
@@ -353,7 +364,7 @@ class TripController extends BaseController
 
             $trip->status = Trip::STATUS_FINISHED;
 
-            switch ($trip->payment_type){
+            switch ($trip->payment_type) {
                 case Trip::PAYMENT_TYPE_CASH:
                     $total['cash'] += $trip->amount;
                     break;
@@ -447,7 +458,7 @@ class TripController extends BaseController
         $this->module->sendResponse();
     }
 
-    public function actionCheckpointArrived()
+    public function actionCheckpointArrived($id)
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
@@ -455,10 +466,24 @@ class TripController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['checkpoint']);
 
+        /** @var \app\models\Line $line */
+        $line = Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var Checkpoint $checkpoint */
         $checkpoint = Checkpoint::findOne(intval($this->body->checkpoint));
         if (!$checkpoint) $this->module->setError(422, 'checkpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         // TODO: Отправить на сокет сообщение что водитель подъехал к checkpoint
+
+        /** @var \app\models\Devices $device */
+        $device = Devices::findOne(['user_id' => $user->id]);
+        if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
+        $socket = new SocketPusher(['authkey' => $device->auth_token]);
+        $socket->push(base64_encode(json_encode([
+            'action' => "checkpointArrived",
+            'data' => ['message_id' => time(), 'line_id' => $line->id, 'checkpoint_id' => $checkpoint->id]
+        ])));
 
         $this->module->data = $checkpoint->toArray();
         $this->module->setSuccess();
@@ -809,6 +834,44 @@ class TripController extends BaseController
     /** CORE METHODS | PROTECTED */
 
     /**
+     * @param $id
+     * @param string $type
+     * @return array|bool|\yii\db\ActiveRecord[]
+     */
+    protected function getTrips($id, $type = 'user')
+    {
+        switch ($type) {
+            case 'user':
+                return $this->getUserTrips($id);
+                break;
+
+            case 'driver':
+                return $this->getDriverTrips($id);
+                break;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $id
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    protected function getUserTrips($id)
+    {
+        return Trip::find()->where(['user_id' => $id])->all();
+    }
+
+    /**
+     * @param $id
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    protected function getDriverTrips($id)
+    {
+        return Trip::find()->where(['driver_id' => $id])->all();
+    }
+
+    /**
      * @param $route_id
      * @return float|int
      */
@@ -895,18 +958,6 @@ class TripController extends BaseController
         ];
     }
 
-    protected function calculateDriverTariff()
-    {
-        /**
-         * Расчет тарифа по зависимостям:
-         * - Базовый тариф
-         * - Задолженость
-         * - Спрос
-         *
-         * ((кол-во пассажиров / кол-во мест) * базовый тариф) * коофициент + задолженость
-         */
-    }
-
     /**
      * @param $id
      * @return object
@@ -928,41 +979,16 @@ class TripController extends BaseController
         ];
     }
 
-    /**
-     * @param $id
-     * @param string $type
-     * @return array|bool|\yii\db\ActiveRecord[]
-     */
-    protected function getTrips($id, $type = 'user')
+    protected function calculateDriverTariff()
     {
-        switch ($type) {
-            case 'user':
-                return $this->getUserTrips($id);
-                break;
-
-            case 'driver':
-                return $this->getDriverTrips($id);
-                break;
-        }
-
-        return false;
+        /**
+         * Расчет тарифа по зависимостям:
+         * - Базовый тариф
+         * - Задолженость
+         * - Спрос
+         *
+         * ((кол-во пассажиров / кол-во мест) * базовый тариф) * коофициент + задолженость
+         */
     }
 
-    /**
-     * @param $id
-     * @return array|\yii\db\ActiveRecord[]
-     */
-    protected function getUserTrips($id)
-    {
-        return Trip::find()->where(['user_id' => $id])->all();
-    }
-
-    /**
-     * @param $id
-     * @return array|\yii\db\ActiveRecord[]
-     */
-    protected function getDriverTrips($id)
-    {
-        return Trip::find()->where(['driver_id' => $id])->all();
-    }
 }

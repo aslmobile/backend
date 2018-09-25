@@ -7,6 +7,7 @@ use app\models\Devices;
 use app\modules\api\models\RestFul;
 use app\modules\api\models\Trip;
 use Ratchet\ConnectionInterface;
+use yii\helpers\ArrayHelper;
 
 class Message
 {
@@ -15,6 +16,7 @@ class Message
     public $error_code = 0;
     public $action;
     public $connections;
+    public $addressed = [];
 
     public $message_id = 0;
 
@@ -24,15 +26,13 @@ class Message
         $data = base64_decode($data, true);
         $data = json_decode($data, true);
 
-        if (!empty($data) && is_array($data) && array_key_exists('action', $data))
-        {
+        if (!empty($data) && is_array($data) && array_key_exists('action', $data)) {
             $method = $data['action'];
             $this->action = $method;
 
             if (method_exists(__CLASS__, $method)) $this->message = $this->$method($data, $from, $connections);
             else $this->error_code = 1;
-        }
-        else $this->error_code = 6;
+        } else $this->error_code = 6;
     }
 
     /**
@@ -50,11 +50,11 @@ class Message
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
         $response = [
-            'message_id'    => $this->message_id,
-            'device_id'     => $device->id,
-            'user_id'       => $device->user_id,
-            'data'          => [
-                'message'   => 'pong'
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => [
+                'message' => 'pong'
             ]
         ];
 
@@ -76,8 +76,7 @@ class Message
             ['=', 'status', Trip::STATUS_WAITING]
         ])->one();
 
-        if ($device_trip)
-        {
+        if ($device_trip) {
             $queue_position = 1;
 
             $trips = Trip::find()->andWhere([
@@ -90,8 +89,7 @@ class Message
                 ])
                 ->all();
 
-            if ($trips && count($trips)) foreach ($trips as $trip)
-            {
+            if ($trips && count($trips)) foreach ($trips as $trip) {
                 if ($trip->id == $device_trip->id) break;
 
                 $queue_position++;
@@ -104,25 +102,23 @@ class Message
             if ($estimated_time < 900) $estimated_time = 900;
 
             $response = [
-                'message_id'    => $this->message_id,
-                'device_id'     => $device->id,
-                'user_id'       => $device->user_id,
-                'data'          => [
-                    'queue_position'    => $queue_position,
-                    'estimated_time'    => $estimated_time,
-                    'trip_id'           => $device_trip->id
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => [
+                    'queue_position' => $queue_position,
+                    'estimated_time' => $estimated_time,
+                    'trip_id' => $device_trip->id
                 ]
             ];
-        }
-        else
-        {
+        } else {
             $response = [
-                'message_id'    => $this->message_id,
-                'device_id'     => $device->id,
-                'user_id'       => $device->user_id,
-                'data'          => [
-                    'queue_position'    => -1,
-                    'estimated_time'    => -1
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => [
+                    'queue_position' => -1,
+                    'estimated_time' => -1
                 ]
             ];
         }
@@ -149,35 +145,32 @@ class Message
             ['=', 'status', Line::STATUS_IN_PROGRESS]
         ])->one();
 
-        if ($line)
-        {
+        if ($line) {
             $line->position = $position;
             $line->angle = $angle;
             $line->save();
 
             $response = [
-                'message_id'    => $this->message_id,
-                'device_id'     => $device->id,
-                'user_id'       => $device->user_id,
-                'data'          => [
-                    'lat'       => $lat,
-                    'lng'       => $lng,
-                    'angle'     => $angle,
-                    'line_id'   => $line->id
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => [
+                    'lat' => $lat,
+                    'lng' => $lng,
+                    'angle' => $angle,
+                    'line_id' => $line->id
                 ]
             ];
-        }
-        else
-        {
+        } else {
             $response = [
-                'message_id'    => $this->message_id,
-                'device_id'     => $device->id,
-                'user_id'       => $device->user_id,
-                'data'          => [
-                    'lat'   => $lat,
-                    'lng'   => $lng,
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => [
+                    'lat' => $lat,
+                    'lng' => $lng,
                     'angle' => $angle,
-                    'line_id'  => 0
+                    'line_id' => 0
                 ]
             ];
         }
@@ -191,16 +184,49 @@ class Message
         if ($this->validateDevice($from)) $device = $from->device;
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        $lines = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $device->user_id])->orderBy(['freeseats' => SORT_DESC, 'created_at' => SORT_DESC])->all();
+        $lines = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $device->user_id])
+            ->orderBy(['freeseats' => SORT_DESC, 'created_at' => SORT_DESC])->all();
         $queue = [];
         foreach ($lines as $line) $queue[] = $line->toArray();
 
         $response = [
-            'message_id'    => $this->message_id,
-            'device_id'     => $device->id,
-            'user_id'       => $device->user_id,
-            'data'          => [
-                'queue'   => $queue
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => [
+                'queue' => $queue
+            ]
+        ];
+
+        return $response;
+    }
+
+    public function processingQuery($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        $line = Line::find()->where(['driver_id' => $device->user_id])->orderBy(['created_at' => SORT_DESC])->one();
+        $passengers = 0;
+
+        if (!empty($line)) {
+            $passengers = Trip::find()->where([
+                'driver_id' => $device->user_id,
+                'line_id' => $line->id,
+                'status' => [Trip::STATUS_WAITING, Trip::STATUS_WAY]
+            ])->count('id');
+        }
+
+        // TODO: обработка очереди (приходит с девайсов на создание поездки и поиск пассажиров
+
+        $response = [
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => [
+                'passengers' => $passengers
             ]
         ];
 
@@ -217,8 +243,7 @@ class Message
         RestFul::updatePassengerAccept();
 
         $watchdog = RestFul::find()->where(['type' => RestFul::TYPE_PASSENGER_ACCEPT, 'user_id' => $device->user->id, 'message' => json_encode(['status' => 'request'])])->one();
-        if (!$watchdog)
-        {
+        if (!$watchdog) {
             $watchdog = new RestFul([
                 'type' => RestFul::TYPE_PASSENGER_ACCEPT,
                 'message' => json_encode(['status' => 'request']),
@@ -240,13 +265,13 @@ class Message
         else $line_data = [];
 
         $response = [
-            'message_id'    => $this->message_id,
-            'device_id'     => $device->id,
-            'user_id'       => $device->user_id,
-            'data'          => [
-                'accept_from'   => $watchdog->created_at,
-                'accept_time'   => 300,
-                'trip'          => $line_data
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => [
+                'accept_from' => $watchdog->created_at,
+                'accept_time' => 300,
+                'trip' => $line_data
             ]
         ];
 
@@ -263,8 +288,7 @@ class Message
         RestFul::updateDriverAccept();
 
         $watchdog = RestFul::find()->where(['type' => RestFul::TYPE_DRIVER_ACCEPT, 'user_id' => $device->user->id, 'message' => json_encode(['status' => 'request'])])->one();
-        if (!$watchdog)
-        {
+        if (!$watchdog) {
             $watchdog = new RestFul([
                 'type' => RestFul::TYPE_DRIVER_ACCEPT,
                 'message' => json_encode(['status' => 'request']),
@@ -286,38 +310,68 @@ class Message
         else $line_data = [];
 
         $response = [
-            'message_id'    => $this->message_id,
-            'device_id'     => $device->id,
-            'user_id'       => $device->user_id,
-            'data'          => [
-                'accept_from'   => $watchdog->created_at,
-                'accept_time'   => 300,
-                'trip'          => $line_data
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => [
+                'accept_from' => $watchdog->created_at,
+                'accept_time' => 300,
+                'trip' => $line_data
             ]
         ];
 
         return $response;
     }
 
-    public function processingQuery($data, $from, $connections)
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
+    public function checkpointArrived($data, $from, $connections)
     {
+
         /** @var Devices $device */
         if ($this->validateDevice($from)) $device = $from->device;
 
-        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+        $data = $data['data'];
+        $this->message_id = intval($data['message_id']);
+        $line_id = intval($data['line_id']);
+        $checkpoint_id = intval($data['checkpoint_id']);
 
-        // TODO: обработка очереди (приходит с девайсов на создание поездки и поиск пассажиров
+        $message = ['status' => 'passed', 'checkpoint' => $checkpoint_id, 'line' => $line_id];
+
+        $params = [
+            'user_id' => $device->user_id,
+            'type' => RestFul::TYPE_DRIVER_CHECKPOINT_ARRIVE,
+            'message' => json_encode($message),
+            'uip' => '0.0.0.0'
+        ];
+
+        $passed_checkpoint = RestFul::findOne($params);
+
+        if (empty($passed_checkpoint)) {
+            $passed_checkpoint = new RestFul($params);
+            $passed_checkpoint->save();
+        }
+
+        /** @var \app\models\Trip $trip */
+        $trips = ArrayHelper::getColumn(Trip::findAll([
+            'line_id' => $line_id,
+            'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING],
+        ]), 'user_id');
+        $this->addressed = $trips;
 
         $response = [
-            'message_id'    => $this->message_id,
-            'device_id'     => $device->id,
-            'user_id'       => $device->user_id,
-            'data'          => [
-                'passengers'   => 0
-            ]
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => $message
         ];
 
         return $response;
+
     }
 
     /**
@@ -327,8 +381,7 @@ class Message
      */
     public function validateDevice($conn)
     {
-        if (!isset ($conn->device) || empty ($conn->device) || !$conn->device)
-        {
+        if (!isset ($conn->device) || empty ($conn->device) || !$conn->device) {
             $conn->send('Device not valid!');
             $conn->close();
 

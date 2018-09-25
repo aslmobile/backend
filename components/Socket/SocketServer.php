@@ -2,6 +2,7 @@
 
 namespace app\components\Socket;
 
+use app\components\ArrayQuery\ArrayQuery;
 use app\models\User;
 use app\modules\api\models\Devices;
 use Ratchet\ConnectionInterface;
@@ -15,6 +16,10 @@ class SocketServer implements MessageComponentInterface
      */
     public $devices = [];
 
+    public $addressed = [
+        'checkpointArrived'
+    ];
+
     /**
      * SocketServer constructor.
      */
@@ -23,7 +28,7 @@ class SocketServer implements MessageComponentInterface
         Yii::$app->db->createCommand('SET SESSION statement_timeout = 86400;');
 
         $timestamp = strtotime(gmdate("M d Y H:i:s", time()));
-        User::updateAll(['last_activity' => $timestamp],'last_activity IS NULL');
+        User::updateAll(['last_activity' => $timestamp], 'last_activity IS NULL');
     }
 
     /**
@@ -45,13 +50,10 @@ class SocketServer implements MessageComponentInterface
 
             $device = $this->validateDevice($conn, $authkey);
 
-            if (!$device || empty($device))
-            {
+            if (!$device || empty($device)) {
                 echo "Connection closed! No device auth!\n";
                 $conn->close();
-            }
-            else
-            {
+            } else {
                 $conn->device = $device;
                 $this->devices[$conn->resourceId] = $conn;
 
@@ -60,9 +62,7 @@ class SocketServer implements MessageComponentInterface
                 if ($authkey == Yii::$app->params['socket']['authkey_server']) echo "Server connected.\n";
                 echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; connected.\n";
             }
-        }
-        else
-        {
+        } else {
             echo "Connection closed! Connection data is invalid!\n";
             $conn->send(base64_encode(json_encode(['error_code' => 100, 'message' => 'Connection closed. Please verify your data.'])));
             $conn->close();
@@ -87,8 +87,7 @@ class SocketServer implements MessageComponentInterface
             }
         }
 
-        if ($conn->device->id && !empty ($conn->device->id))
-        {
+        if ($conn->device->id && !empty ($conn->device->id)) {
             Yii::$app->db->createCommand()->update('users', ['last_activity' => time()], 'id = ' . $conn->device->user_id)->execute();
             echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; disconnected.\n";
         }
@@ -132,7 +131,18 @@ class SocketServer implements MessageComponentInterface
         $response = json_encode($response);
         $response = base64_encode($response);
 
-        foreach ($this->devices as $device) $device->send($response);
+        if (!in_array($result->action, $this->addressed))
+            foreach ($this->devices as $device) $device->send($response);
+        else {
+            $query = new ArrayQuery();
+            $query->from($this->devices);
+            foreach ($result->addressed as $id) {
+                $user_id = intval($id);
+                $devices = $query->where(['user_id' => $user_id])->all();
+                foreach ($devices as $device) $device->send($response);
+            }
+        }
+
         $from->send($response);
 
         echo "Message from ({$from->device->id})\n";
@@ -154,8 +164,7 @@ class SocketServer implements MessageComponentInterface
      */
     private function validateDevice($conn, $authkey)
     {
-        if (!empty($authkey))
-        {
+        if (!empty($authkey)) {
             $device = Devices::find()->where(['auth_token' => $authkey])->one();
             if ($device && !empty($device)) return $device;
         }
