@@ -33,7 +33,7 @@ class City extends \yii\db\ActiveRecord
 
     public static function getCitiesList($asArray = false)
     {
-        $list = self::find()->all();
+        $list = self::find()->where(['status' => self::STATUS_ACTIVE])->all();
 
         $cities = [];
         /** @var \app\models\City $city */

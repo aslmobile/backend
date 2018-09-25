@@ -25,7 +25,7 @@ class LineController extends BaseController
                 'rules' => [
                     [
                         'actions' => [
-                            'startpoints', 'endpoints', 'checkpoints', 'cities',
+                            'startpoints', 'endpoints', 'checkpoints',
                             'get-route',
                             'startpoints-route', 'endpoints-route', 'checkpoints-route',
 
@@ -46,7 +46,6 @@ class LineController extends BaseController
                     'startpoints' => ['GET'],
                     'endpoints' => ['GET'],
                     'checkpoints' => ['GET'],
-                    'cities' => ['GET'],
                     'get-route' => ['GET'],
                     'startpoints-route' => ['GET'],
                     'endpoints-route' => ['GET'],
@@ -423,24 +422,6 @@ class LineController extends BaseController
         }
 
         $this->module->data = $points;
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
-    public function actionCities()
-    {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
-        $cities = [];
-        $cities_db = City::findAll(['status' => City::STATUS_ACTIVE]);
-
-        if ($cities_db && count($cities_db) > 0) foreach ($cities_db as $city) {
-            /** @var $point \app\models\City */
-            $cities[] = $city->toArray();
-        }
-
-        $this->module->data = $cities;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
