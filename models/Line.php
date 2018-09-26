@@ -157,6 +157,7 @@ class Line extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($this->freeseats == 0) {
+
             $watchdog = new RestFul([
                 'type' => RestFul::TYPE_DRIVER_ACCEPT,
                 'message' => json_encode(['status' => 'request']),
@@ -174,7 +175,12 @@ class Line extends \yii\db\ActiveRecord
 
         if ($this->status == self::STATUS_IN_PROGRESS && $this->getOldAttribute('status') != self::STATUS_IN_PROGRESS) {
             // TODO: Отправлять уведомление всем пассажирам
-            Notifications::create(Notifications::NTP_TRIP_READY, $this->driver_id, true, \Yii::t('app', "Ваша машина готова к выезду."));
+            Notifications::create(
+                Notifications::NTP_TRIP_READY,
+                $this->driver_id,
+                true,
+                \Yii::t('app', "Ваша машина готова к выезду.")
+            );
         }
     }
 

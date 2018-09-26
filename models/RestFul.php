@@ -24,7 +24,9 @@ class RestFul extends \yii\db\ActiveRecord
         TYPE_DRIVER_ACCEPT_CANCELLED = 3,
         TYPE_DRIVER_CHECKPOINT_ARRIVE = 4,
         TYPE_DRIVER_HANDLE_ROUTE = 5,
-        TYPE_PASSENGER_ACCEPT = 6;
+        TYPE_PASSENGER_ACCEPT = 6,
+        TYPE_PASSENGER_DECLINE = 7,
+        TYPE_PASSENGER_ACCEPT_SEAT = 7;
 
     public static function tableName()
     {
@@ -57,12 +59,12 @@ class RestFul extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'        => Yii::t('app', "ID"),
-            'type'      => Yii::t('app', "Type"),
-            'user_id'   => Yii::t('app', "User ID"),
-            'message'   => Yii::t('app', "Message"),
-            'baggage'   => Yii::t('app', "Baggage"),
-            'uip'       => Yii::t('app', "User IP"),
+            'id' => Yii::t('app', "ID"),
+            'type' => Yii::t('app', "Type"),
+            'user_id' => Yii::t('app', "User ID"),
+            'message' => Yii::t('app', "Message"),
+            'baggage' => Yii::t('app', "Baggage"),
+            'uip' => Yii::t('app', "User IP"),
             'created_at' => Yii::t('app', "Created"),
             'updated_at' => Yii::t('app', "Updated")
         ];

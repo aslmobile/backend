@@ -3,7 +3,6 @@
 namespace app\modules\admin\controllers;
 
 use app\components\Controller;
-use app\modules\admin\models\Bid;
 use app\modules\admin\models\City;
 use app\modules\admin\models\Countries;
 use app\modules\admin\models\Regions;
@@ -62,8 +61,7 @@ class DefaultController extends Controller
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
 
-        if (!is_null($q))
-        {
+        if (!is_null($q)) {
             $out['results'] = Countries::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere([
@@ -71,9 +69,7 @@ class DefaultController extends Controller
                     ['like', 'title', $q]
                 ])
                 ->limit(10)->asArray()->all();
-        }
-        elseif (is_array($id))
-        {
+        } elseif (is_array($id)) {
             $out['results'] = Countries::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere(['in', 'id', $id])->asArray()->all();
@@ -88,8 +84,7 @@ class DefaultController extends Controller
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
 
-        if (!is_null($q))
-        {
+        if (!is_null($q)) {
             $out['results'] = Regions::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere([
@@ -97,9 +92,7 @@ class DefaultController extends Controller
                     ['like', 'title', $q]
                 ])
                 ->limit(10)->asArray()->all();
-        }
-        elseif (is_array($id))
-        {
+        } elseif (is_array($id)) {
             $out['results'] = Regions::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere(['in', 'id', $id])->asArray()->all();
@@ -114,8 +107,7 @@ class DefaultController extends Controller
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
 
-        if (!is_null($q))
-        {
+        if (!is_null($q)) {
             $out['results'] = City::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere([
@@ -123,9 +115,7 @@ class DefaultController extends Controller
                     ['like', 'title', $q]
                 ])
                 ->limit(10)->asArray()->all();
-        }
-        elseif (is_array($id))
-        {
+        } elseif (is_array($id)) {
             $out['results'] = City::find()
                 ->select(['id', 'text' => 'title'])
                 ->andWhere(['in', 'id', $id])->asArray()->all();
@@ -134,10 +124,11 @@ class DefaultController extends Controller
         return $out;
     }
 
-    public function actionGetStatistic(){
+    public function actionGetStatistic()
+    {
         \Yii::$app->response->format = Response::FORMAT_JSON;
         $response = [];
-        if (\Yii::$app->request->isAjax){
+        if (\Yii::$app->request->isAjax) {
             $interval = \Yii::$app->request->get('interval', 7);
             $users = User::getUserRegistrationStatisticData($interval);
             foreach (array_keys($users) as $date) {

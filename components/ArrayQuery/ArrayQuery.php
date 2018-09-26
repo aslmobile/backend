@@ -5,6 +5,7 @@ namespace app\components\ArrayQuery;
 use Yii;
 use yii\base\Component;
 use yii\db\QueryTrait;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class ArrayQuery
@@ -133,6 +134,7 @@ class ArrayQuery extends Component
         }
 
         foreach ($rows as $row) {
+            if(is_object($row)) $row = ArrayHelper::toArray($row);
             if (is_string($this->indexBy)) {
                 $key = $row[$this->indexBy];
             } else {

@@ -198,7 +198,8 @@ class Trip extends \yii\db\ActiveRecord
         ];
     }
 
-    public function botAfterSave(){
+    public function botAfterSave()
+    {
         $action = Yii::$app->controller->action->id;
 
         switch ($action) {
@@ -225,13 +226,16 @@ class Trip extends \yii\db\ActiveRecord
                         if ($line->save()) {
                             $device = Devices::findOne(['user_id' => $this->driver_id]);
                             if ($device) {
+                                $passengers = ArrayHelper::getColumn(
+                                    self::findAll(['status' => Trip::STATUS_WAITING, 'line_id' => $line->id]),
+                                    'id'
+                                );
                                 $socket = new SocketPusher(['authkey' => $device->auth_token]);
                                 $socket->push(base64_encode(json_encode([
                                     'action' => "acceptDriverTrip",
-                                    'data' => ['message_id' => time()]
+                                    'data' => ['message_id' => time(), 'addressed' => [$passengers]]
                                 ])));
                             }
-
                         }
 
                     };
@@ -263,7 +267,7 @@ class Trip extends \yii\db\ActiveRecord
                             $socket = new SocketPusher(['authkey' => $device->auth_token]);
                             $socket->push(base64_encode(json_encode([
                                 'action' => "acceptPassengerTrip",
-                                'data' => ['message_id' => time()]
+                                'data' => ['message_id' => time(), 'addressed' => [$this->driver_id]]
                             ])));
                         }
 
@@ -293,7 +297,8 @@ class Trip extends \yii\db\ActiveRecord
         }
     }
 
-    public function botBeforeSave(){
+    public function botBeforeSave()
+    {
 
         $action = Yii::$app->controller->action->id;
 

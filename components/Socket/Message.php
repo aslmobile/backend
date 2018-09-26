@@ -3,6 +3,7 @@
 namespace app\components\Socket;
 
 use app\components\Socket\models\Line;
+use app\models\Checkpoint;
 use app\models\Devices;
 use app\modules\api\models\RestFul;
 use app\modules\api\models\Trip;
@@ -20,6 +21,12 @@ class Message
 
     public $message_id = 0;
 
+    /**
+     * Message constructor.
+     * @param ConnectionInterface $from
+     * @param string $data
+     * @param $connections
+     */
     public function __construct(ConnectionInterface $from, $data = '', $connections)
     {
         $this->connections = $connections;
@@ -36,10 +43,9 @@ class Message
     }
 
     /**
-     * @param $data array
-     * @param $from ConnectionInterface
-     * @param $connections array
-     *
+     * @param $data
+     * @param $from
+     * @param $connections
      * @return array
      */
     public function ping($data, $from, $connections)
@@ -61,6 +67,12 @@ class Message
         return $response;
     }
 
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function passengerQueue($data, $from, $connections)
     {
         /** @var Devices $device */
@@ -126,6 +138,12 @@ class Message
         return $response;
     }
 
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function driverAnglePosition($data, $from, $connections)
     {
         /** @var Devices $device */
@@ -178,6 +196,12 @@ class Message
         return $response;
     }
 
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function driverQueue($data, $from, $connections)
     {
         /** @var Devices $device */
@@ -201,6 +225,12 @@ class Message
         return $response;
     }
 
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function processingQuery($data, $from, $connections)
     {
         /** @var Devices $device */
@@ -233,6 +263,12 @@ class Message
         return $response;
     }
 
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function acceptPassengerTrip($data, $from, $connections)
     {
         /** @var Devices $device */
@@ -242,7 +278,11 @@ class Message
 
         RestFul::updatePassengerAccept();
 
-        $watchdog = RestFul::find()->where(['type' => RestFul::TYPE_PASSENGER_ACCEPT, 'user_id' => $device->user->id, 'message' => json_encode(['status' => 'request'])])->one();
+        $watchdog = RestFul::findOne([
+            'type' => RestFul::TYPE_PASSENGER_ACCEPT,
+            'user_id' => $device->user->id,
+            'message' => json_encode(['status' => 'request'])
+        ]);
         if (!$watchdog) {
             $watchdog = new RestFul([
                 'type' => RestFul::TYPE_PASSENGER_ACCEPT,
@@ -254,14 +294,14 @@ class Message
             $watchdog->save();
         }
 
-        /** @var \app\models\Trip $line */
-        $line = \app\models\Trip::find()->andWhere([
+        /** @var \app\models\Trip $trip */
+        $trip = \app\models\Trip::find()->andWhere([
             'AND',
             ['=', 'user_id', $device->user_id],
             ['=', 'status', Trip::STATUS_WAITING]
         ])->one();
 
-        if ($line) $line_data = $line->toArray();
+        if ($trip) $line_data = $trip->toArray();
         else $line_data = [];
 
         $response = [
@@ -275,9 +315,131 @@ class Message
             ]
         ];
 
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+
         return $response;
     }
 
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
+    public function acceptPassengerSeat($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        RestFul::updatePassengerAccept();
+
+        $watchdog = RestFul::findOne([
+            'type' => RestFul::TYPE_PASSENGER_ACCEPT_SEAT,
+            'user_id' => $device->user->id,
+            'message' => json_encode(['status' => 'request'])
+        ]);
+        if (!$watchdog) {
+            $watchdog = new RestFul([
+                'type' => RestFul::TYPE_PASSENGER_ACCEPT_SEAT,
+                'message' => json_encode(['status' => 'request']),
+                'user_id' => $device->user->id,
+                'uip' => '0.0.0.0'
+            ]);
+
+            $watchdog->save();
+        }
+
+        /** @var \app\models\Trip $trip */
+        $trip = \app\models\Trip::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $device->user_id],
+            ['=', 'status', Trip::STATUS_WAY]
+        ])->one();
+
+        if ($trip) $line_data = $trip->toArray();
+        else $line_data = [];
+
+        $response = [
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => [
+                'seat_from' => $watchdog->created_at,
+                'seat_time' => 300,
+                'trip' => $line_data
+            ]
+        ];
+
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
+    public function declinePassengerTrip($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        RestFul::updatePassengerAccept();
+
+        $watchdog = RestFul::findOne([
+            'type' => RestFul::TYPE_PASSENGER_DECLINE,
+            'user_id' => $device->user->id,
+            'message' => json_encode(['status' => 'cancel'])
+        ]);
+        if (!$watchdog) {
+            $watchdog = new RestFul([
+                'type' => RestFul::TYPE_PASSENGER_DECLINE,
+                'message' => json_encode(['status' => 'cancel']),
+                'user_id' => $device->user->id,
+                'uip' => '0.0.0.0'
+            ]);
+
+            $watchdog->save();
+        }
+
+        /** @var \app\models\Trip $trip */
+        $trip = \app\models\Trip::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $device->user_id],
+            ['=', 'status', Trip::STATUS_WAITING]
+        ])->one();
+
+        if ($trip) $line_data = $trip->toArray();
+        else $line_data = [];
+
+        $response = [
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => [
+                'decline_from' => $watchdog->created_at,
+                'decline_time' => 300,
+                'trip' => $line_data
+            ]
+        ];
+
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function acceptDriverTrip($data, $from, $connections)
     {
         /** @var Devices $device */
@@ -287,7 +449,11 @@ class Message
 
         RestFul::updateDriverAccept();
 
-        $watchdog = RestFul::find()->where(['type' => RestFul::TYPE_DRIVER_ACCEPT, 'user_id' => $device->user->id, 'message' => json_encode(['status' => 'request'])])->one();
+        $watchdog = RestFul::findOne([
+            'type' => RestFul::TYPE_DRIVER_ACCEPT,
+            'user_id' => $device->user->id,
+            'message' => json_encode(['status' => 'request'])
+        ]);
         if (!$watchdog) {
             $watchdog = new RestFul([
                 'type' => RestFul::TYPE_DRIVER_ACCEPT,
@@ -303,7 +469,7 @@ class Message
         $line = \app\models\Line::find()->andWhere([
             'AND',
             ['=', 'driver_id', $device->user_id],
-            ['=', 'status', Line::STATUS_WAITING]
+            ['=', 'status', Line::STATUS_IN_PROGRESS]
         ])->one();
 
         if ($line) $line_data = $line->toArray();
@@ -319,6 +485,8 @@ class Message
                 'trip' => $line_data
             ]
         ];
+
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
 
         return $response;
     }
@@ -337,10 +505,13 @@ class Message
 
         $data = $data['data'];
         $this->message_id = intval($data['message_id']);
-        $line_id = intval($data['line_id']);
-        $checkpoint_id = intval($data['checkpoint_id']);
 
-        $message = ['status' => 'passed', 'checkpoint' => $checkpoint_id, 'line' => $line_id];
+        /** @var Line $line */
+        $line = $data['line'];
+        /** @var Checkpoint $checkpoint */
+        $checkpoint = $data['checkpoint'];
+
+        $message = ['status' => 'passed', 'checkpoint' => $checkpoint->id, 'line' => $line->id];
 
         $params = [
             'user_id' => $device->user_id,
@@ -349,16 +520,15 @@ class Message
             'uip' => '0.0.0.0'
         ];
 
-        $passed_checkpoint = RestFul::findOne($params);
-
-        if (empty($passed_checkpoint)) {
-            $passed_checkpoint = new RestFul($params);
-            $passed_checkpoint->save();
+        $watchdog = RestFul::findOne($params);
+        if (empty($watchdog)) {
+            $watchdog = new RestFul($params);
+            $watchdog->save();
         }
 
         /** @var \app\models\Trip $trip */
         $trips = ArrayHelper::getColumn(Trip::findAll([
-            'line_id' => $line_id,
+            'line_id' => $line->id,
             'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING],
         ]), 'user_id');
         $this->addressed = $trips;
@@ -367,7 +537,12 @@ class Message
             'message_id' => $this->message_id,
             'device_id' => $device->id,
             'user_id' => $device->user_id,
-            'data' => $message
+            'data' => [
+                'arrived_from' => $watchdog->created_at,
+                'arrived_time' => 300,
+//                'line' => $line->toArray(),
+                'checkpoint' => $checkpoint->toArray()
+            ]
         ];
 
         return $response;
