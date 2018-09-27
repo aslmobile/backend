@@ -4,6 +4,7 @@ use app\components\Socket\SocketPusher;
 use app\modules\api\models\Users;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "line".
@@ -164,11 +165,16 @@ class Line extends \yii\db\ActiveRecord
                 'user_id' => $this->driver_id,
                 'uip' => '0.0.0.0'
             ]);
-
             $watchdog->save();
 
-            $socket = new SocketPusher();
-            $socket->push(json_encode(['action' => "acceptDriverTrip", 'data' => ['message_id' => time()]]));
+            $device = Devices::findOne(['user_id' => $this->driver_id]);
+            if ($device) {
+                $socket = new SocketPusher(['authkey' => $device->auth_token]);
+                $socket->push(base64_encode(json_encode([
+                    'action' => "acceptDriverTrip",
+                    'data' => ['message_id' => time(), 'addressed' => [$this->driver_id]]
+                ])));
+            }
 
             // TODO: Отправка в сокет что машина заполнена и подтверждение о выезде через 5 минут
         }

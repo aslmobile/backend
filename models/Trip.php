@@ -224,6 +224,15 @@ class Trip extends \yii\db\ActiveRecord
                         $line->status = Line::STATUS_WAITING;
 
                         if ($line->save()) {
+
+                            $watchdog = new RestFul([
+                                'type' => RestFul::TYPE_DRIVER_ACCEPT,
+                                'message' => json_encode(['status' => 'request']),
+                                'user_id' => $this->driver_id,
+                                'uip' => '0.0.0.0'
+                            ]);
+                            $watchdog->save();
+
                             $device = Devices::findOne(['user_id' => $this->driver_id]);
                             if ($device) {
                                 $passengers = ArrayHelper::getColumn(
@@ -233,7 +242,7 @@ class Trip extends \yii\db\ActiveRecord
                                 $socket = new SocketPusher(['authkey' => $device->auth_token]);
                                 $socket->push(base64_encode(json_encode([
                                     'action' => "acceptDriverTrip",
-                                    'data' => ['message_id' => time(), 'addressed' => [$passengers]]
+                                    'data' => ['message_id' => time(), 'addressed' => [$passengers] + [$this->driver_id]]
                                 ])));
                             }
                         }
