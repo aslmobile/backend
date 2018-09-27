@@ -81,11 +81,11 @@ class QueryProcessor extends Component
             return $data;
         }
 
-        if (!ctype_digit((string) $limit)) {
+        if (!ctype_digit((string)$limit)) {
             $limit = null;
         }
 
-        if (!ctype_digit((string) $offset)) {
+        if (!ctype_digit((string)$offset)) {
             $offset = 0;
         }
 
@@ -158,11 +158,11 @@ class QueryProcessor extends Component
             } else {
                 $data = array_filter($data, function ($row) use ($column, $value) {
 
-                    if(is_object($row)) $row = ArrayHelper::toArray($row);
-
                     if ($value instanceof \Closure) {
                         return call_user_func($value, $row[$column]);
                     }
+
+                    $this->prepareColumn($row, $column);
 
                     return $row[$column] == $value;
                 });
@@ -170,6 +170,22 @@ class QueryProcessor extends Component
         }
 
         return $data;
+    }
+
+    /**
+     * @param $row
+     * @param $column
+     */
+    protected function prepareColumn(&$row, &$column)
+    {
+        if (strrpos($column, '.')) {
+            $path = explode('.', $column);
+            $column = $path[sizeof($path) - 1];
+            unset($path[sizeof($path) - 1]);
+            foreach ($path as $key => $property) {
+                $row = $row->$property;
+            }
+        }
     }
 
     /**
@@ -217,7 +233,7 @@ class QueryProcessor extends Component
         $data = [];
         foreach ($parts as $part) {
             foreach ($part as $row) {
-                if(is_object($row)) $row = ArrayHelper::toArray($row);
+                if (is_object($row)) $row = ArrayHelper::toArray($row);
                 $pk = $row[$this->_query->primaryKeyName];
                 $data[$pk] = $row;
             }
@@ -251,7 +267,7 @@ class QueryProcessor extends Component
 
         $pkName = $this->_query->primaryKeyName;
         foreach ($data as $key => $row) {
-            if(is_object($row)) $row = ArrayHelper::toArray($row);
+            if (is_object($row)) $row = ArrayHelper::toArray($row);
             foreach ($filteredData as $filteredRowKey => $filteredRow) {
                 if ($row[$pkName] === $filteredRow[$pkName]) {
                     unset($data[$key]);
@@ -286,13 +302,13 @@ class QueryProcessor extends Component
 
         if (strncmp('NOT', $operator, 3) === 0) {
             return array_filter($data, function ($row) use ($column, $value1, $value2) {
-                if(is_object($row)) $row = ArrayHelper::toArray($row);
+                if (is_object($row)) $row = ArrayHelper::toArray($row);
                 return $row[$column] < $value1 || $row[$column] > $value2;
             });
         }
 
         return array_filter($data, function ($row) use ($column, $value1, $value2) {
-            if(is_object($row)) $row = ArrayHelper::toArray($row);
+            if (is_object($row)) $row = ArrayHelper::toArray($row);
             return $row[$column] >= $value1 && $row[$column] <= $value2;
         });
     }
@@ -321,7 +337,7 @@ class QueryProcessor extends Component
             return $operator === 'IN' ? [] : $data;
         }
 
-        $values = (array) $values;
+        $values = (array)$values;
 
         if (count($column) > 1) {
             throw new InvalidParamException("Operator '$operator' allows only a single column.");
@@ -339,13 +355,13 @@ class QueryProcessor extends Component
 
         if (strncmp('NOT', $operator, 3) === 0) {
             return array_filter($data, function ($row) use ($column, $values) {
-                if(is_object($row)) $row = ArrayHelper::toArray($row);
+                if (is_object($row)) $row = ArrayHelper::toArray($row);
                 return !in_array($row[$column], $values);
             });
         }
 
         return array_filter($data, function ($row) use ($column, $values) {
-            if(is_object($row)) $row = ArrayHelper::toArray($row);
+            if (is_object($row)) $row = ArrayHelper::toArray($row);
             return in_array($row[$column], $values);
         });
     }
@@ -384,7 +400,7 @@ class QueryProcessor extends Component
 
             if ($or) {
                 return array_filter($data, function ($row) use ($column, $values) {
-                    if(is_object($row)) $row = ArrayHelper::toArray($row);
+                    if (is_object($row)) $row = ArrayHelper::toArray($row);
                     foreach ($values as $value) {
                         if (stripos($row[$column], $value) === false) {
                             return true;
@@ -396,7 +412,7 @@ class QueryProcessor extends Component
             }
 
             return array_filter($data, function ($row) use ($column, $values) {
-                if(is_object($row)) $row = ArrayHelper::toArray($row);
+                if (is_object($row)) $row = ArrayHelper::toArray($row);
                 foreach ($values as $value) {
                     if (stripos($row[$column], $value) !== false) {
                         return false;
@@ -413,7 +429,7 @@ class QueryProcessor extends Component
 
         if ($or) {
             return array_filter($data, function ($row) use ($column, $values) {
-                if(is_object($row)) $row = ArrayHelper::toArray($row);
+                if (is_object($row)) $row = ArrayHelper::toArray($row);
                 foreach ($values as $value) {
                     if (stripos($row[$column], $value) !== false) {
                         return true;
@@ -425,7 +441,7 @@ class QueryProcessor extends Component
         }
 
         return array_filter($data, function ($row) use ($column, $values) {
-            if(is_object($row)) $row = ArrayHelper::toArray($row);
+            if (is_object($row)) $row = ArrayHelper::toArray($row);
             foreach ($values as $value) {
                 if (stripos($row[$column], $value) === false) {
                     return false;
@@ -489,7 +505,7 @@ class QueryProcessor extends Component
 
         return array_filter($data, function ($row) use ($operator, $column, $value) {
 
-            if(is_object($row)) $row = ArrayHelper::toArray($row);
+            if (is_object($row)) $row = ArrayHelper::toArray($row);
 
             switch ($operator) {
                 case '=':

@@ -8,6 +8,8 @@ use yii\db\ActiveRecord;
 class NotNullBehavior extends AttributeBehavior
 {
 
+    public $unsigned = false;
+
     /**  @inheritdoc */
     public function events()
     {

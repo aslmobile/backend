@@ -102,6 +102,8 @@ class SocketServer implements MessageComponentInterface
     {
         echo "An error has occurred: {$e->getMessage()}\n";
 
+        var_dump($e);die();
+
         $conn->close();
     }
 
@@ -131,7 +133,7 @@ class SocketServer implements MessageComponentInterface
             $query = new ArrayQuery();
             $query->from($this->devices);
             foreach ($result->addressed as $user_id) {
-                $devices = $query->where(['user_id' =>  intval($user_id)])->all();
+                $devices = $query->where(['device.user_id' =>  intval($user_id)])->all();
                 foreach ($devices as $device) $device->send($response);
             }
         }

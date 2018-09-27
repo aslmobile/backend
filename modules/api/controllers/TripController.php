@@ -31,8 +31,7 @@ class TripController extends BaseController
                         'actions' => [
                             'test',
                             'calculate-passenger-tariff',
-                            'arrive-endpoint',
-                            'accept-arrive',
+                            'accept-seat',
                             'accept-passenger',
                             'passenger-comments',
                             'driver-comments',
@@ -58,7 +57,7 @@ class TripController extends BaseController
                 'actions' => [
                     'calculate-passenger-tariff' => ['GET'],
                     'passengers' => ['GET'],
-                    'accept-arrive' => ['POST'],
+                    'accept-seat' => ['POST'],
                     'accept-passenger' => ['POST'],
                     'checkpoint-arrived' => ['POST'],
                     'taxi' => ['POST'],
@@ -90,10 +89,18 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['country', 'checkpoint', 'endpoint', 'route', 'time', 'seats', 'taxi', 'payment_type']);
+        $this->validateBodyParams(['country', 'checkpoint', 'route', 'time', 'seats', 'taxi', 'payment_type']);
 
         $country = Countries::findOne($this->body->country);
         if (!$country) $this->module->setError(422, '_country', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\models\Route $route */
+        $route = Route::find()->andWhere([
+            'AND',
+            ['=', 'status', Route::STATUS_ACTIVE],
+            ['=', 'id', $this->body->route]
+        ])->one();
+        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Checkpoint $checkpoint */
         $checkpoint = \app\models\Checkpoint::find()->andWhere([
@@ -109,17 +116,9 @@ class TripController extends BaseController
             'AND',
             ['=', 'type', \app\models\Checkpoint::TYPE_END],
             ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
-            ['=', 'id', $this->body->endpoint]
+            ['=', 'route', $route->id]
         ])->one();
         if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
-
-        /** @var \app\models\Route $route */
-        $route = Route::find()->andWhere([
-            'AND',
-            ['=', 'status', Route::STATUS_ACTIVE],
-            ['=', 'id', $this->body->route]
-        ])->one();
-        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         $seats = $this->body->seats;
         $_luggages = [];
@@ -360,15 +359,14 @@ class TripController extends BaseController
         $trip->line_id = $line->id;
         $trip->driver_id = $line->driver_id;
         $trip->vehicle_id = $line->vehicle_id;
-        $line->freeseats -= $trip->seats;
 
-        if ($line->freeseats > intval($trip->seats)) {
+        if ($line->freeseats > $trip->seats) {
             $line->freeseats = $line->freeseats - $trip->seats;
-        } else if ($line->freeseats == intval($trip->seats)) {
+        } else if ($line->freeseats == $trip->seats) {
             $line->freeseats = 0;
             $line->status = Line::STATUS_WAITING;
         } else {
-            $this->module->setError(422, '_seats', Yii::$app->mv->gt("Не достаточно свободных мест", [], false));
+            $this->module->setError(400, '_seats', Yii::$app->mv->gt("Не достаточно свободных мест", [], false));
         };
 
         $trip->save();
@@ -399,19 +397,14 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['passenger_id']);
+        $this->validateBodyParams(['trip_id']);
 
         /** @var \app\models\Line $line */
         $line = Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
-        $trip = Trip::find()->where([
-            'line_id' => $line->id,
-            'route_id' => $line->route_id,
-            'driver_id' => $line->driver_id,
-            'user_id' => $this->body->passenger_id
-        ])->one();
+        $trip = Trip::find()->where(['id' => $this->body->trip_id, 'status' => Trip::STATUS_WAITING])->one();
 
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
@@ -461,14 +454,14 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['passenger_id']);
+        $this->validateBodyParams(['trip_id']);
 
         /** @var \app\modules\api\models\Line $line */
         $line = \app\modules\api\models\Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
-        $trip = Trip::findOne(['route_id' => $line->route_id, 'driver_id' => $line->driver_id, 'user_id' => $this->body->passenger_id]);
+        $trip = Trip::findOne($this->body->trip_id);
         if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $addressed = [];
@@ -482,6 +475,10 @@ class TripController extends BaseController
                 $trip->status = Trip::STATUS_CANCELLED;
                 $addressed[] = $line->driver_id;
                 break;
+            default:
+                $trip->status = Trip::STATUS_CANCELLED;
+                $addressed[] = $trip->user_id;
+                $addressed[] = $line->driver_id;
         }
 
         $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
@@ -518,14 +515,14 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['checkpoint']);
+        $this->validateBodyParams(['checkpoint_id']);
 
         /** @var \app\models\Line $line */
         $line = Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var Checkpoint $checkpoint */
-        $checkpoint = Checkpoint::findOne(intval($this->body->checkpoint));
+        $checkpoint = Checkpoint::findOne(intval($this->body->checkpoint_id));
         if (!$checkpoint) $this->module->setError(422, 'checkpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         $data = [
