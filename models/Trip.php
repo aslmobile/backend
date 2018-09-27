@@ -1,5 +1,6 @@
 <?php namespace app\models;
 
+use app\components\NotNullBehavior;
 use app\components\Socket\SocketPusher;
 use app\modules\api\models\Users;
 use Yii;
@@ -77,7 +78,8 @@ class Trip extends \yii\db\ActiveRecord
     public function behaviors()
     {
         return [
-            TimestampBehavior::className()
+            TimestampBehavior::class,
+            NotNullBehavior::class
         ];
     }
 

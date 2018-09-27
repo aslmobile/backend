@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\NotNullBehavior;
 use app\modules\api\models\UploadFiles;
 use Yii;
 use yii\base\NotSupportedException;
@@ -142,6 +143,7 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             TimestampBehavior::className(),
+            NotNullBehavior::class
         ];
     }
 

@@ -1,5 +1,6 @@
 <?php namespace app\models;
 
+use app\components\NotNullBehavior;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 
@@ -46,7 +47,8 @@ class Checkpoint extends \yii\db\ActiveRecord
     public function behaviors()
     {
         return [
-            TimestampBehavior::class
+            TimestampBehavior::class,
+            NotNullBehavior::class
         ];
     }
 
@@ -118,9 +120,14 @@ class Checkpoint extends \yii\db\ActiveRecord
 
     public function afterSave($insert, $changedAttributes)
     {
-        if ($this->type == self::TYPE_START) {
-            Checkpoint::updateAll(['pid' => null], ['pid' => $this->id, 'type' => self::TYPE_STOP]);
-            Checkpoint::updateAll(['pid' => $this->id], ['id' => $this->children, 'type' => self::TYPE_STOP]);
+        switch ($this->type) {
+            case self::TYPE_START:
+                Checkpoint::updateAll(['pid' => null], ['pid' => $this->id, 'type' => self::TYPE_STOP]);
+                Checkpoint::updateAll(['pid' => $this->id], ['id' => $this->children, 'type' => self::TYPE_STOP]);
+                break;
+            case self::TYPE_END:
+                Checkpoint::updateAll(['type' => 0], ['type' => self::TYPE_END, 'route' => $this->route, ['NOT', ['id' => $this->id]]]);
+                break;
         }
         parent::afterSave($insert, $changedAttributes);
     }

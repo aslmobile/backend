@@ -1,10 +1,10 @@
 <?php namespace app\models;
 
+use app\components\NotNullBehavior;
 use app\components\Socket\SocketPusher;
 use app\modules\api\models\Users;
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "line".
@@ -59,7 +59,8 @@ class Line extends \yii\db\ActiveRecord
     public function behaviors()
     {
         return [
-            TimestampBehavior::className()
+            TimestampBehavior::className(),
+            NotNullBehavior::class
         ];
     }
 

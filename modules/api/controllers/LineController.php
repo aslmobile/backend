@@ -91,7 +91,7 @@ class LineController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['vehicle_id', 'startpoint', 'endpoint', 'seats', 'freeseats']);
+        $this->validateBodyParams(['vehicle_id', 'startpoint', 'seats', 'freeseats']);
 
         /** @var \app\models\Route $route */
         $route = Route::findOne($id);
@@ -102,12 +102,20 @@ class LineController extends BaseController
         if (!$vehicle) $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Checkpoint $startpoint */
-        $startpoint = Checkpoint::findOne(['id' => $this->body->startpoint, 'status' => Checkpoint::STATUS_ACTIVE]);
-        if (!$startpoint || $startpoint->type != $startpoint::TYPE_START) $this->module->setError(422, '_startpoint', Yii::$app->mv->gt("Не найден", [], false));
+        $startpoint = Checkpoint::findOne([
+            'id' => $this->body->startpoint,
+            'type' => Checkpoint::TYPE_START,
+            'status' => Checkpoint::STATUS_ACTIVE
+        ]);
+        if (!$startpoint) $this->module->setError(422, '_startpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Checkpoint $endpoint */
-        $endpoint = Checkpoint::findOne(['id' => $this->body->endpoint, 'status' => Checkpoint::STATUS_ACTIVE]);
-        if (!$endpoint || $endpoint->type != $endpoint::TYPE_END) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
+        $endpoint = Checkpoint::findOne([
+            'route' => $route->id,
+            'type' => Checkpoint::TYPE_END,
+            'status' => Checkpoint::STATUS_ACTIVE
+        ]);
+        if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         $seats = isset ($this->body->seats) ? intval($this->body->seats) : $vehicle->seats;
         if ($seats == 0) $seats = $vehicle->seats;
@@ -130,9 +138,11 @@ class LineController extends BaseController
         if (!$line->validate() || !$line->save()) {
             if ($line->hasErrors()) {
                 foreach ($line->errors as $field => $error_message)
-                    $this->module->setError(422, 'line.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                    $this->module->setError(422,
+                        '_line.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
-            } else $this->module->setError(422, '_line', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422,
+                '_line', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['line'] = $line->toArray();
@@ -298,12 +308,12 @@ class LineController extends BaseController
         $this->prepareBody();
 
         if (
-            isset($this->body->path) &&
-            !empty($this->body->path) &&
-            $user->type == User::TYPE_DRIVER
+            isset($this->body->path)
+            && !empty($this->body->path)
+            && $user->type == User::TYPE_DRIVER
         ) {
             $path = $this->body->path;
-            $line->path = $path;
+            $line->path = json_encode($path);
             $line->update(false);
         }
 
@@ -638,6 +648,8 @@ class LineController extends BaseController
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
+
+    /** CORE METHODS | PROTECTED */
 
     protected function buildRoute(&$all_checkpoints, &$trips, &$passengers, &$checkpoints, $user, $line)
     {
