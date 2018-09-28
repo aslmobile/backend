@@ -164,9 +164,17 @@ class Message
         ])->one();
 
         if ($line) {
+
             $line->position = $position;
             $line->angle = $angle;
             $line->save();
+
+            /** @var \app\models\Trip $trip */
+            $trips = ArrayHelper::getColumn(Trip::findAll([
+                'line_id' => $line->id,
+                'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING],
+            ]), 'user_id');
+            $this->addressed = $trips;
 
             $response = [
                 'message_id' => $this->message_id,
@@ -179,6 +187,7 @@ class Message
                     'line_id' => $line->id
                 ]
             ];
+
         } else {
             $response = [
                 'message_id' => $this->message_id,

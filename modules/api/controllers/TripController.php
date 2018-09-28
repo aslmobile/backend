@@ -534,9 +534,7 @@ class TripController extends BaseController
 
             /** @var \app\models\Trip $trip */
             $trips = Trip::find()->andWhere([
-                'route_id' => $line->route_id,
-                'vehicle_id' => $line->vehicle_id,
-                'driver_id' => $line->driver_id,
+                'line_id' => $line->id,
                 'status' => Trip::STATUS_WAY,
                 //'payment_status' => Trip::PAYMENT_STATUS_PAID
             ])->all();
