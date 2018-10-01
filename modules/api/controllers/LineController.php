@@ -94,11 +94,17 @@ class LineController extends BaseController
         $this->validateBodyParams(['vehicle_id', 'startpoint', 'seats', 'freeseats']);
 
         /** @var \app\models\Route $route */
-        $route = Route::findOne($id);
+        $route = Route::findOne([
+            'id' => $id,
+            'status' => Route::STATUS_ACTIVE
+        ]);
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\modules\api\models\Vehicles $vehicle */
-        $vehicle = Vehicles::findOne($this->body->vehicle_id);
+        $vehicle = Vehicles::findOne([
+            'id' => $this->body->vehicle_id,
+            'status' => Vehicles::STATUS_APPROVED
+        ]);
         if (!$vehicle) $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Checkpoint $startpoint */
@@ -424,11 +430,11 @@ class LineController extends BaseController
             ['=', 'type', Checkpoint::TYPE_STOP],
             ['=', 'route', $route_id],
             ['=', 'pid', $startpoint_id],
-            ['status' => Checkpoint::STATUS_ACTIVE]
+            ['=', 'status', Checkpoint::STATUS_ACTIVE]
         ];
 
         $checkpoints = Checkpoint::find()->andWhere($params)->all();
-        if ($checkpoints && count($checkpoints) > 0) foreach ($checkpoints as $point) {
+        if ($checkpoints && sizeof($checkpoints) > 0) foreach ($checkpoints as $point) {
             /** @var $point \app\models\Checkpoint */
             $points[] = $point->toArray();
         }
