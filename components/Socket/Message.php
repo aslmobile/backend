@@ -480,19 +480,27 @@ class Message
             'status' => [Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
         ])->one();
 
-        if ($line) $line_data = $line->toArray();
-        else $line_data = null;
-
-        $response = [
-            'message_id' => $this->message_id,
-            'device_id' => $device->id,
-            'user_id' => $device->user_id,
-            'data' => [
-                'accept_from' => $watchdog->created_at,
-                'accept_time' => 300,
-                'trip' => $line_data
-            ]
-        ];
+        if ($line) {
+            $line_data = $line->toArray();
+            $response = [
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => [
+                    'accept_from' => $watchdog->created_at,
+                    'accept_time' => 300,
+                    'trip' => $line_data
+                ]
+            ];
+        } else {
+            $response = [
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => null
+            ];
+            $this->error_code = 2;
+        }
 
         $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
 
