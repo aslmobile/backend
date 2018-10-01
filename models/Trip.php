@@ -220,6 +220,16 @@ class Trip extends \yii\db\ActiveRecord
                         $line->freeseats = $line->freeseats - $this->seats;
                         $line->save();
 
+                        /** @var \app\models\Devices $device */
+                        $device = Devices::findOne(['user_id' => $this->user_id]);
+                        if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
+                        $socket = new SocketPusher(['authkey' => $device->auth_token]);
+                        $socket->push(base64_encode(json_encode([
+                            'action' => "acceptPassengerTrip",
+                            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id]]
+                        ])));
+
+
                     } else if ($line->freeseats == intval($this->seats)) {
 
                         $line->freeseats = 0;
