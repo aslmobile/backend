@@ -311,7 +311,7 @@ class Message
         ])->one();
 
         if ($trip) $line_data = $trip->toArray();
-        else $line_data = [];
+        else $line_data = null;
 
         $response = [
             'message_id' => $this->message_id,
@@ -368,7 +368,7 @@ class Message
         ])->one();
 
         if ($trip) $line_data = $trip->toArray();
-        else $line_data = [];
+        else $line_data = null;
 
         $response = [
             'message_id' => $this->message_id,
@@ -425,7 +425,7 @@ class Message
         ])->one();
 
         if ($trip) $line_data = $trip->toArray();
-        else $line_data = [];
+        else $line_data = null;
 
         $response = [
             'message_id' => $this->message_id,
@@ -476,13 +476,12 @@ class Message
 
         /** @var \app\models\Line $line */
         $line = \app\models\Line::find()->andWhere([
-            'AND',
-            ['=', 'driver_id', $device->user_id],
-            ['=', 'status', Line::STATUS_IN_PROGRESS]
+            'driver_id' => $device->user_id,
+            'status' => [Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
         ])->one();
 
         if ($line) $line_data = $line->toArray();
-        else $line_data = [];
+        else $line_data = null;
 
         $response = [
             'message_id' => $this->message_id,
