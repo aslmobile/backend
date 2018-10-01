@@ -21,7 +21,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int $freeseats
  * @property int $starttime
  * @property int $endtime
- * @property string $cancel_reason
+ * @property int $cancel_reason
  * @property string $angle
  * @property string $position
  * @property string $path
@@ -94,7 +94,8 @@ class Line extends \yii\db\ActiveRecord
                     'startpoint',
                     'endpoint',
                     'seats',
-                    'freeseats'
+                    'freeseats',
+                    'cancel_reason',
                 ],
                 'integer'
             ],
@@ -108,7 +109,6 @@ class Line extends \yii\db\ActiveRecord
 
             [
                 [
-                    'cancel_reason',
                     'path'
                 ],
                 'string'
