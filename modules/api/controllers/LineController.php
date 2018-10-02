@@ -245,9 +245,15 @@ class LineController extends BaseController
 
         if (!$line->validate() || !$line->save()) {
             if ($line->hasErrors()) {
-                foreach ($line->errors as $field => $error_message)
+                foreach ($line->errors as $field => $error_message) {
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= $error;
+                        $error_message = $result;
+                    }
                     $this->module->setError(422, 'line.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
-                $this->module->sendResponse();
+                    $this->module->sendResponse();
+                }
             } else $this->module->setError(422, '_line', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
