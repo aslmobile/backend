@@ -15,6 +15,8 @@ use yii\behaviors\TimestampBehavior;
  * @property string $license_plate
  * @property integer $image
  * @property string $photos
+ * @property string $code
+ * @property integer $generate_code
  * @property integer $insurance
  * @property integer $registration
  * @property integer $registration2
@@ -57,9 +59,9 @@ class Vehicles extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'vehicle_type_id', 'vehicle_model_id', 'vehicle_brand_id', 'seats', 'license_plate'], 'required'],
-            [['main', 'weight', 'seats', 'vehicle_type_id', 'vehicle_model_id', 'vehicle_brand_id'], 'integer'],
+            [['main', 'weight', 'seats', 'vehicle_type_id', 'vehicle_model_id', 'vehicle_brand_id', 'generate_code'], 'integer'],
             [['image', 'insurance', 'registration', 'registration2'], 'integer'],
-            [['license_plate', 'photos'], 'string'],
+            [['license_plate', 'photos', 'code'], 'string'],
             ['license_plate', 'unique', 'targetClass' => self::className(),
                 'message' => Yii::t('app', 'This plate has already been taken.')
             ],
@@ -68,8 +70,7 @@ class Vehicles extends \yii\db\ActiveRecord
             [['main'], 'integer', 'min' => 0, 'max' => 1],
             [['weight'], 'integer', 'min' => 0],
             [['main'], 'filter', 'filter' => function ($value) {
-                if ($value && intval($value) == 1)
-                {
+                if ($value && intval($value) == 1) {
                     $vehicle = Vehicles::find()->andWhere([
                         'AND',
                         ['=', 'user_id', $this->user_id],
@@ -94,23 +95,24 @@ class Vehicles extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'                => Yii::t('app', "ID"),
-            'user_id'           => Yii::t('app', "Пользователь"),
-            'status'            => Yii::t('app', "Статус"),
-            'seats'             => Yii::t('app', "Мест"),
-            'license_plate'     => Yii::t('app', "Номер"),
-            'image'             => Yii::t('app', "Фото"),
-            'photos'            => Yii::t('app', "Фотографии"),
-            'insurance'         => Yii::t('app', "Страхование"),
-            'vehicle_type_id'   => Yii::t('app', "Тип"),
-            'vehicle_brand_id'  => Yii::t('app', "Бренд"),
-            'vehicle_model_id'  => Yii::t('app', "Модель"),
-            'created_at'        => Yii::t('app', "Создано"),
-            'updated_at'        => Yii::t('app', "Обновлено"),
-            'registration'      => Yii::t('app', "Фото тех. паспорта"),
-            'registration2'     => Yii::t('app', "Фото тех. паспорта"),
-            'rating'            => Yii::t('app', "Рейтинг"),
-            'main'              => Yii::t('app', "Основная")
+            'id' => Yii::t('app', "ID"),
+            'user_id' => Yii::t('app', "Пользователь"),
+            'status' => Yii::t('app', "Статус"),
+            'seats' => Yii::t('app', "Мест"),
+            'license_plate' => Yii::t('app', "Номер"),
+            'image' => Yii::t('app', "Фото"),
+            'photos' => Yii::t('app', "Фотографии"),
+            'insurance' => Yii::t('app', "Страхование"),
+            'vehicle_type_id' => Yii::t('app', "Тип"),
+            'vehicle_brand_id' => Yii::t('app', "Бренд"),
+            'vehicle_model_id' => Yii::t('app', "Модель"),
+            'created_at' => Yii::t('app', "Создано"),
+            'updated_at' => Yii::t('app', "Обновлено"),
+            'registration' => Yii::t('app', "Фото тех. паспорта"),
+            'registration2' => Yii::t('app', "Фото тех. паспорта"),
+            'rating' => Yii::t('app', "Рейтинг"),
+            'main' => Yii::t('app', "Основная"),
+            'generate_code' => Yii::t('app', "Сгенерировать QR код")
         ];
     }
 
@@ -157,14 +159,11 @@ class Vehicles extends \yii\db\ActiveRecord
         if (empty ($this->photos)) return null;
 
         $photos = explode(',', $this->photos);
-        switch ($type)
-        {
+        switch ($type) {
             case 1:
                 $_photos = [];
-                if ($photos && count ($photos) > 0) foreach ($photos as $file_id)
-                {
-                    if (intval($file_id) > 0)
-                    {
+                if ($photos && count($photos) > 0) foreach ($photos as $file_id) {
+                    if (intval($file_id) > 0) {
                         $file = UploadFiles::findOne(intval($file_id));
                         if ($file) $_photos[] = [
                             'id' => $file->id,
@@ -179,10 +178,8 @@ class Vehicles extends \yii\db\ActiveRecord
 
             case 2:
                 $_photos = [];
-                if ($photos && count ($photos) > 0) foreach ($photos as $file_id)
-                {
-                    if (intval($file_id) > 0)
-                    {
+                if ($photos && count($photos) > 0) foreach ($photos as $file_id) {
+                    if (intval($file_id) > 0) {
                         $file = UploadFiles::findOne(intval($file_id));
                         if ($file) $_photos[] = $file;
                     }

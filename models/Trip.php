@@ -217,7 +217,7 @@ class Trip extends \yii\db\ActiveRecord
 
                     if ($line->freeseats > intval($this->seats)) {
 
-                        $line->freeseats = $line->freeseats - $this->seats;
+                        $line->freeseats -= $this->seats;
                         $line->save();
 
                         /** @var \app\models\Devices $device */

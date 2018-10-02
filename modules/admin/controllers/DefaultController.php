@@ -3,6 +3,7 @@
 namespace app\modules\admin\controllers;
 
 use app\components\Controller;
+use app\models\Trip;
 use app\modules\admin\models\City;
 use app\modules\admin\models\Countries;
 use app\modules\admin\models\Regions;
