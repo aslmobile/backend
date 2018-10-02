@@ -111,6 +111,12 @@ $config = [
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => '127.0.0.1',
+                'username' => 'admin@aslmobile.net',
+                'password' => 'E2d8Z8l4',
+            ],
         ],
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
