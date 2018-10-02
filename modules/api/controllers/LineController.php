@@ -520,10 +520,6 @@ class LineController extends BaseController
         ]);
         if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
 
-        /** @var \app\models\Route $route */
-        $route = Route::findOne($startpoint->route);
-        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
-
         // TODO: Переделать логику
         $rate = $this->getRate($route->id);
         $seat = (float)round($route->base_tariff * $rate, 2);
