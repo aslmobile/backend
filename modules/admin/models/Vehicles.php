@@ -63,7 +63,7 @@ class Vehicles extends \app\models\Vehicles
             Yii::$app->mailer->compose('driverQr', ['user' => $user])
                 ->setFrom([Yii::$app->params['supportEmail'] => Yii::$app->name])
                 ->setTo($user->email)
-                ->setSubject('Email confirmation from ' . Yii::$app->name)
+                ->setSubject('QR код машины для водителя. ' . Yii::$app->name)
                 ->attach($storePath . '/code.png')
                 ->send();
         }
