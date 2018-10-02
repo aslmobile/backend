@@ -502,15 +502,23 @@ class LineController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['startpoint', 'endpoint']);
+        $this->validateBodyParams(['startpoint']);
 
         /** @var \app\models\Checkpoint $startpoint */
         $startpoint = Checkpoint::findOne($this->body->startpoint);
         if (!$startpoint || $startpoint->type != $startpoint::TYPE_START) $this->module->setError(422, '_startpoint', Yii::$app->mv->gt("Не найден", [], false));
 
+        /** @var \app\models\Route $route */
+        $route = Route::findOne(['id' => $startpoint->route, 'status' => Route::STATUS_ACTIVE]);
+        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
+
         /** @var \app\models\Checkpoint $endpoint */
-        $endpoint = Checkpoint::findOne($this->body->endpoint);
-        if (!$endpoint || $endpoint->type != $endpoint::TYPE_END) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
+        $endpoint = Checkpoint::findOne([
+            'route' => $route->id,
+            'type' => Checkpoint::TYPE_END,
+            'status' => Checkpoint::STATUS_ACTIVE
+        ]);
+        if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Route $route */
         $route = Route::findOne($startpoint->route);
