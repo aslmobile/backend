@@ -54,13 +54,20 @@ class Vehicles extends \app\models\Vehicles
         $storePath = $this->getStorePath() . DIRECTORY_SEPARATOR . $this->id;
         BaseFileHelper::createDirectory($storePath, 0777, true);
 
-        $qrCode = (new QrCode($this->id))
-            ->setSize(500)
-            ->setMargin(5)
-            //->useForegroundColor(255, 255, 255)
-        ;
+        $qrCode = (new QrCode($this->id))->setSize(500)->setMargin(5);
+        $qrCode->writeFile($storePath . '/code.png');
 
-        $qrCode->writeFile($storePath . '/code.png'); // writer defaults to PNG when none is specified
+        $user = $this->user;
+
+        if (!empty($user)) {
+            Yii::$app->mailer->compose('driverQr', ['user' => $user])
+                ->setFrom([Yii::$app->params['supportEmail'] => Yii::$app->name])
+                ->setTo($user->email)
+                ->setSubject('Email confirmation from ' . Yii::$app->name)
+                ->attach($storePath . '/code.png')
+                ->send();
+        }
+
         $this->code = Url::to($this->relPath . '/' . $this->id . '/code.png');
         $this->update();
     }
