@@ -112,7 +112,7 @@ class Vehicles extends \yii\db\ActiveRecord
             'registration2' => Yii::t('app', "Фото тех. паспорта"),
             'rating' => Yii::t('app', "Рейтинг"),
             'main' => Yii::t('app', "Основная"),
-            'generate_code' => Yii::t('app', "Сгенерировать QR код")
+            'generate_code' => Yii::t('app', "Сгенерировать QR код и отправить водителю на почту")
         ];
     }
 
