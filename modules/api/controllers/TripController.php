@@ -416,10 +416,9 @@ class TripController extends BaseController
                 break;
             case User::TYPE_PASSENGER:
                 $this->validateBodyParams(['code']);
-                $v_id = $this->body->code;
-                if($v_id != $trip->vehicle_id){
-                    if (!$trip) $this->module->setError(422, '_code', Yii::$app->mv->gt("Не правильный код", [], false));
-                }
+                $v_id = intval($this->body->code);
+                if($v_id !== $trip->vehicle_id) $this->module->setError(422,
+                    '_code', Yii::$app->mv->gt("Не правильный код", [], false));
                 $trip->passenger_comment = Yii::$app->mv->gt("Посадка подтверждена пассажиром", [], false);
                 break;
         }
