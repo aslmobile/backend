@@ -102,8 +102,6 @@ class SocketServer implements MessageComponentInterface
     {
         echo "An error has occurred: {$e->getMessage()}\n";
 
-        var_dump($e);die();
-
         $conn->close();
     }
 
