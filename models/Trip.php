@@ -15,6 +15,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $user_id
  * @property integer $driver_id
  * @property float $amount
+ * @property integer $penalty
  * @property float $tariff
  * @property integer $cancel_reason
  * @property string $passenger_description
@@ -121,7 +122,8 @@ class Trip extends \yii\db\ActiveRecord
                     'scheduled',
                     'schedule_id',
                     'start_time',
-                    'finish_time'
+                    'finish_time',
+                    'penalty'
                 ],
                 'integer'
             ],
@@ -180,6 +182,7 @@ class Trip extends \yii\db\ActiveRecord
             'line_id' => Yii::t('app', "Линия"),
             'route_id' => Yii::t('app', "Маршрут"),
             'amount' => Yii::t('app', "Сумма"),
+            'penalty'  => Yii::t('app', "Наложен штраф"),
             'tariff' => Yii::t('app', "Тариф"),
             'cancel_reason' => Yii::t('app', "Причина отмены"),
             'passenger_description' => Yii::t('app', "Комментарий пассажира"),

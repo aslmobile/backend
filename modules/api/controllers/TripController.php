@@ -417,7 +417,7 @@ class TripController extends BaseController
             case User::TYPE_PASSENGER:
                 $this->validateBodyParams(['code']);
                 $v_id = intval($this->body->code);
-                if($v_id !== $trip->vehicle_id) $this->module->setError(422,
+                if ($v_id !== $trip->vehicle_id) $this->module->setError(422,
                     '_code', Yii::$app->mv->gt("Не правильный код", [], false));
                 $trip->passenger_comment = Yii::$app->mv->gt("Посадка подтверждена пассажиром", [], false);
                 break;
@@ -476,23 +476,24 @@ class TripController extends BaseController
         switch ($user->type) {
             case User::TYPE_DRIVER:
                 $trip->status = Trip::STATUS_CANCELLED_DRIVER;
-                $addressed[] = $trip->user_id;
+                $trip->penalty = 1;
+                $trip->driver_comment = isset($this->body->driver_comment) ? $this->body->driver_comment : '';
                 break;
             case User::TYPE_PASSENGER:
                 $trip->status = Trip::STATUS_CANCELLED;
-                $addressed[] = $line->driver_id;
+                if ($line->status == Line::STATUS_IN_PROGRESS) $trip->penalty = 1;
+                $trip->passenger_comment = isset($this->body->passenger_comment) ? $this->body->passenger_comment : '';
                 break;
             default:
                 $trip->status = Trip::STATUS_CANCELLED;
-                $addressed[] = $trip->user_id;
-                $addressed[] = $line->driver_id;
         }
 
+        $addressed[] = $trip->user_id;
+        $addressed[] = $line->driver_id;
         $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
         $line->freeseats += $trip->seats;
 
-        $trip->save();
-        $line->save();
+        if ($trip->save()) $line->save();
 
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
@@ -679,18 +680,15 @@ class TripController extends BaseController
         $trip = Trip::findOne($this->body->trip_id);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
-        if(isset($this->body->driver_rating)) $trip->driver_rating = $this->body->driver_rating;
-        if(isset($this->body->driver_comment)) $trip->driver_comment = $this->body->driver_comment;
+        if (isset($this->body->driver_rating)) $trip->driver_rating = $this->body->driver_rating;
+        if (isset($this->body->driver_comment)) $trip->driver_comment = $this->body->driver_comment;
 
-        if (!$trip->validate() || !$trip->save())
-        {
-            if ($trip->hasErrors())
-            {
+        if (!$trip->validate() || !$trip->save()) {
+            if ($trip->hasErrors()) {
                 foreach ($trip->errors as $field => $error_message)
                     $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
-            }
-            else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['line'] = $line->toArray();
