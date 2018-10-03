@@ -474,8 +474,16 @@ class Message
             $watchdog->save();
         }
 
-        /** @var Line $line */
-        $line = $data['data']['line'];
+        if (isset($data['data']['line'])) {
+            /** @var Line $line */
+            $line = $data['data']['line'];
+        } else {
+            /** @var \app\models\Line $line */
+            $line = \app\models\Line::find()->andWhere([
+                'driver_id' => $device->user_id,
+                'status' => [Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
+            ])->orderBy(['created_at' => SORT_DESC])->one();
+        }
 
         if ($line) {
             $line_data = $line->toArray();
