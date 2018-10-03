@@ -253,7 +253,7 @@ class BotsController extends Controller
                                     $socket->push(base64_encode(json_encode([
                                         'action' => "acceptDriverTrip",
                                         'data' => [
-                                            'message_id' => time()
+                                            'message_id' => time(), 'line' => $line
                                         ]
                                     ])));
 

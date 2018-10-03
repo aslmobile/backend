@@ -215,7 +215,7 @@ class LineController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "acceptDriverTrip",
-            'data' => ['message_id' => time(), 'addressed' => [$passengers]]
+            'data' => ['message_id' => time(), 'addressed' => [$passengers], 'line' => $line]
         ])));
 
 

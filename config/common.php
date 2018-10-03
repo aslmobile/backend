@@ -30,13 +30,30 @@ $config = [
         'gii' => [
             'class' => 'app\modules\gii\Module',
         ],
-        'gridview' =>  [
+        'gridview' => [
             'class' => '\kartik\grid\Module',
         ]
     ],
     'components' => [
         'mv' => [
             'class' => 'app\components\Mv',
+        ],
+        'push' => [
+            'class' => 'app\components\Push',
+            'options' => [
+                'returnInvalidTokens' => true //default false
+            ],
+//            'apnsConfig' => [
+//                'environment' => '.sandbox',
+//                'pem' => dirname(__DIR__).'/components/certs/DevPush.pem',
+//                'passphrase' => 'lyres374;fascia', //optional
+//            ],
+            'fcmConfig' => [
+                'apiAccessKey' => 'AAAAhnp7X4c:APA91bEEZEipwT6Czoaumtnt3STunnsMqYtlqDj_5eSxOTTMaKl17Fqx_lMoEYMHLUZgHn3QCjSahjYWzQI--Ntojdx0m6p3nhJ-oYsAjQu12FVpltSjSz7EJGzs6bGvR1eCYUziG3DH'
+            ],
+            'gcmConfig' => [
+                'apiAccessKey' => 'AIzaSyCUfMeKft1Vw1YGxGYw7AMNEMBxw082Eno'
+            ]
         ],
         'assetManager' => [
             'bundles' => [

@@ -474,11 +474,8 @@ class Message
             $watchdog->save();
         }
 
-        /** @var \app\models\Line $line */
-        $line = \app\models\Line::find()->andWhere([
-            'driver_id' => $device->user_id,
-            'status' => [Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
-        ])->one();
+        /** @var Line $line */
+        $line = $data['data']['line'];
 
         if ($line) {
             $line_data = $line->toArray();

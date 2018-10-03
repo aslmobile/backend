@@ -185,7 +185,7 @@ class DefaultController extends BaseController
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
-    
+
     public function actionSendSocketMessage()
     {
         $user = $this->TokenAuth(self::TOKEN);

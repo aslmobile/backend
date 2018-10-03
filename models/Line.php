@@ -173,7 +173,7 @@ class Line extends \yii\db\ActiveRecord
                 $socket = new SocketPusher(['authkey' => $device->auth_token]);
                 $socket->push(base64_encode(json_encode([
                     'action' => "acceptDriverTrip",
-                    'data' => ['message_id' => time(), 'addressed' => [$this->driver_id]]
+                    'data' => ['message_id' => time(), 'addressed' => [$this->driver_id], 'line' => $this]
                 ])));
             }
 
