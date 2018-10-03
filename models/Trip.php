@@ -52,6 +52,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property \app\models\Checkpoint $startpoint
  * @property \app\models\User $user
+ * @property \app\models\Dispatch $dispatch
  */
 class Trip extends \yii\db\ActiveRecord
 {
@@ -680,5 +681,9 @@ class Trip extends \yii\db\ActiveRecord
         }
 
         return $list;
+    }
+
+    public function getDispatch(){
+        return Dispatch::findOne(1);
     }
 }

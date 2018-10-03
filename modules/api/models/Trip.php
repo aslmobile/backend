@@ -86,6 +86,9 @@ class Trip extends \app\models\Trip
         if ($this->user) $array['passenger'] = $this->user->toArray();
         else $array['passenger'] = null;
 
+        if ($this->dispatch) $array['dispatch'] = $this->dispatch->toArray();
+        else $array['dispatch'] = null;
+
         if ($this->baggage) $array['baggage'] = $this->baggage;
         else $array['baggage'] = [];
 
