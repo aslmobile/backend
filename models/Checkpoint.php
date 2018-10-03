@@ -131,5 +131,4 @@ class Checkpoint extends \yii\db\ActiveRecord
         }
         parent::afterSave($insert, $changedAttributes);
     }
-
 }

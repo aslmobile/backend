@@ -131,8 +131,12 @@ class SocketServer implements MessageComponentInterface
             $query = new ArrayQuery();
             $query->from($this->devices);
             foreach ($result->addressed as $user_id) {
-                $devices = $query->where(['device.user_id' =>  intval($user_id)])->all();
-                foreach ($devices as $device) $device->send($response);
+                $devices = $query->where(['device.user_id' => intval($user_id)])->all();
+                if (empty($devices)) {
+
+                } else {
+                    foreach ($devices as $device) $device->send($response);
+                }
             }
         }
 

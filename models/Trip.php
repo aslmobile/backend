@@ -183,7 +183,7 @@ class Trip extends \yii\db\ActiveRecord
             'line_id' => Yii::t('app', "Линия"),
             'route_id' => Yii::t('app', "Маршрут"),
             'amount' => Yii::t('app', "Сумма"),
-            'penalty'  => Yii::t('app', "Наложен штраф"),
+            'penalty' => Yii::t('app', "Наложен штраф"),
             'tariff' => Yii::t('app', "Тариф"),
             'cancel_reason' => Yii::t('app', "Причина отмены"),
             'passenger_description' => Yii::t('app', "Комментарий пассажира"),
@@ -446,6 +446,15 @@ class Trip extends \yii\db\ActiveRecord
 
         $this->botBeforeSave();
 
+        $old_line_id = $this->oldAttributes['line_id'];
+        if ($old_line_id != $this->line_id) {
+            $old_line = Line::findOne($old_line_id);
+            if ($old_line) {
+                $old_line->freeseats += $this->seats;
+                $old_line->update(false);
+            }
+        }
+
         return parent::beforeSave($insert);
     }
 
@@ -683,7 +692,8 @@ class Trip extends \yii\db\ActiveRecord
         return $list;
     }
 
-    public function getDispatch(){
+    public function getDispatch()
+    {
         return Dispatch::findOne(1);
     }
 }

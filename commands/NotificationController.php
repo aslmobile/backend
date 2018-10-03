@@ -18,9 +18,7 @@ class NotificationController extends ConsoleController
         parent::__construct($id, $module, $config);
     }
 
-    /**
-     * @inheritdoc
-     */
+    /** @inheritdoc */
     public function actionIndex()
     {
     }
