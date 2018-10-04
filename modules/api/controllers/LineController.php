@@ -215,7 +215,7 @@ class LineController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "acceptDriverTrip",
-            'notifications' => Notifications::create(Notifications::NTP_TRIP_READY, $passengers),
+            'notifications' => Notifications::create(Notifications::NTP_TRIP_READY, $passengers, '', $user->id),
             'data' => ['message_id' => time(), 'addressed' => $passengers, 'line' => $line]
         ])));
 
@@ -287,7 +287,7 @@ class LineController extends BaseController
 
                 $socket->push(base64_encode(json_encode([
                     'action' => "declinePassengerTrip",
-                    'notifications' => Notifications::create(Notifications::NTP_TRIP_CANCEL, [$trip->user_id]),
+                    'notifications' => Notifications::create(Notifications::NTP_TRIP_CANCEL, [$trip->user_id], '', $user->id),
                     'data' => ['message_id' => time(), 'addressed' => [$trip->user_id]]
                 ])));
 

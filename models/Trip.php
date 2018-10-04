@@ -230,7 +230,8 @@ class Trip extends \yii\db\ActiveRecord
                         $socket = new SocketPusher(['authkey' => $device->auth_token]);
                         $socket->push(base64_encode(json_encode([
                             'action' => "acceptPassengerTrip",
-                            'notifications' => Notifications::create(Notifications::NTD_TRIP_ADD, [$line->driver_id]),
+                            'notifications' => Notifications::create(
+                                Notifications::NTD_TRIP_ADD, [$line->driver_id], '', $this->user_id),
                             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id]]
                         ])));
 
@@ -259,7 +260,10 @@ class Trip extends \yii\db\ActiveRecord
                                 $socket = new SocketPusher(['authkey' => $device->auth_token]);
                                 $socket->push(base64_encode(json_encode([
                                     'action' => "acceptDriverTrip",
-                                    'notifications' => Notifications::create(Notifications::NTD_TRIP_SEATS, [$passengers] + [$this->driver_id]),
+                                    'notifications' => Notifications::create(
+                                        Notifications::NTD_TRIP_SEATS,
+                                        [$passengers] + [$this->driver_id]
+                                    ),
                                     'data' => ['message_id' => time(), 'addressed' => [$passengers] + [$this->driver_id], 'line' => $line]
                                 ])));
                             }
@@ -293,8 +297,13 @@ class Trip extends \yii\db\ActiveRecord
                         if (!empty($device)) {
                             $socket = new SocketPusher(['authkey' => $device->auth_token]);
                             $socket->push(base64_encode(json_encode([
-                                'action' => "acceptPassengerTrip",
-                                'data' => ['message_id' => time(), 'addressed' => [$this->driver_id]]
+                                'action' => "acceptPassengerSeat",
+                                'notifications' => Notifications::create(
+                                    Notifications::NTD_TRIP_SEAT,
+                                    [$this->driver_id, $this->user_id],
+                                    '', $this->user_id
+                                ),
+                                'data' => ['message_id' => time(), 'addressed' => [$this->driver_id, $this->user_id]]
                             ])));
                         }
 
@@ -448,12 +457,14 @@ class Trip extends \yii\db\ActiveRecord
 
         $this->botBeforeSave();
 
-        $old_line_id = $this->oldAttributes['line_id'];
-        if ($old_line_id != $this->line_id) {
-            $old_line = Line::findOne($old_line_id);
-            if ($old_line) {
-                $old_line->freeseats += $this->seats;
-                $old_line->update(false);
+        if (isset($this->oldAttributes['line_id'])) {
+            $old_line_id = $this->oldAttributes['line_id'];
+            if ($old_line_id != $this->line_id) {
+                $old_line = Line::findOne($old_line_id);
+                if ($old_line) {
+                    $old_line->freeseats += $this->seats;
+                    $old_line->update(false);
+                }
             }
         }
 

@@ -382,7 +382,7 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "acceptPassengerTrip",
-            'notifications' => Notifications::create(Notifications::NTD_TRIP_ADD, [$line->driver_id]),
+            'notifications' => Notifications::create(Notifications::NTD_TRIP_ADD, [$line->driver_id], '', $user->id),
             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id]]
         ])));
 
@@ -445,8 +445,8 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "acceptPassengerSeat",
-            'notifications' => Notifications::create(Notifications::NTD_TRIP_SEAT, [$line->driver_id]),
-            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id]]
+            'notifications' => Notifications::create(Notifications::NTD_TRIP_SEAT, [$line->driver_id, $trip->user_id], '', $user->id),
+            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id, $trip->user_id]]
         ])));
 
         $this->module->data['line'] = $line->toArray();
@@ -505,7 +505,7 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "declinePassengerTrip",
-            'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, $addressed),
+            'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, $addressed, '', $user->id),
             'data' => ['message_id' => time(), 'addressed' => $addressed]
         ])));
 
@@ -543,7 +543,15 @@ class TripController extends BaseController
             'checkpoint' => $checkpoint->toArray(),
         ];
 
+        /** @var \app\models\Trip $trip */
+        $addressed = ArrayHelper::getColumn(Trip::findAll([
+            'line_id' => $line->id,
+            'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING],
+        ]), 'user_id');
+
         if ($checkpoint->type == Checkpoint::TYPE_END) {
+
+            $notifications = Notifications::create(Notifications::NTP_TRIP_FINISHED, $addressed, '', $user->id);
 
             /** @var \app\models\Trip $trip */
             $trips = Trip::find()->andWhere([
@@ -589,13 +597,9 @@ class TripController extends BaseController
                 'trips' => $_trips,
                 'total' => $total,
             ];
+        } else {
+            $notifications = Notifications::create(Notifications::NTP_TRIP_ARRIVED, $addressed, '', $user->id);
         }
-
-        /** @var \app\models\Trip $trip */
-        $addressed = ArrayHelper::getColumn(Trip::findAll([
-            'line_id' => $line->id,
-            'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING],
-        ]), 'user_id');
 
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
@@ -603,7 +607,7 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "checkpointArrived",
-            'notifications' => Notifications::create(Notifications::NTP_TRIP_ARRIVED, $addressed),
+            'notifications' => $notifications,
             'data' => ['message_id' => time(), 'line' => $line, 'checkpoint' => $checkpoint, 'addressed' => $addressed]
         ])));
 
@@ -638,6 +642,9 @@ class TripController extends BaseController
             } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
+        $notifications = Notifications::create(Notifications::NTP_TRIP_RATING, [$trip->user_id], '', $user->id);
+        foreach ($notifications as $notification) Notifications::send($notification);
+
         $this->module->data['line'] = $line->toArray();
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
@@ -670,6 +677,9 @@ class TripController extends BaseController
             } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
+        $notifications = Notifications::create(Notifications::NTP_TRIP_REVIEW, [$trip->user_id], '', $user->id);
+        foreach ($notifications as $notification) Notifications::send($notification);
+
         $this->module->data['line'] = $line->toArray();
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
@@ -692,8 +702,16 @@ class TripController extends BaseController
         $trip = Trip::findOne($this->body->trip_id);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
-        if (isset($this->body->driver_rating)) $trip->driver_rating = $this->body->driver_rating;
-        if (isset($this->body->driver_comment)) $trip->driver_comment = $this->body->driver_comment;
+        if (isset($this->body->driver_rating)){
+            $trip->driver_rating = $this->body->driver_rating;
+            $notifications = Notifications::create(Notifications::NTD_TRIP_REVIEW, [$trip->driver_id], '', $user->id);
+            foreach ($notifications as $notification) Notifications::send($notification);
+        }
+        if (isset($this->body->driver_comment)){
+            $trip->driver_comment = $this->body->driver_comment;
+            $notifications = Notifications::create(Notifications::NTD_TRIP_REVIEW, [$trip->driver_id], '', $user->id);
+            foreach ($notifications as $notification) Notifications::send($notification);
+        }
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {

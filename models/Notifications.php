@@ -97,20 +97,22 @@ class Notifications extends \yii\db\ActiveRecord
             self::NTP_TRIP_CANCEL => Yii::t('app', "Поездка отменена"),
             self::NTP_TRIP_WAIT => Yii::t('app', "Ожидание поездки"),
             self::NTP_TRIP_FINISHED => Yii::t('app', "Ваша поездка завершена"),
+            self::NTP_TRIP_ARRIVED => Yii::t('app', "Прибытие на точку"),
+
             self::NTP_FREE_KM => Yii::t('app', "Бесплатные километры"),
             self::NTP_TRIP_REVIEW => Yii::t('app', "Отзыв"),
             self::NTP_TRIP_RATING => Yii::t('app', "Рейтинг"),
-            self::NTP_TRIP_ARRIVED => Yii::t('app', "Прибытие на точку"),
 
             self::NTD_TRIP_ADD => Yii::t('app', "К вам добавился пассажир"),
             self::NTD_TRIP_SEAT => Yii::t('app', "К вам сел пассажир"),
             self::NTD_TRIP_SEATS => Yii::t('app', "Ваша машина заполнена"),
             self::NTD_TRIP_CANCEL => Yii::t('app', "Ваша поездка отменена"),
             self::NTD_TRIP_FINISHED => Yii::t('app', "Ваша поездка завершена"),
-            self::NTD_TRIP_REVIEW => Yii::t('app', "Отзыв"),
-            self::NTD_TRIP_RATING => Yii::t('app', "Рейтинг"),
             self::NTD_TRIP_QUEUE => Yii::t('app', "Вы стали в очередь"),
             self::NTD_TRIP_READY => Yii::t('app', "Ваша поездка готова"),
+
+            self::NTD_TRIP_REVIEW => Yii::t('app', "Отзыв"),
+            self::NTD_TRIP_RATING => Yii::t('app', "Рейтинг"),
 
             self::NTF_NOTIFICATIONS => Yii::t('app', "Уведомления"),
             self::NTF_GEO => Yii::t('app', "Геолокация"),
