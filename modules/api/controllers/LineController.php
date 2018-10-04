@@ -1,5 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
+use app\components\ArrayQuery\ArrayQuery;
 use app\components\Socket\SocketPusher;
 use app\models\Checkpoint;
 use app\models\Line;
@@ -687,7 +688,9 @@ class LineController extends BaseController
             ]
         ];
 
-        $indexed_trips = ArrayHelper::index($trips, 'startpoint_id');
+        $query = new ArrayQuery();
+        $query->from($trips);
+
         $indexed_checkpoints = ArrayHelper::index($all_checkpoints, 'id');
 
         foreach ($indexed_checkpoints as $key => &$checkpoint) {
@@ -697,7 +700,7 @@ class LineController extends BaseController
                 unset($indexed_checkpoints[$key]);
                 $indexed_checkpoints = [$checkpoint->id => $checkpoint] + $children + $indexed_checkpoints;
                 $checkpoint->children = false;
-                $this->buildRoute($indexed_checkpoints, $indexed_trips, $passengers, $checkpoints, $user, $line);
+                $this->buildRoute($indexed_checkpoints, $trips, $passengers, $checkpoints, $user, $line);
                 break;
             }
 
@@ -708,7 +711,9 @@ class LineController extends BaseController
                 ['=', 'message', json_encode(['status' => 'passed', 'checkpoint' => $checkpoint->id, 'line' => $line->id])]
             ])->one();
 
-            if (!isset($indexed_trips[$key])) {
+            $exists = $query->where(['startpoint_id' => intval($key)])->all();
+
+            if (empty($exists)) {
                 $checkpoints[(int)$checkpoint->id] = [
                     'id' => $checkpoint->id,
                     'title' => $checkpoint->title,
@@ -720,73 +725,75 @@ class LineController extends BaseController
                 ];
                 continue;
             } else {
-                $trip = $indexed_trips[$key];
+                $trips = $exists;
             }
 
-            if ($trip->status == Trip::STATUS_WAY) {
-                $passengers['total']['cabin']++;
-                $passengers['cabin'][] = [
-                    'id' => $trip->user->id,
-                    'name' => $trip->user->fullName,
-                    'phone' => $trip->user->phone,
-                    'baggage' => $trip->baggages,
-                    'image_url' => $trip->user->getImageFile(),
-                    'payment_type' => $trip->payment_type,
-                    'seats' => $trip->seats,
-                    'comment' => $trip->passenger_description,
-                    'rating' => $trip->passenger_rating
-                ];
-            }
+            foreach ($trips as $trip) {
+                if ($trip->status == Trip::STATUS_WAY) {
+                    $passengers['total']['cabin']++;
+                    $passengers['cabin'][] = [
+                        'id' => $trip->user->id,
+                        'name' => $trip->user->fullName,
+                        'phone' => $trip->user->phone,
+                        'baggage' => $trip->baggages,
+                        'image_url' => $trip->user->getImageFile(),
+                        'payment_type' => $trip->payment_type,
+                        'seats' => $trip->seats,
+                        'comment' => $trip->passenger_description,
+                        'rating' => $trip->passenger_rating
+                    ];
+                }
 
-            if ($trip->status == Trip::STATUS_WAITING) {
-                $passengers['total']['route']++;
-                $passengers['route'][] = [
-                    'id' => $trip->user->id,
-                    'name' => $trip->user->fullName,
-                    'phone' => $trip->user->phone,
-                    'baggage' => $trip->baggages,
-                    'image_url' => $trip->user->getImageFile(),
-                    'payment_type' => $trip->payment_type,
-                    'seats' => $trip->seats,
-                    'comment' => $trip->passenger_description,
-                    'rating' => $trip->passenger_rating
-                ];
-            }
+                if ($trip->status == Trip::STATUS_WAITING) {
+                    $passengers['total']['route']++;
+                    $passengers['route'][] = [
+                        'id' => $trip->user->id,
+                        'name' => $trip->user->fullName,
+                        'phone' => $trip->user->phone,
+                        'baggage' => $trip->baggages,
+                        'image_url' => $trip->user->getImageFile(),
+                        'payment_type' => $trip->payment_type,
+                        'seats' => $trip->seats,
+                        'comment' => $trip->passenger_description,
+                        'rating' => $trip->passenger_rating
+                    ];
+                }
 
-            if (isset ($checkpoints[(int)$trip->startpoint->id])) {
-                $checkpoints[(int)$trip->startpoint->id]['passengers'][] = [
-                    'id' => $trip->user->id,
-                    'name' => $trip->user->fullName,
-                    'phone' => $trip->user->phone,
-                    'baggage' => $trip->baggages,
-                    'image_url' => $trip->user->getImageFile(),
-                    'payment_type' => $trip->payment_type,
-                    'seats' => $trip->seats,
-                    'comment' => $trip->passenger_description,
-                    'rating' => $trip->passenger_rating
-                ];
-            } else {
-                $checkpoints[(int)$trip->startpoint->id] = [
-                    'id' => $trip->startpoint->id,
-                    'title' => $trip->startpoint->title,
-                    'latitude' => $trip->startpoint->latitude,
-                    'longitude' => $trip->startpoint->longitude,
-                    'weight' => intval($trip->startpoint->weight),
-                    'passed' => $passed_checkpoint ? 1 : 0,
-                    'passengers' => [
-                        [
-                            'id' => $trip->user->id,
-                            'name' => $trip->user->fullName,
-                            'phone' => $trip->user->phone,
-                            'baggage' => $trip->baggages,
-                            'image_url' => $trip->user->getImageFile(),
-                            'payment_type' => $trip->payment_type,
-                            'seats' => $trip->seats,
-                            'comment' => $trip->passenger_description,
-                            'rating' => $trip->passenger_rating
+                if (isset ($checkpoints[(int)$trip->startpoint->id])) {
+                    $checkpoints[(int)$trip->startpoint->id]['passengers'][] = [
+                        'id' => $trip->user->id,
+                        'name' => $trip->user->fullName,
+                        'phone' => $trip->user->phone,
+                        'baggage' => $trip->baggages,
+                        'image_url' => $trip->user->getImageFile(),
+                        'payment_type' => $trip->payment_type,
+                        'seats' => $trip->seats,
+                        'comment' => $trip->passenger_description,
+                        'rating' => $trip->passenger_rating
+                    ];
+                } else {
+                    $checkpoints[(int)$trip->startpoint->id] = [
+                        'id' => $trip->startpoint->id,
+                        'title' => $trip->startpoint->title,
+                        'latitude' => $trip->startpoint->latitude,
+                        'longitude' => $trip->startpoint->longitude,
+                        'weight' => intval($trip->startpoint->weight),
+                        'passed' => $passed_checkpoint ? 1 : 0,
+                        'passengers' => [
+                            [
+                                'id' => $trip->user->id,
+                                'name' => $trip->user->fullName,
+                                'phone' => $trip->user->phone,
+                                'baggage' => $trip->baggages,
+                                'image_url' => $trip->user->getImageFile(),
+                                'payment_type' => $trip->payment_type,
+                                'seats' => $trip->seats,
+                                'comment' => $trip->passenger_description,
+                                'rating' => $trip->passenger_rating
+                            ]
                         ]
-                    ]
-                ];
+                    ];
+                }
             }
 
             $passengers['total']['total']++;
