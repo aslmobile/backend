@@ -126,7 +126,7 @@ class Checkpoint extends \yii\db\ActiveRecord
                 Checkpoint::updateAll(['pid' => $this->id], ['id' => $this->children, 'type' => self::TYPE_STOP]);
                 break;
             case self::TYPE_END:
-                Checkpoint::updateAll(['type' => 0], ['type' => self::TYPE_END, 'route' => $this->route, ['NOT', ['id' => $this->id]]]);
+                Checkpoint::updateAll(['type' => 0], ['AND', ['type' => self::TYPE_END], ['route' => $this->route], ['NOT', ['id' => $this->id]]]);
                 break;
         }
         parent::afterSave($insert, $changedAttributes);
