@@ -799,7 +799,6 @@ class LineController extends BaseController
                 }
             }
 
-            $passengers['total']['total']++;
         }
     }
 
