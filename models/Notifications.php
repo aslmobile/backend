@@ -72,14 +72,17 @@ class Notifications extends \yii\db\ActiveRecord
         NTP_FREE_KM = 6,
         NTP_TRIP_REVIEW = 7,
         NTP_TRIP_RATING = 8,
+        NTP_TRIP_ARRIVED = 9,
 
-        NTD_TRIP_SEATS = 2,
-        NTD_TRIP_CANCEL = 3,
-        NTD_TRIP_FINISHED = 4,
-        NTD_TRIP_REVIEW = 5,
-        NTD_TRIP_RATING = 6,
-        NTD_TRIP_QUEUE = 7,
-        NTD_TRIP_READY = 8,
+        NTD_TRIP_SEATS = 10,
+        NTD_TRIP_CANCEL = 11,
+        NTD_TRIP_FINISHED = 12,
+        NTD_TRIP_REVIEW = 13,
+        NTD_TRIP_RATING = 14,
+        NTD_TRIP_QUEUE = 15,
+        NTD_TRIP_READY = 16,
+        NTD_TRIP_ADD = 17,
+        NTD_TRIP_SEAT = 18,
 
         NTF_NOTIFICATIONS = -1,
         NTF_GEO = -2;
@@ -91,13 +94,16 @@ class Notifications extends \yii\db\ActiveRecord
             self::NT_BLACKLIST => Yii::t('app', "Черный список"),
 
             self::NTP_TRIP_READY => Yii::t('app', "Ваша поездка готова"),
-            self::NTP_TRIP_CANCEL => Yii::t('app', "Ваша поездка отменена"),
+            self::NTP_TRIP_CANCEL => Yii::t('app', "Поездка отменена"),
             self::NTP_TRIP_WAIT => Yii::t('app', "Ожидание поездки"),
             self::NTP_TRIP_FINISHED => Yii::t('app', "Ваша поездка завершена"),
             self::NTP_FREE_KM => Yii::t('app', "Бесплатные километры"),
             self::NTP_TRIP_REVIEW => Yii::t('app', "Отзыв"),
             self::NTP_TRIP_RATING => Yii::t('app', "Рейтинг"),
+            self::NTP_TRIP_ARRIVED => Yii::t('app', "Прибытие на точку"),
 
+            self::NTD_TRIP_ADD => Yii::t('app', "К вам добавился пассажир"),
+            self::NTD_TRIP_SEAT => Yii::t('app', "К вам сел пассажир"),
             self::NTD_TRIP_SEATS => Yii::t('app', "Ваша машина заполнена"),
             self::NTD_TRIP_CANCEL => Yii::t('app', "Ваша поездка отменена"),
             self::NTD_TRIP_FINISHED => Yii::t('app', "Ваша поездка завершена"),
@@ -125,26 +131,29 @@ class Notifications extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function create($type = self::NT_DEFAULT, $user, $important = false, $message = null, $initiator = 0)
+    public static function create($type = self::NT_DEFAULT, $addressed, $message = '', $initiator = 0)
     {
         $types = self::getTypes();
-        if (!isset ($types[$type]) || !in_array($type, $types)) return false;
-
-        $notification = new Notifications();
-        $notification->type = $type;
-        $notification->user_id = $user;
-        $notification->status = self::STATUS_NEW;
-        $notification->title = self::getTypes()[$type];
-        $notification->text = $message;
-        $notification->initiator_id = $initiator;
-
-        if ($notification->save()) return $notification;
-        return false;
+        if (!isset ($types[$type])) return false;
+        $notifications = [];
+        if (is_array($addressed)) {
+            foreach ($addressed as $user) {
+                $notification = new Notifications();
+                $notification->type = $type;
+                $notification->user_id = $user;
+                $notification->status = self::STATUS_NEW;
+                $notification->title = self::getTypes()[$type];
+                $notification->text = $message;
+                $notification->initiator_id = $initiator;
+                if ($notification->save()) $notifications[] = $notification;
+            }
+        }
+        return $notifications;
     }
 
     /**
      * @param $notification Notifications
-     * @throws \Exception
+     * @throws
      */
     public static function send($notification)
     {
@@ -176,9 +185,11 @@ class Notifications extends \yii\db\ActiveRecord
                             'notification_id' => $notification->id,
                             'type' => $notification->type,
                         ],
-                    ]);
+                    ], $device->app);
                     break;
             }
         }
+        $notification->status = self::STATUS_WAITING;
+        $notification->update();
     }
 }

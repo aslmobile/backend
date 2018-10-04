@@ -2,6 +2,7 @@
 
 use app\components\Socket\SocketPusher;
 use app\models\Answers;
+use app\models\Notifications;
 use app\models\Trip;
 use app\modules\admin\models\Agreement;
 use app\modules\api\models\Devices;
@@ -35,7 +36,8 @@ class DefaultController extends BaseController
                             'cancel-passenger-reasons',
                             'get-file',
                             'update-device',
-                            'for-testing'
+                            'for-testing',
+                            'read-notification'
                         ],
                         'allow' => true
                     ]
@@ -54,6 +56,7 @@ class DefaultController extends BaseController
                     'method' => ['POST'],
                     'send-socket-message' => ['POST'],
                     'update-device' => ['POST'],
+                    'read-notification' => ['POST']
                 ]
             ]
         ];
@@ -250,6 +253,22 @@ class DefaultController extends BaseController
         if (empty ($answers) || count($answers) == 0) $answers = Yii::$app->params['cancel-passenger-reasons'];
         $this->module->data = $answers;
 
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionReadNotification($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $notification = Notifications::findOne($id);
+        if (!$notification) $this->module->setError(404, '_notification', Yii::$app->mv->gt("Не найден", [], false));
+
+        $notification->status = Notifications::STATUS_DELIVERED;
+        $notification->save();
+
+        $this->module->data['notification'] = $notification->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

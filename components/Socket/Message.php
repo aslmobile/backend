@@ -18,6 +18,7 @@ class Message
     public $action;
     public $connections;
     public $addressed = [];
+    public $notifications = [];
 
     public $message_id = 0;
 
@@ -32,6 +33,10 @@ class Message
         $this->connections = $connections;
         $data = base64_decode($data, true);
         $data = json_decode($data, true);
+
+        if (!empty($data) && is_array($data)) {
+            if(array_key_exists('notifications', $data)) $this->notifications = $data['notifications'];
+        } else $this->error_code = 6;
 
         if (!empty($data) && is_array($data) && array_key_exists('action', $data)) {
             $method = $data['action'];
@@ -547,13 +552,6 @@ class Message
             $watchdog->save();
         }
 
-        /** @var \app\models\Trip $trip */
-        $trips = ArrayHelper::getColumn(Trip::findAll([
-            'line_id' => $line->id,
-            'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING],
-        ]), 'user_id');
-        $this->addressed = $trips;
-
         $response = [
             'message_id' => $this->message_id,
             'device_id' => $device->id,
@@ -565,6 +563,8 @@ class Message
                 'checkpoint' => $checkpoint->toArray()
             ]
         ];
+
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
 
         return $response;
 

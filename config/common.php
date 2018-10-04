@@ -49,11 +49,12 @@ $config = [
 //                'passphrase' => 'lyres374;fascia', //optional
 //            ],
             'fcmConfig' => [
-                'apiAccessKey' => 'AAAAhnp7X4c:APA91bEEZEipwT6Czoaumtnt3STunnsMqYtlqDj_5eSxOTTMaKl17Fqx_lMoEYMHLUZgHn3QCjSahjYWzQI--Ntojdx0m6p3nhJ-oYsAjQu12FVpltSjSz7EJGzs6bGvR1eCYUziG3DH'
+                1 => ['apiAccessKey' => 'AIzaSyCzwjm0emzf4aVUdjPTAfn0fhk79cdJ3Jc'],
+                2 => ['apiAccessKey' => 'AIzaSyDjpbHCJFPPWOE8hx2PHmufI5tVS-XuGPE']
             ],
-            'gcmConfig' => [
-                'apiAccessKey' => 'AIzaSyCUfMeKft1Vw1YGxGYw7AMNEMBxw082Eno'
-            ]
+//            'gcmConfig' => [
+//                'apiAccessKey' => 'AIzaSyCUfMeKft1Vw1YGxGYw7AMNEMBxw082Eno'
+//            ]
         ],
         'assetManager' => [
             'bundles' => [

@@ -3,6 +3,7 @@
 namespace app\components\Socket;
 
 use app\components\ArrayQuery\ArrayQuery;
+use app\models\Notifications;
 use app\models\User;
 use app\modules\api\models\Devices;
 use Ratchet\ConnectionInterface;
@@ -133,7 +134,12 @@ class SocketServer implements MessageComponentInterface
             foreach ($result->addressed as $user_id) {
                 $devices = $query->where(['device.user_id' => intval($user_id)])->all();
                 if (empty($devices)) {
-
+                    foreach ($result->notifications as $notification) {
+                        if ($notification instanceof Notifications) {
+                            /** @var Notifications $notification */
+                            Notifications::send($notification);
+                        }
+                    }
                 } else {
                     foreach ($devices as $device) $device->send($response);
                 }

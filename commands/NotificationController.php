@@ -23,6 +23,36 @@ class NotificationController extends ConsoleController
     {
     }
 
+    /**
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function actionSend()
+    {
+        /**
+         * @var $notifications Notifications
+         */
+        echo "Notification send action index started at " . date('d:m:Y H:i:s') . "\n";
+        $notifications = Notifications::find()->where([
+            'status' => [Notifications::STATUS_NEW, Notifications::STATUS_WAITING]])->all();
+        /**
+         * @var Notifications $notification
+         */
+        foreach ($notifications as $notification) {
+            echo "
+            Notification: {$notification->id}, 
+            from: {$notification->user_id}, 
+            type: {$notification->type}, 
+            time: {$notification->updated_at}, 
+            diff: " . ($notification->updated_at - time()) . "
+            \r";
+            Notifications::send($notification);
+            $notification->status = Notifications::STATUS_WAITING;
+            $notification->update();
+        }
+        echo "Notification send action index finished at " . date('d:m:Y H:i:s') . "\n";
+    }
+
     public function actionTest()
     {
         $push = \Yii::$app->push;
@@ -47,30 +77,5 @@ class NotificationController extends ConsoleController
                 ],
             ]
         );
-    }
-
-    public function actionSend()
-    {
-        /**
-         * @var $notifications Notifications
-         */
-        echo "Notification send action index started at " . date('d:m:Y H:i:s') . "\n";
-        $notifications = Notifications::find()->where(['status' => 1])->andWhere(['type' => [0, 2]])->all();
-        /**
-         * @var Notifications $notification
-         */
-        foreach ($notifications as $notification) {
-            echo "
-            Notification: {$notification->id}, 
-            from: {$notification->user_id}, 
-            type: {$notification->type}, 
-            time: {$notification->updated_at}, 
-            diff: " . ($notification->updated_at - time()) . "
-            \r";
-            Notifications::send($notification);
-            $notification->status = 2;
-            $notification->save();
-        }
-        echo "Notification send action index finished at " . date('d:m:Y H:i:s') . "\n";
     }
 }

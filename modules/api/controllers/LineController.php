@@ -3,6 +3,7 @@
 use app\components\Socket\SocketPusher;
 use app\models\Checkpoint;
 use app\models\Line;
+use app\models\Notifications;
 use app\models\Route;
 use app\models\User;
 use app\modules\api\models\City;
@@ -198,8 +199,7 @@ class LineController extends BaseController
         $line = Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
-        $passengers = ArrayHelper::getColumn(Trip::findAll(['status' => Trip::STATUS_WAITING, 'line_id' => $line->id]),
-            'id');
+        $passengers = ArrayHelper::getColumn(Trip::findAll(['status' => Trip::STATUS_WAITING, 'line_id' => $line->id]), 'id');
 
         $line->status = Line::STATUS_IN_PROGRESS;
         $line->save();
@@ -215,7 +215,8 @@ class LineController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "acceptDriverTrip",
-            'data' => ['message_id' => time(), 'addressed' => [$passengers], 'line' => $line]
+            'notifications' => Notifications::create(Notifications::NTP_TRIP_READY, $passengers),
+            'data' => ['message_id' => time(), 'addressed' => $passengers, 'line' => $line]
         ])));
 
 
@@ -286,6 +287,7 @@ class LineController extends BaseController
 
                 $socket->push(base64_encode(json_encode([
                     'action' => "declinePassengerTrip",
+                    'notifications' => Notifications::create(Notifications::NTP_TRIP_CANCEL, [$trip->user_id]),
                     'data' => ['message_id' => time(), 'addressed' => [$trip->user_id]]
                 ])));
 

@@ -6,6 +6,7 @@
 
 namespace app\components;
 
+use app\models\Devices;
 use Exception;
 use Yii;
 use yii\base\Component;
@@ -42,6 +43,12 @@ class Push extends Component
     /* @var  $fcmConfig array */
     public $fcmConfig;
 
+    /* @var  $apnsConfig array */
+    public $defaultApplication = Devices::APP_DRIVER;
+
+    /* @var $application integer */
+    public $application;
+
     /* @var  $options array */
     public $options;
 
@@ -71,7 +78,18 @@ class Push extends Component
 
         if (is_array($this->gcmConfig) && !empty($this->gcmConfig)) {$this->validateGcm();$this->gcmEnabled = true;}
 
-        if (is_array($this->fcmConfig) && !empty($this->fcmConfig)) {$this->validateFcm();$this->fcmEnabled = true;}
+        $this->setApp($this->defaultApplication);
+
+    }
+
+    public function setApp($app = Devices::APP_DRIVER){
+        if(is_array($this->fcmConfig) && isset($this->fcmConfig[$app])){
+            $this->application = $app;
+            $this->fcmConfig = $this->fcmConfig[$app];
+            if (is_array($this->fcmConfig) && !empty($this->fcmConfig)) {
+                $this->validateFcm(); $this->fcmEnabled = true;
+            }
+        }
     }
 
     /**
@@ -180,8 +198,10 @@ class Push extends Component
      * @return mixed
      * @throws Exception
      */
-    public function send($tokens, $payload = [])
+    public function send($tokens, $payload = [], $app)
     {
+        if($this->application != $app){ $this->setApp($app); }
+
         if ($this->type) {
             switch ($this->type) {
                 case self::TYPE_GCM:self::sendGcm($tokens, $payload);break;

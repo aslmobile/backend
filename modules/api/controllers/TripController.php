@@ -4,6 +4,7 @@ use app\components\Socket\SocketPusher;
 use app\models\Countries;
 use app\models\Line;
 use app\models\LuggageType;
+use app\models\Notifications;
 use app\models\Route;
 use app\models\TariffDependence;
 use app\models\Taxi;
@@ -15,6 +16,7 @@ use app\modules\api\models\Trip;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 
 /** @property \app\modules\api\Module $module */
 class TripController extends BaseController
@@ -380,6 +382,7 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "acceptPassengerTrip",
+            'notifications' => Notifications::create(Notifications::NTD_TRIP_ADD, [$line->driver_id]),
             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id]]
         ])));
 
@@ -442,6 +445,7 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "acceptPassengerSeat",
+            'notifications' => Notifications::create(Notifications::NTD_TRIP_SEAT, [$line->driver_id]),
             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id]]
         ])));
 
@@ -501,6 +505,7 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "declinePassengerTrip",
+            'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, $addressed),
             'data' => ['message_id' => time(), 'addressed' => $addressed]
         ])));
 
@@ -586,13 +591,20 @@ class TripController extends BaseController
             ];
         }
 
+        /** @var \app\models\Trip $trip */
+        $addressed = ArrayHelper::getColumn(Trip::findAll([
+            'line_id' => $line->id,
+            'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING],
+        ]), 'user_id');
+
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
         if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "checkpointArrived",
-            'data' => ['message_id' => time(), 'line' => $line, 'checkpoint' => $checkpoint]
+            'notifications' => Notifications::create(Notifications::NTP_TRIP_ARRIVED, $addressed),
+            'data' => ['message_id' => time(), 'line' => $line, 'checkpoint' => $checkpoint, 'addressed' => $addressed]
         ])));
 
         $this->module->data = $data;
