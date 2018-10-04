@@ -173,6 +173,7 @@ class Line extends \yii\db\ActiveRecord
                 $socket = new SocketPusher(['authkey' => $device->auth_token]);
                 $socket->push(base64_encode(json_encode([
                     'action' => "acceptDriverTrip",
+                    'notifications' => Notifications::create(Notifications::NTD_TRIP_SEATS, [$this->driver_id]),
                     'data' => ['message_id' => time(), 'addressed' => [$this->driver_id], 'line' => $this]
                 ])));
             }
@@ -182,12 +183,7 @@ class Line extends \yii\db\ActiveRecord
 
         if ($this->status == self::STATUS_IN_PROGRESS && $this->getOldAttribute('status') != self::STATUS_IN_PROGRESS) {
             // TODO: Отправлять уведомление всем пассажирам
-            Notifications::create(
-                Notifications::NTP_TRIP_READY,
-                $this->driver_id,
-                true,
-                \Yii::t('app', "Ваша машина готова к выезду.")
-            );
+            //Notifications::create(Notifications::NTP_TRIP_READY, $this->driver_id, true, \Yii::t('app', "Ваша машина готова к выезду."));
         }
     }
 

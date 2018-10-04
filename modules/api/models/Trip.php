@@ -53,7 +53,7 @@ class Trip extends \app\models\Trip
         if ($this->status != $this->oldStatus && $this->status == self::STATUS_WAY)
         {
             // TODO: Отправка подтверждения о выезде
-            Notifications::create(Notifications::NTP_TRIP_READY, $this->user_id, true, \Yii::t('app', "Ваша машина готова к выезду."));
+            //Notifications::create(Notifications::NTP_TRIP_READY, $this->user_id, true, \Yii::t('app', "Ваша машина готова к выезду."));
         }
     }
 
