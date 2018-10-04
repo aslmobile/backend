@@ -729,6 +729,7 @@ class LineController extends BaseController
             }
 
             foreach ($trips as $trip) {
+
                 if ($trip->status == Trip::STATUS_WAY) {
                     $passengers['total']['cabin']++;
                     $passengers['cabin'][] = [
@@ -758,6 +759,8 @@ class LineController extends BaseController
                         'rating' => $trip->passenger_rating
                     ];
                 }
+
+                $passengers['total']['total']++;
 
                 if (isset ($checkpoints[(int)$trip->startpoint->id])) {
                     $checkpoints[(int)$trip->startpoint->id]['passengers'][] = [
