@@ -92,6 +92,7 @@ class Notifications extends \yii\db\ActiveRecord
         NTD_TRIP_READY = 16,
         NTD_TRIP_ADD = 17,
         NTD_TRIP_SEAT = 18,
+        NTD_TRIP_FIRST = 19,
 
         NTF_NOTIFICATIONS = -1,
         NTF_GEO = -2;
@@ -119,6 +120,7 @@ class Notifications extends \yii\db\ActiveRecord
             self::NTD_TRIP_FINISHED => Yii::t('app', "Ваша поездка завершена"),
             self::NTD_TRIP_QUEUE => Yii::t('app', "Вы стали в очередь"),
             self::NTD_TRIP_READY => Yii::t('app', "Ваша поездка готова"),
+            self::NTD_TRIP_FIRST => Yii::t('app', "Ваша машина первая в очереди на выезд"),
 
             self::NTD_TRIP_REVIEW => Yii::t('app', "Отзыв"),
             self::NTD_TRIP_RATING => Yii::t('app', "Рейтинг"),

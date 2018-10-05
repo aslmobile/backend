@@ -5,6 +5,7 @@ use app\components\Socket\SocketPusher;
 use app\models\Checkpoint;
 use app\models\Line;
 use app\models\Notifications;
+use app\models\Queue;
 use app\models\Route;
 use app\models\User;
 use app\modules\api\models\City;
@@ -136,6 +137,7 @@ class LineController extends BaseController
         $line->status = Line::STATUS_QUEUE;
         $line->driver_id = $user->id;
         $line->vehicle_id = $vehicle->id;
+        $line->vehicle_type_id = $vehicle->vehicle_type_id;
         $line->tariff = $route->base_tariff;
         $line->route_id = $route->id;
         $line->seats = $seats;
@@ -152,6 +154,8 @@ class LineController extends BaseController
             } else $this->module->setError(422,
                 '_line', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
+
+        Queue::processingQueue();
 
         $this->module->data['line'] = $line->toArray();
         $this->module->setSuccess();
@@ -181,6 +185,8 @@ class LineController extends BaseController
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_line', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
+
+        Queue::processingQueue();
 
         $this->module->data['line'] = $line->toArray();
         $this->module->setSuccess();
@@ -260,7 +266,7 @@ class LineController extends BaseController
         }
 
         /** @var \app\models\Trip $trip */
-        $trips = Trip::find()->andWhere(['route_id' => $line->route_id, 'vehicle_id' => $line->vehicle_id, 'driver_id' => $line->driver_id])->all();
+        $trips = Trip::find()->andWhere(['line_id' => $line->id])->all();
         if ($trips) {
 
             $trip_errors = 0;
@@ -306,6 +312,8 @@ class LineController extends BaseController
             ['=', 'user_id', $line->driver_id],
             ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT]
         ]);
+
+        Queue::processingQueue();
 
         $this->module->data['line'] = $line->toArray();
         $this->module->setSuccess();
@@ -673,6 +681,14 @@ class LineController extends BaseController
 
     /** CORE METHODS | PROTECTED */
 
+    /**
+     * @param $all_checkpoints Checkpoint[]
+     * @param $trips Trip[]
+     * @param $passengers array
+     * @param $checkpoints array
+     * @param $user User
+     * @param $line Line
+     */
     protected function buildRoute(&$all_checkpoints, &$trips, &$passengers, &$checkpoints, $user, $line)
     {
 
@@ -802,11 +818,19 @@ class LineController extends BaseController
         }
     }
 
+    /**
+     * @param $line_id
+     * @return Line|null
+     */
     protected function getLine($line_id)
     {
         return Line::findOne($line_id);
     }
 
+    /**
+     * @param $route_id
+     * @return float|int
+     */
     protected function getRate($route_id)
     {
         /** @var \app\models\Line $line */

@@ -35,7 +35,7 @@ class Message
         $data = json_decode($data, true);
 
         if (!empty($data) && is_array($data)) {
-            if(array_key_exists('notifications', $data)) $this->notifications = $data['notifications'];
+            if (array_key_exists('notifications', $data)) $this->notifications = $data['notifications'];
         } else $this->error_code = 6;
 
         if (!empty($data) && is_array($data) && array_key_exists('action', $data)) {
@@ -100,11 +100,7 @@ class Message
                 'AND',
                 ['=', 'status', Trip::STATUS_WAITING],
                 ['=', 'route_id', $device_trip->route_id]
-            ])
-                ->orderBy([
-                    'created_at' => SORT_DESC
-                ])
-                ->all();
+            ])->orderBy(['created_at' => SORT_DESC])->all();
 
             if ($trips && count($trips)) foreach ($trips as $trip) {
                 if ($trip->id == $device_trip->id) break;
@@ -500,6 +496,49 @@ class Message
                     'accept_from' => $watchdog->created_at,
                     'accept_time' => 300,
                     'trip' => $line_data
+                ]
+            ];
+        } else {
+            $response = [
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => null
+            ];
+            $this->error_code = 2;
+        }
+
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
+    public function readyPassengerTrip($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        /** @var Line $line */
+        if (isset($data['data']['line'])) $line = $data['data']['line'];
+
+        if (isset($line) && $line) {
+            $line_data = $line->toArray();
+            $response = [
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => [
+                    'accept_from' => time(),
+                    'accept_time' => 300,
+                    'line' => $line_data,
                 ]
             ];
         } else {

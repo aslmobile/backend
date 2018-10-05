@@ -5,6 +5,7 @@ use app\models\Countries;
 use app\models\Line;
 use app\models\LuggageType;
 use app\models\Notifications;
+use app\models\Queue;
 use app\models\Route;
 use app\models\TariffDependence;
 use app\models\Taxi;
@@ -147,7 +148,7 @@ class TripController extends BaseController
         }
 
         $trip = new Trip();
-        $trip->status = Trip::STATUS_WAITING;
+        $trip->status = Trip::STATUS_CREATED;
         $trip->user_id = $user->id;
         $trip->tariff = $this->calculatePassengerTariff($route->id, $checkpoint->id, $endpoint->id)['tariff'];
         $trip->currency = "₸";
@@ -214,6 +215,8 @@ class TripController extends BaseController
             } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
+        Queue::processingQueue();
+
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
@@ -230,15 +233,17 @@ class TripController extends BaseController
         $trip = Trip::find()->andWhere([
             'AND',
             ['=', 'user_id', $user->id],
-            ['=', 'status', Trip::STATUS_WAITING]
+            ['=', 'status', Trip::STATUS_CREATED]
         ])->one();
         if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
 
         $trip->status = Trip::STATUS_CANCELLED;
-        $trip->cancel_reason = $this->body->cancel_reason;
+        $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
         $trip->save();
+
+        Queue::processingQueue();
 
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
@@ -356,13 +361,14 @@ class TripController extends BaseController
         $this->validateBodyParams(['trip_id']);
 
         /** @var \app\modules\api\models\Trip $trip */
-        $trip = Trip::findOne(['status' => [Trip::STATUS_WAITING], 'id' => $this->body->trip_id]);
+        $trip = Trip::findOne(['id' => $this->body->trip_id]);
 
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $trip->line_id = $line->id;
         $trip->driver_id = $line->driver_id;
         $trip->vehicle_id = $line->vehicle_id;
+        $trip->status = Trip::STATUS_WAITING;
 
         if ($line->freeseats > $trip->seats) {
             $line->freeseats = $line->freeseats - $trip->seats;
@@ -385,6 +391,8 @@ class TripController extends BaseController
             'notifications' => Notifications::create(Notifications::NTD_TRIP_ADD, [$line->driver_id], '', $user->id),
             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id]]
         ])));
+
+        Queue::processingQueue();
 
         $this->module->data['line'] = $line->toArray();
         $this->module->data['trip'] = $trip->toArray();
@@ -508,6 +516,8 @@ class TripController extends BaseController
             'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, $addressed, '', $user->id),
             'data' => ['message_id' => time(), 'addressed' => $addressed]
         ])));
+
+        Queue::processingQueue();
 
         $this->module->data['trip'] = $trip->toArray();
         $this->module->data['line'] = $line->toArray();
@@ -702,12 +712,12 @@ class TripController extends BaseController
         $trip = Trip::findOne($this->body->trip_id);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
-        if (isset($this->body->driver_rating)){
+        if (isset($this->body->driver_rating)) {
             $trip->driver_rating = $this->body->driver_rating;
             $notifications = Notifications::create(Notifications::NTD_TRIP_REVIEW, [$trip->driver_id], '', $user->id);
             foreach ($notifications as $notification) Notifications::send($notification);
         }
-        if (isset($this->body->driver_comment)){
+        if (isset($this->body->driver_comment)) {
             $trip->driver_comment = $this->body->driver_comment;
             $notifications = Notifications::create(Notifications::NTD_TRIP_REVIEW, [$trip->driver_id], '', $user->id);
             foreach ($notifications as $notification) Notifications::send($notification);

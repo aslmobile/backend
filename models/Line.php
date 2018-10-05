@@ -13,6 +13,8 @@ use yii\behaviors\TimestampBehavior;
  * @property int $status
  * @property int $driver_id
  * @property int $vehicle_id
+ * @property integer $vehicle_type_id
+ * @property bool $ready
  * @property float $tariff
  * @property int $route_id
  * @property int $startpoint
@@ -39,6 +41,8 @@ class Line extends \yii\db\ActiveRecord
         STATUS_IN_PROGRESS = 1,
         STATUS_WAITING = 2,
         STATUS_FINISHED = 3;
+
+    public $ready = false;
 
     public static function getStatusList()
     {
@@ -90,6 +94,7 @@ class Line extends \yii\db\ActiveRecord
                     'status',
                     'driver_id',
                     'vehicle_id',
+                    'vehicle_type_id',
                     'route_id',
                     'startpoint',
                     'endpoint',
@@ -136,6 +141,7 @@ class Line extends \yii\db\ActiveRecord
             'id' => Yii::t('app', "ID"),
             'driver_id' => Yii::t('app', "Водитель"),
             'vehicle_id' => Yii::t('app', "Автомобиль"),
+            'vehicle_type_id' => Yii::t('app', "Тип автомобиля"),
             'route_id' => Yii::t('app', "Маршрут"),
             'startpoint' => Yii::t('app', "Начальная точка"),
             'endpoint' => Yii::t('app', "Конечная точка"),
@@ -178,12 +184,8 @@ class Line extends \yii\db\ActiveRecord
                 ])));
             }
 
-            // TODO: Отправка в сокет что машина заполнена и подтверждение о выезде через 5 минут
-        }
+            Queue::processingQueue();
 
-        if ($this->status == self::STATUS_IN_PROGRESS && $this->getOldAttribute('status') != self::STATUS_IN_PROGRESS) {
-            // TODO: Отправлять уведомление всем пассажирам
-            //Notifications::create(Notifications::NTP_TRIP_READY, $this->driver_id, true, \Yii::t('app', "Ваша машина готова к выезду."));
         }
     }
 
