@@ -2,8 +2,10 @@
 
 namespace app\models;
 
+use app\components\NotNullBehavior;
 use app\components\Push;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "notifications".
@@ -29,6 +31,13 @@ class Notifications extends \yii\db\ActiveRecord
         return 'notifications';
     }
 
+    public function behaviors()
+    {
+        return [
+            NotNullBehavior::class,
+            TimestampBehavior::class,
+        ];
+    }
 
     /**
      * @inheritdoc
