@@ -119,8 +119,8 @@ class BotTrip extends \app\models\Trip
         $line = \app\models\Line::findOne($this->line_id);
         if(!empty($line)){
             $line->freeseats += $this->seats;
+            $line->update();
         }
-        $line->update();
 
         parent::afterDelete();
     }
