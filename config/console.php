@@ -24,6 +24,24 @@ return [
         'mv' => [
             'class' => 'app\components\Mv',
         ],
+        'push' => [
+            'class' => 'app\components\Push',
+            'options' => [
+                'returnInvalidTokens' => true //default false
+            ],
+//            'apnsConfig' => [
+//                'environment' => '.sandbox',
+//                'pem' => dirname(__DIR__).'/components/certs/DevPush.pem',
+//                'passphrase' => 'lyres374;fascia', //optional
+//            ],
+            'fcmConfig' => [
+                1 => ['apiAccessKey' => 'AIzaSyCzwjm0emzf4aVUdjPTAfn0fhk79cdJ3Jc'],
+                2 => ['apiAccessKey' => 'AIzaSyDjpbHCJFPPWOE8hx2PHmufI5tVS-XuGPE']
+            ],
+//            'gcmConfig' => [
+//                'apiAccessKey' => 'AIzaSyCUfMeKft1Vw1YGxGYw7AMNEMBxw082Eno'
+//            ]
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
