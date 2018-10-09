@@ -2,9 +2,9 @@
 
 namespace app\components\Socket;
 
+use Ratchet\ConnectionInterface;
 use Yii;
 use yii\base\Model;
-use Ratchet\ConnectionInterface;
 
 /**
  * Class SocketPusher
@@ -34,8 +34,7 @@ class SocketPusher extends Model
     public function push($message)
     {
         $connection = \Ratchet\Client\connect($this->scheme . $this->host . ':' . $this->port . '?auth=' . $this->authkey);
-        if (!$connection)
-        {
+        if (!$connection) {
             echo 'Connection failed';
             exit;
         }
@@ -45,7 +44,7 @@ class SocketPusher extends Model
             $conn->send($message);
             $conn->close();
         }, function ($e) {
-            echo "Could not connect: {$e->getMessage()}\n";
+            echo "Could not connect: {$e->getMessage()}\n" . date('d.m.Y h:i', time()) . "\n";
             exit;
         });
 

@@ -1,14 +1,13 @@
 <?php
+
 namespace app\commands;
 
 use app\components\ConsoleController;
 use app\components\Socket\SocketServer;
 use app\modules\main\models\Settings;
-
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
-
 use Yii;
 use yii\base\Module;
 
@@ -51,8 +50,7 @@ class SocketController extends ConsoleController
 
         $port = (!empty($this->port)) ? $this->port : \Yii::$app->params['socket']['in_port'];
         $server = IoServer::factory($httpServer, $port);
-
-        echo 'Server running on port: ' . $port . "\n";
+        echo 'Server running on port: ' . $port . "\n" . date('d.m.Y h:i', time()) . "\n";
         $server->run();
     }
 }

@@ -57,7 +57,7 @@ class SocketServer implements MessageComponentInterface
                 Yii::$app->db->createCommand()->update('users', ['last_activity' => null], 'id = ' . $device->user_id)->execute();
 
                 if ($authkey == Yii::$app->params['socket']['authkey_server']) echo "Server connected.\n";
-                echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; connected.\n";
+                echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; connected.\n" . date('d.m.Y h:i', time()) . "\n";
             }
         } else {
             echo "Connection closed! Connection data is invalid!\n";
@@ -86,7 +86,7 @@ class SocketServer implements MessageComponentInterface
 
         if ($conn->device->id && !empty ($conn->device->id)) {
             Yii::$app->db->createCommand()->update('users', ['last_activity' => time()], 'id = ' . $conn->device->user_id)->execute();
-            echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; disconnected.\n";
+            echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; disconnected.\n" . date('d.m.Y h:i', time()) . "\n";
         }
     }
 
@@ -101,7 +101,7 @@ class SocketServer implements MessageComponentInterface
      */
     function onError(ConnectionInterface $conn, \Exception $e)
     {
-        echo "An error has occurred: {$e->getMessage()}\n";
+        echo "An error has occurred: {$e->getMessage()}\n" . date('d.m.Y h:i', time()) . "\n";
 
         $conn->close();
     }
@@ -135,10 +135,8 @@ class SocketServer implements MessageComponentInterface
                 $devices = $query->where(['device.user_id' => intval($user_id)])->all();
                 if (empty($devices)) {
                     foreach ($result->notifications as $notification) {
-                        if ($notification instanceof Notifications) {
-                            /** @var Notifications $notification */
-                            Notifications::send($notification);
-                        }
+                        /** @var Notifications $notification */
+                        if ($notification instanceof Notifications) Notifications::send($notification);
                     }
                 } else {
                     foreach ($devices as $device) $device->send($response);
@@ -148,7 +146,7 @@ class SocketServer implements MessageComponentInterface
 
         $from->send($response);
 
-        echo "Message from ({$from->device->id})\n";
+        echo "Message from ({$from->device->id})\n" . date('d.m.Y h:i', time()) . "\n";
     }
 
     /**
