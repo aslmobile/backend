@@ -94,13 +94,14 @@ class Message
         ])->one();
 
         if ($device_trip) {
+
             $queue_position = 1;
 
             $trips = Trip::find()->andWhere([
                 'AND',
                 ['=', 'status', Trip::STATUS_WAITING],
                 ['=', 'route_id', $device_trip->route_id]
-            ])->orderBy(['created_at' => SORT_DESC])->all();
+            ])->orderBy(['created_at' => SORT_DESC, 'seats' => SORT_DESC])->all();
 
             if ($trips && count($trips)) foreach ($trips as $trip) {
                 if ($trip->id == $device_trip->id) break;
@@ -151,8 +152,8 @@ class Message
         if ($this->validateDevice($from)) $device = $from->device;
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        $lines = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $device->user_id])
-            ->orderBy(['freeseats' => SORT_DESC, 'created_at' => SORT_DESC])->all();
+        $lines = Line::find()->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING], 'driver_id' => $device->user_id])
+            ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_DESC])->all();
         $queue = [];
         foreach ($lines as $line) $queue[] = $line->toArray();
 
@@ -530,7 +531,7 @@ class Message
         if (isset($data['data']['line'])) $line = $data['data']['line'];
 
         if (isset($line) && $line) {
-            $line_data = $line->toArray();
+            $line_data = $line;
             $response = [
                 'message_id' => $this->message_id,
                 'device_id' => $device->id,

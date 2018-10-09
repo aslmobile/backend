@@ -13,7 +13,7 @@ class Queue extends Model
 
     public static function processingQueue()
     {
-        $lines = Line::find()
+        $lines = \app\modules\api\models\Line::find()
             ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
             ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_DESC])
             ->all();
@@ -49,8 +49,8 @@ class Queue extends Model
             'vehicle_type_id' => $line->vehicle_type_id,
             'status' => Trip::STATUS_CREATED
         ]);
-        if (!empty($not)) $data->andWhere(['NOT', ['id' => $not]]);
-        $data->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_DESC])->all();
+        if (!empty($not)) $data = $data->andWhere(['NOT', ['id' => $not]]);
+        $data = $data->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_DESC])->all();
 
         $queue = [];
         $need = 0;

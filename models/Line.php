@@ -30,6 +30,9 @@ use yii\behaviors\TimestampBehavior;
  * @property int $created_at
  * @property int $updated_at
  *
+ * @property \app\models\User $driver
+ * @property \app\models\Vehicles $vehicle
+ * @property \app\models\Route $route
  * @property \app\models\Checkpoint $startPoint
  * @property \app\models\Checkpoint $endPoint
  */

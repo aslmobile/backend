@@ -412,8 +412,8 @@ class TripController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['trip_id']);
 
-        /** @var \app\models\Line $line */
-        $line = Line::findOne($id);
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
@@ -540,8 +540,8 @@ class TripController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['checkpoint_id']);
 
-        /** @var \app\models\Line $line */
-        $line = Line::findOne($id);
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var Checkpoint $checkpoint */
@@ -634,8 +634,8 @@ class TripController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['trip_id', 'passenger_rating']);
 
-        /** @var \app\models\Line $line */
-        $line = Line::findOne($id);
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
@@ -669,8 +669,8 @@ class TripController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['trip_id', 'passenger_comment']);
 
-        /** @var \app\models\Line $line */
-        $line = Line::findOne($id);
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
@@ -704,8 +704,8 @@ class TripController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['trip_id']);
 
-        /** @var \app\models\Line $line */
-        $line = Line::findOne($id);
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
@@ -838,8 +838,8 @@ class TripController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        /** @var \app\models\Line $line */
-        $line = Line::findOne($id);
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
         if (!$line) $this->module->setError(422, 'line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
@@ -871,8 +871,8 @@ class TripController extends BaseController
 
         $this->prepareBody();
 
-        /** @var \app\models\Line $line */
-        $line = Line::findOne($id);
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
