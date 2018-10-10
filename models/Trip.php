@@ -686,6 +686,11 @@ class Trip extends \yii\db\ActiveRecord
         return Users::findOne($this->user_id);
     }
 
+    public function getUserR()
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
     public function getBaggages()
     {
         $baggage_list = [];

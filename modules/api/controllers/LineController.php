@@ -359,12 +359,12 @@ class LineController extends BaseController
 
         if (in_array($line->status, [Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING])) {
 
-            $trips = Trip::find()->joinWith(['startpointR'])->andWhere([
+            $trips = Trip::find()->joinWith(['startpointR', 'userR'])->where([
                 'AND',
                 ['=', 'trip.line_id', $line->id],
                 ['=', 'trip.driver_id', $line->driver_id],
                 ['IN', 'trip.status', [Trip::STATUS_WAITING, Trip::STATUS_WAY]]
-            ])->orderBy(['checkpoint.weight' => SORT_ASC])->all();
+            ])->andWhere(['users.status' => User::STATUS_APPROVED])->orderBy(['checkpoint.weight' => SORT_ASC])->all();
 
             $all_checkpoints = Checkpoint::find()->with(['childrenR'])
                 ->where(['route' => $line->route_id, 'status' => Checkpoint::STATUS_ACTIVE])
@@ -748,8 +748,6 @@ class LineController extends BaseController
 
             /** @var Trip $trip */
             foreach ($trips as $trip) {
-
-                if(empty($trip->user)) continue;
 
                 if ($trip->status == Trip::STATUS_WAY) {
                     $passengers['total']['cabin']++;
