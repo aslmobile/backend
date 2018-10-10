@@ -51,6 +51,7 @@ class TripController extends BaseController
                             'rate-passenger',
                             'comment-passenger',
                             'rate-driver',
+                            'return'
                         ],
                         'allow' => true
                     ]
@@ -75,6 +76,7 @@ class TripController extends BaseController
                     'rate-passenger' => ['POST'],
                     'comment-passenger' => ['POST'],
                     'rate-driver' => ['POST'],
+                    'return' => ['POST']
                 ]
             ]
         ];
@@ -86,6 +88,35 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         return parent::beforeAction($event);
+    }
+
+    public function actionReturn($id)
+    {
+
+        /** @var \app\modules\api\models\Trip $trip */
+        $trip = Trip::findOne($id);
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+
+        $trip->status = Trip::STATUS_CREATED;
+        $trip->driver_id = 0;
+        $trip->vehicle_id = 0;
+        $trip->line_id = 0;
+
+        if (!$trip->validate() || !$trip->save()) {
+            if ($trip->hasErrors()) {
+                foreach ($trip->errors as $field => $error_message)
+                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false),
+                        true, false);
+                $this->module->sendResponse();
+            } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
+        }
+
+        //Queue::processingQueue();
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+
     }
 
     public function actionQueue()
@@ -169,15 +200,8 @@ class TripController extends BaseController
             $trip->taxi_time = time() + 900;
         }
 
-        if ($this->body->schedule) {
-
-            // TODO: Сделать расписание
-            $trip->scheduled = 1;
-            $trip->schedule_id = 0;
-
-        } else $trip->scheduled = 0;
-
         if ($luggage_unique) {
+
             $trip->luggage_unique_id = (string)$luggage_unique;
 
             /** @var \app\models\TripLuggage $luggage */
@@ -201,6 +225,7 @@ class TripController extends BaseController
                 $trip->seats += $_luggage->seats;
                 $trip->amount += $_luggage->amount;
             }
+
         }
 
         $trip->driver_id = 0;
@@ -212,7 +237,13 @@ class TripController extends BaseController
                 foreach ($trip->errors as $field => $error_message)
                     $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
-            } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
+        }
+
+        if (isset($this->body->schedule) && !empty($this->body->schedule)) {
+            $trip->schedule = json_encode($this->body->schedule);
+            Trip::cloneTrip($trip, Trip::STATUS_SCHEDULED);
+            Notifications::create(Notifications::NTP_TRIP_SCHEDULED, [$trip->user_id], '', 0, $this->body->time);
         }
 
         Queue::processingQueue();
@@ -362,7 +393,6 @@ class TripController extends BaseController
 
         /** @var \app\modules\api\models\Trip $trip */
         $trip = Trip::findOne(['id' => $this->body->trip_id]);
-
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $trip->line_id = $line->id;
@@ -389,7 +419,7 @@ class TripController extends BaseController
         $socket->push(base64_encode(json_encode([
             'action' => "acceptPassengerTrip",
             'notifications' => Notifications::create(Notifications::NTD_TRIP_ADD, [$line->driver_id], '', $user->id),
-            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id]]
+            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id], 'trip' => $trip->toArray()]
         ])));
 
         Queue::processingQueue();
@@ -454,7 +484,7 @@ class TripController extends BaseController
         $socket->push(base64_encode(json_encode([
             'action' => "acceptPassengerSeat",
             'notifications' => Notifications::create(Notifications::NTD_TRIP_SEAT, [$line->driver_id, $trip->user_id], '', $user->id),
-            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id, $trip->user_id]]
+            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id, $trip->user_id], 'trip' => $trip->toArray()]
         ])));
 
         $this->module->data['line'] = $line->toArray();
@@ -479,7 +509,7 @@ class TripController extends BaseController
         $line = \app\modules\api\models\Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
-        /** @var \app\models\Trip $trip */
+        /** @var Trip $trip */
         $trip = Trip::findOne($this->body->trip_id);
         if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
@@ -506,6 +536,7 @@ class TripController extends BaseController
         $line->freeseats += $trip->seats;
 
         if ($trip->save()) $line->save();
+        $user->save();
 
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
@@ -514,7 +545,7 @@ class TripController extends BaseController
         $socket->push(base64_encode(json_encode([
             'action' => "declinePassengerTrip",
             'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, $addressed, '', $user->id),
-            'data' => ['message_id' => time(), 'addressed' => $addressed]
+            'data' => ['message_id' => time(), 'addressed' => $addressed, 'trip' => $trip->toArray()]
         ])));
 
         Queue::processingQueue();
@@ -611,6 +642,8 @@ class TripController extends BaseController
             $notifications = Notifications::create(Notifications::NTP_TRIP_ARRIVED, $addressed, '', $user->id);
         }
 
+        $user->save();
+
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
         if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
@@ -618,7 +651,7 @@ class TripController extends BaseController
         $socket->push(base64_encode(json_encode([
             'action' => "checkpointArrived",
             'notifications' => $notifications,
-            'data' => ['message_id' => time(), 'line' => $line, 'checkpoint' => $checkpoint, 'addressed' => $addressed]
+            'data' => ['message_id' => time(), 'line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray(), 'addressed' => $addressed]
         ])));
 
         $this->module->data = $data;
@@ -642,6 +675,9 @@ class TripController extends BaseController
         $trip = Trip::findOne($this->body->trip_id);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
+        $passenger = User::findOne($trip->user_id);
+        if (!$passenger) $this->module->setError(422, '_passenger', Yii::$app->mv->gt("Не найден", [], false));
+
         $trip->passenger_rating = floatval($this->body->passenger_rating);
 
         if (!$trip->validate() || !$trip->save()) {
@@ -651,6 +687,8 @@ class TripController extends BaseController
                 $this->module->sendResponse();
             } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
+
+        $passenger->save();
 
         $notifications = Notifications::create(Notifications::NTP_TRIP_RATING, [$trip->user_id], '', $user->id);
         foreach ($notifications as $notification) Notifications::send($notification);
@@ -712,6 +750,9 @@ class TripController extends BaseController
         $trip = Trip::findOne($this->body->trip_id);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
+        $driver = User::findOne($trip->driver_id);
+        if (!$driver) $this->module->setError(422, '_driver', Yii::$app->mv->gt("Не найден", [], false));
+
         if (isset($this->body->driver_rating)) {
             $trip->driver_rating = $this->body->driver_rating;
             $notifications = Notifications::create(Notifications::NTD_TRIP_REVIEW, [$trip->driver_id], '', $user->id);
@@ -730,6 +771,8 @@ class TripController extends BaseController
                 $this->module->sendResponse();
             } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
+
+        $driver->save();
 
         $this->module->data['line'] = $line->toArray();
         $this->module->data['trip'] = $trip->toArray();

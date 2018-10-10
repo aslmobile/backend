@@ -17,6 +17,9 @@ class SocketServer implements MessageComponentInterface
      */
     public $devices = [];
 
+    /**  @var \React\EventLoop\LoopInterface */
+    public $loop;
+
     /**
      * SocketServer constructor.
      */
@@ -37,6 +40,7 @@ class SocketServer implements MessageComponentInterface
      */
     function onOpen(ConnectionInterface $conn)
     {
+
         $query_string = $conn->httpRequest->getUri()->getQuery();
         parse_str($query_string, $q);
         $input_data = $q;
@@ -117,7 +121,7 @@ class SocketServer implements MessageComponentInterface
     function onMessage(ConnectionInterface $from, $msg)
     {
         $connections = $this->devices;
-        $result = new Message($from, $msg, $connections);
+        $result = new Message($from, $msg, $connections, $loop = $this->loop);
 
         $response = [
             'error_code' => $result->error_code,

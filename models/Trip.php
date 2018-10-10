@@ -40,8 +40,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $taxi_cancel_reason
  * @property string $taxi_address
  * @property integer $taxi_time
- * @property integer $scheduled
- * @property integer $schedule_id
+ * @property string $schedule
  * @property integer $start_time
  * @property integer $finish_time
  * @property integer $position
@@ -120,8 +119,6 @@ class Trip extends \yii\db\ActiveRecord
                     'taxi_status',
                     'taxi_cancel_reason',
                     'taxi_time',
-                    'scheduled',
-                    'schedule_id',
                     'start_time',
                     'finish_time',
                     'penalty'
@@ -150,7 +147,8 @@ class Trip extends \yii\db\ActiveRecord
                     'passenger_comment',
                     'luggage_unique_id',
                     'taxi_address',
-                    'position'
+                    'position',
+                    'schedule'
                 ],
                 'string'
             ],
@@ -197,8 +195,7 @@ class Trip extends \yii\db\ActiveRecord
             'driver_rating' => Yii::t('app', "Рейтинг водителя"),
             'vehicle_id' => Yii::t('app', "Автомобиль"),
             'need_taxi' => Yii::t('app', "Заказ такси"),
-            'scheduled' => Yii::t('app', "По расписанию"),
-            'schedule_id' => Yii::t('app', "Номер расписания"),
+            'schedule' => Yii::t('app', "По расписанию"),
             'finish_time' => Yii::t('app', "Время окончания"),
             'driver_description' => Yii::t('app', "Комментарий водителя"),
         ];
@@ -232,7 +229,7 @@ class Trip extends \yii\db\ActiveRecord
                             'action' => "acceptPassengerTrip",
                             'notifications' => Notifications::create(
                                 Notifications::NTD_TRIP_ADD, [$line->driver_id], '', $this->user_id),
-                            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id]]
+                            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id], 'trip' => $this->toArray()]
                         ])));
 
 
@@ -264,7 +261,7 @@ class Trip extends \yii\db\ActiveRecord
                                         Notifications::NTD_TRIP_SEATS,
                                         [$passengers] + [$this->driver_id]
                                     ),
-                                    'data' => ['message_id' => time(), 'addressed' => [$passengers] + [$this->driver_id], 'line' => $line]
+                                    'data' => ['message_id' => time(), 'addressed' => [$passengers] + [$this->driver_id], 'line' => $line->toArray()]
                                 ])));
                             }
                         }
@@ -303,7 +300,7 @@ class Trip extends \yii\db\ActiveRecord
                                     [$this->driver_id, $this->user_id],
                                     '', $this->user_id
                                 ),
-                                'data' => ['message_id' => time(), 'addressed' => [$this->driver_id, $this->user_id]]
+                                'data' => ['message_id' => time(), 'addressed' => [$this->driver_id, $this->user_id], 'trip' => $this->toArray()]
                             ])));
                         }
 
@@ -522,11 +519,6 @@ class Trip extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getUser()
-    {
-        return User::findOne(['id' => $this->user_id]);
-    }
-
     public function getStartpoint()
     {
         return Checkpoint::findOne($this->startpoint_id);
@@ -628,27 +620,6 @@ class Trip extends \yii\db\ActiveRecord
         return Users::findOne($this->driver_id);
     }
 
-    public function getBaggages()
-    {
-        $baggage_list = [];
-        $baggages = TripLuggage::find()->where([
-            'AND',
-            ['=', 'unique_id', $this->luggage_unique_id]
-        ])->all();
-
-        /** @var \app\models\TripLuggage $baggage */
-        if ($baggages && count($baggages) > 0) foreach ($baggages as $baggage) {
-            $baggage_list[] = [
-                'id' => $baggage->id,
-                'size' => $baggage->luggageType->title,
-                'need_seat' => intval($baggage->need_place),
-                'amount' => $baggage->amount
-            ];
-        }
-
-        return $baggage_list;
-    }
-
     public function getCalculatedAmount()
     {
         $amount = floatval($this->amount);
@@ -708,5 +679,119 @@ class Trip extends \yii\db\ActiveRecord
     public function getDispatch()
     {
         return Dispatch::findOne(1);
+    }
+
+    public function getUser()
+    {
+        return Users::findOne($this->user_id);
+    }
+
+    public function getBaggages()
+    {
+        $baggage_list = [];
+        $baggages = TripLuggage::find()->where([
+            'AND',
+            ['=', 'unique_id', $this->luggage_unique_id]
+        ])->all();
+
+        /** @var \app\models\TripLuggage $baggage */
+        if ($baggages && count($baggages) > 0) foreach ($baggages as $baggage) {
+            $baggage_list[] = [
+                'id' => $baggage->id,
+                'size' => $baggage->luggageType->title,
+                'need_seat' => intval($baggage->need_place),
+                'amount' => $baggage->amount
+            ];
+        }
+
+        return $baggage_list;
+    }
+
+    public function getBaggage()
+    {
+        $luggages = TripLuggage::find()->andWhere([
+            'AND',
+            ['=', 'unique_id', $this->luggage_unique_id]
+        ])->all();
+
+        $baggages = [];
+        if ($luggages && count($luggages) > 0) foreach ($luggages as $luggage) {
+            /** @var \app\models\TripLuggage $luggage */
+            $baggage = LuggageType::findOne($luggage->luggage_type);
+            $baggages[] = [
+                'id' => $baggage->id,
+                'title' => $baggage->title,
+                'need_place' => $baggage->need_place
+            ];
+        }
+
+        return $baggages;
+    }
+
+    public function getLuggages()
+    {
+        return TripLuggage::find()->andWhere([
+            'AND',
+            ['=', 'unique_id', $this->luggage_unique_id]
+        ])->all();
+    }
+
+    /**
+     * @param $trip Trip
+     * @param $status
+     * @return bool
+     */
+    public static function cloneTrip($trip, $status)
+    {
+
+        $new_trip = new Trip();
+        $old_attributes = $trip->attributes;
+        unset($old_attributes['id']);
+        foreach ($old_attributes as $attribute => $value) $new_trip->$attribute = $value;
+
+        if (!empty($trip->luggages)) {
+            /** @var TripLuggage $luggage */
+            foreach ($trip->luggages as $luggage) {
+                $new_luggage = new TripLuggage();
+                $old_attributes = $luggage->attributes;
+                unset($old_attributes['id']);
+                foreach ($luggage->attributes as $attribute => $value) $new_luggage->$attribute = $value;
+                $new_luggage->save();
+            }
+        }
+
+        $new_trip->status = $status;
+        return $new_trip->save();
+    }
+
+    public function toArray(array $fields = [], array $expand = [], $recursive = true)
+    {
+        $array = parent::toArray($fields, $expand, $recursive);
+
+        if ($this->startpoint) $array['startpoint'] = $this->startpoint->toArray();
+        else $array['startpoint'] = null;
+
+        if ($this->endpoint) $array['endpoint'] = $this->endpoint->toArray();
+        else $array['endpoint'] = null;
+
+        if ($this->route) $array['route'] = $this->route->toArray();
+        else $array['route'] = null;
+
+        if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
+        else $array['vehicle'] = null;
+
+        if ($this->driver) $array['driver'] = $this->driver->toArray();
+        else $array['driver'] = null;
+
+        if ($this->user) $array['passenger'] = $this->user->toArray();
+        else $array['passenger'] = null;
+
+        if ($this->dispatch) $array['dispatch'] = $this->dispatch->toArray();
+        else $array['dispatch'] = null;
+
+        if ($this->baggage) $array['baggage'] = $this->baggage;
+        else $array['baggage'] = [];
+
+        return $array;
     }
 }

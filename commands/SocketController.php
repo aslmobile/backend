@@ -50,6 +50,7 @@ class SocketController extends ConsoleController
 
         $port = (!empty($this->port)) ? $this->port : \Yii::$app->params['socket']['in_port'];
         $server = IoServer::factory($httpServer, $port);
+        $socket->loop = $server->loop;
         echo 'Server running on port: ' . $port . "\n" . date('d.m.Y h:i', time()) . "\n";
         $server->run();
     }

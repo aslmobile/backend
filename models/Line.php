@@ -183,7 +183,7 @@ class Line extends \yii\db\ActiveRecord
                 $socket->push(base64_encode(json_encode([
                     'action' => "acceptDriverTrip",
                     'notifications' => Notifications::create(Notifications::NTD_TRIP_SEATS, [$this->driver_id]),
-                    'data' => ['message_id' => time(), 'addressed' => [$this->driver_id], 'line' => $this]
+                    'data' => ['message_id' => time(), 'addressed' => [$this->driver_id], 'line' => $this->toArray()]
                 ])));
             }
 
@@ -226,4 +226,18 @@ class Line extends \yii\db\ActiveRecord
     {
         return Checkpoint::findOne($this->endpoint);
     }
+
+    public function toArray(array $fields = [], array $expand = [], $recursive = true)
+    {
+        $array = parent::toArray($fields, $expand, $recursive);
+
+        if ($this->driver) $array['driver'] = $this->driver->toArray();
+        if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
+        if ($this->route) $array['route'] = $this->route->toArray();
+        if ($this->startPoint) $array['startpoint'] = $this->startPoint->toArray();
+        if ($this->endPoint) $array['endpoint'] = $this->endPoint->toArray();
+
+        return $array;
+    }
+
 }

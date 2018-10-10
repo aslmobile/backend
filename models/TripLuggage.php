@@ -40,7 +40,6 @@ class TripLuggage extends \yii\db\ActiveRecord
         ];
     }
 
-
     /**
      * @inheritdoc
      */

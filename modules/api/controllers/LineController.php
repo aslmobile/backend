@@ -223,7 +223,7 @@ class LineController extends BaseController
         $socket->push(base64_encode(json_encode([
             'action' => "acceptDriverTrip",
             'notifications' => Notifications::create(Notifications::NTP_TRIP_READY, $passengers, '', $user->id),
-            'data' => ['message_id' => time(), 'addressed' => $passengers, 'line' => $line]
+            'data' => ['message_id' => time(), 'addressed' => $passengers, 'line' => $line->toArray()]
         ])));
 
 
@@ -265,7 +265,7 @@ class LineController extends BaseController
             } else $this->module->setError(422, '_line', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
-        /** @var \app\models\Trip $trip */
+        /** @var Trip $trip */
         $trips = Trip::find()->andWhere(['line_id' => $line->id])->all();
         if ($trips) {
 
@@ -295,7 +295,7 @@ class LineController extends BaseController
                 $socket->push(base64_encode(json_encode([
                     'action' => "declinePassengerTrip",
                     'notifications' => Notifications::create(Notifications::NTP_TRIP_CANCEL, [$trip->user_id], '', $user->id),
-                    'data' => ['message_id' => time(), 'addressed' => [$trip->user_id]]
+                    'data' => ['message_id' => time(), 'addressed' => [$trip->user_id], 'trip' => $trip->toArray()]
                 ])));
 
             }
@@ -314,6 +314,8 @@ class LineController extends BaseController
         ]);
 
         Queue::processingQueue();
+
+        $user->save();
 
         $this->module->data['line'] = $line->toArray();
         $this->module->setSuccess();
@@ -744,6 +746,7 @@ class LineController extends BaseController
                 $trips = $exists;
             }
 
+            /** @var Trip $trip */
             foreach ($trips as $trip) {
 
                 if ($trip->status == Trip::STATUS_WAY) {
@@ -757,7 +760,9 @@ class LineController extends BaseController
                         'payment_type' => $trip->payment_type,
                         'seats' => $trip->seats,
                         'comment' => $trip->passenger_description,
-                        'rating' => $trip->passenger_rating
+                        'rating' => $trip->passenger_rating,
+                        'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
+                        'trip_id' => $trip->id
                     ];
                 }
 
@@ -772,7 +777,9 @@ class LineController extends BaseController
                         'payment_type' => $trip->payment_type,
                         'seats' => $trip->seats,
                         'comment' => $trip->passenger_description,
-                        'rating' => $trip->passenger_rating
+                        'rating' => $trip->passenger_rating,
+                        'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
+                        'trip_id' => $trip->id
                     ];
                 }
 
@@ -788,7 +795,9 @@ class LineController extends BaseController
                         'payment_type' => $trip->payment_type,
                         'seats' => $trip->seats,
                         'comment' => $trip->passenger_description,
-                        'rating' => $trip->passenger_rating
+                        'rating' => $trip->passenger_rating,
+                        'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
+                        'trip_id' => $trip->id
                     ];
                 } else {
                     $checkpoints[(int)$trip->startpoint->id] = [
@@ -808,7 +817,9 @@ class LineController extends BaseController
                                 'payment_type' => $trip->payment_type,
                                 'seats' => $trip->seats,
                                 'comment' => $trip->passenger_description,
-                                'rating' => $trip->passenger_rating
+                                'rating' => $trip->passenger_rating,
+                                'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
+                                'trip_id' => $trip->id
                             ]
                         ]
                     ];

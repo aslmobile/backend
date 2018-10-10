@@ -20,6 +20,9 @@ class Message
     public $addressed = [];
     public $notifications = [];
 
+    /** @var \React\EventLoop\LoopInterface */
+    public $loop;
+
     public $message_id = 0;
 
     /**
@@ -27,10 +30,12 @@ class Message
      * @param ConnectionInterface $from
      * @param string $data
      * @param $connections
+     * @param \React\EventLoop\LoopInterface $loop
      */
-    public function __construct(ConnectionInterface $from, $data = '', $connections)
+    public function __construct(ConnectionInterface $from, $data = '', $connections, \React\EventLoop\LoopInterface $loop)
     {
         $this->connections = $connections;
+        $this->loop = $loop;
         $data = base64_decode($data, true);
         $data = json_decode($data, true);
 
@@ -90,8 +95,8 @@ class Message
         $device_trip = Trip::find()->andWhere([
             'AND',
             ['=', 'user_id', $device->user_id],
-            ['=', 'status', Trip::STATUS_WAITING]
-        ])->one();
+            ['=', 'status', Trip::STATUS_CREATED]
+        ])->orderBy(['created_at' => SORT_DESC])->one();
 
         if ($device_trip) {
 
@@ -99,20 +104,20 @@ class Message
 
             $trips = Trip::find()->andWhere([
                 'AND',
-                ['=', 'status', Trip::STATUS_WAITING],
+                ['=', 'status', Trip::STATUS_CREATED],
                 ['=', 'route_id', $device_trip->route_id]
             ])->orderBy(['created_at' => SORT_DESC, 'seats' => SORT_DESC])->all();
 
             if ($trips && count($trips)) foreach ($trips as $trip) {
                 if ($trip->id == $device_trip->id) break;
-
                 $queue_position++;
             }
 
-            $vehicles_queue = Line::find()->andWhere(['AND', ['=', 'status', Line::STATUS_WAITING]])->count();
+            $vehicles_queue = Line::find()->andWhere(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
+                ->andWhere(['>=', 'freeseats', $device_trip->seats])->count();
+
             $basic_estimated_time = $queue_position * 300;
             $estimated_time = $basic_estimated_time * 3 / $vehicles_queue;
-
             if ($estimated_time < 900) $estimated_time = 900;
 
             $response = [
@@ -152,7 +157,9 @@ class Message
         if ($this->validateDevice($from)) $device = $from->device;
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        $lines = Line::find()->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING], 'driver_id' => $device->user_id])
+        $lines = Line::find()
+            ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING], 'driver_id' => $device->user_id])
+            ->andWhere(['>', 'freeseats', 0])
             ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_DESC])->all();
         $queue = [];
         foreach ($lines as $line) $queue[] = $line->toArray();
@@ -301,19 +308,12 @@ class Message
                 'user_id' => $device->user->id,
                 'uip' => '0.0.0.0'
             ]);
-
             $watchdog->save();
         }
 
         /** @var \app\models\Trip $trip */
-        $trip = \app\models\Trip::find()->andWhere([
-            'AND',
-            ['=', 'user_id', $device->user_id],
-            ['=', 'status', Trip::STATUS_WAITING]
-        ])->one();
-
-        if ($trip) $line_data = $trip->toArray();
-        else $line_data = null;
+        if (isset($data['data']['trip'])) $trip = $data['data']['trip'];
+        if (isset($trip) && $trip) $trip_data = $trip; else $trip_data = null;
 
         $response = [
             'message_id' => $this->message_id,
@@ -322,7 +322,7 @@ class Message
             'data' => [
                 'accept_from' => $watchdog->created_at,
                 'accept_time' => 300,
-                'trip' => $line_data
+                'trip' => $trip_data
             ]
         ];
 
@@ -358,19 +358,12 @@ class Message
                 'user_id' => $device->user->id,
                 'uip' => '0.0.0.0'
             ]);
-
             $watchdog->save();
         }
 
         /** @var \app\models\Trip $trip */
-        $trip = \app\models\Trip::find()->andWhere([
-            'AND',
-            ['=', 'user_id', $device->user_id],
-            ['=', 'status', Trip::STATUS_WAY]
-        ])->one();
-
-        if ($trip) $line_data = $trip->toArray();
-        else $line_data = null;
+        if (isset($data['data']['trip'])) $trip = $data['data']['trip'];
+        if (isset($trip) && $trip) $trip_data = $trip; else $trip_data = null;
 
         $response = [
             'message_id' => $this->message_id,
@@ -379,7 +372,7 @@ class Message
             'data' => [
                 'seat_from' => $watchdog->created_at,
                 'seat_time' => 300,
-                'trip' => $line_data
+                'trip' => $trip_data
             ]
         ];
 
@@ -415,19 +408,12 @@ class Message
                 'user_id' => $device->user->id,
                 'uip' => '0.0.0.0'
             ]);
-
             $watchdog->save();
         }
 
         /** @var \app\models\Trip $trip */
-        $trip = \app\models\Trip::find()->andWhere([
-            'AND',
-            ['=', 'user_id', $device->user_id],
-            ['=', 'status', Trip::STATUS_WAITING]
-        ])->one();
-
-        if ($trip) $line_data = $trip->toArray();
-        else $line_data = null;
+        if (isset($data['data']['trip'])) $trip = $data['data']['trip'];
+        if (isset($trip) && $trip) $trip_data = $trip; else $trip_data = null;
 
         $response = [
             'message_id' => $this->message_id,
@@ -436,7 +422,7 @@ class Message
             'data' => [
                 'decline_from' => $watchdog->created_at,
                 'decline_time' => 300,
-                'trip' => $line_data
+                'trip' => $trip_data
             ]
         ];
 
@@ -472,23 +458,15 @@ class Message
                 'user_id' => $device->user->id,
                 'uip' => '0.0.0.0'
             ]);
-
             $watchdog->save();
         }
 
-        if (isset($data['data']['line'])) {
-            /** @var Line $line */
-            $line = $data['data']['line'];
-        } else {
-            /** @var \app\models\Line $line */
-            $line = \app\models\Line::find()->andWhere([
-                'driver_id' => $device->user_id,
-                'status' => [Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]
-            ])->orderBy(['created_at' => SORT_DESC])->one();
-        }
+        /** @var Line $line */
+        if (isset($data['data']['line'])) $line = $data['data']['line'];
 
-        if ($line) {
-            $line_data = $line->toArray();
+        if (isset($line) && $line) {
+
+            $line_data = $line;
             $response = [
                 'message_id' => $this->message_id,
                 'device_id' => $device->id,
@@ -496,9 +474,14 @@ class Message
                 'data' => [
                     'accept_from' => $watchdog->created_at,
                     'accept_time' => 300,
-                    'trip' => $line_data
+                    'line' => $line_data
                 ]
             ];
+
+            $this->loop->addPeriodicTimer(10, function ($timer) {
+                echo '10 remained';
+            });
+
         } else {
             $response = [
                 'message_id' => $this->message_id,
@@ -577,7 +560,7 @@ class Message
         /** @var Checkpoint $checkpoint */
         $checkpoint = $data['checkpoint'];
 
-        $message = ['status' => 'passed', 'checkpoint' => $checkpoint->id, 'line' => $line->id];
+        $message = ['status' => 'passed', 'checkpoint' => intval($checkpoint['id']), 'line' => intval($line['id'])];
 
         $params = [
             'user_id' => $device->user_id,
@@ -599,8 +582,7 @@ class Message
             'data' => [
                 'arrived_from' => $watchdog->created_at,
                 'arrived_time' => 300,
-//                'line' => $line->toArray(),
-                'checkpoint' => $checkpoint->toArray()
+                'checkpoint' => $checkpoint
             ]
         ];
 

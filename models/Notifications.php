@@ -14,6 +14,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string $title
  * @property integer $created_at
  * @property integer $updated_at
+ * @property integer $time
  * @property integer $status
  * @property integer $user_id
  * @property integer $type
@@ -45,7 +46,7 @@ class Notifications extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['created_at', 'updated_at', 'status', 'user_id', 'type', 'todeliver', 'initiator_id'], 'integer'],
+            [['created_at', 'updated_at', 'status', 'user_id', 'type', 'todeliver', 'initiator_id', 'time'], 'integer'],
             [['title'], 'string', 'max' => 255],
             [['text'], 'string', 'max' => 512],
         ];
@@ -82,17 +83,18 @@ class Notifications extends \yii\db\ActiveRecord
         NTP_TRIP_REVIEW = 7,
         NTP_TRIP_RATING = 8,
         NTP_TRIP_ARRIVED = 9,
+        NTP_TRIP_SCHEDULED = 10,
 
-        NTD_TRIP_SEATS = 10,
-        NTD_TRIP_CANCEL = 11,
-        NTD_TRIP_FINISHED = 12,
-        NTD_TRIP_REVIEW = 13,
-        NTD_TRIP_RATING = 14,
-        NTD_TRIP_QUEUE = 15,
-        NTD_TRIP_READY = 16,
-        NTD_TRIP_ADD = 17,
-        NTD_TRIP_SEAT = 18,
-        NTD_TRIP_FIRST = 19,
+        NTD_TRIP_SEATS = 11,
+        NTD_TRIP_CANCEL = 12,
+        NTD_TRIP_FINISHED = 13,
+        NTD_TRIP_REVIEW = 14,
+        NTD_TRIP_RATING = 15,
+        NTD_TRIP_QUEUE = 16,
+        NTD_TRIP_READY = 17,
+        NTD_TRIP_ADD = 18,
+        NTD_TRIP_SEAT = 19,
+        NTD_TRIP_FIRST = 20,
 
         NTF_NOTIFICATIONS = -1,
         NTF_GEO = -2;
@@ -133,7 +135,9 @@ class Notifications extends \yii\db\ActiveRecord
     const
         STATUS_NEW = 0,
         STATUS_DELIVERED = 1,
-        STATUS_WAITING = 2;
+        STATUS_WAITING = 2,
+        STATUS_SCHEDULED = 3;
+
 
     public static function getStatuses()
     {
@@ -141,10 +145,11 @@ class Notifications extends \yii\db\ActiveRecord
             self::STATUS_NEW => Yii::t('app', "Новое уведомление"),
             self::STATUS_DELIVERED => Yii::t('app', "Уведомление доставлено"),
             self::STATUS_WAITING => Yii::t('app', "Уведомление в обработке"),
+            self::STATUS_SCHEDULED => Yii::t('app', "Запланировано"),
         ];
     }
 
-    public static function create($type = self::NT_DEFAULT, $addressed, $message = '', $initiator = 0)
+    public static function create($type = self::NT_DEFAULT, $addressed, $message = '', $initiator = 0, $status = self::STATUS_NEW)
     {
         $types = self::getTypes();
         if (!isset ($types[$type])) return false;
@@ -154,7 +159,7 @@ class Notifications extends \yii\db\ActiveRecord
                 $notification = new Notifications();
                 $notification->type = $type;
                 $notification->user_id = $user;
-                $notification->status = self::STATUS_NEW;
+                $notification->status = $status;
                 $notification->title = self::getTypes()[$type];
                 $notification->text = $message;
                 $notification->initiator_id = $initiator;

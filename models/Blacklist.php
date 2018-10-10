@@ -4,9 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\helpers\ArrayHelper;
-use app\components\MultilingualBehavior;
-use app\components\MultilingualQuery;
+
 /**
  * This is the model class for table "blacklist".
  *
@@ -38,7 +36,6 @@ class Blacklist extends \yii\db\ActiveRecord
     {
         return 'blacklist';
     }
-
 
     /**
      * @inheritdoc

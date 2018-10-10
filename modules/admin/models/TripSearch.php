@@ -17,9 +17,9 @@ class TripSearch extends Trip
     public function rules()
     {
         return [
-            [['id', 'created_at', 'updated_at', 'status', 'user_id', 'cancel_reason', 'created_by', 'updated_by', 'payment_type', 'startpoint_id', 'route_id', 'seats', 'endpoint_id', 'payment_status', 'vehicle_type_id', 'line_id', 'vehicle_id', 'driver_id', 'need_taxi', 'taxi_status', 'taxi_cancel_reason', 'taxi_time', 'scheduled', 'schedule_id', 'start_time', 'finish_time'], 'integer'],
+            [['id', 'created_at', 'updated_at', 'status', 'user_id', 'cancel_reason', 'created_by', 'updated_by', 'payment_type', 'startpoint_id', 'route_id', 'seats', 'endpoint_id', 'payment_status', 'vehicle_type_id', 'line_id', 'vehicle_id', 'driver_id', 'need_taxi', 'taxi_status', 'taxi_cancel_reason', 'taxi_time', 'start_time', 'finish_time'], 'integer'],
             [['amount', 'tariff', 'passenger_rating', 'driver_rating'], 'number'],
-            [['passenger_description', 'currency', 'driver_comment', 'luggage_unique_id', 'passenger_comment', 'taxi_address', 'driver_description'], 'safe'],
+            [['passenger_description', 'currency', 'driver_comment', 'luggage_unique_id', 'passenger_comment', 'taxi_address', 'driver_description', 'schedule'], 'safe'],
         ];
     }
 
@@ -86,8 +86,7 @@ class TripSearch extends Trip
             'taxi_status' => $this->taxi_status,
             'taxi_cancel_reason' => $this->taxi_cancel_reason,
             'taxi_time' => $this->taxi_time,
-            'scheduled' => $this->scheduled,
-            'schedule_id' => $this->schedule_id,
+            'schedule' => $this->schedule,
             'start_time' => $this->start_time,
             'finish_time' => $this->finish_time,
         ]);

@@ -1,5 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
+use app\models\User;
 use app\modules\api\models\UploadFiles;
 use app\modules\api\models\VehicleBrands;
 use app\modules\api\models\VehicleModels;
@@ -134,7 +135,17 @@ class VehiclesController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $this->module->data = VehicleTypes::getTypesList(true);
+        $with_any = false;
+
+        switch (intval($user->type)) {
+            case User::TYPE_DRIVER:
+                break;
+            case User::TYPE_PASSENGER:
+                $with_any = true;
+                break;
+        }
+
+        $this->module->data = VehicleTypes::getTypesList(true, $with_any);
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
@@ -154,7 +165,7 @@ class VehiclesController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $this->module->data = VehicleModels::getModelsList($param1, $param2,true);
+        $this->module->data = VehicleModels::getModelsList($param1, $param2, true);
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

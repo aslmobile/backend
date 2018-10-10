@@ -87,10 +87,6 @@ use yii\widgets\ActiveForm;
 
                         <?= $form->field($model, 'taxi_time')->textInput() ?>
 
-                        <?= $form->field($model, 'scheduled')->textInput() ?>
-
-                        <?= $form->field($model, 'schedule_id')->textInput() ?>
-
                         <?= $form->field($model, 'start_time')->textInput() ?>
 
                         <?= $form->field($model, 'finish_time')->textInput() ?>

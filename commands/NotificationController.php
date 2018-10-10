@@ -33,8 +33,13 @@ class NotificationController extends ConsoleController
          * @var $notifications Notifications
          */
         echo "Notification send action index started at " . date('d:m:Y H:i:s') . "\n";
+
         $notifications = Notifications::find()->where([
-            'status' => [Notifications::STATUS_NEW, Notifications::STATUS_WAITING]])->all();
+            'OR',
+            ['=', 'status', [Notifications::STATUS_NEW, Notifications::STATUS_WAITING]],
+            ['AND', ['=', 'status', Notifications::STATUS_SCHEDULED], ['!=', 'time', 0], ['>=', 'time', time() - 3600]]
+        ])->all();
+
         /**
          * @var Notifications $notification
          */
