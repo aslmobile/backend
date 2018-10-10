@@ -749,6 +749,8 @@ class LineController extends BaseController
             /** @var Trip $trip */
             foreach ($trips as $trip) {
 
+                if(empty($trip->user)) continue;
+
                 if ($trip->status == Trip::STATUS_WAY) {
                     $passengers['total']['cabin']++;
                     $passengers['cabin'][] = [
