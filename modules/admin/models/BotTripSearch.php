@@ -17,9 +17,9 @@ class BotTripSearch extends BotTrip
     public function rules()
     {
         return [
-            [['id', 'updated_at', 'status', 'user_id', 'cancel_reason', 'created_by', 'updated_by', 'payment_type', 'startpoint_id', 'route_id', 'seats', 'endpoint_id', 'payment_status', 'vehicle_type_id', 'line_id', 'vehicle_id', 'driver_id', 'need_taxi', 'taxi_status', 'taxi_cancel_reason', 'taxi_time', 'scheduled', 'schedule_id', 'start_time', 'finish_time'], 'integer'],
+            [['id', 'updated_at', 'status', 'user_id', 'cancel_reason', 'created_by', 'updated_by', 'payment_type', 'startpoint_id', 'route_id', 'seats', 'endpoint_id', 'payment_status', 'vehicle_type_id', 'line_id', 'vehicle_id', 'driver_id', 'need_taxi', 'taxi_status', 'taxi_cancel_reason', 'taxi_time', 'start_time', 'finish_time'], 'integer'],
             [['tariff', 'passenger_rating', 'driver_rating'], 'number'],
-            [['created_at', 'passenger_description', 'currency', 'driver_comment', 'luggage_unique_id', 'passenger_comment', 'taxi_address', 'driver_description'], 'safe'],
+            [['created_at', 'passenger_description', 'currency', 'driver_comment', 'luggage_unique_id', 'passenger_comment', 'taxi_address', 'driver_description', 'schedule'], 'safe'],
         ];
     }
 
