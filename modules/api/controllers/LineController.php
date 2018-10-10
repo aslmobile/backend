@@ -762,7 +762,7 @@ class LineController extends BaseController
                         'comment' => $trip->passenger_description,
                         'rating' => $trip->passenger_rating,
                         'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
-                        'trip_id' => $trip->id
+                        'tripId' => $trip->id
                     ];
                 }
 
@@ -779,7 +779,7 @@ class LineController extends BaseController
                         'comment' => $trip->passenger_description,
                         'rating' => $trip->passenger_rating,
                         'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
-                        'trip_id' => $trip->id
+                        'tripId' => $trip->id
                     ];
                 }
 
@@ -797,7 +797,7 @@ class LineController extends BaseController
                         'comment' => $trip->passenger_description,
                         'rating' => $trip->passenger_rating,
                         'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
-                        'trip_id' => $trip->id
+                        'tripId' => $trip->id
                     ];
                 } else {
                     $checkpoints[(int)$trip->startpoint->id] = [
@@ -819,7 +819,7 @@ class LineController extends BaseController
                                 'comment' => $trip->passenger_description,
                                 'rating' => $trip->passenger_rating,
                                 'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
-                                'trip_id' => $trip->id
+                                'tripId' => $trip->id
                             ]
                         ]
                     ];
