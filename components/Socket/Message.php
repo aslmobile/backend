@@ -142,6 +142,8 @@ class Message
             ];
         }
 
+        $this->addressed = [$device->user_id];
+
         return $response;
     }
 
@@ -172,6 +174,8 @@ class Message
                 'queue' => $queue
             ]
         ];
+
+        $this->addressed = [$device->user_id];
 
         return $response;
     }
@@ -230,6 +234,8 @@ class Message
                 'passengers' => $passengers
             ]
         ];
+
+        $this->addressed = [$device->user_id];
 
         return $response;
     }
@@ -296,6 +302,7 @@ class Message
                     'line_id' => 0
                 ]
             ];
+            $this->addressed = [$device->user_id];
         }
 
         return $response;
@@ -506,8 +513,13 @@ class Message
             ];
 
             if (isset($data['data']['timer']) && $data['data']['timer']) {
-                $this->loop->addTimer(10, function ($timer) {
-                    echo '10 remained';
+                $this->loop->addTimer(300, function ($timer) use ($line) {
+//                    $line = \app\modules\api\models\Line::findOne($line['id']);
+//                    if(!empty($line) && $line->status){
+//                        switch ($line->status){
+//                            case Line::S
+//                        }
+//                    }
                 });
             }
 
