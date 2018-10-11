@@ -248,7 +248,7 @@ class LineController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['cancel_reason_trip', 'cancel_reason_line']);
+        $this->validateBodyParams(['cancel_reason_line']);
 
         /** @var \app\models\Line $line */
         $line = Line::findOne($id);
@@ -287,7 +287,8 @@ class LineController extends BaseController
 
             foreach ($trips as $trip) {
 
-                $trip->cancel_reason = $this->body->cancel_reason_trip;
+                $trip->cancel_reason = isset($this->body->cancel_reason_trip) ? $this->body->cancel_reason_trip : 0;
+                $trip->driver_comment = isset($this->body->driver_comment) ? $this->body->driver_comment : '';
                 $trip->status = Trip::STATUS_CANCELLED_DRIVER;
 
                 if (!$trip->validate() || !$trip->save()) {

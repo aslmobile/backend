@@ -20,6 +20,9 @@ class SocketServer implements MessageComponentInterface
     /**  @var \React\EventLoop\LoopInterface */
     public $loop;
 
+    /** @var string */
+    public $server;
+
     /**
      * SocketServer constructor.
      */
@@ -29,6 +32,8 @@ class SocketServer implements MessageComponentInterface
 
         $timestamp = strtotime(gmdate("M d Y H:i:s", time()));
         User::updateAll(['last_activity' => $timestamp], 'last_activity IS NULL');
+
+        $this->server = Yii::$app->params['socket']['authkey_server'];
     }
 
     /**
@@ -44,26 +49,20 @@ class SocketServer implements MessageComponentInterface
         $query_string = $conn->httpRequest->getUri()->getQuery();
         parse_str($query_string, $q);
         $input_data = $q;
-        $server = Yii::$app->params['socket']['authkey_server'];
 
         if (is_array($input_data) && array_key_exists('auth', $input_data)) {
 
             $authkey = $input_data['auth'];
             $device = $this->validateDevice($conn, $authkey);
 
-            if ((!$device || empty($device)) && $authkey !== $server) {
-
+            if (!$device) {
                 echo "Connection closed! No device auth!\n";
                 $conn->close();
-
-            } elseif ($authkey == $server) {
-
+            } elseif ($authkey === $this->server) {
                 $conn->device = $device;
                 $this->devices[$conn->resourceId] = $conn;
                 echo "Server connected.\n" . date('d.m.Y h:i', time()) . "\n";
-
             } else {
-
                 $conn->device = $device;
                 $this->devices[$conn->resourceId] = $conn;
                 Yii::$app->db->createCommand()->update('users', ['last_activity' => null], 'id = ' . $device->user_id)->execute();
@@ -115,7 +114,7 @@ class SocketServer implements MessageComponentInterface
      */
     function onError(ConnectionInterface $conn, \Exception $e)
     {
-        echo "An error has occurred: {$e->getMessage()}\n" . date('d.m.Y h:i', time()) . "\n";
+        echo "An error has occurred: {$e->getFile()} : {$e->getLine()} \n {$e->getMessage()}\n" . date('d.m.Y h:i', time()) . "\n";
 
         $conn->close();
     }
@@ -160,7 +159,9 @@ class SocketServer implements MessageComponentInterface
 
         $from->send($response);
 
-        echo "Message from ({$from->device->id})\n" . date('d.m.Y h:i', time()) . "\n";
+        $sender = is_object($from->device) ? $from->device->id : 'Server';
+
+        echo "Message from ({$sender})\n" . date('d.m.Y h:i', time()) . "\n";
     }
 
     /**
@@ -182,6 +183,7 @@ class SocketServer implements MessageComponentInterface
         if (!empty($authkey)) {
             $device = Devices::find()->where(['auth_token' => $authkey])->one();
             if ($device && !empty($device)) return $device;
+            if ($authkey === $this->server) return true;
         }
 
         $conn->send('Device not found. Please check your token');

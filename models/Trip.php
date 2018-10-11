@@ -242,13 +242,15 @@ class Trip extends \yii\db\ActiveRecord
 
                     };
 
-                    Queue::processingQueue();
+                }
 
-                } else return false;
+                Queue::processingQueue();
 
                 break;
 
             case 'status':
+
+                Queue::processingQueue();
 
                 $line = Line::findOne($this->line_id);
 
@@ -301,8 +303,6 @@ class Trip extends \yii\db\ActiveRecord
 
                         break;
                 }
-
-                Queue::processingQueue();
 
                 break;
         }

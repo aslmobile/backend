@@ -17,6 +17,10 @@ class Queue extends Model
      */
     public static function processingQueue()
     {
+
+        $socket = new SocketPusher(['authkey' => \Yii::$app->params['socket']['authkey_server']]);
+        $socket->push(base64_encode(json_encode(['action' => "changeQueue", 'data' => ['message_id' => time()]])));
+
         $lines = \app\modules\api\models\Line::find()
             ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
             ->andWhere(['>', 'freeseats', 0])
@@ -44,9 +48,6 @@ class Queue extends Model
             }
 
         }
-
-        $socket = new SocketPusher();
-        $socket->push(base64_encode(json_encode(['action' => "changeQueue", 'data' => ['message_id' => time()]])));
 
     }
 
