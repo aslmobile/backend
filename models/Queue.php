@@ -70,9 +70,9 @@ class Queue extends Model
         $queue = [];
         $need = 0;
 
-        /** @var $trip Trip */
+        /** @var $trip Trip[] */
         foreach (ArrayHelper::index($data, 'id') as $key => $trip) {
-            $need += $trip->seats;
+            $need += $trip['seats'];
             if ($line->freeseats < $need) {
                 continue;
             } elseif ($line->freeseats > $need) {

@@ -125,7 +125,7 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['country', 'checkpoint', 'route', 'time', 'seats', 'taxi', 'payment_type']);
+        $this->validateBodyParams(['country', 'checkpoint', 'route', 'time', 'seats', 'taxi', 'payment_type', 'vehicle_type_id']);
 
         $country = Countries::findOne($this->body->country);
         if (!$country) $this->module->setError(422, '_country', Yii::$app->mv->gt("Не найден", [], false));
@@ -173,7 +173,7 @@ class TripController extends BaseController
         }
 
         $taxi = false;
-        if ($this->body->taxi) {
+        if (isset($this->body->taxi)) {
             $taxi = Taxi::findOne($this->body->taxi);
             if (!$taxi) $this->module->setError(422, '_taxi', Yii::$app->mv->gt("Не найден", [], false));
         }
@@ -205,31 +205,33 @@ class TripController extends BaseController
             $trip->luggage_unique_id = (string)$luggage_unique;
 
             /** @var \app\models\TripLuggage $luggage */
-            if ($_luggages && count($$_luggages) > 0) foreach ($_luggages as $luggage) {
+            if ($_luggages && count($_luggages) > 0) foreach ($_luggages as $luggage) {
+
                 if ($luggage['need_place']) {
                     $tariff = $this->calculateLuggageTariff($route->id);
                     $amount = (int)intval($luggage['seats']) * (float)floatval($tariff);
                 } else $amount = (float)floatval(0.0);
 
-                $_luggage = new TripLuggage();
-                $_luggage->unique_id = (string)$luggage_unique;
-                $_luggage->amount = (float)floatval($amount);
-                $_luggage->status = (int)0;
-                $_luggage->need_place = (int)intval($luggage['need_place']);
-                $_luggage->seats = (int)intval($luggage['seats']);
-                $_luggage->currency = (string)"₸";
-                $_luggage->luggage_type = (int)intval($luggage['id']);
+                $_trip_luggage = new TripLuggage();
+                $_trip_luggage->unique_id = (string)$luggage_unique;
+                $_trip_luggage->amount = (float)floatval($amount);
+                $_trip_luggage->status = (int)0;
+                $_trip_luggage->need_place = (int)intval($luggage['need_place']);
+                $_trip_luggage->seats = (int)intval($luggage['seats']);
+                $_trip_luggage->currency = (string)"₸";
+                $_trip_luggage->luggage_type = (int)intval($luggage['id']);
 
-                $_luggage->save(false);
+                $_trip_luggage->save();
 
-                $trip->seats += $_luggage->seats;
-                $trip->amount += $_luggage->amount;
+                $trip->seats += $_trip_luggage->seats;
+                $trip->amount += $_trip_luggage->amount;
             }
 
         }
 
         $trip->driver_id = 0;
         $trip->vehicle_id = 0;
+        $trip->vehicle_type_id = $this->body->vehicle_type_id;
         $trip->line_id = 0;
 
         if (!$trip->validate() || !$trip->save()) {

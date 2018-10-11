@@ -760,7 +760,7 @@ class Trip extends \yii\db\ActiveRecord
                 $new_luggage = new TripLuggage();
                 $old_attributes = $luggage->attributes;
                 unset($old_attributes['id']);
-                foreach ($luggage->attributes as $attribute => $value) $new_luggage->$attribute = $value;
+                foreach ($old_attributes as $attribute => $value) $new_luggage->$attribute = $value;
                 $new_luggage->save();
             }
         }
