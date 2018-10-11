@@ -211,19 +211,23 @@ class LineController extends BaseController
         $line->status = Line::STATUS_IN_PROGRESS;
         $line->save();
 
-        RestFul::updateAll(['message' => json_encode(['status' => 'accepted'])],
-            ['AND',
+        RestFul::updateAll(
+            ['message' => json_encode(['status' => 'closed'])],
+            [
+                'AND',
                 ['=', 'user_id', $line->driver_id],
-                ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT]]);
+                ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT]
+            ]
+        );
 
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
         if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
-            'action' => "acceptDriverTrip",
+            'action' => "startDriverTrip",
             'notifications' => Notifications::create(Notifications::NTP_TRIP_READY, $passengers, '', $user->id),
-            'data' => ['message_id' => time(), 'addressed' => $passengers, 'line' => $line->toArray(), 'timer' => false]
+            'data' => ['message_id' => time(), 'addressed' => $passengers, 'line' => $line->toArray()]
         ])));
 
 

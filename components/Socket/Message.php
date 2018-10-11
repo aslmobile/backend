@@ -534,6 +534,47 @@ class Message
      * @param $connections
      * @return array
      */
+    public function startDriverTrip($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        if (isset($data['data']['line']) && !empty($line)) {
+
+            $line_data = $data['data']['line'];;
+            $response = [
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => [
+                    'line' => $line_data
+                ]
+            ];
+
+        } else {
+
+            $response = [
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => null
+            ];
+            $this->error_code = 2;
+        }
+
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function readyPassengerTrip($data, $from, $connections)
     {
         /** @var Devices $device */

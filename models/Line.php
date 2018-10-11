@@ -169,14 +169,6 @@ class Line extends \yii\db\ActiveRecord
 
         if ($this->freeseats == 0) {
 
-            $watchdog = new RestFul([
-                'type' => RestFul::TYPE_DRIVER_ACCEPT,
-                'message' => json_encode(['status' => 'request']),
-                'user_id' => $this->driver_id,
-                'uip' => '0.0.0.0'
-            ]);
-            $watchdog->save();
-
             $device = Devices::findOne(['user_id' => $this->driver_id]);
             if ($device) {
                 $socket = new SocketPusher(['authkey' => $device->auth_token]);

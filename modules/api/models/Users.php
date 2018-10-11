@@ -38,62 +38,60 @@ JSON;
     public function toArray(array $fields = [], array $expand = [], $recursive = true)
     {
         $array = parent::toArray($fields, $expand, $recursive);
-        if (isset ($array['phone']) && !empty ($array['phone'])) $array['phone'] = (string) $array['phone'];
+        if (isset ($array['phone']) && !empty ($array['phone'])) $array['phone'] = (string)$array['phone'];
 
         $image_file = UploadFiles::findOne($this->image);
-        if ($image_file)
-        {
+        if ($image_file) {
             $array['image_url'] = $image_file->file;
-        }
-        else $array['image_url'] = null;
+        } else $array['image_url'] = null;
 
         RestFul::updateDriverAccept();
 
-        if ($this->type == User::TYPE_DRIVER)
-        {
+        if ($this->type == User::TYPE_DRIVER) {
+
             /** @var \app\models\RestFul $inAccept */
-            $inAccept = RestFul::find()->andWhere([
+            $inAccept = RestFul::find()->where([
                 'AND',
                 ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT],
                 ['=', 'user_id', $this->id],
-                ['=', 'message', json_encode(['status' => 'request'])]
+                ['=', 'message', json_encode(['status' => 'request'])],
+                ['>', 'created_at', time() - 300],
             ])->one();
 
-            $array['accept'] = 0;
-            if ($inAccept && ($inAccept->created_at + 300 > time())) $array['accept'] = 1;
+            $array['accept'] = !empty($inAccept) ? 1 : 0;
 
             $inQueue = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $this->id])->one();
-            $array['queue'] = $inQueue ? 1 : 0;
+            $array['queue'] = !empty($inQueue) ? 1 : 0;
 
             /** @var \app\models\Line $onLine */
             $onLine = Line::find()->where(['status' => Line::STATUS_IN_PROGRESS, 'driver_id' => $this->id])->one();
-            $array['line_id'] = $onLine ? $onLine->id : 0;
+            $array['line_id'] = !empty($onLine) ? $onLine->id : 0;
         }
 
-        if ($this->type == User::TYPE_PASSENGER)
-        {
+        if ($this->type == User::TYPE_PASSENGER) {
+
             /** @var \app\models\RestFul $inAccept */
-            $inAccept = RestFul::find()->andWhere([
+            $inAccept = RestFul::find()->where([
                 'AND',
                 ['=', 'type', RestFul::TYPE_PASSENGER_ACCEPT],
                 ['=', 'user_id', $this->id],
-                ['=', 'message', json_encode(['status' => 'request'])]
+                ['=', 'message', json_encode(['status' => 'request'])],
+                ['>', 'created_at', time() - 300],
             ])->one();
 
-            $array['accept'] = 0;
-            if ($inAccept && ($inAccept->created_at + 300 > time())) $array['accept'] = 1;
+            $array['accept'] = !empty($inAccept) ? 1 : 0;
 
             /** @var \app\models\Line $inQueue */
-            $inQueue = Trip::find()->where(['status' => Trip::STATUS_WAITING, 'user_id' => $this->id])->one();
-            $array['queue'] = $inQueue ? 1 : 0;
+            $inQueue = Trip::find()->where(['status' => Trip::STATUS_CREATED, 'user_id' => $this->id])->one();
+            $array['queue'] = !empty($inQueue) ? 1 : 0;
 
-            $array['trip_id'] = $inQueue ? $inQueue->id : 0;
+            $array['trip_id'] = !empty($inQueue) ? $inQueue->id : 0;
         }
 
         $array['rating'] = $this->getRating();
 
         $blacklist = Blacklist::find()->where(['status' => Blacklist::STATUS_BLACKLISTED, 'user_id' => $this->id])->one();
-        $array['blacklisted'] = $blacklist ? 1 : 0;
+        $array['blacklisted'] = !empty($blacklist) ? 1 : 0;
 
         return $array;
     }
