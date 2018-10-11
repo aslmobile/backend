@@ -44,30 +44,40 @@ class SocketServer implements MessageComponentInterface
         $query_string = $conn->httpRequest->getUri()->getQuery();
         parse_str($query_string, $q);
         $input_data = $q;
+        $server = Yii::$app->params['socket']['authkey_server'];
 
         if (is_array($input_data) && array_key_exists('auth', $input_data)) {
 
             $authkey = $input_data['auth'];
-
             $device = $this->validateDevice($conn, $authkey);
 
-            if (!$device || empty($device)) {
+            if ((!$device || empty($device)) && $authkey !== $server) {
+
                 echo "Connection closed! No device auth!\n";
                 $conn->close();
-            } else {
+
+            } elseif ($authkey == $server) {
+
                 $conn->device = $device;
                 $this->devices[$conn->resourceId] = $conn;
+                echo "Server connected.\n" . date('d.m.Y h:i', time()) . "\n";
 
+            } else {
+
+                $conn->device = $device;
+                $this->devices[$conn->resourceId] = $conn;
                 Yii::$app->db->createCommand()->update('users', ['last_activity' => null], 'id = ' . $device->user_id)->execute();
-
-                if ($authkey == Yii::$app->params['socket']['authkey_server']) echo "Server connected.\n";
                 echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; connected.\n" . date('d.m.Y h:i', time()) . "\n";
             }
+
         } else {
+
             echo "Connection closed! Connection data is invalid!\n";
             $conn->send(base64_encode(json_encode(['error_code' => 100, 'message' => 'Connection closed. Please verify your data.'])));
             $conn->close();
+
         }
+
     }
 
     /**

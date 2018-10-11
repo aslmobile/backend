@@ -182,6 +182,26 @@ class Message
      * @param $connections
      * @return array
      */
+    public function changeQueue($data, $from, $connections)
+    {
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        $response = [
+            'message_id' => $this->message_id,
+            'device_id' => 0,
+            'user_id' => 0,
+            'data' => null
+        ];
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function processingQuery($data, $from, $connections)
     {
         /** @var Devices $device */

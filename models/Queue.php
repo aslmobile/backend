@@ -44,6 +44,10 @@ class Queue extends Model
             }
 
         }
+
+        $socket = new SocketPusher();
+        $socket->push(base64_encode(json_encode(['action' => "changeQueue", 'data' => ['message_id' => time()]])));
+
     }
 
     /**
