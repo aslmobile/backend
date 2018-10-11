@@ -237,6 +237,7 @@ class Trip extends \yii\db\ActiveRecord
 
                         $line->freeseats = 0;
                         $line->status = Line::STATUS_WAITING;
+                        $line->save();
 
                     };
 
