@@ -315,7 +315,7 @@ class LineController extends BaseController
         }
 
         RestFul::updateAll([
-            'message' => json_encode(['status' => 'cancel'])
+            'message' => json_encode(['status' => 'closed'])
         ], [
             'AND',
             ['=', 'user_id', $line->driver_id],

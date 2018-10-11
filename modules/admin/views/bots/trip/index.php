@@ -13,7 +13,6 @@ $this->title = Yii::$app->mv->gt('Поездки', [], false);
 $this->params['breadcrumbs'][] = $this->title;
 
 $statuses = BotTrip::getStatusList();
-unset($statuses[BotTrip::STATUS_CREATED]);
 
 ?>
 

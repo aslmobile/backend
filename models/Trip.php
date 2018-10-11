@@ -242,6 +242,8 @@ class Trip extends \yii\db\ActiveRecord
 
                     };
 
+                    Queue::processingQueue();
+
                 } else return false;
 
                 break;
@@ -299,6 +301,8 @@ class Trip extends \yii\db\ActiveRecord
 
                         break;
                 }
+
+                Queue::processingQueue();
 
                 break;
         }
@@ -475,7 +479,7 @@ class Trip extends \yii\db\ActiveRecord
         return [
             self::STATUS_CANCELLED => Yii::t('app', "Отменена"),
             self::STATUS_CREATED => Yii::t('app', "Создана"),
-            self::STATUS_WAITING => Yii::t('app', "В очереди"),
+            self::STATUS_WAITING => Yii::t('app', "Ожидает"),
             self::STATUS_WAY => Yii::t('app', "В пути"),
             self::STATUS_FINISHED => Yii::t('app', "Завершена"),
             self::STATUS_CANCELLED_DRIVER => Yii::t('app', "Отменена водителем")

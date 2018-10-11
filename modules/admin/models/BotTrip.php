@@ -3,6 +3,7 @@
 namespace app\modules\admin\models;
 
 use app\models\LuggageType;
+use app\models\Queue;
 use app\models\TripLuggage;
 use Yii;
 
@@ -121,6 +122,8 @@ class BotTrip extends \app\models\Trip
             $line->freeseats += $this->seats;
             $line->update();
         }
+
+        Queue::processingQueue();
 
         parent::afterDelete();
     }

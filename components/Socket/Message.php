@@ -520,7 +520,19 @@ class Message
                     if (!empty($line) && $line->status !== Line::STATUS_IN_PROGRESS) {
                         $line->status = Line::STATUS_CANCELED;
                         $line->penalty = 1;
-                        $line->save();
+                        if ($line->save()) {
+                            /** @var Trip $trip */
+                            $trips = Trip::find()->andWhere(['line_id' => $line->id])->all();
+                            if (!empty($trips)) {
+                                foreach ($trips as $trip) {
+                                    $trip->status = Trip::STATUS_CREATED;
+                                    $trip->driver_id = 0;
+                                    $trip->vehicle_id = 0;
+                                    $trip->line_id = 0;
+                                    $trip->save();
+                                }
+                            }
+                        };
                     }
                 });
             }
