@@ -24,6 +24,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int $starttime
  * @property int $endtime
  * @property int $cancel_reason
+ * @property int $penalty
  * @property string $angle
  * @property string $position
  * @property string $path
@@ -104,6 +105,7 @@ class Line extends \yii\db\ActiveRecord
                     'seats',
                     'freeseats',
                     'cancel_reason',
+                    'penalty'
                 ],
                 'integer'
             ],
@@ -155,6 +157,7 @@ class Line extends \yii\db\ActiveRecord
             'starttime' => Yii::t('app', "Время отправления"),
             'endtime' => Yii::t('app', "Время прибытия"),
             'cancel_reason' => Yii::t('app', "Причина отмены"),
+            'penalty' => Yii::t('app', "Наложен штраф"),
             'angle' => Yii::t('app', "Угол поворота"),
             'position' => Yii::t('app', "GEO позиция"),
             'path' => Yii::t('app', "Путь"),

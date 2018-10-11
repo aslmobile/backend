@@ -239,6 +239,8 @@ class LineController extends BaseController
     /**
      * Decline line and its trips by driver
      * @param $id
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionCancel($id)
     {
@@ -272,6 +274,9 @@ class LineController extends BaseController
         /** @var Trip $trip */
         $trips = Trip::find()->andWhere(['line_id' => $line->id])->all();
         if ($trips) {
+
+            $line->penalty = 1;
+            $line->update();
 
             $trip_errors = 0;
             $_trips = [];
@@ -342,9 +347,6 @@ class LineController extends BaseController
             && $user->type == User::TYPE_DRIVER
         ) {
             $path = $this->body->path;
-
-            //$line->path = json_encode($path); $line->update(false);
-
             Line::updateAll(['path' => json_encode($path)], ['id' => $line->id]);
         }
 

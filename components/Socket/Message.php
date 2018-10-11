@@ -516,12 +516,12 @@ class Message
 
             if (isset($data['data']['timer']) && $data['data']['timer']) {
                 $this->loop->addTimer(300, function ($timer) use ($line) {
-//                    $line = \app\modules\api\models\Line::findOne($line['id']);
-//                    if(!empty($line) && $line->status){
-//                        switch ($line->status){
-//                            case Line::S
-//                        }
-//                    }
+                    $line = \app\modules\api\models\Line::findOne($line['id']);
+                    if (!empty($line) && $line->status !== Line::STATUS_IN_PROGRESS) {
+                        $line->status = Line::STATUS_CANCELED;
+                        $line->penalty = 1;
+                        $line->save();
+                    }
                 });
             }
 
