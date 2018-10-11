@@ -463,24 +463,23 @@ class Message
 
         RestFul::updateDriverAccept();
 
-        $watchdog = RestFul::findOne([
-            'type' => RestFul::TYPE_DRIVER_ACCEPT,
-            'user_id' => $device->user->id,
-            'message' => json_encode(['status' => 'request'])
-        ]);
-        if (!$watchdog) {
-            $watchdog = new RestFul([
-                'type' => RestFul::TYPE_DRIVER_ACCEPT,
-                'message' => json_encode(['status' => 'request']),
-                'user_id' => $device->user->id,
-                'uip' => '0.0.0.0'
-            ]);
-            $watchdog->save();
-        }
-
         /** @var Line $line */
         if (isset($data['data']['line'])) {
             $line = $data['data']['line'];
+            $watchdog = RestFul::findOne([
+                'type' => RestFul::TYPE_DRIVER_ACCEPT,
+                'user_id' => $device->user->id,
+                'message' => json_encode(['status' => 'request'])
+            ]);
+            if (!$watchdog) {
+                $watchdog = new RestFul([
+                    'type' => RestFul::TYPE_DRIVER_ACCEPT,
+                    'message' => json_encode(['status' => 'request']),
+                    'user_id' => $device->user->id,
+                    'uip' => '0.0.0.0'
+                ]);
+                $watchdog->save();
+            }
         } else {
             $line = \app\modules\api\models\Line::find()->where([
                 'status' => [
