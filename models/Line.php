@@ -183,7 +183,7 @@ class Line extends \yii\db\ActiveRecord
                 $socket->push(base64_encode(json_encode([
                     'action' => "acceptDriverTrip",
                     'notifications' => Notifications::create(Notifications::NTD_TRIP_SEATS, [$this->driver_id]),
-                    'data' => ['message_id' => time(), 'addressed' => [$this->driver_id], 'line' => $this->toArray()]
+                    'data' => ['message_id' => time(), 'addressed' => [$this->driver_id], 'line' => $this->toArray(), 'timer' => true]
                 ])));
             }
 

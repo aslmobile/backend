@@ -311,9 +311,8 @@ class Message
             $watchdog->save();
         }
 
-        /** @var \app\models\Trip $trip */
-        if (isset($data['data']['trip'])) $trip = $data['data']['trip'];
-        if (isset($trip) && $trip) $trip_data = $trip; else $trip_data = null;
+        if (isset($data['data']['trip']) && !empty($data['data']['trip']))
+            $trip_data = $data['data']['trip']; else $trip_data = null;
 
         $response = [
             'message_id' => $this->message_id,
@@ -361,9 +360,8 @@ class Message
             $watchdog->save();
         }
 
-        /** @var \app\models\Trip $trip */
-        if (isset($data['data']['trip'])) $trip = $data['data']['trip'];
-        if (isset($trip) && $trip) $trip_data = $trip; else $trip_data = null;
+        if (isset($data['data']['trip']) && !empty($data['data']['trip']))
+            $trip_data = $data['data']['trip']; else $trip_data = null;
 
         $response = [
             'message_id' => $this->message_id,
@@ -411,9 +409,8 @@ class Message
             $watchdog->save();
         }
 
-        /** @var \app\models\Trip $trip */
-        if (isset($data['data']['trip'])) $trip = $data['data']['trip'];
-        if (isset($trip) && $trip) $trip_data = $trip; else $trip_data = null;
+        if (isset($data['data']['trip']) && !empty($data['data']['trip']))
+            $trip_data = $data['data']['trip']; else $trip_data = null;
 
         $response = [
             'message_id' => $this->message_id,
@@ -462,9 +459,20 @@ class Message
         }
 
         /** @var Line $line */
-        if (isset($data['data']['line'])) $line = $data['data']['line'];
+        if (isset($data['data']['line'])) {
+            $line = $data['data']['line'];
+        } else {
+            $line = \app\modules\api\models\Line::find()->where([
+                'status' => [
+                    \app\modules\api\models\Line::STATUS_WAITING,
+                    \app\modules\api\models\Line::STATUS_IN_PROGRESS
+                ],
+                'driver_id' => $device->user_id
+            ])->orderBy(['created_at' => SORT_DESC])->one();
+            $line = !empty($line) ? $line->toArray() : null;
+        }
 
-        if (isset($line) && $line) {
+        if (!empty($line)) {
 
             $line_data = $line;
             $response = [
@@ -478,11 +486,14 @@ class Message
                 ]
             ];
 
-            $this->loop->addPeriodicTimer(10, function ($timer) {
-                echo '10 remained';
-            });
+            if (isset($data['data']['timer']) && $data['data']['timer']) {
+                $this->loop->addTimer(10, function ($timer) {
+                    echo '10 remained';
+                });
+            }
 
         } else {
+
             $response = [
                 'message_id' => $this->message_id,
                 'device_id' => $device->id,
@@ -510,11 +521,8 @@ class Message
 
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        /** @var Line $line */
-        if (isset($data['data']['line'])) $line = $data['data']['line'];
-
-        if (isset($line) && $line) {
-            $line_data = $line;
+        if (isset($data['data']['line']) && !empty($data['data']['line'])) {
+            $line_data = $data['data']['line'];
             $response = [
                 'message_id' => $this->message_id,
                 'device_id' => $device->id,

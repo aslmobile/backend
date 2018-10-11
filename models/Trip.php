@@ -261,7 +261,7 @@ class Trip extends \yii\db\ActiveRecord
                                         Notifications::NTD_TRIP_SEATS,
                                         [$passengers] + [$this->driver_id]
                                     ),
-                                    'data' => ['message_id' => time(), 'addressed' => [$passengers] + [$this->driver_id], 'line' => $line->toArray()]
+                                    'data' => ['message_id' => time(), 'addressed' => [$this->driver_id], 'line' => $line->toArray(), 'timer' => true]
                                 ])));
                             }
                         }

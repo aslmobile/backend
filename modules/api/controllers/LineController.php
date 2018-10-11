@@ -223,7 +223,7 @@ class LineController extends BaseController
         $socket->push(base64_encode(json_encode([
             'action' => "acceptDriverTrip",
             'notifications' => Notifications::create(Notifications::NTP_TRIP_READY, $passengers, '', $user->id),
-            'data' => ['message_id' => time(), 'addressed' => $passengers, 'line' => $line->toArray()]
+            'data' => ['message_id' => time(), 'addressed' => $passengers, 'line' => $line->toArray(), 'timer' => false]
         ])));
 
 
