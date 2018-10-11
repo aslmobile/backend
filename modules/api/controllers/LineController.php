@@ -342,8 +342,10 @@ class LineController extends BaseController
             && $user->type == User::TYPE_DRIVER
         ) {
             $path = $this->body->path;
-            $line->path = json_encode($path);
-            $line->update(false);
+
+            //$line->path = json_encode($path); $line->update(false);
+
+            Line::updateAll(['path' => json_encode($path)], ['id' => $line->id]);
         }
 
         $this->module->data['path'] = $line->path;
