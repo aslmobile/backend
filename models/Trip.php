@@ -214,6 +214,7 @@ class Trip extends \yii\db\ActiveRecord
             case 'line_id':
 
                 $line = Line::findOne($this->line_id);
+
                 if (!empty($line)) {
 
                     if ($line->freeseats > intval($this->seats)) {

@@ -45,9 +45,9 @@ JSON;
             $array['image_url'] = $image_file->file;
         } else $array['image_url'] = null;
 
-        RestFul::updateDriverAccept();
-
         if ($this->type == User::TYPE_DRIVER) {
+
+            RestFul::updateDriverAccept();
 
             /** @var \app\models\RestFul $inAccept */
             $inAccept = RestFul::find()->where([
@@ -69,6 +69,8 @@ JSON;
         }
 
         if ($this->type == User::TYPE_PASSENGER) {
+
+            RestFul::updatePassengerAccept();
 
             /** @var \app\models\RestFul $inAccept */
             $inAccept = RestFul::find()->where([
