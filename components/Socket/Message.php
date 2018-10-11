@@ -74,6 +74,8 @@ class Message
             ]
         ];
 
+        $this->addressed = [$device->user_id];
+
         return $response;
     }
 
