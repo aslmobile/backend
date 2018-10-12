@@ -306,6 +306,8 @@ class UserController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
+        $finish = Yii::$app->request->getHeaders()->get('finish', false);
+
         if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
 
         $documents = [];

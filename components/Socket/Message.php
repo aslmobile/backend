@@ -5,6 +5,7 @@ namespace app\components\Socket;
 use app\components\Socket\models\Line;
 use app\models\Checkpoint;
 use app\models\Devices;
+use app\models\Queue;
 use app\modules\api\models\RestFul;
 use app\modules\api\models\Trip;
 use Ratchet\ConnectionInterface;
@@ -520,19 +521,20 @@ class Message
                     if (!empty($line) && $line->status !== Line::STATUS_IN_PROGRESS) {
                         $line->status = Line::STATUS_CANCELED;
                         $line->penalty = 1;
-                        if ($line->save()) {
-                            /** @var Trip $trip */
-                            $trips = Trip::find()->andWhere(['line_id' => $line->id])->all();
-                            if (!empty($trips)) {
-                                foreach ($trips as $trip) {
-                                    $trip->status = Trip::STATUS_CREATED;
-                                    $trip->driver_id = 0;
-                                    $trip->vehicle_id = 0;
-                                    $trip->line_id = 0;
-                                    $trip->save();
-                                }
+                        $line->save();
+                        /** @var Trip $trip */
+                        $trips = Trip::find()->where(['line_id' => $line->id])->all();
+                        if (!empty($trips)) {
+                            foreach ($trips as $trip) {
+                                $trip->status = Trip::STATUS_CREATED;
+                                $trip->driver_id = 0;
+                                $trip->vehicle_id = 0;
+                                $trip->line_id = 0;
+                                $trip->save();
                             }
+
                         };
+                        Queue::processingQueue();
                     }
                 });
             }
@@ -669,6 +671,27 @@ class Message
             $watchdog->save();
         }
 
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+
+        if (isset($data['data']['timer']) && $data['data']['timer']) {
+            $this->loop->addTimer(300, function ($timer) use ($line, $checkpoint) {
+                /** @var Trip $trip */
+                $trips = Trip::find()->where([
+                    'startpoint_id' => intval($checkpoint['id']),
+                    'line_id' => intval($line['id']),
+                    'status' => Trip::STATUS_WAITING
+                ])->all();
+                if (!empty($trips)) {
+                    foreach ($trips as $trip) {
+                        $trip->status = Trip::STATUS_CANCELLED;
+                        $trip->penalty = 1;
+                        $trip->save();
+                    }
+                    Queue::processingQueue();
+                }
+            });
+        }
+
         $response = [
             'message_id' => $this->message_id,
             'device_id' => $device->id,
@@ -679,8 +702,6 @@ class Message
                 'checkpoint' => $checkpoint
             ]
         ];
-
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
 
         return $response;
 

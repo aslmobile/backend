@@ -1,7 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
 use app\components\Socket\SocketPusher;
-use app\models\Countries;
 use app\models\Line;
 use app\models\LuggageType;
 use app\models\Notifications;
@@ -589,6 +588,8 @@ class TripController extends BaseController
             'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING],
         ]), 'user_id');
 
+        $timer = true;
+
         if ($checkpoint->type == Checkpoint::TYPE_END) {
 
             $notifications = Notifications::create(Notifications::NTP_TRIP_FINISHED, $addressed, '', $user->id);
@@ -638,6 +639,7 @@ class TripController extends BaseController
                 'total' => $total,
             ];
         } else {
+            $timer = false;
             $notifications = Notifications::create(Notifications::NTP_TRIP_ARRIVED, $addressed, '', $user->id);
         }
 
@@ -650,7 +652,10 @@ class TripController extends BaseController
         $socket->push(base64_encode(json_encode([
             'action' => "checkpointArrived",
             'notifications' => $notifications,
-            'data' => ['message_id' => time(), 'line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray(), 'addressed' => $addressed]
+            'data' => [
+                'message_id' => time(), 'line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray(),
+                'addressed' => $addressed, 'timer' => $timer
+            ]
         ])));
 
         $this->module->data = $data;
