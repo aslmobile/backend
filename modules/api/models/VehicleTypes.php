@@ -9,7 +9,7 @@ class VehicleTypes extends \app\models\VehicleType
         $list = self::find()->all();
 
         $_list = [];
-        if ($with_any) $_list[] = \Yii::$app->mv->gt("Любой", [], false);
+        if ($with_any) $_list[] = ['id' => 0, 'value' => \Yii::$app->mv->gt("Любой", [], false), 'seats' => 0];
 
         /** @var \app\models\VehicleType $type */
         if ($list && count($list) > 0) {
