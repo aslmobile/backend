@@ -125,10 +125,7 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['country', 'checkpoint', 'route', 'time', 'seats', 'taxi', 'payment_type', 'vehicle_type_id']);
-
-        $country = Countries::findOne($this->body->country);
-        if (!$country) $this->module->setError(422, '_country', Yii::$app->mv->gt("Не найден", [], false));
+        $this->validateBodyParams(['checkpoint', 'route', 'time', 'seats', 'taxi', 'payment_type', 'vehicle_type_id']);
 
         /** @var \app\models\Route $route */
         $route = Route::find()->andWhere([
