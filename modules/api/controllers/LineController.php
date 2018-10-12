@@ -618,24 +618,6 @@ class LineController extends BaseController
         $this->module->sendResponse();
     }
 
-//    public function actionCheckpoints()
-//    {
-//        $user = $this->TokenAuth(self::TOKEN);
-//        if ($user) $user = $this->user;
-//
-//        $points = [];
-//
-//        $checkpoints = Checkpoint::find()->where(['type' => Checkpoint::TYPE_STOP])->all();
-//        if ($checkpoints && count($checkpoints) > 0) foreach ($checkpoints as $point) {
-//            /** @var $point \app\models\Checkpoint */
-//            $points[] = $point->toArray();
-//        }
-//
-//        $this->module->data = $points;
-//        $this->module->setSuccess();
-//        $this->module->sendResponse();
-//    }
-
     public function actionHandleRoutePoints($id)
     {
         $user = $this->TokenAuth(self::TOKEN);

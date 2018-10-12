@@ -176,7 +176,6 @@ class TripController extends BaseController
                 'address' => $this->body->taxi,
                 'status' => Taxi::STATUS_NEW
             ]);
-            $taxi->save();
         }
 
         $trip = new Trip();
@@ -238,9 +237,15 @@ class TripController extends BaseController
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
                 foreach ($trip->errors as $field => $error_message)
-                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                    $this->module->setError(422,
+                        'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
+        }
+
+        if ($taxi) {
+            $taxi->trip_id = $trip->id;
+            $taxi->save();
         }
 
         if (isset($this->body->schedule) && !empty($this->body->schedule)) {

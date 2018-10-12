@@ -11,6 +11,7 @@ use app\modules\admin\models\RouteSearch;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class LinesController extends Controller

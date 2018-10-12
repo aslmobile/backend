@@ -104,6 +104,8 @@ class VehiclesController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
+        Vehicles::deleteAll(['user_id' => $user->id, 'status' => Vehicles::STATUS_PROCESS]);
+
         $_vehicles = [];
         $vehicles = Vehicles::find()->where(['user_id' => $user->id])->orderBy(['created_at' => SORT_DESC])->all();
 
@@ -120,6 +122,8 @@ class VehiclesController extends BaseController
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
+
+        Vehicles::deleteAll(['user_id' => $user->id, 'status' => Vehicles::STATUS_PROCESS]);
 
         $vehicle = Vehicles::findOne($id);
         if ($vehicle) $vehicle = $vehicle->toArray();
@@ -176,6 +180,8 @@ class VehiclesController extends BaseController
 
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
+
+        Vehicles::deleteAll(['user_id' => $user->id, 'status' => Vehicles::STATUS_PROCESS]);
 
         $this->validateBodyParams(['user_id', 'vehicle_type_id', 'vehicle_brand_id', 'vehicle_model_id', 'license_plate', 'seats']);
 
@@ -329,6 +335,8 @@ class VehiclesController extends BaseController
 
         if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
 
+        $finish = Yii::$app->request->getHeaders()->get('finish', false);
+
         $vehicle = Vehicles::findOne(['id' => $id]);
         if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
@@ -343,6 +351,8 @@ class VehiclesController extends BaseController
                 $file->delete();
             }
         }
+
+        if ($finish) $vehicle->status = Vehicles::STATUS_WAITING;
 
         $vehicle->image = $documents['image']['file_id'];
         $vehicle->save();
@@ -361,6 +371,8 @@ class VehiclesController extends BaseController
         if ($user) $user = $this->user;
 
         if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
+
+        $finish = Yii::$app->request->getHeaders()->get('finish', false);
 
         $vehicle = Vehicles::findOne(['id' => $id]);
         if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
@@ -394,6 +406,8 @@ class VehiclesController extends BaseController
         foreach ($documents as $file) $_photos[] = $file['file_id'];
         foreach ($saved_photos_objects as $file) $_photos[] = $file->id;
         $_photos = implode(',', $_photos);
+
+        if ($finish) $vehicle->status = Vehicles::STATUS_WAITING;
 
         $vehicle->photos = (string)$_photos;
         $vehicle->save();

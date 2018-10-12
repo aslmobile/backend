@@ -9,7 +9,6 @@ use app\modules\user\models\User;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\helpers\ArrayHelper;
 
 /** @property \app\modules\api\Module $module */
 class UserController extends BaseController
@@ -43,8 +42,8 @@ class UserController extends BaseController
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'auth'  => ['POST'],
-                    'sms'   => ['POST'],
+                    'auth' => ['POST'],
+                    'sms' => ['POST'],
                     'registration' => ['PUT'],
                     'upload-driver-licence' => ['POST'],
                     'upload-user-photo' => ['POST'],
@@ -65,6 +64,10 @@ class UserController extends BaseController
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
+
+        if ($user->status == User::STATUS_PROCESS) {
+            $this->module->setError(422, '_sms', Yii::$app->mv->gt("Регистрация не завершена", [], false));
+        }
 
         $this->module->data = $user->toArray();
         $this->module->setSuccess();
@@ -122,8 +125,7 @@ class UserController extends BaseController
         if ($this->body->phone == '380000000000') $device = $this->module->sendSms($device, true);
         else $device = $this->module->sendSms($device);
 
-        if ($device)
-        {
+        if ($device) {
             $this->module->data = [
                 'sms' => 1,
                 'user' => $device->user->toArray(),
@@ -131,8 +133,7 @@ class UserController extends BaseController
             ];
             $this->module->setSuccess();
             $this->module->sendResponse();
-        }
-        else $this->module->setError(422, '_sms', Yii::$app->mv->gt("Не удалось отправить СМС", [], false));
+        } else $this->module->setError(422, '_sms', Yii::$app->mv->gt("Не удалось отправить СМС", [], false));
     }
 
     public function actionSms()
@@ -144,7 +145,7 @@ class UserController extends BaseController
 
         $token = Yii::$app->security->generateRandomString();
         $this->module->data = [
-            'user'  => $user->toArray(),
+            'user' => $user->toArray(),
             'token' => $token
         ];
 
@@ -167,8 +168,7 @@ class UserController extends BaseController
         if ($code == 0) $this->module->setError(422, 'code', Yii::$app->mv->gt("Не верный формат кода подтверждения", [], false));
 
         if ($this->device->sms_code != $code) $this->module->setError(422, 'code', Yii::$app->mv->gt("Не верный код подтверждения", [], false));
-        else
-        {
+        else {
             $this->device->sms_code = null;
             $user->phone = $user->phone_on_verify;
             $user->phone_on_verify = null;
@@ -208,20 +208,18 @@ class UserController extends BaseController
         $this->prepareBody();
         $phone = false;
 
-        if (isset ($this->body->phone) && !empty($this->body->phone))
-        {
+        if (isset ($this->body->phone) && !empty($this->body->phone)) {
             $phone = $this->body->phone;
             unset($this->body->phone);
         }
 
         $data = [
-            'Users' => (array) $this->body
+            'Users' => (array)$this->body
         ];
 
         if (!$user->load($data)) $this->module->setError(422, '_user', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
 
-        if ($phone && $user->phone != $phone)
-        {
+        if ($phone && $user->phone != $phone) {
             $device = $this->module->verifyPhone($this->device, $phone);
             if (!$device) $this->module->setError(422, '_sms', Yii::$app->mv->gt("Не удалось отправить СМС", [], false));
 
@@ -230,15 +228,12 @@ class UserController extends BaseController
             $user->phone_on_verify = $phone;
         }
 
-        if (!$user->validate() || !$user->save())
-        {
-            if ($user->hasErrors())
-            {
+        if (!$user->validate() || !$user->save()) {
+            if ($user->hasErrors()) {
                 foreach ($user->errors as $field => $error_message)
                     $this->module->setError(422, 'user.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
-            }
-            else $this->module->setError(422, '_user', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422, '_user', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data['user'] = $user->toArray();
@@ -257,21 +252,25 @@ class UserController extends BaseController
         if ($user) $user = $this->user;
 
         $data = [
-            'Users' => (array) $this->body
+            'Users' => (array)$this->body
         ];
 
-        if (!$user->load($data)) $this->module->setError(422, 'user', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
-        if ($user->type == User::TYPE_PASSENGER) $user->status = User::STATUS_APPROVED;
+        Vehicles::deleteAll(['user_id' => $user->id]);
 
-        if (!$user->validate() || !$user->save())
-        {
-            if ($user->hasErrors())
-            {
+        if (!$user->load($data)) $this->module->setError(422, 'user', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
+
+        if ($user->type == User::TYPE_PASSENGER) {
+            $user->status = User::STATUS_APPROVED;
+        } else {
+            $user->status = User::STATUS_PROCESS;
+        }
+
+        if (!$user->validate() || !$user->save()) {
+            if ($user->hasErrors()) {
                 foreach ($user->errors as $field => $error_message)
                     $this->module->setError(422, 'user.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
                 $this->module->sendResponse();
-            }
-            else $this->module->setError(422, 'user', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            } else $this->module->setError(422, 'user', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
         $this->module->data = [
@@ -294,7 +293,7 @@ class UserController extends BaseController
 
         $this->module->data = [
             'files' => $data['documents'],
-            'user'  => $user->toArray(),
+            'user' => $user->toArray(),
             'licence' => $data['licenses']->toArray()
         ];
         $this->module->setSuccess();
@@ -313,16 +312,16 @@ class UserController extends BaseController
         $documents = [];
         foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'user-photos/' . $user->id, true);
 
-        if (!empty ($user->image))
-        {
+        if (!empty ($user->image)) {
             $file = UploadFiles::findOne(['id' => $user->image]);
-            if ($file && !empty($file->file))
-            {
+            if ($file && !empty($file->file)) {
                 $oldDocument = Yii::getAlias('@webroot') . $file->file;
                 if ($oldDocument && file_exists($oldDocument)) unlink($oldDocument);
                 $file->delete();
             }
         }
+
+        if ($finish) $user->status = User::STATUS_PENDING;
 
         $user->image = $documents['image']['file_id'];
         $user->save();
@@ -342,8 +341,7 @@ class UserController extends BaseController
 
         /** @var \app\modules\api\models\Trip $trip */
         $trips = Trip::find()->where(['user_id' => $user->id])->all();
-        if ($trips && count($trips)) foreach ($trips as $trip)
-        {
+        if ($trips && count($trips)) foreach ($trips as $trip) {
             $this->module->data['trips'][] = $trip->toArray();
         }
 
@@ -365,37 +363,36 @@ class UserController extends BaseController
             'user_id' => $user->id,
             'type' => $type
         ]);
-        else
-        {
+        else {
             if (!empty ($licences->image)) $remove_old_images[] = Yii::getAlias('@webroot' . $licences->image);
             if (!empty ($licences->image2)) $remove_old_images[] = Yii::getAlias('@webroot' . $licences->image2);
         }
 
         $documents = [];
-        switch ($type)
-        {
+        switch ($type) {
             case DriverLicence::TYPE_LICENSE:
                 foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'driver-licence/' . $user->id);
                 break;
 
-            default: $this->module->setError(422, 'license.type', Yii::$app->mv->gt("Передан неизвестный тип документа", [], false));
+            default:
+                $this->module->setError(422, 'license.type', Yii::$app->mv->gt("Передан неизвестный тип документа", [], false));
         }
 
-        foreach ($documents as $name => $path) switch ($name)
-        {
-            case 'image': $licences->$name = $path; break;
-            case 'image2': $licences->$name = $path; break;
+        foreach ($documents as $name => $path) switch ($name) {
+            case 'image':
+                $licences->$name = $path;
+                break;
+            case 'image2':
+                $licences->$name = $path;
+                break;
         }
 
-        if (!$licences->save())
-        {
+        if (!$licences->save()) {
             $save_errors = $licences->getErrors();
-            if ($save_errors && count ($save_errors) > 0)
-            {
+            if ($save_errors && count($save_errors) > 0) {
                 foreach ($save_errors as $field => $error) $this->module->setError(422, $field, Yii::$app->mv->gt($error[0], [], false), true, false);
                 $this->module->sendResponse();
-            }
-            else $this->module->setError(422, '_licenses', Yii::$app->mv->gt("Не удалось сохранить файл", [], false));
+            } else $this->module->setError(422, '_licenses', Yii::$app->mv->gt("Не удалось сохранить файл", [], false));
         }
 
         // REMOVE OLD UPLOADED IMAGES
@@ -404,7 +401,7 @@ class UserController extends BaseController
 
         return [
             'documents' => $documents,
-            'licenses'  => $licences
+            'licenses' => $licences
         ];
     }
 }

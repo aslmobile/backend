@@ -12,6 +12,7 @@ use app\components\MultilingualQuery;
  *
  * @property integer $id
  * @property integer $user_id
+ * @property integer $trip_id
  * @property integer $status
  * @property string $address
  * @property integer $checkpoint
@@ -21,9 +22,9 @@ use app\components\MultilingualQuery;
 class Taxi extends \yii\db\ActiveRecord
 {
     const
-        STATUS_NEW = 0,
-        STATUS_PROCESSING = 1,
-        STATUS_DONE = 2;
+        STATUS_NEW = 1,
+        STATUS_PROCESSING = 2,
+        STATUS_DONE = 3;
 
     /**
      * @inheritdoc
@@ -40,7 +41,7 @@ class Taxi extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'checkpoint', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['user_id', 'checkpoint', 'status', 'created_at', 'updated_at', 'trip_id'], 'integer'],
             [['address'], 'string', 'max' => 255],
         ];
     }
@@ -53,6 +54,7 @@ class Taxi extends \yii\db\ActiveRecord
         return [
             'id' => Yii::$app->mv->gt('ID', [], 0),
             'user_id' => Yii::$app->mv->gt('Пассажир', [], 0),
+            'trip_id' => Yii::$app->mv->gt('Поездка', [], 0),
             'status' => Yii::$app->mv->gt('Статус', [], 0),
             'address' => Yii::$app->mv->gt('Адрес', [], 0),
             'checkpoint' => Yii::$app->mv->gt('Куда', [], 0),

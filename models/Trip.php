@@ -719,10 +719,16 @@ class Trip extends \yii\db\ActiveRecord
         ])->all();
     }
 
+    public function getTransfer()
+    {
+        return Taxi::findOne(['trip_id' => $this->id]);
+    }
+
     /**
      * @param $trip Trip
      * @param $status
      * @return bool
+     * @throws
      */
     public static function cloneTrip($trip, $status)
     {
@@ -741,6 +747,16 @@ class Trip extends \yii\db\ActiveRecord
                 foreach ($old_attributes as $attribute => $value) $new_luggage->$attribute = $value;
                 $new_luggage->save();
             }
+        }
+
+        if (!empty($trip->transfer)) {
+            /** @var $taxi Taxi */
+            $taxi = $trip->transfer;
+            $old_attributes = $taxi->attributes;
+            unset($old_attributes['id']);
+            $new_taxi = new Taxi();
+            foreach ($old_attributes as $attribute => $value) $new_taxi->$attribute = $value;
+            $new_taxi->save();
         }
 
         $new_trip->status = $status;

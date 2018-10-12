@@ -38,7 +38,8 @@ class Vehicles extends \yii\db\ActiveRecord
     const
         STATUS_ADDED = 0,
         STATUS_APPROVED = 1,
-        STATUS_WAITING = 2;
+        STATUS_WAITING = 2,
+        STATUS_PROCESS = 3;
 
     public static function tableName()
     {
@@ -84,7 +85,7 @@ class Vehicles extends \yii\db\ActiveRecord
 
                 return 0;
             }],
-            [['status'], 'default', 'value' => self::STATUS_ADDED],
+            [['status'], 'default', 'value' => self::STATUS_PROCESS],
             [['weight', 'main', 'rating'], 'default', 'value' => 0]
         ];
     }
@@ -118,7 +119,7 @@ class Vehicles extends \yii\db\ActiveRecord
 
     public function isFirstVehicle()
     {
-        return self::findOne(['user_id' => $this->user_id]) ? false : true;
+        return self::findOne(['user_id' => $this->user_id, 'status' => self::STATUS_APPROVED]) ? false : true;
     }
 
     public function beforeSave($insert)
