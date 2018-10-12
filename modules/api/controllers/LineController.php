@@ -455,7 +455,7 @@ class LineController extends BaseController
 
         $params = [
             'AND',
-            ['=', 'type', Checkpoint::TYPE_STOP],
+            ['=', 'type', [Checkpoint::TYPE_STOP, Checkpoint::TYPE_START]],
             ['=', 'route', $route_id],
             ['=', 'pid', $startpoint_id],
             ['=', 'status', Checkpoint::STATUS_ACTIVE]
