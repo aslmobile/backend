@@ -169,9 +169,14 @@ class TripController extends BaseController
         }
 
         $taxi = false;
-        if (isset($this->body->taxi) && $this->body->taxi) {
-            $taxi = Taxi::findOne($this->body->taxi);
-            if (!$taxi) $this->module->setError(422, '_taxi', Yii::$app->mv->gt("Не найден", [], false));
+        if (isset($this->body->taxi) && !empty($this->body->taxi)) {
+            $taxi = new Taxi([
+                'checkpoint' => $checkpoint->id,
+                'user_id' => $user->id,
+                'address' => $this->body->taxi,
+                'status' => Taxi::STATUS_NEW
+            ]);
+            $taxi->save();
         }
 
         $trip = new Trip();

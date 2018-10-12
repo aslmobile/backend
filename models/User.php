@@ -60,6 +60,7 @@ class User extends ActiveRecord implements IdentityInterface
     public $new_image;
 
     const STATUS_PENDING = 0;
+    const STATUS_PROCESS = 2;
     const STATUS_APPROVED = 1;
     const STATUS_BLOCKED = 9;
 
@@ -81,13 +82,13 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             [['phone'], 'required'],
             ['email', 'email'],
-            ['email', 'unique', 'targetClass' => self::className(),
+            [['email', 'type'], 'unique', 'targetAttribute' => ['email', 'type'],
                 'message' => Yii::t('app', 'This email address has already been taken.')
             ],
             ['phone', 'filter', 'filter' => function ($value) {
                 return preg_replace('/[^\d]/i', '', $value);
             }],
-            ['phone', 'unique', 'targetClass' => self::className(),
+            [['phone', 'type'], 'unique', 'targetAttribute' => ['phone', 'type'],
                 'message' => Yii::t('app', 'This phone has already been taken.')
             ],
             ['phone', 'phoneValidate'],
