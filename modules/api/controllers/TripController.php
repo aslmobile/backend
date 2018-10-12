@@ -205,7 +205,7 @@ class TripController extends BaseController
 
                 if ($luggage['need_place']) {
                     $tariff = $this->calculateLuggageTariff($route->id);
-                    $amount = (int)intval($luggage['seats']) * (float)floatval($tariff);
+                    $amount = (int)intval($luggage['seats']) * (float)floatval($tariff->tariff);
                 } else $amount = (float)floatval(0.0);
 
                 $_trip_luggage = new TripLuggage();
