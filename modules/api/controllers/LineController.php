@@ -88,6 +88,9 @@ class LineController extends BaseController
         return parent::beforeAction($event);
     }
 
+    /**
+     * @param $id
+     */
     public function actionOnLine($id)
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -162,6 +165,9 @@ class LineController extends BaseController
         $this->module->sendResponse();
     }
 
+    /**
+     * @param $id
+     */
     public function actionUpdateLine($id)
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -332,6 +338,9 @@ class LineController extends BaseController
         $this->module->sendResponse();
     }
 
+    /**
+     * @param $id
+     */
     public function actionPath($id)
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -356,6 +365,9 @@ class LineController extends BaseController
         $this->module->sendResponse();
     }
 
+    /**
+     * @param $id
+     */
     public function actionRoute($id)
     {
         $user = $this->TokenAuth(self::TOKEN);

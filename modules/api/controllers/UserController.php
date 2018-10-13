@@ -251,9 +251,7 @@ class UserController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $data = [
-            'Users' => (array)$this->body
-        ];
+        $data = ['Users' => (array)$this->body];
 
         Vehicles::deleteAll(['user_id' => $user->id]);
 

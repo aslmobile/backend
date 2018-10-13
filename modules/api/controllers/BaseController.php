@@ -173,13 +173,12 @@ class BaseController extends RestFul
         }
 
         if (!$device && !empty ($this->body->phone)) {
-            $user = Users::find()->where(['phone' => $this->body->phone, 'type' => $this->body->type])->one();
+            $user = Users::find()->where(['phone' => preg_replace('/[^\d]/i', '', $this->body->phone), 'type' => $this->body->type])->one();
             if (!$user) {
                 $user = new Users([
                     'phone' => $this->body->phone,
                     'type' => $this->body->type
                 ]);
-
                 if (!$user->save(false)) {
                     $save_errors = $user->getErrors();
                     if ($save_errors && count($save_errors) > 0) {
