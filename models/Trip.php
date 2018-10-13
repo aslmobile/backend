@@ -253,10 +253,8 @@ class Trip extends \yii\db\ActiveRecord
                 Queue::processingQueue();
 
                 $line = Line::findOne($this->line_id);
-                $device = Devices::findOne(['user_id' => $this->user_id]);
-                $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
-                if (empty($line) || empty($device)) break;
+                if (empty($line)) break;
 
                 switch ($this->status) {
 
@@ -270,6 +268,9 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_WAY:
 
+                        $device = Devices::findOne(['user_id' => $this->user_id]);
+                        if (empty($device)) break;
+                        $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
                         $socket->push(base64_encode(json_encode([
                             'action' => "acceptPassengerSeat",
@@ -288,7 +289,10 @@ class Trip extends \yii\db\ActiveRecord
                         $line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
 
+                        $device = Devices::findOne(['user_id' => $this->user_id]);
+                        if (empty($device)) break;
                         $socket = new SocketPusher(['authkey' => $device->auth_token]);
+
                         $socket->push(base64_encode(json_encode([
                             'action' => "declinePassengerTrip",
                             'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, [$this->user_id, $line->driver_id], '', $this->user_id),
@@ -303,7 +307,10 @@ class Trip extends \yii\db\ActiveRecord
                         $line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
 
+                        $device = Devices::findOne(['user_id' => $this->driver_id]);
+                        if (empty($device)) break;
                         $socket = new SocketPusher(['authkey' => $device->auth_token]);
+
                         $socket->push(base64_encode(json_encode([
                             'action' => "declinePassengerTrip",
                             'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, [$this->user_id, $line->driver_id], '', $this->driver_id),
