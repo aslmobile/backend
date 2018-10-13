@@ -521,8 +521,6 @@ class TripController extends BaseController
         $trip = Trip::findOne($this->body->trip_id);
         if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
-        $addressed = [];
-
         switch ($user->type) {
             case User::TYPE_DRIVER:
                 $trip->status = Trip::STATUS_CANCELLED_DRIVER;
@@ -538,8 +536,7 @@ class TripController extends BaseController
                 $trip->status = Trip::STATUS_CANCELLED;
         }
 
-        $addressed[] = $trip->user_id;
-        $addressed[] = $line->driver_id;
+        $addressed = [$trip->user_id, $line->driver_id];
         $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
         $line->freeseats += $trip->seats;
 

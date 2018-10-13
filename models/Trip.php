@@ -253,8 +253,10 @@ class Trip extends \yii\db\ActiveRecord
                 Queue::processingQueue();
 
                 $line = Line::findOne($this->line_id);
+                $device = Devices::findOne(['user_id' => $this->user_id]);
+                $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
-                if (empty($line)) break;
+                if (empty($line) || empty($device)) break;
 
                 switch ($this->status) {
 
@@ -268,19 +270,16 @@ class Trip extends \yii\db\ActiveRecord
 
                     case Trip::STATUS_WAY:
 
-                        $device = Devices::findOne(['user_id' => $this->user_id]);
-                        if (!empty($device)) {
-                            $socket = new SocketPusher(['authkey' => $device->auth_token]);
-                            $socket->push(base64_encode(json_encode([
-                                'action' => "acceptPassengerSeat",
-                                'notifications' => Notifications::create(
-                                    Notifications::NTD_TRIP_SEAT,
-                                    [$this->driver_id, $this->user_id],
-                                    '', $this->user_id
-                                ),
-                                'data' => ['message_id' => time(), 'addressed' => [$this->driver_id, $this->user_id], 'trip' => $this->toArray()]
-                            ])));
-                        }
+
+                        $socket->push(base64_encode(json_encode([
+                            'action' => "acceptPassengerSeat",
+                            'notifications' => Notifications::create(
+                                Notifications::NTD_TRIP_SEAT,
+                                [$this->driver_id, $this->user_id],
+                                '', $this->user_id
+                            ),
+                            'data' => ['message_id' => time(), 'addressed' => [$this->driver_id, $this->user_id], 'trip' => $this->toArray()]
+                        ])));
 
                         break;
 
@@ -289,6 +288,13 @@ class Trip extends \yii\db\ActiveRecord
                         $line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
 
+                        $socket = new SocketPusher(['authkey' => $device->auth_token]);
+                        $socket->push(base64_encode(json_encode([
+                            'action' => "declinePassengerTrip",
+                            'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, [$this->user_id, $line->driver_id], '', $this->user_id),
+                            'data' => ['message_id' => time(), 'addressed' => [$this->user_id, $line->driver_id], 'trip' => $this->toArray()]
+                        ])));
+
                         break;
 
                     case Trip::STATUS_CANCELLED_DRIVER:
@@ -296,6 +302,13 @@ class Trip extends \yii\db\ActiveRecord
 
                         $line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
+
+                        $socket = new SocketPusher(['authkey' => $device->auth_token]);
+                        $socket->push(base64_encode(json_encode([
+                            'action' => "declinePassengerTrip",
+                            'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, [$this->user_id, $line->driver_id], '', $this->driver_id),
+                            'data' => ['message_id' => time(), 'addressed' => [$this->user_id, $line->driver_id], 'trip' => $this->toArray()]
+                        ])));
 
                         break;
 
