@@ -14,8 +14,6 @@ class Vehicles extends \app\models\Vehicles
     public $storePath = '@app/web/files/vehicle-codes';
     public $relPath = '/files/vehicle-codes';
 
-    public $generate_code;
-
     public function getModelTitle()
     {
         return Yii::t('app', "Автомобиль");
