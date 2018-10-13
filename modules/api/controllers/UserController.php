@@ -271,9 +271,7 @@ class UserController extends BaseController
             } else $this->module->setError(422, 'user', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
-        $this->module->data = [
-            'user' => $user->toArray()
-        ];
+        $this->module->data = ['user' => $user->toArray()];
         $this->prepareScheme('users');
         $this->module->JSONValidate('user', $this->scheme);
 

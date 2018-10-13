@@ -143,8 +143,7 @@ class Module extends \yii\base\Module
                 else $this->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
             }
 
-            if (!$sandbox)
-            {
+            if (!$sandbox) {
                 if (!is_numeric($device->user->phone) || empty($device->user->phone) || intval($device->user->phone) == 0)
                     $this->setError(422, 'phone', Yii::$app->mv->gt("Не верный формат. " . $device->user->phone, [], false));
 
@@ -155,8 +154,7 @@ class Module extends \yii\base\Module
 
                 $response = $SMSCenter->send($device->user->phone, $template, Yii::$app->params['smsc']['sender']);
                 $send = new \SimpleXMLElement($response);
-            }
-            else $send = (object) ['cnt' => 1];
+            } else $send = (object) ['cnt' => 1];
         }
         else $this->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
 
