@@ -41,6 +41,8 @@ class Vehicles extends \yii\db\ActiveRecord
         STATUS_WAITING = 2,
         STATUS_PROCESS = 3;
 
+    public $generate_code;
+
     public static function tableName()
     {
         return 'user_vehicle';
