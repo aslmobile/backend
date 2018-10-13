@@ -269,8 +269,8 @@ class Trip extends \yii\db\ActiveRecord
 
                         $device = Devices::findOne(['user_id' => $this->user_id]);
                         if (empty($device)) break;
-                        $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
+                        $socket = new SocketPusher(['authkey' => $device->auth_token]);
                         $socket->push(base64_encode(json_encode([
                             'action' => "acceptPassengerSeat",
                             'notifications' => Notifications::create(Notifications::NTD_TRIP_SEAT, [$this->driver_id, $this->user_id], '', $this->user_id),
@@ -286,8 +286,8 @@ class Trip extends \yii\db\ActiveRecord
 
                         $device = Devices::findOne(['user_id' => $this->user_id]);
                         if (empty($device)) break;
-                        $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
+                        $socket = new SocketPusher(['authkey' => $device->auth_token]);
                         $socket->push(base64_encode(json_encode([
                             'action' => "declinePassengerTrip",
                             'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, [$this->user_id, $line->driver_id], '', $this->user_id),
@@ -303,8 +303,8 @@ class Trip extends \yii\db\ActiveRecord
 
                         $device = Devices::findOne(['user_id' => $this->driver_id]);
                         if (empty($device)) break;
-                        $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
+                        $socket = new SocketPusher(['authkey' => $device->auth_token]);
                         $socket->push(base64_encode(json_encode([
                             'action' => "declinePassengerTrip",
                             'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, [$this->user_id, $line->driver_id], '', $this->driver_id),
@@ -400,9 +400,6 @@ class Trip extends \yii\db\ActiveRecord
                     case Trip::STATUS_CANCELLED:
 
                         $this->cancel_reason = Yii::$app->mv->gt('Поездка отменена', [], 0);
-                        $this->line_id = 0;
-                        $this->driver_id = 0;
-                        $this->vehicle_id = 0;
                         $this->finish_time = time();
 
                         break;
@@ -410,9 +407,6 @@ class Trip extends \yii\db\ActiveRecord
                     case Trip::STATUS_CANCELLED_DRIVER:
 
                         $this->cancel_reason = Yii::$app->mv->gt('Поездка отменена водителем', [], 0);
-                        $this->line_id = 0;
-                        $this->driver_id = 0;
-                        $this->vehicle_id = 0;
                         $this->finish_time = time();
 
                         break;
