@@ -40,7 +40,7 @@ class LineController extends BaseController
                             'passenger-accept',
 
                             'update-line', 'passengers', 'seats',
-                            'cancel', 'decline-passenger', 'on-line', 'calculate-tariff'
+                            'cancel', 'on-line', 'calculate-tariff'
                         ],
                         'allow' => true
                     ]
