@@ -222,9 +222,8 @@ class Trip extends \yii\db\ActiveRecord
                         $line->freeseats -= $this->seats;
                         $line->save();
 
-                        /** @var \app\models\Devices $device */
                         $device = Devices::findOne(['user_id' => $this->user_id]);
-                        if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
+                        if (empty($device)) break;
                         $socket = new SocketPusher(['authkey' => $device->auth_token]);
                         $socket->push(base64_encode(json_encode([
                             'action' => "acceptPassengerTrip",
@@ -274,11 +273,7 @@ class Trip extends \yii\db\ActiveRecord
 
                         $socket->push(base64_encode(json_encode([
                             'action' => "acceptPassengerSeat",
-                            'notifications' => Notifications::create(
-                                Notifications::NTD_TRIP_SEAT,
-                                [$this->driver_id, $this->user_id],
-                                '', $this->user_id
-                            ),
+                            'notifications' => Notifications::create(Notifications::NTD_TRIP_SEAT, [$this->driver_id, $this->user_id], '', $this->user_id),
                             'data' => ['message_id' => time(), 'addressed' => [$this->driver_id, $this->user_id], 'trip' => $this->toArray()]
                         ])));
 
@@ -302,7 +297,6 @@ class Trip extends \yii\db\ActiveRecord
                         break;
 
                     case Trip::STATUS_CANCELLED_DRIVER:
-
 
                         $line->freeseats = $line->freeseats + $this->seats;
                         $line->save();
