@@ -30,7 +30,7 @@ $params = [
     ],
     'main_vehicle_yes_no' => [
         0 => Yii::t('app', "Вторичная машина"),
-        1 => Yii::t('app', "Основаня машина")
+        1 => Yii::t('app', "Основная машина")
     ],
     'image_extensions' => 'bmp,gif,jpeg,jpg,jpe,jp2,png',
     'video_extensions' => 'avi,mpeg,mp4,mkv,flv',

@@ -490,6 +490,7 @@ class Trip extends \yii\db\ActiveRecord
             self::STATUS_WAITING => Yii::t('app', "Ожидает"),
             self::STATUS_WAY => Yii::t('app', "В пути"),
             self::STATUS_FINISHED => Yii::t('app', "Завершена"),
+            self::STATUS_SCHEDULED => Yii::t('app', "Запланирована"),
             self::STATUS_CANCELLED_DRIVER => Yii::t('app', "Отменена водителем")
         ];
     }

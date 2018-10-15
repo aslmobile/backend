@@ -655,6 +655,8 @@ class Message
         $line = $data['line'];
         /** @var Checkpoint $checkpoint */
         $checkpoint = $data['checkpoint'];
+        /** @var bool $timer */
+        $timer = isset($data['data']['timer']) ? $data['data']['timer'] : false;
 
         $message = ['status' => 'passed', 'checkpoint' => intval($checkpoint['id']), 'line' => intval($line['id'])];
 
@@ -673,7 +675,7 @@ class Message
 
         $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
 
-        if (isset($data['data']['timer']) && $data['data']['timer']) {
+        if ($timer) {
             $this->loop->addTimer(300, function ($timer) use ($line, $checkpoint) {
                 /** @var Trip $trip */
                 $trips = Trip::find()->where([
@@ -699,6 +701,7 @@ class Message
             'data' => [
                 'arrived_from' => $watchdog->created_at,
                 'arrived_time' => 300,
+                'timer' => $timer,
                 'checkpoint' => $checkpoint
             ]
         ];

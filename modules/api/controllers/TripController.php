@@ -584,21 +584,18 @@ class TripController extends BaseController
         $checkpoint = Checkpoint::findOne(intval($this->body->checkpoint_id));
         if (!$checkpoint) $this->module->setError(422, 'checkpoint', Yii::$app->mv->gt("Не найден", [], false));
 
-        $data = [
-            'line' => $line->toArray(),
-            'checkpoint' => $checkpoint->toArray(),
-        ];
-
-        /** @var \app\models\Trip $trip */
-        $addressed = ArrayHelper::getColumn(Trip::findAll([
-            'line_id' => $line->id,
-            'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING],
-        ]), 'user_id');
-
+        $data = ['line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray(),];
         $timer = true;
 
-        if ($checkpoint->type == Checkpoint::TYPE_END) {
+        if ($checkpoint->type === Checkpoint::TYPE_END) {
 
+            /** @var \app\models\Trip $trip */
+            $addressed = ArrayHelper::getColumn(Trip::findAll([
+                'line_id' => $line->id,
+                'status' => Trip::STATUS_WAY,
+            ]), 'user_id');
+
+            $timer = false;
             $notifications = Notifications::create(Notifications::NTP_TRIP_FINISHED, $addressed, '', $user->id);
 
             /** @var \app\models\Trip $trip */
@@ -646,7 +643,13 @@ class TripController extends BaseController
                 'total' => $total,
             ];
         } else {
-            $timer = false;
+
+            /** @var \app\models\Trip $trip */
+            $addressed = ArrayHelper::getColumn(Trip::findAll([
+                'line_id' => $line->id,
+                'status' => Trip::STATUS_WAITING,
+                'startpoint_id' => $checkpoint->id,
+            ]), 'user_id');
             $notifications = Notifications::create(Notifications::NTP_TRIP_ARRIVED, $addressed, '', $user->id);
         }
 
@@ -660,7 +663,8 @@ class TripController extends BaseController
             'action' => "checkpointArrived",
             'notifications' => $notifications,
             'data' => [
-                'message_id' => time(), 'line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray(),
+                'message_id' => time(),
+                'line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray(),
                 'addressed' => $addressed, 'timer' => $timer
             ]
         ])));
