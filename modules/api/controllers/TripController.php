@@ -272,7 +272,7 @@ class TripController extends BaseController
         $trip = Trip::find()->where([
             'user_id' => $user->id,
             //'status' => Trip::STATUS_CREATED
-        ])->one();
+        ])->orderBy(['created_at' => SORT_DESC])->one();
         if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
