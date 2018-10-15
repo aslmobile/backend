@@ -33,7 +33,8 @@ class Vehicles extends \app\models\Vehicles
         return [
             self::STATUS_ADDED => Yii::t('app', "Добавлена"),
             self::STATUS_APPROVED => Yii::t('app', "Одобрена"),
-            self::STATUS_WAITING => Yii::t('app', "Ждет одобрения")
+            self::STATUS_WAITING => Yii::t('app', "Ждет одобрения"),
+            self::STATUS_PROCESS => Yii::t('app', "Добавление")
         ];
     }
 

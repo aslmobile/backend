@@ -588,22 +588,11 @@ class TripController extends BaseController
         $timer = true;
 
         if ($checkpoint->type === Checkpoint::TYPE_END) {
-
             /** @var \app\models\Trip $trip */
-            $addressed = ArrayHelper::getColumn(Trip::findAll([
-                'line_id' => $line->id,
-                'status' => Trip::STATUS_WAY,
-            ]), 'user_id');
-
+            $trips = Trip::find()->andWhere(['line_id' => $line->id, 'status' => Trip::STATUS_WAY])->all();
+            $addressed = ArrayHelper::getColumn($trips, 'user_id');
             $timer = false;
             $notifications = Notifications::create(Notifications::NTP_TRIP_FINISHED, $addressed, '', $user->id);
-
-            /** @var \app\models\Trip $trip */
-            $trips = Trip::find()->andWhere([
-                'line_id' => $line->id,
-                'status' => Trip::STATUS_WAY,
-                //'payment_status' => Trip::PAYMENT_STATUS_PAID
-            ])->all();
 
             if (!$trips) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найдены", [], false));
 
@@ -624,32 +613,29 @@ class TripController extends BaseController
 
                 if (!$trip->validate() || !$trip->save()) {
                     if ($trip->hasErrors()) {
-                        foreach ($trip->errors as $field => $error_message)
+                        foreach ($trip->errors as $field => $error_message) {
                             $this->module->setError(422,
                                 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                        }
                         $this->module->sendResponse();
-                    } else $this->module->setError(422,
-                        'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+                    } else {
+                        $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+                    }
                 }
-
                 $_trips[] = $trip->toArray();
             }
 
             $line->status = Line::STATUS_FINISHED;
-            $line->update();
+            $line->save();
 
-            $data += [
-                'trips' => $_trips,
-                'total' => $total,
-            ];
+            $data += ['trips' => $_trips, 'total' => $total];
+
         } else {
-
             /** @var \app\models\Trip $trip */
-            $addressed = ArrayHelper::getColumn(Trip::findAll([
-                'line_id' => $line->id,
-                'status' => Trip::STATUS_WAITING,
-                'startpoint_id' => $checkpoint->id,
-            ]), 'user_id');
+            $addressed = ArrayHelper::getColumn(
+                Trip::findAll(['line_id' => $line->id, 'status' => Trip::STATUS_WAITING, 'startpoint_id' => $checkpoint->id,]),
+                'user_id'
+            );
             $notifications = Notifications::create(Notifications::NTP_TRIP_ARRIVED, $addressed, '', $user->id);
         }
 
