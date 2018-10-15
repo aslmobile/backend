@@ -11,8 +11,8 @@ use yii\helpers\Url;
 class Vehicles extends \app\models\Vehicles
 {
 
-    public $storePath = '@app/web/files/vehicle-codes';
-    public $relPath = '/files/vehicle-codes';
+    public $storePath = '@app' . DIRECTORY_SEPARATOR . 'web' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'vehicle-codes';
+    public $relPath = DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'vehicle-codes';
 
     public function getModelTitle()
     {
@@ -53,7 +53,7 @@ class Vehicles extends \app\models\Vehicles
         BaseFileHelper::createDirectory($storePath, 0777, true);
 
         $qrCode = (new QrCode($this->id))->setSize(500)->setMargin(5);
-        $qrCode->writeFile($storePath . '/code.png');
+        $qrCode->writeFile($storePath . DIRECTORY_SEPARATOR . 'code.png');
 
         $user = $this->user;
 
@@ -62,21 +62,11 @@ class Vehicles extends \app\models\Vehicles
                 ->setFrom([Yii::$app->params['supportEmail'] => Yii::$app->name])
                 ->setTo($user->email)
                 ->setSubject('QR код машины для водителя. ' . Yii::$app->name)
-                ->attach($storePath . '/code.png')
+                ->attach($storePath . DIRECTORY_SEPARATOR . 'code.png')
                 ->send();
         }
 
-        $this->code = Url::to($this->relPath . '/' . $this->id . '/code.png');
+        $this->code = Url::to($this->relPath . DIRECTORY_SEPARATOR . $this->id . DIRECTORY_SEPARATOR . 'code.png');
         $this->update();
-    }
-
-    public function beforeSave($insert)
-    {
-        return parent::beforeSave($insert);
-    }
-
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
     }
 }

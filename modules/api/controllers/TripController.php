@@ -124,7 +124,7 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['checkpoint', 'route', 'time', 'seats', 'taxi', 'payment_type', 'vehicle_type_id']);
+        $this->validateBodyParams(['checkpoint', 'route', 'time', 'seats', 'payment_type', 'vehicle_type_id']);
 
         /** @var \app\models\Route $route */
         $route = Route::find()->andWhere([
@@ -269,10 +269,9 @@ class TripController extends BaseController
         $this->prepareBody();
 
         /** @var \app\models\Trip $trip */
-        $trip = Trip::find()->andWhere([
-            'AND',
-            ['=', 'user_id', $user->id],
-            ['=', 'status', Trip::STATUS_CREATED]
+        $trip = Trip::find()->where([
+            'user_id' => $user->id,
+            //'status' => Trip::STATUS_CREATED
         ])->one();
         if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
@@ -280,6 +279,7 @@ class TripController extends BaseController
 
         $trip->status = Trip::STATUS_CANCELLED;
         $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
+        $trip->passenger_comment = isset($this->body->passenger_comment) ? $this->body->passenger_comment : '';
         $trip->save();
 
         Queue::processingQueue();

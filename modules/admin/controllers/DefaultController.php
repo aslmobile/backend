@@ -52,6 +52,7 @@ class DefaultController extends Controller
      */
     public function actionIndex()
     {
+        //var_dump(strtoupper(hash('sha256', '380632308442' . \Yii::$app->params['salt'])));die();
         return $this->render('index');
     }
 
