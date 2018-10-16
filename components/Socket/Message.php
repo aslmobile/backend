@@ -464,6 +464,34 @@ class Message
      * @param $connections
      * @return array
      */
+    public function pathChanged($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        if (isset($data['data']['path']) && !empty($data['data']['path']))
+            $path_data = $data['data']['path']; else $path_data = null;
+
+        $response = [
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => ['path' => $path_data]
+        ];
+
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function acceptDriverTrip($data, $from, $connections)
     {
         /** @var Devices $device */

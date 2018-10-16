@@ -11,6 +11,7 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $id
  * @property integer $user_id
  * @property integer $trip_id
+ * @property float $tariff
  * @property integer $status
  * @property string $address
  * @property integer $checkpoint
@@ -32,7 +33,6 @@ class Taxi extends \yii\db\ActiveRecord
         return 'taxi';
     }
 
-
     /**
      * @inheritdoc
      */
@@ -40,6 +40,7 @@ class Taxi extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'checkpoint', 'status', 'created_at', 'updated_at', 'trip_id'], 'integer'],
+            ['tariff', 'double'],
             [['address'], 'string', 'max' => 255],
         ];
     }
@@ -53,6 +54,7 @@ class Taxi extends \yii\db\ActiveRecord
             'id' => Yii::$app->mv->gt('ID', [], 0),
             'user_id' => Yii::$app->mv->gt('Пассажир', [], 0),
             'trip_id' => Yii::$app->mv->gt('Поездка', [], 0),
+            'tariff' => Yii::$app->mv->gt('Тариф', [], 0),
             'status' => Yii::$app->mv->gt('Статус', [], 0),
             'address' => Yii::$app->mv->gt('Адрес', [], 0),
             'checkpoint' => Yii::$app->mv->gt('Куда', [], 0),

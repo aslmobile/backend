@@ -50,7 +50,9 @@ class TripController extends BaseController
                             'rate-passenger',
                             'comment-passenger',
                             'rate-driver',
-                            'return'
+                            'return',
+                            'get-trip',
+                            'update-trip'
                         ],
                         'allow' => true
                     ]
@@ -75,7 +77,9 @@ class TripController extends BaseController
                     'rate-passenger' => ['POST'],
                     'comment-passenger' => ['POST'],
                     'rate-driver' => ['POST'],
-                    'return' => ['POST']
+                    'return' => ['POST'],
+                    'get-trip' => ['GET'],
+                    'update-trip' => ['POST']
                 ]
             ]
         ];
@@ -181,7 +185,7 @@ class TripController extends BaseController
         $trip = new Trip();
         $trip->status = Trip::STATUS_CREATED;
         $trip->user_id = $user->id;
-        $trip->tariff = $this->calculatePassengerTariff($route->id, $checkpoint->id, $endpoint->id)['tariff'];
+        $trip->tariff = $this->calculatePassengerTariff($route->id, $checkpoint->id, $endpoint->id, $taxi)['tariff'];
         $trip->currency = "₸";
         $trip->payment_type = $this->body->payment_type;
         $trip->startpoint_id = $checkpoint->id;
@@ -261,6 +265,177 @@ class TripController extends BaseController
         $this->module->sendResponse();
     }
 
+    public function actionGetTrip($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $trip = Trip::findOne($id);
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionUpdateTrip($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+        $this->prepareBody();
+
+        $trip = Trip::findOne($id);
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+
+        if (isset($this->body->route) && !empty($this->body->route)) {
+            /** @var \app\models\Route $route */
+            $route = Route::find()->where([
+                'AND',
+                ['=', 'status', Route::STATUS_ACTIVE],
+                ['=', 'id', $this->body->route]
+            ])->one();
+        } else $route = Route::findOne($trip->route_id);
+        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
+
+        if (isset($this->body->checkpoint) && !empty($this->body->checkpoint)) {
+            /** @var \app\models\Checkpoint $checkpoint */
+            $checkpoint = \app\models\Checkpoint::find()->andWhere([
+                'AND',
+                ['=', 'type', \app\models\Checkpoint::TYPE_STOP],
+                ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
+                ['=', 'id', $this->body->checkpoint]
+            ])->one();
+        } else $checkpoint = \app\models\Checkpoint::findOne($trip->startpoint_id);
+        if (!$checkpoint) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\models\Checkpoint $endpoint */
+        $endpoint = \app\models\Checkpoint::find()->andWhere([
+            'AND',
+            ['=', 'type', \app\models\Checkpoint::TYPE_END],
+            ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
+            ['=', 'route', $route->id]
+        ])->one();
+        if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
+
+        if (isset($this->body->seats) && !empty($this->body->seats))
+            $seats = $this->body->seats; else $seats = $trip->seats;
+        if (isset($this->body->payment_type) && !empty($this->body->payment_type))
+            $payment_type = $this->body->payment_type; else $payment_type = $trip->payment_type;
+        if (isset($this->body->comment) && !empty($this->body->comment))
+            $comment = $this->body->comment; else $comment = $trip->passenger_description;
+        if (isset($this->body->time) && !empty($this->body->time))
+            $time = $this->body->time; else $time = $trip->start_time;
+
+        $luggage_unique = false;
+        if (!empty($trip->luggages)) {
+            /** @var TripLuggage $luggage */
+            foreach ($trip->luggages as $luggage) {
+                $trip->seats -= $luggage->seats;
+                $trip->amount -= $luggage->amount;
+            }
+        }
+        TripLuggage::deleteAll(['unique_id' => $trip->luggage_unique_id]);
+        if (isset($this->body->luggage) && !empty($this->body->luggage)) {
+            $_luggages = [];
+            $luggages = $this->body->luggage;
+            if (is_array($luggages) && count($luggages) > 0) foreach ($luggages as $luggage) {
+                $luggage = LuggageType::findOne($luggage);
+                if (!$luggage) $this->module->setError(422, '_luggage', Yii::$app->mv->gt("Не найден", [], false));
+                $_luggages[] = $luggage->toArray();
+            }
+            if ($_luggages && count($_luggages) > 0) {
+                foreach ($_luggages as $luggage) $luggage_unique .= $luggage['id'] . '+';
+                $luggage_unique .= $user->id . '+' . $route->id;
+                $luggage_unique = hash('sha256', md5($luggage_unique) . time());
+            }
+        }
+
+        $taxi = false;
+        Taxi::deleteAll(['trip_id' => $trip->id]);
+        if (isset($this->body->taxi) && !empty($this->body->taxi)) {
+            $taxi = new Taxi([
+                'checkpoint' => $checkpoint->id,
+                'user_id' => $user->id,
+                'address' => $this->body->taxi,
+                'status' => Taxi::STATUS_NEW
+            ]);
+        }
+
+        $trip->tariff = $this->calculatePassengerTariff($route->id, $checkpoint->id, $endpoint->id, $taxi)['tariff'];
+        $trip->currency = "₸";
+        $trip->startpoint_id = $checkpoint->id;
+        $trip->route_id = $route->id;
+        $trip->seats = intval($seats);
+        $trip->amount = $trip->seats * $trip->tariff;
+        $trip->endpoint_id = $endpoint->id;
+        $trip->payment_type = $payment_type;
+        $trip->passenger_description = $comment;
+        $trip->need_taxi = $taxi ? 1 : 0;
+        $trip->start_time = $time;
+        $trip->taxi_status = 0;
+        $trip->taxi_address = '';
+        $trip->taxi_time = 0;
+
+        if ($taxi) {
+            $trip->taxi_status = $taxi->status;
+            $trip->taxi_address = $taxi->address;
+            $trip->taxi_time = $trip->start_time + 900;
+        }
+
+        if ($luggage_unique) {
+
+            $trip->luggage_unique_id = (string)$luggage_unique;
+
+            /** @var \app\models\TripLuggage $luggage */
+            if (isset($_luggages) && $_luggages && count($_luggages) > 0) foreach ($_luggages as $luggage) {
+
+                if ($luggage['need_place']) {
+                    $tariff = $this->calculateLuggageTariff($route->id);
+                    $amount = (int)intval($luggage['seats']) * (float)floatval($tariff->tariff);
+                } else $amount = (float)floatval(0.0);
+
+                $_trip_luggage = new TripLuggage();
+                $_trip_luggage->unique_id = (string)$luggage_unique;
+                $_trip_luggage->amount = (float)floatval($amount);
+                $_trip_luggage->status = (int)0;
+                $_trip_luggage->need_place = (int)intval($luggage['need_place']);
+                $_trip_luggage->seats = (int)intval($luggage['seats']);
+                $_trip_luggage->currency = (string)"₸";
+                $_trip_luggage->luggage_type = (int)intval($luggage['id']);
+
+                $_trip_luggage->save();
+
+                $trip->seats += $_trip_luggage->seats;
+                $trip->amount += $_trip_luggage->amount;
+            }
+
+        }
+
+        if (isset($this->body->vehicle_type_id) && !empty($this->body->vehicle_type_id))
+            $trip->vehicle_type_id = $this->body->vehicle_type_id;
+
+        if (!$trip->validate() || !$trip->save()) {
+            if ($trip->hasErrors()) {
+                foreach ($trip->errors as $field => $error_message)
+                    $this->module->setError(422,
+                        'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                $this->module->sendResponse();
+            } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
+        }
+
+        if ($taxi) {
+            $taxi->trip_id = $trip->id;
+            $taxi->save();
+        }
+
+        Queue::processingQueue();
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+
+    }
+
     public function actionCancelTripQueue()
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -271,20 +446,23 @@ class TripController extends BaseController
         /** @var \app\models\Trip $trip */
         $trip = Trip::find()->where([
             'user_id' => $user->id,
-            //'status' => Trip::STATUS_CREATED
+            'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]
         ])->orderBy(['created_at' => SORT_DESC])->one();
-        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
-        if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
+        if ($trip) {
+            if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
+            $trip->status = Trip::STATUS_CANCELLED;
+            $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
+            $trip->passenger_comment = isset($this->body->passenger_comment) ? $this->body->passenger_comment : '';
+            $trip->save();
 
-        $trip->status = Trip::STATUS_CANCELLED;
-        $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
-        $trip->passenger_comment = isset($this->body->passenger_comment) ? $this->body->passenger_comment : '';
-        $trip->save();
+            Queue::processingQueue();
 
-        Queue::processingQueue();
+            $this->module->data['trip'] = $trip->toArray();
+        } else {
+            $this->module->data['trip'] = [];
+        };
 
-        $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
@@ -990,15 +1168,6 @@ class TripController extends BaseController
 
     }
 
-    public function actionTest($id)
-    {
-        $tariff = $this->calculatePassengerTariff($id);
-
-        $this->module->data['tariff'] = $tariff;
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
     /** CORE METHODS | PROTECTED */
 
     /**
@@ -1046,17 +1215,14 @@ class TripController extends BaseController
     protected function getRate($route_id)
     {
         /** @var \app\models\Line $line */
-        $lines = Line::find()->andWhere([
-            'AND',
-            ['=', 'route_id', $route_id]
-        ])->all();
+        $lines = Line::findAll(['route_id' => $route_id]);
 
         if (!$lines) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $seats = 0;
         foreach ($lines as $line) $seats += $line->freeseats;
 
-        $passengers = Trip::find()->andWhere([
+        $passengers = Trip::find()->where([
             'AND',
             ['=', 'route_id', $route_id],
             ['=', 'driver_id', 0]
@@ -1080,25 +1246,28 @@ class TripController extends BaseController
 
     /**
      * @param $id
-     * @param int $checkpoint_start
-     * @param int $checkpoint_end
+     * @param $checkpoint_start
+     * @param $checkpoint_end
+     * @param bool|Taxi $taxi
      * @return array
      */
-    protected function calculatePassengerTariff($id, $checkpoint_start = 0, $checkpoint_end = 0)
+    protected function calculatePassengerTariff($id, $checkpoint_start, $checkpoint_end, $taxi = false)
     {
         $rate = $this->getRate($id);
-        $taxi_tariff = 0; // TODO: Брать тариф на такси через админку
+        $taxi_tariff = 0;
+
+        if ($taxi) $taxi_tariff = $taxi->tariff;
 
         /** @var \app\models\Route $route */
-        $route = Route::find()->where(['id' => $id])->one();
+        $route = Route::findOne($id);
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Checkpoint $checkpoint_start */
-        $checkpoint_start = Checkpoint::find()->where(['id' => $checkpoint_start])->one();
+        $checkpoint_start = Checkpoint::findOne($checkpoint_start);
         if (!$checkpoint_start) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найдена", [], false));
 
         /** @var \app\models\Checkpoint $checkpoint_end */
-        $checkpoint_end = Checkpoint::find()->where(['id' => $checkpoint_end])->one();
+        $checkpoint_end = Checkpoint::findOne($checkpoint_end);
         if (!$checkpoint_end) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найдена", [], false));
 
         $dependence = TariffDependence::find()->where([
@@ -1114,16 +1283,12 @@ class TripController extends BaseController
             $dependence->end_checkpoint_id = $checkpoint_end->id;
             $dependence->base_tariff = $route->base_tariff;
             $dependence->base_rate = 0;
-
             $dependence->save();
         }
 
         $tariff = $dependence->base_tariff * $rate + $taxi_tariff;
 
-        return [
-            'base_tariff' => $dependence->base_tariff,
-            'tariff' => $tariff
-        ];
+        return ['base_tariff' => $dependence->base_tariff, 'tariff' => $tariff];
     }
 
     /**
@@ -1133,18 +1298,14 @@ class TripController extends BaseController
     protected function calculateLuggageTariff($id)
     {
         $rate = $this->getRate($id);
-        $taxi_tariff = 0;
 
         /** @var \app\models\Route $route */
-        $route = Route::find()->where(['id' => $id])->one();
+        $route = Route::findOne($id);
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         $tariff = $route->base_tariff * $rate;
 
-        return (object)[
-            'base_tariff' => $route->base_tariff,
-            'tariff' => $tariff
-        ];
+        return (object)['base_tariff' => $route->base_tariff, 'tariff' => $tariff];
     }
 
     protected function calculateDriverTariff()

@@ -351,6 +351,7 @@ class LineController extends BaseController
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $this->prepareBody();
+        $path = $line->path;
 
         if (
             isset($this->body->path)
@@ -359,9 +360,21 @@ class LineController extends BaseController
         ) {
             $path = $this->body->path;
             Line::updateAll(['path' => json_encode($path)], ['id' => $line->id]);
+
+            /** @var \app\models\Trip[] $trip */
+            $trips = Trip::find()->where(['line_id' => $line->id, 'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING]])->all();
+            $addressed = ArrayHelper::getColumn($trips, 'user_id');
+            /** @var \app\models\Devices $device */
+            $device = Devices::findOne(['user_id' => $user->id]);
+            if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
+            $socket = new SocketPusher(['authkey' => $device->auth_token]);
+            $socket->push(base64_encode(json_encode([
+                'action' => "pathChanged",
+                'data' => ['message_id' => time(), 'addressed' => $addressed, 'path' => $path]
+            ])));
         }
 
-        $this->module->data['path'] = $line->path;
+        $this->module->data['path'] = $path;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

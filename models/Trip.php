@@ -722,10 +722,7 @@ class Trip extends \yii\db\ActiveRecord
 
     public function getLuggages()
     {
-        return TripLuggage::find()->andWhere([
-            'AND',
-            ['=', 'unique_id', $this->luggage_unique_id]
-        ])->all();
+        return TripLuggage::find()->where(['unique_id' => $this->luggage_unique_id])->all();
     }
 
     public function getTransfer()

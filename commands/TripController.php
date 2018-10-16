@@ -3,6 +3,7 @@
 namespace app\commands;
 
 use app\components\ConsoleController;
+use app\models\Queue;
 use app\models\Trip;
 use app\modules\main\models\Settings;
 use Yii;
@@ -28,14 +29,18 @@ class TripController extends ConsoleController
     public function actionIndex()
     {
         $trips = Trip::find()->where(['status' => Trip::STATUS_SCHEDULED])
+            ->andWhere(['>=', 'start_time', time()])
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_DESC])->all();
-        /** @var Trip $trip */
-        foreach ($trips as $trip) {
-            $schedule = json_decode($trip->schedule);
-            if (is_array($schedule) && in_array(intval(date('N')), $schedule)){
-                $trip->schedule = '';
-                Trip::cloneTrip($trip, Trip::STATUS_CREATED);
+        if (!empty($trips)) {
+            /** @var Trip $trip */
+            foreach ($trips as $trip) {
+                $schedule = json_decode($trip->schedule);
+                if (is_array($schedule) && in_array(intval(date('N')), $schedule)) {
+                    $trip->schedule = '';
+                    Trip::cloneTrip($trip, Trip::STATUS_CREATED);
+                }
             }
+            Queue::processingQueue();
         }
     }
 }
