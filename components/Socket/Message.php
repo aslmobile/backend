@@ -509,7 +509,7 @@ class Message
                 'device_id' => $device->id,
                 'user_id' => $device->user_id,
                 'data' => [
-                    'accept_from' => $watchdog->created_at,
+                    'accept_from' => isset($watchdog) ? $watchdog->created_at : time(),
                     'accept_time' => 300,
                     'line' => $line_data
                 ]
@@ -569,7 +569,6 @@ class Message
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
         if (isset($data['data']['line']) && !empty($line)) {
-
             $line_data = $data['data']['line'];;
             $response = [
                 'message_id' => $this->message_id,
@@ -581,7 +580,6 @@ class Message
             ];
 
         } else {
-
             $response = [
                 'message_id' => $this->message_id,
                 'device_id' => $device->id,
