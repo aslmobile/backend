@@ -372,8 +372,6 @@ class VehiclesController extends BaseController
 
         if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
 
-        $finish = Yii::$app->request->getHeaders()->get('finish', false);
-
         $vehicle = Vehicles::findOne(['id' => $id]);
         if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
@@ -406,8 +404,6 @@ class VehiclesController extends BaseController
         foreach ($documents as $file) $_photos[] = $file['file_id'];
         foreach ($saved_photos_objects as $file) $_photos[] = $file->id;
         $_photos = implode(',', $_photos);
-
-        if ($finish) $vehicle->status = Vehicles::STATUS_WAITING;
 
         $vehicle->photos = (string)$_photos;
         $vehicle->save();

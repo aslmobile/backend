@@ -294,7 +294,8 @@ class LineController extends BaseController
             foreach ($trips as $trip) {
 
                 $trip->cancel_reason = isset($this->body->cancel_reason_trip) ? $this->body->cancel_reason_trip : 0;
-                $trip->driver_comment = isset($this->body->driver_comment) ? $this->body->driver_comment : '';
+                $trip->driver_comment = isset($this->body->driver_comment) ?
+                    $this->body->driver_comment : Yii::$app->mv->gt('Поездка отменена водителем', [], 0);
                 $trip->status = Trip::STATUS_CANCELLED_DRIVER;
 
                 if (!$trip->validate() || !$trip->save()) {
@@ -443,14 +444,15 @@ class LineController extends BaseController
 
         $start_city = City::findOne($param1);
         $end_city = City::findOne($param2);
+        $data = [];
 
         if (!$start_city || !$end_city) $this->module->setError(422, '_city', Yii::$app->mv->gt("Не найден", [], false));
 
         $route = Route::findOne(['start_city_id' => $start_city->id, 'end_city_id' => $end_city->id]);
 
-        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
+        if ($route) $data = $route->toArray();
 
-        $this->module->data = $route->toArray();
+        $this->module->data = $data;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

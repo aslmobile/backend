@@ -526,13 +526,11 @@ class Message
                         $trips = Trip::find()->where(['line_id' => $line->id])->all();
                         if (!empty($trips)) {
                             foreach ($trips as $trip) {
-                                $trip->status = Trip::STATUS_CREATED;
-                                $trip->driver_id = 0;
-                                $trip->vehicle_id = 0;
-                                $trip->line_id = 0;
+                                $trip->cancel_reason = 0;
+                                $trip->driver_comment = '';
+                                $trip->status = Trip::STATUS_CANCELLED_DRIVER;
                                 $trip->save();
                             }
-
                         };
                         Queue::processingQueue();
                     }
@@ -683,6 +681,8 @@ class Message
                 ])->all();
                 if (!empty($trips)) {
                     foreach ($trips as $trip) {
+                        $trip->cancel_reason = 0;
+                        $trip->passenger_comment = '';
                         $trip->status = Trip::STATUS_CANCELLED;
                         $trip->penalty = 1;
                         $trip->save();

@@ -525,12 +525,14 @@ class TripController extends BaseController
             case User::TYPE_DRIVER:
                 $trip->status = Trip::STATUS_CANCELLED_DRIVER;
                 $trip->penalty = 1;
-                $trip->driver_comment = isset($this->body->driver_comment) ? $this->body->driver_comment : '';
+                $trip->driver_comment = isset($this->body->driver_comment) ?
+                    $this->body->driver_comment : \Yii::$app->mv->gt('Поездка отменена водителем', [], 0);
                 break;
             case User::TYPE_PASSENGER:
                 $trip->status = Trip::STATUS_CANCELLED;
                 if ($line->status == Line::STATUS_IN_PROGRESS) $trip->penalty = 1;
-                $trip->passenger_comment = isset($this->body->passenger_comment) ? $this->body->passenger_comment : '';
+                $trip->passenger_comment = isset($this->body->passenger_comment) ?
+                    $this->body->passenger_comment : \Yii::$app->mv->gt('Поездка отменена', [], 0);
                 break;
             default:
                 $trip->status = Trip::STATUS_CANCELLED;
