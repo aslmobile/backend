@@ -21,7 +21,7 @@ class Queue extends Model
         $lines = \app\modules\api\models\Line::find()
             ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
             ->andWhere(['>', 'freeseats', 0])
-            ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_DESC])
+            ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_ASC])
             ->all();
 
         $trips = \app\modules\api\models\Trip::find()
