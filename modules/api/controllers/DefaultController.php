@@ -36,7 +36,6 @@ class DefaultController extends BaseController
                             'cancel-passenger-reasons',
                             'get-file',
                             'update-device',
-                            'for-testing',
                             'read-notification'
                         ],
                         'allow' => true
@@ -66,24 +65,6 @@ class DefaultController extends BaseController
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
-
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
-    public function actionForTesting()
-    {
-        /** @var \app\models\Devices $device */
-        $device = Devices::findOne(['user_id' => 48]);
-        $socket = new SocketPusher(['authkey' => $device->auth_token]);
-        $message = $socket->push(base64_encode(json_encode([
-            'action' => "acceptDriverTrip",
-            'data' => [
-                'message_id' => time()
-            ]
-        ])));
-
-        if (!$message) $this->module->setError(422, 'socket.push', 'failed');
 
         $this->module->setSuccess();
         $this->module->sendResponse();
