@@ -728,6 +728,7 @@ class Message
                 'arrived_from' => $watchdog->created_at,
                 'arrived_time' => 300,
                 'timer' => $timer,
+                'line' => $line,
                 'checkpoint' => $checkpoint
             ]
         ];
