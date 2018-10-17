@@ -71,6 +71,7 @@ JSON;
         if ($this->type == User::TYPE_PASSENGER) {
 
             RestFul::updatePassengerAccept();
+            RestFul::updatePassengerAcceptSeat();
 
             /** @var \app\models\RestFul $inAccept */
             $inAccept = RestFul::find()->where([
@@ -81,7 +82,17 @@ JSON;
                 ['>', 'created_at', time() - 300],
             ])->one();
 
+            /** @var \app\models\RestFul $inAcceptSeat */
+            $inAcceptSeat = RestFul::find()->where([
+                'AND',
+                ['=', 'type', RestFul::TYPE_PASSENGER_ACCEPT_SEAT],
+                ['=', 'user_id', $this->id],
+                ['=', 'message', json_encode(['status' => 'request'])],
+                ['>', 'created_at', time() - 300],
+            ])->one();
+
             $array['accept'] = !empty($inAccept) ? 1 : 0;
+            $array['acceptSeat'] = !empty($inAcceptSeat) ? 1 : 0;
 
             /** @var \app\models\Line $inQueue */
             $inQueue = Trip::find()->where(['status' => Trip::STATUS_CREATED, 'user_id' => $this->id])->one();
