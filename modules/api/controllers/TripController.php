@@ -255,7 +255,7 @@ class TripController extends BaseController
         if (isset($this->body->schedule) && !empty($this->body->schedule)) {
             $trip->schedule = json_encode($this->body->schedule);
             Trip::cloneTrip($trip, Trip::STATUS_SCHEDULED);
-            Notifications::create(Notifications::NTP_TRIP_SCHEDULED, [$trip->user_id], '', 0, $this->body->time);
+            Notifications::create(Notifications::NTP_TRIP_SCHEDULED, [$trip->user_id], '', $trip->id, $this->body->time);
         }
 
         Queue::processingQueue();
@@ -270,7 +270,7 @@ class TripController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $trip = Trip::findOne($id);
+        $trip = Trip::findOne(['id' => $id, 'status' => Trip::STATUS_SCHEDULED]);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $this->module->data['trip'] = $trip->toArray();
@@ -284,7 +284,7 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
         $this->prepareBody();
 
-        $trip = Trip::findOne($id);
+        $trip = Trip::findOne(['id' => $id, 'status' => Trip::STATUS_SCHEDULED]);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         if (isset($this->body->route) && !empty($this->body->route)) {
@@ -325,12 +325,14 @@ class TripController extends BaseController
             $comment = $this->body->comment; else $comment = $trip->passenger_description;
         if (isset($this->body->time) && !empty($this->body->time))
             $time = $this->body->time; else $time = $trip->start_time;
+        if (isset($this->body->vehicle_type_id) && !empty($this->body->vehicle_type_id))
+            $vehicle_type_id = $this->body->vehicle_type_id; else $vehicle_type_id = $trip->vehicle_type_id;
 
         $luggage_unique = false;
         if (!empty($trip->luggages)) {
             /** @var TripLuggage $luggage */
             foreach ($trip->luggages as $luggage) {
-                $trip->seats -= $luggage->seats;
+                $seats -= $luggage->seats;
                 $trip->amount -= $luggage->amount;
             }
         }
@@ -352,6 +354,9 @@ class TripController extends BaseController
 
         $taxi = false;
         Taxi::deleteAll(['trip_id' => $trip->id]);
+        $trip->taxi_status = 0;
+        $trip->taxi_address = '';
+        $trip->taxi_time = 0;
         if (isset($this->body->taxi) && !empty($this->body->taxi)) {
             $taxi = new Taxi([
                 'checkpoint' => $checkpoint->id,
@@ -365,16 +370,15 @@ class TripController extends BaseController
         $trip->currency = "₸";
         $trip->startpoint_id = $checkpoint->id;
         $trip->route_id = $route->id;
-        $trip->seats = intval($seats);
         $trip->amount = $trip->seats * $trip->tariff;
         $trip->endpoint_id = $endpoint->id;
+
+        $trip->seats = $seats;
         $trip->payment_type = $payment_type;
         $trip->passenger_description = $comment;
         $trip->need_taxi = $taxi ? 1 : 0;
         $trip->start_time = $time;
-        $trip->taxi_status = 0;
-        $trip->taxi_address = '';
-        $trip->taxi_time = 0;
+        $trip->vehicle_type_id = $vehicle_type_id;
 
         if ($taxi) {
             $trip->taxi_status = $taxi->status;
@@ -411,8 +415,14 @@ class TripController extends BaseController
 
         }
 
-        if (isset($this->body->vehicle_type_id) && !empty($this->body->vehicle_type_id))
-            $trip->vehicle_type_id = $this->body->vehicle_type_id;
+        if (isset($this->body->schedule) && !empty($this->body->schedule)) {
+            $trip->schedule = json_encode($this->body->schedule);
+            Notifications::updateAll(['time' => $this->body->time, 'status' => Notifications::STATUS_NEW], [
+                'type' => Notifications::NTP_TRIP_SCHEDULED,
+                'user_id' => $trip->user_id,
+                'initiator_id' => $trip->id,
+            ]);
+        }
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
@@ -427,8 +437,6 @@ class TripController extends BaseController
             $taxi->trip_id = $trip->id;
             $taxi->save();
         }
-
-        Queue::processingQueue();
 
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
@@ -764,7 +772,7 @@ class TripController extends BaseController
         $checkpoint = Checkpoint::findOne(intval($this->body->checkpoint_id));
         if (!$checkpoint) $this->module->setError(422, 'checkpoint', Yii::$app->mv->gt("Не найден", [], false));
 
-        $data = ['line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray(),];
+        $data = ['line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray()];
         $timer = true;
 
         if ($checkpoint->type === Checkpoint::TYPE_END) {

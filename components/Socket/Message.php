@@ -680,7 +680,7 @@ class Message
         /** @var Checkpoint $checkpoint */
         $checkpoint = $data['checkpoint'];
         /** @var bool $timer */
-        $timer = isset($data['data']['timer']) ? $data['data']['timer'] : false;
+        $timer = isset($data['timer']) ? $data['timer'] : false;
 
         $message = ['status' => 'passed', 'checkpoint' => intval($checkpoint['id']), 'line' => intval($line['id'])];
 
@@ -697,7 +697,7 @@ class Message
             $watchdog->save();
         }
 
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+        $this->addressed = isset($data['addressed']) ? $data['addressed'] : [];
 
         if ($timer) {
             $this->loop->addTimer(300, function ($timer) use ($line, $checkpoint) {
