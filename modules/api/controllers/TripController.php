@@ -1186,9 +1186,9 @@ class TripController extends BaseController
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         $rate = $this->getRate($id);
-        $tariff = ($route->base_tariff * $rate * $this->body->seats) / 10;
 
-        $this->module->data['tariff'] = $tariff;
+        $this->module->data['commission'] = ($route->base_tariff * 1.5 * $this->body->seats) / 10;
+        $this->module->data['one'] = $route->base_tariff * $rate;
         $this->module->setSuccess();
         $this->module->sendResponse();
 
