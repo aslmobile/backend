@@ -76,6 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'min' => 1,
                             'max' => 18,
                             'addButtonPosition' => \unclead\multipleinput\MultipleInput::POS_FOOTER,
+                            'allowEmptyList' => true,
                             'columns' => [
                                 [
                                     'name' => 'route',
@@ -134,9 +135,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= $form->field($model, 'settings_waste')->widget(\unclead\multipleinput\MultipleInput::class, [
                             'data' => $model->settings_waste,
                             'sortable' => true,
-                            'min' => 1,
-                            'max' => 18,
                             'addButtonPosition' => \unclead\multipleinput\MultipleInput::POS_FOOTER,
+                            'allowEmptyList' => true,
                             'columns' => [
                                 [
                                     'name' => 'type',
