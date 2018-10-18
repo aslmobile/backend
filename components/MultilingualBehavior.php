@@ -1,10 +1,11 @@
 <?php
+
 namespace app\components;
 
 use Yii;
 use yii\base\Behavior;
-use yii\base\UnknownPropertyException;
 use yii\base\InvalidConfigException;
+use yii\base\UnknownPropertyException;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Inflector;
@@ -368,7 +369,7 @@ class MultilingualBehavior extends Behavior
 
                 if ($value !== null) {
                     $field = $this->localizedPrefix . $attribute;
-                    $translation->$field = $value;
+                    $translation->$field = is_array($value) ? json_encode($value) : $value;
                     $save = true;
                 }
             }
@@ -386,7 +387,7 @@ class MultilingualBehavior extends Behavior
     public function canGetProperty($name, $checkVars = true)
     {
         return method_exists($this, 'get' . $name) || $checkVars && property_exists($this, $name)
-        || $this->hasLangAttribute($name);
+            || $this->hasLangAttribute($name);
     }
 
     /**

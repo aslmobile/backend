@@ -1,9 +1,9 @@
 <?php namespace app\models;
 
-use Yii;
-use yii\behaviors\TimestampBehavior;
 use app\components\MultilingualBehavior;
 use app\components\MultilingualQuery;
+use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "legal".
@@ -78,19 +78,14 @@ class Legal extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'                => Yii::t('app', "ID"),
-            'title'             => Yii::t('app', "Заголовок"),
-            'content'           => Yii::t('app', "Содержание"),
-            'type'              => Yii::t('app', "Тип"),
-            'weight'            => Yii::t('app', "Вес (сортировка)"),
-            'created_at'        => Yii::t('app', "Создан"),
-            'updated_at'        => Yii::t('app', "Обновлен")
+            'id' => Yii::t('app', "ID"),
+            'title' => Yii::t('app', "Заголовок"),
+            'content' => Yii::t('app', "Содержание"),
+            'type' => Yii::t('app', "Тип"),
+            'weight' => Yii::t('app', "Вес (сортировка)"),
+            'created_at' => Yii::t('app', "Создан"),
+            'updated_at' => Yii::t('app', "Обновлен")
         ];
-    }
-
-    public function beforeSave($insert)
-    {
-        return parent::beforeSave($insert);
     }
 
     public static function getTypesList()
@@ -99,5 +94,17 @@ class Legal extends \yii\db\ActiveRecord
             self::TYPE_PASSENGER => Yii::t('app', "Пассажир"),
             self::TYPE_DRIVER => Yii::t('app', "Водитель")
         ];
+    }
+
+    public function afterFind()
+    {
+        $this->content = json_decode($this->content, true);
+        parent::afterFind();
+    }
+
+    public function beforeSave($insert)
+    {
+        $this->content = json_encode($this->content);
+        return parent::beforeSave($insert);
     }
 }

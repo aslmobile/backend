@@ -76,11 +76,36 @@ use yii\widgets\ActiveForm;
             <?php foreach (Lang::getBehaviorsList() as $k => $v) { ?>
                 <div class="tab-pane fade" id="top-<?= $k ?>">
                     <div class="row">
-                        <div class="col-sm-6">
-                            <?= $form->field($model, 'title_' . $k)->textInput()->label($model->getAttributeLabel('title') . ' ' . $v); ?>
-                            <?= $form->field($model, 'content_' . $k)->textarea()->label($model->getAttributeLabel('content') . ' ' . $v); ?>
+                        <div class="col-sm-12">
+                            <?= $form->field($model, 'title_' . $k)->textInput()
+                                ->label($model->getAttributeLabel('title') . ' ' . $v); ?>
+                            <?php $attribute =  'content_' . $k ?>
+                            <?= $form->field($model, $attribute)
+                                ->widget(\unclead\multipleinput\MultipleInput::class, [
+                                    'data' => json_decode($model->$attribute, true),
+                                    'sortable' => true,
+                                    'addButtonPosition' => \unclead\multipleinput\MultipleInput::POS_FOOTER,
+                                    'allowEmptyList' => true,
+                                    'columns' => [
+                                        [
+                                            'name' => 'weight',
+                                            'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_TEXT_INPUT,
+                                            'title' => Yii::t('app', "Порядок"),
+                                            'options' => ['type' => 'number', 'step' => 1, 'style' => 'width:70px;']
+                                        ],
+                                        [
+                                            'name' => 'title',
+                                            'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_TEXT_INPUT,
+                                            'title' => Yii::t('app', "Заголовок"),
+                                        ],
+                                        [
+                                            'name' => 'description',
+                                            'type' => 'textArea',
+                                            'title' => Yii::t('app', "Содержимое"),
+                                        ],
+                                    ],
+                                ]); ?>
                         </div>
-                        <div class="col-sm-6"></div>
                     </div>
                 </div>
             <?php } ?>

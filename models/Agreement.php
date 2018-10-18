@@ -88,16 +88,24 @@ class Agreement extends \yii\db\ActiveRecord
         ];
     }
 
-    public function beforeSave($insert)
-    {
-        return parent::beforeSave($insert);
-    }
-
     public static function getTypesList()
     {
         return [
             self::TYPE_PASSENGER => Yii::t('app', "Пассажир"),
             self::TYPE_DRIVER => Yii::t('app', "Водитель")
         ];
+    }
+
+
+    public function afterFind()
+    {
+        $this->content = json_decode($this->content, true);
+        parent::afterFind();
+    }
+
+    public function beforeSave($insert)
+    {
+        $this->content = json_encode($this->content);
+        return parent::beforeSave($insert);
     }
 }

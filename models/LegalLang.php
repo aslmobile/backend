@@ -28,7 +28,7 @@ class LegalLang extends \yii\db\ActiveRecord
         return [
             [['id'], 'required'],
             [['id', 'original_id'], 'integer'],
-            [['content','title'], 'safe'],
+            [['content', 'title'], 'safe'],
         ];
     }
 
@@ -44,5 +44,17 @@ class LegalLang extends \yii\db\ActiveRecord
             'original_id' => Yii::t('app', 'ID записи'),
             'language' => Yii::t('app', 'Язык'),
         ];
+    }
+
+    public function afterFind()
+    {
+        $this->content = json_decode($this->content, true);
+        parent::afterFind();
+    }
+
+    public function beforeSave($insert)
+    {
+        $this->content = json_encode($this->content);
+        return parent::beforeSave($insert);
     }
 }

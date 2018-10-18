@@ -77,29 +77,41 @@ use yii\widgets\ActiveForm;
             <?php foreach (Lang::getBehaviorsList() as $k => $v) { ?>
                 <div class="tab-pane fade" id="top-<?= $k ?>">
                     <div class="row">
-                        <div class="col-sm-6">
-                            <?= $form->field($model, 'title_' . $k)->textInput()->label($model->getAttributeLabel('title') . ' ' . $v); ?>
-
-                            <?= $form->field($model, 'content_' . $k)->widget(TTinyMCE::className(), [
-                                'clientOptions' => [
-                                    'language_url' => Yii::$app->homeUrl . 'tiny_translates/ru.js',
-                                    'language' => 'ru',
-                                    'plugins' => [
-                                        "advlist autolink lists link image charmap print preview hr anchor pagebreak",
-                                        "searchreplace visualblocks visualchars code fullscreen",
-                                        "insertdatetime media nonbreaking save table contextmenu directionality",
-                                        "template paste textcolor emoticons",
+                        <div class="col-sm-12">
+                            <?= $form->field($model, 'title_' . $k)->textInput()
+                                ->label($model->getAttributeLabel('title') . ' ' . $v); ?>
+                            <?php $attribute =  'content_' . $k ?>
+                            <?= $form->field($model, $attribute)
+                                ->widget(\unclead\multipleinput\MultipleInput::class, [
+                                    'data' => json_decode($model->$attribute, true),
+                                    'sortable' => true,
+                                    'addButtonPosition' => \unclead\multipleinput\MultipleInput::POS_FOOTER,
+                                    'allowEmptyList' => true,
+                                    'columns' => [
+                                        [
+                                            'name' => 'weight',
+                                            'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_TEXT_INPUT,
+                                            'title' => Yii::t('app', "Порядок"),
+                                            'options' => ['type' => 'number', 'step' => 1, 'style' => 'width:70px;']
+                                        ],
+                                        [
+                                            'name' => 'title',
+                                            'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_TEXT_INPUT,
+                                            'title' => Yii::t('app', "Заголовок"),
+                                        ],
+                                        [
+                                            'name' => 'description',
+                                            'type' => 'textArea',
+                                            'title' => Yii::t('app', "Содержимое"),
+                                        ],
                                     ],
-                                    'toolbar' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media | forecolor backcolor | emoticons",
-                                    'file_picker_callback' => ETinyMCE::getFilePickerCallback(['el-finder/tinymce']),
-                                ],
-                            ])->label($model->getAttributeLabel('content') . ' ' . $v) ?>
+                                ]); ?>
                         </div>
-                        <div class="col-sm-6"></div>
                     </div>
                 </div>
             <?php } ?>
         </div>
+
     </div>
     <!-- /.box-body -->
     <div class="box-footer clearfix text-right">
