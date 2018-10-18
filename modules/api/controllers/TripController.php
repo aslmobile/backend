@@ -134,7 +134,7 @@ class TripController extends BaseController
         $km_desc = $km_settings->description;
 
         $this->module->data['km'] = $user->km;
-        $this->module->data['min'] = 213;
+        $this->module->data['min'] = Yii::$app->params['distance'];
         $this->module->data['description'] = $km_desc;
         $this->module->setSuccess();
         $this->module->sendResponse();
@@ -178,7 +178,7 @@ class TripController extends BaseController
                 }])->andWhere(['route' => strval($route->id)])
                     ->andWhere(['<=', 'from', $time])->andWhere(['>=', 'to', $time])
                     ->one();
-                if (!$waste || $user->km < 213) $this->module->setError(422,
+                if (!$waste || $user->km < Yii::$app->params['distance']) $this->module->setError(422,
                     '_km', Yii::$app->mv->gt("Вы не можете оплатить данную поездку бесплатными километрами", [], false));
             }
 

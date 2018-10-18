@@ -176,6 +176,7 @@ $params = [
         5 => Yii::t('app', "Пятница"),
         6 => Yii::t('app', "Суббота"),
         7 => Yii::t('app', "Воскресенье"),
-    ]
+    ],
+    'distance' => 217
 ];
 return $params;
