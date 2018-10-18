@@ -94,11 +94,17 @@ JSON;
             $array['accept'] = !empty($inAccept) ? 1 : 0;
             $array['acceptSeat'] = !empty($inAcceptSeat) ? 1 : 0;
 
-            /** @var \app\models\Line $inQueue */
-            $inQueue = Trip::find()->where(['status' => Trip::STATUS_CREATED, 'user_id' => $this->id])->one();
+            /** @var \app\models\Trip $inQueue */
+            $inQueue = Trip::find()->where(['status' => Trip::STATUS_CREATED, 'user_id' => $this->id])
+                ->orderBy(['created_at' => SORT_DESC])
+                ->one();
             $array['queue'] = !empty($inQueue) ? 1 : 0;
 
-            $array['trip_id'] = !empty($inQueue) ? $inQueue->id : 0;
+            /** @var \app\models\Trip $inLine */
+            $inLine = Trip::find()->where(['status' => [Trip::STATUS_WAITING, Trip::STATUS_WAY], 'user_id' => $this->id])
+                ->orderBy(['created_at' => SORT_DESC])
+                ->one();
+            $array['trip_id'] = !empty($inLine) ? $inLine->id : 0;
         }
 
         $array['rating'] = $this->getRating();

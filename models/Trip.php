@@ -232,7 +232,6 @@ class Trip extends \yii\db\ActiveRecord
                             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id], 'trip' => $this->toArray()]
                         ])));
 
-
                     } else if ($line->freeseats == intval($this->seats)) {
 
                         $line->freeseats = 0;
@@ -248,8 +247,6 @@ class Trip extends \yii\db\ActiveRecord
                 break;
 
             case 'status':
-
-                Queue::processingQueue();
 
                 $line = Line::findOne($this->line_id);
 
@@ -317,6 +314,8 @@ class Trip extends \yii\db\ActiveRecord
 
                         break;
                 }
+
+                Queue::processingQueue();
 
                 break;
         }
