@@ -38,7 +38,8 @@
         "yiisoft/yii2-redis": "^2.0@dev",
         "yii2tech/html2pdf": "^1.0@dev",
         "kartik-v/yii2-widget-datetimepicker": "*",
-        "2amigos/qrcode-library": "~1.1"
+        "2amigos/qrcode-library": "~1.1",
+        "kartik-v/yii2-widget-timepicker": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

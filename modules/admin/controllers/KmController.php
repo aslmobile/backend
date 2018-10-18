@@ -1,12 +1,11 @@
 <?php namespace app\modules\admin\controllers;
 
+use app\components\Controller;
 use app\modules\admin\models\Km;
 use app\modules\admin\models\Route;
 use Yii;
-use app\components\Controller;
-
-use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 
 class KmController extends Controller
 {
@@ -41,29 +40,23 @@ class KmController extends Controller
 
     public function actionSettings()
     {
-        $model = Km::findOne(['id' => 1]);
+        $model = Km::findOne(1);
         if (!$model) $model = new Km();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save())
-        {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             Yii::$app->getSession()->setFlash('success', Yii::t('app', "Сохранено"));
             return $this->redirect(['settings']);
-        }
-        else
-        {
+        } else {
+
             $_routes = [];
 
             /** @var \app\modules\admin\models\Route $route */
             $routes = Route::find()->where(['status' => Route::STATUS_ACTIVE])->all();
-            if ($routes && count($routes) > 0) foreach ($routes as $route)
-            {
+            if ($routes && count($routes) > 0) foreach ($routes as $route) {
                 $_routes[$route->id] = $route->title . " ({$route->base_tariff})";
             }
 
-            $days = [];
-            $days['1,2,3,4,5,6,7'] = Yii::t('app', "Все");
-            $days['1,2,3,4,5'] = Yii::t('app', "Будни");
-            $days['6,7'] = Yii::t('app', "Выходные");
+            $days = Yii::$app->params['schedules'];
 
             return $this->render('settings', [
                 'model' => $model,

@@ -4,9 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\helpers\ArrayHelper;
-use app\components\MultilingualBehavior;
-use app\components\MultilingualQuery;
+
 /**
  * This is the model class for table "km".
  *
@@ -15,9 +13,25 @@ use app\components\MultilingualQuery;
  * @property string $description
  * @property integer $created_at
  * @property integer $updated_at
+ *
+ * @property array $settings_accumulation
+ * @property array $settings_waste
  */
 class Km extends \yii\db\ActiveRecord
 {
+
+    public $settings_accumulation = false;
+    public $settings_waste = false;
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $settings = json_decode($this->settings, true);
+        $this->settings_accumulation = $settings['accumulation'];
+        $this->settings_waste = $settings['waste'];
+    }
+
     /**
      * @inheritdoc
      */

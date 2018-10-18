@@ -1,12 +1,12 @@
 <?php namespace app\modules\api\controllers;
 
+use app\components\ArrayQuery\ArrayQuery;
 use app\components\Socket\SocketPusher;
 use app\models\Line;
 use app\models\LuggageType;
 use app\models\Notifications;
 use app\models\Queue;
 use app\models\Route;
-use app\models\TariffDependence;
 use app\models\Taxi;
 use app\models\TripLuggage;
 use app\models\User;
@@ -52,7 +52,8 @@ class TripController extends BaseController
                             'rate-driver',
                             'return',
                             'get-trip',
-                            'update-trip'
+                            'update-trip',
+                            'get-km'
                         ],
                         'allow' => true
                     ]
@@ -80,7 +81,8 @@ class TripController extends BaseController
                     'rate-driver' => ['POST'],
                     'return' => ['POST'],
                     'get-trip' => ['GET'],
-                    'update-trip' => ['POST']
+                    'update-trip' => ['POST'],
+                    'get-km' => ['GET']
                 ]
             ]
         ];
@@ -123,6 +125,22 @@ class TripController extends BaseController
 
     }
 
+    public function actionGetKm(){
+
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $km_settings = \app\models\Km::findOne(1);
+        $km_desc = $km_settings->description;
+
+        $this->module->data['km'] = $user->km;
+        $this->module->data['min'] = 213;
+        $this->module->data['description'] = $km_desc;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+
+    }
+
     public function actionQueue()
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -138,6 +156,33 @@ class TripController extends BaseController
             ['=', 'id', $this->body->route]
         ])->one();
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
+
+        if ($this->body->payment_type == Trip::PAYMENT_TYPE_KM) {
+
+            if(isset($this->body->schedule) && !empty($this->body->schedule))$this->module->setError(422,
+                '_km', Yii::$app->mv->gt("Вы не можете оплатить зпланированную поездку бесплатными километрами", [], false));
+
+            $query = new ArrayQuery();
+
+            $km_settings = \app\models\Km::findOne(1);
+            $km_waste = $km_settings->settings_waste;
+            $day = date('N');
+            $time = intval(str_replace(':', '', date('H:i')));
+            $query->from($km_waste);
+
+            $waste_exist = $query->where(['route' => strval($route->id)])->one();
+
+            if ($waste_exist) {
+                $waste = $query->where(['CALLBACK', function ($data) use ($day) {
+                    return in_array($day, $data['days']);
+                }])->andWhere(['route' => strval($route->id)])
+                    ->andWhere(['<=', 'from', $time])->andWhere(['>=', 'to', $time])
+                    ->one();
+                if (!$waste || $user->km < 213) $this->module->setError(422,
+                    '_km', Yii::$app->mv->gt("Вы не можете оплатить данную поездку бесплатными километрами", [], false));
+            }
+
+        }
 
         /** @var \app\models\Checkpoint $checkpoint */
         $checkpoint = \app\models\Checkpoint::find()->andWhere([
@@ -777,7 +822,7 @@ class TripController extends BaseController
         $timer = true;
 
         if ($checkpoint->type === Checkpoint::TYPE_END) {
-            /** @var \app\models\Trip $trip */
+
             $trips = Trip::find()->andWhere(['line_id' => $line->id, 'status' => Trip::STATUS_WAY])->all();
             $addressed = ArrayHelper::getColumn($trips, 'user_id');
             $timer = false;
@@ -787,6 +832,10 @@ class TripController extends BaseController
 
             $_trips = [];
             $total = ['cash' => 0, 'card' => 0];
+
+            $query = new ArrayQuery();
+
+            /** @var \app\models\Trip $trip */
             foreach ($trips as $trip) {
 
                 $trip->status = Trip::STATUS_FINISHED;
@@ -812,6 +861,29 @@ class TripController extends BaseController
                     }
                 }
                 $_trips[] = $trip->toArray();
+
+                $km_settings = \app\models\Km::findOne(1);
+                $km_accumulation = $km_settings->settings_accumulation;
+                $day = date('N');
+                $time = intval(str_replace(':', '', date('H:i')));
+                $query->from($km_accumulation);
+
+                $accumulation = $query->where(['CALLBACK', function ($data) use ($day) {
+                    return in_array($day, $data['days']);
+                }])->andWhere(['route' => strval($trip->route_id)])
+                    ->andWhere(['<=', 'from', $time])->andWhere(['>=', 'to', $time])
+                    ->one();
+
+                if ($accumulation) {
+                    $rate = doubleval($accumulation['rate']);
+                    if ($rate && !empty($line->path)) {
+                        $path = json_decode($line->path);
+                        $distance = isset($path->distance) ? round($path->distance / 1000) : 0;
+                        $trip->user->km += $distance * $rate;
+                        $trip->user->update();
+                    }
+                }
+
             }
 
             $line->status = Line::STATUS_FINISHED;
