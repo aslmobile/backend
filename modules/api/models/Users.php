@@ -66,6 +66,7 @@ JSON;
             /** @var \app\models\Line $onLine */
             $onLine = Line::find()->where(['status' => Line::STATUS_IN_PROGRESS, 'driver_id' => $this->id])->one();
             $array['line_id'] = !empty($onLine) ? $onLine->id : 0;
+
         }
 
         if ($this->type == User::TYPE_PASSENGER) {
@@ -100,11 +101,12 @@ JSON;
                 ->one();
             $array['queue'] = !empty($inQueue) ? 1 : 0;
 
-            /** @var \app\models\Trip $inLine */
-            $inLine = Trip::find()->where(['status' => [Trip::STATUS_WAITING, Trip::STATUS_WAY], 'user_id' => $this->id])
+            /** @var \app\models\Trip $onLine */
+            $onLine = Trip::find()->where(['status' => [Trip::STATUS_WAITING, Trip::STATUS_WAY], 'user_id' => $this->id])
                 ->orderBy(['created_at' => SORT_DESC])
                 ->one();
-            $array['trip_id'] = !empty($inLine) ? $inLine->id : 0;
+            $array['trip_id'] = !empty($onLine) ? $onLine->id : 0;
+
         }
 
         $array['rating'] = $this->getRating();

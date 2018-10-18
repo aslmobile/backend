@@ -316,7 +316,7 @@ class TripController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $trip = Trip::findOne(['id' => $id, 'status' => Trip::STATUS_SCHEDULED]);
+        $trip = Trip::findOne($id);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         $this->module->data['trip'] = $trip->toArray();
