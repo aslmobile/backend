@@ -62,6 +62,7 @@ $statuses = BotTrip::getStatusList();
                 ],
                 'filterModel' => $searchModel,
                 'columns' => [
+                    'id',
                     [
                         'attribute' => 'user_id',
                         'content' => function ($data) {
@@ -139,8 +140,8 @@ $statuses = BotTrip::getStatusList();
                         'headerOptions' => ['style' => 'width: 250px;'],
                         'content' => function ($model) {
                             $title = isset($model->line) && isset($model->line->driver) ? $model->line->driver->fullName . ' ' . $model->route->title : '';
-                            $seats = isset($model->line) ? '<br>Свободных мест: '.$model->line->freeseats : '';
-                            return $title.$seats;
+                            $seats = isset($model->line) ? '<br>Свободных мест: ' . $model->line->freeseats : '';
+                            return $title . $seats;
                         },
                         'refreshGrid' => true,
                         'class' => '\kartik\grid\EditableColumn',

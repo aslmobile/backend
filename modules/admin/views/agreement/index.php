@@ -1,15 +1,16 @@
 <?php
 
-use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\admin\models\LegalSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt('Пользовательское соглашение',[],false);
+$this->title = Yii::$app->mv->gt('Пользовательское соглашение', [], false);
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
 
 <div class="content-wrapper">
@@ -26,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="box-tools pull-right">
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} Добавить',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
+                        Yii::$app->mv->gt('{i} Добавить', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
                     ); ?>
@@ -39,24 +40,24 @@ $this->params['breadcrumbs'][] = $this->title;
                 'rowOptions' => function ($model, $key, $index, $grid) {
                     return [
                         'role' => 'button',
-                        'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/agreement/view/" . $key) . "'"
+                        'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/agreement/update/" . $key) . "'"
                     ];
                 },
-                'layout'=>"
+                'layout' => "
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
                     <div class='box-footer' style='display: block;'>{pager}</div>",
                 'tableOptions' => [
                     'class' => 'table table-bordered table-hover dataTable',
                 ],
                 'filterModel' => $searchModel,
-                 'columns' => [
-                     [
-                         'attribute' => 'type',
-                         'content' => function ($data) {
-                             return key_exists($data->type, $data->typesList) ? $data->typesList[$data->type] : $data->type;
-                         },
-                         'filter' => \app\models\Legal::getTypesList(),
-                     ],
+                'columns' => [
+                    [
+                        'attribute' => 'type',
+                        'content' => function ($data) {
+                            return key_exists($data->type, $data->typesList) ? $data->typesList[$data->type] : $data->type;
+                        },
+                        'filter' => \app\models\Legal::getTypesList(),
+                    ],
                     'title'
                 ],
             ]); ?>

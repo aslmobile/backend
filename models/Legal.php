@@ -58,8 +58,9 @@ class Legal extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'content', 'type'], 'required'],
-            [['title', 'content'], 'string'],
+            [['title', 'type'], 'required'],
+            [['title'], 'string'],
+            ['content', 'safe'],
             [['type'], 'integer']
         ];
     }

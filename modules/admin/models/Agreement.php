@@ -18,10 +18,19 @@ class Agreement extends \app\models\Agreement
     public function toArray(array $fields = [], array $expand = [], $recursive = true)
     {
         $array = parent::toArray($fields, $expand, $recursive);
-
-        $array['content'] = strip_tags($array['content'], '<br>');
-        $array['content'] = str_replace(['\r', '\n', '\\r', '\\n', '\r\n', '\\r\\n', "\n", "\r"], '<br />', $array['content']);
-
         return $array;
     }
+
+    public function afterFind()
+    {
+        $this->content = json_decode($this->content, true);
+        parent::afterFind();
+    }
+
+    public function beforeSave($insert)
+    {
+        $this->content = json_encode($this->content);
+        return parent::beforeSave($insert);
+    }
+
 }

@@ -26,7 +26,7 @@ class Queue extends Model
 
         $trips = \app\modules\api\models\Trip::find()
             ->where(['status' => Trip::STATUS_CREATED])
-            ->andWhere(['>=', 'start_time', time()])
+            ->andWhere(['<=', 'start_time', time()])
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])
             ->all();
 
@@ -40,8 +40,9 @@ class Queue extends Model
                 $notifications = Notifications::create(Notifications::NTD_TRIP_FIRST, [$line->driver_id]);
                 foreach ($notifications as $notification) Notifications::send($notification);
                 $ids = ArrayHelper::getColumn($applicants, 'id');
+                $applicants = ArrayHelper::getColumn($applicants, 'user_id');
                 self::unsetQueue($ids, $query);
-                if (!empty($ids)) self::send($ids, $line);
+                if (!empty($ids)) self::send($applicants, $line);
             }
 
         }

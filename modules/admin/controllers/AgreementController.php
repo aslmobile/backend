@@ -1,17 +1,13 @@
 <?php namespace app\modules\admin\controllers;
 
+use app\components\Controller;
 use app\modules\admin\models\Agreement;
 use app\modules\admin\models\AgreementSearch;
-use app\modules\admin\models\Legal;
-use app\modules\admin\models\LegalSearch;
-use Yii;
-use app\modules\admin\models\Lang;
 use app\modules\admin\models\Mailtpl;
-use app\components\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
+use Yii;
 use yii\filters\AccessControl;
-use yii\helpers\ArrayHelper;
+use yii\filters\VerbFilter;
+use yii\web\NotFoundHttpException;
 
 class AgreementController extends Controller
 {
@@ -46,11 +42,10 @@ class AgreementController extends Controller
 
     public function actionIndex()
     {
-        if (Yii::$app->request->isAjax)
-        {
+        if (Yii::$app->request->isAjax) {
             $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
             if (count($keys)) foreach ($keys as $k => $v) if (($model = Agreement::findOne($v)) !== null)
-                    $model->delete();
+                $model->delete();
 
             return $this->redirect(['index']);
         }
@@ -65,9 +60,9 @@ class AgreementController extends Controller
     }
 
     /**
-     * Displays a single Mailtpl model.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
@@ -77,16 +72,14 @@ class AgreementController extends Controller
     }
 
     /**
-     * Creates a new Mailtpl model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
         $model = new Agreement();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['index']);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -95,10 +88,9 @@ class AgreementController extends Controller
     }
 
     /**
-     * Updates an existing Mailtpl model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
@@ -115,10 +107,11 @@ class AgreementController extends Controller
     }
 
     /**
-     * Deletes an existing Mailtpl model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id)
     {
@@ -128,11 +121,10 @@ class AgreementController extends Controller
     }
 
     /**
-     * Finds the Mailtpl model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Mailtpl the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @param bool $ml
+     * @return Agreement|array|null|\yii\db\ActiveRecord
+     * @throws NotFoundHttpException
      */
     protected function findModel($id, $ml = true)
     {

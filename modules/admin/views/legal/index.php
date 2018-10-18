@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'rowOptions' => function ($model, $key, $index, $grid) {
                     return [
                         'role' => 'button',
-                        'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/legal/view/" . $key) . "'"
+                        'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/legal/update/" . $key) . "'"
                     ];
                 },
                 'layout'=>"

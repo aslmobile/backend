@@ -1,12 +1,11 @@
 <?php
 
+use alexantr\elfinder\TinyMCE as ETinyMCE;
+use alexantr\tinymce\TinyMCE as TTinyMCE;
+use app\modules\admin\models\Lang;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use yii\helpers\ArrayHelper;
-use alexantr\elfinder\InputFile;
-use alexantr\tinymce\TinyMCE as TTinyMCE;
-use alexantr\elfinder\TinyMCE as ETinyMCE;
-use app\modules\admin\models\Lang;
+
 /* @var $this yii\web\View */
 /* @var $model app\models\Legal */
 /* @var $form yii\widgets\ActiveForm */
@@ -29,7 +28,7 @@ use app\modules\admin\models\Lang;
     <div class="box-body" style="padding: 10px 0">
         <ul class="nav nav-tabs">
             <li class="active" style="margin-left: 15px;">
-                <a data-toggle="tab" href="#top"><?= Yii::$app->mv->gt('Информация',[],false); ?></a>
+                <a data-toggle="tab" href="#top"><?= Yii::$app->mv->gt('Информация', [], false); ?></a>
             </li>
             <?php foreach (Lang::getBehaviorsList() as $k => $v) { ?>
                 <li>
@@ -41,38 +40,64 @@ use app\modules\admin\models\Lang;
         <div class="tab-content" style="padding: 10px">
             <div id="top" class="tab-pane fade in active">
                 <div class="row">
-                    <div class="col-sm-12">
+                    <div class="col-sm-6">
                         <?= $form->field($model, 'type')->dropDownList($model->typesList); ?>
-                        <?= $form->field($model, 'weight')->textInput(['type' => "number"]) ?>
+                    </div>
+                    <div class="col-sm-6">
                         <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
-                        <?= $form->field($model, 'content')->textarea(['rows' => 16]); ?>
+                    </div>
+                    <div class="col-sm-12">
+                        <?= $form->field($model, 'content')->widget(\unclead\multipleinput\MultipleInput::class, [
+                            'data' => $model->content,
+                            'sortable' => true,
+                            'addButtonPosition' => \unclead\multipleinput\MultipleInput::POS_FOOTER,
+                            'allowEmptyList' => true,
+                            'columns' => [
+                                [
+                                    'name' => 'weight',
+                                    'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_TEXT_INPUT,
+                                    'title' => Yii::t('app', "Порядок"),
+                                    'options' => ['type' => 'number', 'step' => 1, 'style' => 'width:70px;']
+                                ],
+                                [
+                                    'name' => 'title',
+                                    'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_TEXT_INPUT,
+                                    'title' => Yii::t('app', "Заголовок"),
+                                ],
+                                [
+                                    'name' => 'description',
+                                    'type' => 'textArea',
+                                    'title' => Yii::t('app', "Содержимое"),
+                                ],
+                            ],
+                        ])->label(Yii::t('app', "Содержимое")); ?>
                     </div>
                 </div>
             </div>
             <?php foreach (Lang::getBehaviorsList() as $k => $v) { ?>
-            <div class="tab-pane fade" id="top-<?= $k ?>">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <?= $form->field($model, 'title_'.$k)->textInput()->label($model->getAttributeLabel('title').' '.$v); ?>
+                <div class="tab-pane fade" id="top-<?= $k ?>">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <?= $form->field($model, 'title_' . $k)->textInput()->label($model->getAttributeLabel('title') . ' ' . $v); ?>
 
-                        <?= $form->field($model, 'content_'.$k)->widget(TTinyMCE::className(), [
-                            'clientOptions' => [
-                                'language_url' => Yii::$app->homeUrl.'tiny_translates/ru.js',
-                                'language' => 'ru',
-                                'plugins' => [
-                                    "advlist autolink lists link image charmap print preview hr anchor pagebreak",
-                                    "searchreplace visualblocks visualchars code fullscreen",
-                                    "insertdatetime media nonbreaking save table contextmenu directionality",
-                                    "template paste textcolor emoticons",
+                            <?= $form->field($model, 'content_' . $k)->widget(TTinyMCE::className(), [
+                                'clientOptions' => [
+                                    'language_url' => Yii::$app->homeUrl . 'tiny_translates/ru.js',
+                                    'language' => 'ru',
+                                    'plugins' => [
+                                        "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+                                        "searchreplace visualblocks visualchars code fullscreen",
+                                        "insertdatetime media nonbreaking save table contextmenu directionality",
+                                        "template paste textcolor emoticons",
+                                    ],
+                                    'toolbar' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media | forecolor backcolor | emoticons",
+                                    'file_picker_callback' => ETinyMCE::getFilePickerCallback(['el-finder/tinymce']),
                                 ],
-                                'toolbar' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media | forecolor backcolor | emoticons",
-                                'file_picker_callback' => ETinyMCE::getFilePickerCallback(['el-finder/tinymce']),
-                            ],
-                        ])->label($model->getAttributeLabel('content').' '.$v) ?>
+                            ])->label($model->getAttributeLabel('content') . ' ' . $v) ?>
+                        </div>
+                        <div class="col-sm-6"></div>
                     </div>
-                    <div class="col-sm-6"></div>
                 </div>
-            </div>
             <?php } ?>
         </div>
     </div>
@@ -80,8 +105,8 @@ use app\modules\admin\models\Lang;
     <div class="box-footer clearfix text-right">
         <?= Html::submitButton(
             ($model->isNewRecord ?
-            Yii::$app->mv->gt('{i} Добавить',['i'=>Html::tag('i','',['class'=>'fa fa-save'])],0) :
-            Yii::$app->mv->gt('{i} Сохранить',['i'=>Html::tag('i','',['class'=>'fa fa-save'])],0)),
+                Yii::$app->mv->gt('{i} Добавить', ['i' => Html::tag('i', '', ['class' => 'fa fa-save'])], 0) :
+                Yii::$app->mv->gt('{i} Сохранить', ['i' => Html::tag('i', '', ['class' => 'fa fa-save'])], 0)),
             ['class' => 'btn btn-success']
         ) ?>
     </div>

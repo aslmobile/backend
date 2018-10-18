@@ -151,3 +151,12 @@ span.select2{
 .list-cell__days>.form-group{
     min-width: 300px !important;
 }
+.list-cell__weight{
+    width: 50px;
+}
+.list-cell__description{
+    width: 50%;
+}
+.list-cell__description textarea{
+    width: 100% !important;
+}

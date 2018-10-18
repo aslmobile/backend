@@ -14,4 +14,16 @@ class Legal extends \app\models\Legal
             self::TYPE_PASSENGER => Yii::t('app', "Пассажир")
         ];
     }
+
+    public function afterFind()
+    {
+        $this->content = json_decode($this->content, true);
+        parent::afterFind();
+    }
+
+    public function beforeSave($insert)
+    {
+        $this->content = json_encode($this->content);
+        return parent::beforeSave($insert);
+    }
 }
