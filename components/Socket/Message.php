@@ -3,7 +3,6 @@
 namespace app\components\Socket;
 
 use app\components\Socket\models\Line;
-use app\models\Checkpoint;
 use app\models\Devices;
 use app\models\Queue;
 use app\modules\api\models\RestFul;
@@ -648,12 +647,8 @@ class Message
 
         $data = $data['data'];
         $this->message_id = intval($data['message_id']);
-
-        /** @var Line $line */
         $line = $data['line'];
-        /** @var Checkpoint $checkpoint */
         $checkpoint = $data['checkpoint'];
-        /** @var bool $timer */
         $timer = isset($data['timer']) ? $data['timer'] : false;
 
         $message = ['status' => 'passed', 'checkpoint' => intval($checkpoint['id']), 'line' => intval($line['id'])];

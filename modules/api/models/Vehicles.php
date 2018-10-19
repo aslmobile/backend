@@ -31,9 +31,14 @@ class Vehicles extends \app\models\Vehicles
         }
 
         foreach ($array as $field => $value) {
-            if ($field == 'vehicle_type_id') $array[$field] = VehicleTypes::findOne($this->vehicle_type_id)->toArray();
-            if ($field == 'vehicle_model_id') $array[$field] = VehicleModels::findOne($this->vehicle_model_id)->toArray();
-            if ($field == 'vehicle_brand_id') $array[$field] = VehicleBrands::findOne($this->vehicle_brand_id)->toArray();
+
+            $type = VehicleTypes::findOne($this->vehicle_type_id);
+            $model = VehicleModels::findOne($this->vehicle_model_id);
+            $brand = VehicleBrands::findOne($this->vehicle_brand_id);
+
+            if ($field == 'vehicle_type_id') $array[$field] = !empty($type) ? $type->toArray() : [];
+            if ($field == 'vehicle_model_id') $array[$field] = !empty($model) ? $model->toArray() : [];
+            if ($field == 'vehicle_brand_id') $array[$field] = !empty($brand) ? $brand->toArray() : [];
         }
 
         return $array;
@@ -41,7 +46,8 @@ class Vehicles extends \app\models\Vehicles
 
     public function getPhotoUrl()
     {
-        if ($this->image && !empty ($this->image)) {}
+        if ($this->image && !empty ($this->image)) {
+        }
 
         return $this->model->image;
     }

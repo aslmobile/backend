@@ -185,6 +185,14 @@ class VehiclesController extends BaseController
 
         $this->validateBodyParams(['user_id', 'vehicle_type_id', 'vehicle_brand_id', 'vehicle_model_id', 'license_plate', 'seats']);
 
+        $type = VehicleTypes::findOne($this->body->vehicle_type_id);
+        $model = VehicleModels::findOne($this->body->vehicle_model_id);
+        $brand = VehicleBrands::findOne($this->body->vehicle_brand_id);
+
+        if (!$type) $this->module->setError(422, '_type', Yii::$app->mv->gt("Не найдено", [], false));
+        if (!$model) $this->module->setError(422, '_model', Yii::$app->mv->gt("Не найдено", [], false));
+        if (!$brand) $this->module->setError(422, '_brand', Yii::$app->mv->gt("Не найдено", [], false));
+
         $vehicle = new Vehicles();
         $data['Vehicles'] = (array)$this->body;
         if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle.load', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
@@ -214,11 +222,18 @@ class VehiclesController extends BaseController
         $vehicle = Vehicles::findOne(['id' => $id]);
         if (!$vehicle) $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
-        $data = [
-            'Vehicles' => (array)$this->body
-        ];
+        $data = ['Vehicles' => (array)$this->body];
 
         if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
+
+        $type = VehicleTypes::findOne($vehicle->vehicle_type_id);
+        $model = VehicleModels::findOne($vehicle->vehicle_model_id);
+        $brand = VehicleBrands::findOne($vehicle->vehicle_brand_id);
+
+        if (!$type) $this->module->setError(422, '_type', Yii::$app->mv->gt("Не найдено", [], false));
+        if (!$model) $this->module->setError(422, '_model', Yii::$app->mv->gt("Не найдено", [], false));
+        if (!$brand) $this->module->setError(422, '_brand', Yii::$app->mv->gt("Не найдено", [], false));
+
         if (!$vehicle->validate() || !$vehicle->save()) {
             if ($vehicle->hasErrors()) {
                 foreach ($vehicle->errors as $field => $error_message)

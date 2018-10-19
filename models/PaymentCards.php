@@ -2,9 +2,7 @@
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\helpers\ArrayHelper;
-use app\components\MultilingualBehavior;
-use app\components\MultilingualQuery;
+
 /**
  * This is the model class for table "payment_cards".
  *
@@ -22,6 +20,7 @@ class PaymentCards extends \yii\db\ActiveRecord
     const
         STATUS_DISABLED = 0,
         STATUS_ACTIVE = 1,
+        STATUS_MAIN = 2,
         STATUS_DELETED = 10;
 
     /**
@@ -70,9 +69,10 @@ class PaymentCards extends \yii\db\ActiveRecord
     public static function getStatusList()
     {
         return [
-            self::STATUS_DISABLED   => Yii::t('app', "Не активная"),
-            self::STATUS_ACTIVE     => Yii::t('app', "Активная"),
-            self::STATUS_DELETED    => Yii::t('app', "Удалена")
+            self::STATUS_DISABLED => Yii::t('app', "Не активная"),
+            self::STATUS_ACTIVE => Yii::t('app', "Активная"),
+            self::STATUS_MAIN => Yii::t('app', "Основная"),
+            self::STATUS_DELETED => Yii::t('app', "Удалена")
         ];
     }
 
@@ -101,14 +101,10 @@ class PaymentCards extends \yii\db\ActiveRecord
 
     public static function getCards($user_id)
     {
-        $cards = self::find()->andWhere([
-            'AND',
-            ['=', 'user_id', $user_id],
-            ['=', 'status', self::STATUS_ACTIVE]
-        ])->all();
+        $cards = self::find()->andWhere(['user_id' => $user_id, 'status' => [self::STATUS_ACTIVE, self::STATUS_MAIN]])->all();
 
         $cards_list = [];
-        if ($cards && count($cards) > 0) foreach ($cards as $card) $cards_list[] = $card->toArray();
+        if (!empty($cards)) foreach ($cards as $card) $cards_list[] = $card->toArray();
 
         return $cards_list;
     }
