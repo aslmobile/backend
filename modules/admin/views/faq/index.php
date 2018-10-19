@@ -8,7 +8,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $searchModel app\modules\admin\models\LegalSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt('FAQ', [], false);
+$this->title = Yii::$app->mv->gt('Помощь', [], false);
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

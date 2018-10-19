@@ -8,7 +8,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $searchModel app\modules\admin\models\AnswersSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt('Быстрые ответы', [], false);
+$this->title = Yii::$app->mv->gt('Причины отмены', [], false);
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Answers */
 
 $this->title = Yii::$app->mv->gt('Добавить раздел',[],false);
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "FAQ"), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Помощь"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

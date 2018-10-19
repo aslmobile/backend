@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /* @var $model app\models\Answers */
 
 $this->title = Yii::$app->mv->gt('Добавить ответ',[],false);
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Быстрые ответы"), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', "Причины отмены"), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
