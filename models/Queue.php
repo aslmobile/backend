@@ -19,14 +19,14 @@ class Queue extends Model
     {
 
         $lines = \app\modules\api\models\Line::find()
-            ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
+            ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING, Line::STATUS_IN_PROGRESS]])
             ->andWhere(['>', 'freeseats', 0])
             ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_ASC])
             ->all();
 
         $trips = \app\modules\api\models\Trip::find()
             ->where(['status' => Trip::STATUS_CREATED])
-            ->andWhere(['<=', 'start_time', time()])
+            //->andWhere(['<=', 'start_time', time()])
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])
             ->all();
 
