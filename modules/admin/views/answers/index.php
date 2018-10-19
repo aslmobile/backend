@@ -1,14 +1,14 @@
 <?php
 
-use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\admin\models\AnswersSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::$app->mv->gt('Быстрые ответы',[],false);
+$this->title = Yii::$app->mv->gt('Быстрые ответы', [], false);
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="box-tools pull-right">
                     <?= Html::a(
-                        Yii::$app->mv->gt('{i} Добавить',['i'=>Html::tag('i','',['class'=>'fa fa-plus'])],false),
+                        Yii::$app->mv->gt('{i} Добавить', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false),
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
                     ); ?>
@@ -42,22 +42,29 @@ $this->params['breadcrumbs'][] = $this->title;
                         'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/answers/update/" . $key) . "'"
                     ];
                 },
-                'layout'=>"
+                'layout' => "
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
                     <div class='box-footer' style='display: block;'>{pager}</div>",
                 'tableOptions' => [
                     'class' => 'table table-bordered table-hover dataTable',
                 ],
                 'filterModel' => $searchModel,
-                 'columns' => [
-                     [
-                         'attribute' => 'type',
-                         'content' => function ($data) {
-                             return key_exists($data->type, $data->typesList) ? $data->typesList[$data->type] : false;
-                         },
-                         'filter' => \app\models\Answers::getTypesList(),
-                     ],
-                    'answer'
+                'columns' => [
+                    [
+                        'attribute' => 'type',
+                        'content' => function ($data) {
+                            return key_exists($data->type, $data->typesList) ? $data->typesList[$data->type] : false;
+                        },
+                        'filter' => \app\models\Answers::getTypesList(),
+                    ],
+                    [
+                        'attribute' => 'answer',
+                        'content' => function ($data) {
+                            $result = '';
+                            foreach ($data['answer'] as $item) $result .= $item['answer'] . '; ';
+                            return $result;
+                        },
+                    ],
                 ],
             ]); ?>
         </div>

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+
 /**
  * This is the model class for table "answers_lang".
  *
@@ -19,14 +20,13 @@ class AnswersLang extends \yii\db\ActiveRecord
         return 'answers_lang';
     }
 
-
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['answer'], 'string', 'max' => 255],
+            [['answer'], 'safe'],
             [['original_id'], 'integer'],
             [['language'], 'string', 'max' => 12]
         ];
@@ -44,4 +44,17 @@ class AnswersLang extends \yii\db\ActiveRecord
             'language' => Yii::t('app', 'Language'),
         ];
     }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->answer = is_string($this->answer) ? json_decode($this->answer, true) : $this->answer;
+    }
+
+    public function beforeSave($insert)
+    {
+        $this->answer = json_encode($this->answer);
+        return parent::beforeSave($insert);
+    }
+
 }

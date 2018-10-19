@@ -2,11 +2,11 @@
 
 namespace app\models;
 
-use Yii;
-use yii\behaviors\TimestampBehavior;
-use yii\helpers\ArrayHelper;
 use app\components\MultilingualBehavior;
 use app\components\MultilingualQuery;
+use Yii;
+use yii\behaviors\TimestampBehavior;
+
 /**
  * This is the model class for table "answers".
  *
@@ -29,7 +29,6 @@ class Answers extends \yii\db\ActiveRecord
     {
         return 'answers';
     }
-
 
     public function behaviors()
     {
@@ -56,8 +55,10 @@ class Answers extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            ['type', 'required'],
             [['type', 'created_at', 'updated_at'], 'integer'],
-            [['answer'], 'string', 'max' => 255],
+            ['type', 'unique', 'targetClass' => self::class, 'message' => Yii::t('app', "Данный тип уже занят")],
+            [['answer'], 'safe'],
         ];
     }
 
@@ -69,15 +70,14 @@ class Answers extends \yii\db\ActiveRecord
         return [
             'id' => Yii::$app->mv->gt('ID', [], 0),
             'type' => Yii::$app->mv->gt('Тип', [], 0),
-            'answer' => Yii::$app->mv->gt('Ответ', [], 0),
-            'created_at' => Yii::$app->mv->gt('Создан', [], 0),
-            'updated_at' => Yii::$app->mv->gt('Обновлен', [], 0),
+            'answer' => Yii::$app->mv->gt('Ответы', [], 0),
+            'created_at' => Yii::$app->mv->gt('Создано', [], 0),
+            'updated_at' => Yii::$app->mv->gt('Обновлено', [], 0),
         ];
     }
 
     /**
-     * @inheritdoc
-     * @return  the active query used by this AR class.
+     * @return MultilingualQuery|\yii\db\ActiveQuery
      */
     public static function find()
     {
@@ -89,8 +89,22 @@ class Answers extends \yii\db\ActiveRecord
     public static function getTypesList()
     {
         return [
+            null => Yii::t('app', "Не определено"),
             self::TYPE_CPR => Yii::t('app', "Водитель. Отмена поездки"),
             self::TYPE_CTR => Yii::t('app', "Пассажир. Отмена поездки."),
         ];
     }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->answer = is_string($this->answer) ? json_decode($this->answer, true) : $this->answer;
+    }
+
+    public function beforeSave($insert)
+    {
+        $this->answer = json_encode($this->answer);
+        return parent::beforeSave($insert);
+    }
+
 }

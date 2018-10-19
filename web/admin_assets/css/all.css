@@ -160,3 +160,9 @@ span.select2{
 .list-cell__description textarea{
     width: 100% !important;
 }
+.list-cell__answer{
+    width: 80%;
+}
+.list-cell__answer textarea{
+    width: 100% !important;
+}

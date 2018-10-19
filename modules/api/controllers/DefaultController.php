@@ -114,7 +114,7 @@ class DefaultController extends BaseController
         /** @var \app\modules\api\models\Legal $legal */
         foreach ($legals as $legal) {
             $result = '';
-            if (is_array($legal->content)) {
+            if (is_array($legal->content) && !empty($legal->content)) {
                 $query = new ArrayQuery();
                 $query->from($legal->content);
                 $content = $query->orderBy(['weight' => SORT_ASC])->all();
@@ -148,7 +148,7 @@ class DefaultController extends BaseController
         /** @var \app\modules\api\models\Agreement $agreement */
         foreach ($agreements as $agreement) {
             $result = '';
-            if (is_array($agreement->content)) {
+            if (is_array($agreement->content) && !empty($agreement->content)) {
                 $query = new ArrayQuery();
                 $query->from($agreement->content);
                 $content = $query->orderBy(['weight' => SORT_ASC])->all();
@@ -182,7 +182,7 @@ class DefaultController extends BaseController
         /** @var \app\modules\api\models\Faq $faq */
         foreach ($faqs as $faq) {
             $result = '';
-            if (is_array($faq->content)) {
+            if (is_array($faq->content) && !empty($faq->content)) {
                 $query = new ArrayQuery();
                 $query->from($faq->content);
                 $content = $query->orderBy(['weight' => SORT_ASC])->all();
@@ -245,11 +245,18 @@ class DefaultController extends BaseController
         $answers = [];
 
         /** @var \app\models\Answers $answer */
-        $_answers = Answers::find()->where(['type' => Answers::TYPE_CTR])->all();
-        if ($_answers && count($_answers) > 0) foreach ($_answers as $answer) $answers[] = [
-            'id' => $answer->id,
-            'value' => $answer->answer
-        ];
+        $_answers = Answers::findOne(['type' => Answers::TYPE_CTR]);
+        if (is_array($_answers->answer) && !empty($_answers->answer)) {
+            $query = new ArrayQuery();
+            $query->from($_answers->answer);
+            $content = $query->orderBy(['weight' => SORT_ASC])->all();
+            foreach ($content as $answer) {
+                $answers[] = [
+                    'id' => $answer['id'],
+                    'value' => $answer['answer'],
+                ];
+            }
+        }
 
         if (empty ($answers) || count($answers) == 0) $answers = Yii::$app->params['cancel-passenger-reasons'];
         $this->module->data = $answers;
@@ -266,11 +273,18 @@ class DefaultController extends BaseController
         $answers = [];
 
         /** @var \app\models\Answers $answer */
-        $_answers = Answers::find()->where(['type' => Answers::TYPE_CPR])->all();
-        if ($_answers && count($_answers) > 0) foreach ($_answers as $answer) $answers[] = [
-            'id' => $answer->id,
-            'value' => $answer->answer
-        ];
+        $_answers = Answers::findOne(['type' => Answers::TYPE_CPR]);
+        if (is_array($_answers->answer) && !empty($_answers->answer)) {
+            $query = new ArrayQuery();
+            $query->from($_answers->answer);
+            $content = $query->orderBy(['weight' => SORT_ASC])->all();
+            foreach ($content as $answer) {
+                $answers[] = [
+                    'id' => $answer['id'],
+                    'value' => $answer['answer'],
+                ];
+            }
+        }
 
         if (empty ($answers) || count($answers) == 0) $answers = Yii::$app->params['cancel-passenger-reasons'];
         $this->module->data = $answers;

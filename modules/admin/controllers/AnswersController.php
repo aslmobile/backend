@@ -2,21 +2,22 @@
 
 namespace app\modules\admin\controllers;
 
-use Yii;
+use app\components\Controller;
 use app\models\Answers;
 use app\modules\admin\models\AnswersSearch;
-use app\components\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
+use Yii;
 use yii\filters\AccessControl;
-use yii\helpers\ArrayHelper;
+use yii\filters\VerbFilter;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
  * AnswersController implements the CRUD actions for Answers model.
  */
 class AnswersController extends Controller
 {
-	public $layout = "./sidebar";
+    public $layout = "./sidebar";
 
     public function behaviors()
     {
@@ -46,22 +47,23 @@ class AnswersController extends Controller
     }
 
     /**
-     * Lists all Answers models.
-     * @return mixed
+     * @return string|\yii\web\Response
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionIndex()
     {
-		if (Yii::$app->request->isAjax) {
-			$keys = (isset($_POST['keys']))?$_POST['keys']:[];
-			if (count($keys)) {
-				foreach ($keys as $k => $v) {
-					if (($model = Answers::findOne($v)) !== null) {
-						$model->delete();
-					}
-				}
-				return $this->redirect(['index']);
-			}
-		}
+        if (Yii::$app->request->isAjax) {
+            $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
+            if (count($keys)) {
+                foreach ($keys as $k => $v) {
+                    if (($model = Answers::findOne($v)) !== null) {
+                        $model->delete();
+                    }
+                }
+                return $this->redirect(['index']);
+            }
+        }
 
         $searchModel = new AnswersSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
@@ -73,9 +75,9 @@ class AnswersController extends Controller
     }
 
     /**
-     * Displays a single Answers model.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
@@ -85,14 +87,16 @@ class AnswersController extends Controller
     }
 
     /**
-     * Creates a new Answers model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return array|string|Response
      */
     public function actionCreate()
     {
         $model = new Answers();
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
 
+            return ActiveForm::validate($model);
+        }
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['index', 'id' => $model->id]);
         } else {
@@ -103,17 +107,20 @@ class AnswersController extends Controller
     }
 
     /**
-     * Updates an existing Answers model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return array|string|Response
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
 
+            return ActiveForm::validate($model);
+        }
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved',[],0));
+            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved', [], 0));
             return $this->redirect(['update', 'id' => $model->id]);
         } else {
             return $this->render('update', [
@@ -123,10 +130,11 @@ class AnswersController extends Controller
     }
 
     /**
-     * Deletes an existing Answers model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id)
     {
@@ -134,19 +142,19 @@ class AnswersController extends Controller
 
         return $this->redirect(['index']);
     }
+
     /**
-    * Finds the Answers model based on its primary key value.
-    * If the model is not found, a 404 HTTP exception will be thrown.
-    * @param integer $id
-    * @return Answers the loaded model
-    * @throws NotFoundHttpException if the model cannot be found
-    */
-protected function findModel($id, $ml = true)
-        {
+     * @param $id
+     * @param bool $ml
+     * @return Answers|null
+     * @throws NotFoundHttpException
+     */
+    protected function findModel($id, $ml = true)
+    {
         if ($ml) {
-            $model =  Answers::find()->where('id = :id', [':id' => $id])->multilingual()->one();
+            $model = Answers::find()->where('id = :id', [':id' => $id])->multilingual()->one();
         } else {
-            $model =  Answers::findOne($id);
+            $model = Answers::findOne($id);
         }
 
         if ($model !== null) {
