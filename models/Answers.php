@@ -16,6 +16,7 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $created_at
  * @property integer $updated_at
  */
+
 class Answers extends \yii\db\ActiveRecord
 {
     const

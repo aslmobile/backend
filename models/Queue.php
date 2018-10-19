@@ -100,21 +100,24 @@ class Queue extends Model
      */
     public static function send($applicants, $line)
     {
+
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $line->driver_id]);
         if (!$device) return false;
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
-        $socket->push(base64_encode(json_encode([
-            'action' => "readyPassengerTrip",
-            'notifications' => Notifications::create(
-                Notifications::NTP_TRIP_READY,
-                $applicants,
-                '',
-                $line->driver_id
-            ),
-            'data' => ['message_id' => time(), 'addressed' => $applicants, 'line' => $line->toArray()]
-        ])));
+        foreach ($applicants as $user_id) {
+            $socket->push(base64_encode(json_encode([
+                'action' => "readyPassengerTrip",
+                'notifications' => Notifications::create(
+                    Notifications::NTP_TRIP_READY,
+                    [$user_id],
+                    '',
+                    $line->driver_id
+                ),
+                'data' => ['message_id' => time(), 'addressed' => [$user_id], 'line' => $line->toArray(), 'passenger' => $user_id]
+            ])));
+        }
 
         return true;
     }

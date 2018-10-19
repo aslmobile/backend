@@ -324,23 +324,6 @@ class Message
 
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        RestFul::updatePassengerAccept();
-
-        $watchdog = RestFul::findOne([
-            'type' => RestFul::TYPE_PASSENGER_ACCEPT,
-            'user_id' => $device->user->id,
-            'message' => json_encode(['status' => 'request'])
-        ]);
-        if (!$watchdog) {
-            $watchdog = new RestFul([
-                'type' => RestFul::TYPE_PASSENGER_ACCEPT,
-                'message' => json_encode(['status' => 'request']),
-                'user_id' => $device->user->id,
-                'uip' => '0.0.0.0'
-            ]);
-            $watchdog->save();
-        }
-
         if (isset($data['data']['trip']) && !empty($data['data']['trip']))
             $trip_data = $data['data']['trip']; else $trip_data = null;
 
@@ -349,7 +332,7 @@ class Message
             'device_id' => $device->id,
             'user_id' => $device->user_id,
             'data' => [
-                'accept_from' => $watchdog->created_at,
+                'accept_from' => time(),
                 'accept_time' => 300,
                 'trip' => $trip_data
             ]
@@ -631,7 +614,25 @@ class Message
         /** @var Devices $device */
         if ($this->validateDevice($from)) $device = $from->device;
 
-        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+        $this->message_id = intval($data['data']['message_id']);
+        $passenger = intval($data['data']['passenger']);
+
+        RestFul::updatePassengerAccept();
+
+        $watchdog = RestFul::findOne([
+            'type' => RestFul::TYPE_PASSENGER_ACCEPT,
+            'user_id' => $passenger,
+            'message' => json_encode(['status' => 'request'])
+        ]);
+        if (!$watchdog) {
+            $watchdog = new RestFul([
+                'type' => RestFul::TYPE_PASSENGER_ACCEPT,
+                'message' => json_encode(['status' => 'request']),
+                'user_id' => $passenger,
+                'uip' => '0.0.0.0'
+            ]);
+            $watchdog->save();
+        }
 
         if (isset($data['data']['line']) && !empty($data['data']['line'])) {
             $line_data = $data['data']['line'];
@@ -640,7 +641,7 @@ class Message
                 'device_id' => $device->id,
                 'user_id' => $device->user_id,
                 'data' => [
-                    'accept_from' => time(),
+                    'accept_from' => $watchdog->created_at,
                     'accept_time' => 300,
                     'line' => $line_data,
                 ]

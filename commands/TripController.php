@@ -37,7 +37,7 @@ class TripController extends ConsoleController
                 $schedule = json_decode($trip->schedule);
                 if (is_array($schedule) && in_array(intval(date('N')), $schedule)) {
                     $trip->schedule = '';
-                    Trip::cloneTrip($trip, Trip::STATUS_CREATED);
+                    Trip::cloneTrip($trip, Trip::STATUS_CREATED, true);
                 }
             }
             Queue::processingQueue();

@@ -730,18 +730,23 @@ class Trip extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param $trip Trip
+     * @param $trip
      * @param $status
+     * @param bool $time
      * @return bool
-     * @throws
      */
-    public static function cloneTrip($trip, $status)
+    public static function cloneTrip($trip, $status, $time = false)
     {
 
         $new_trip = new Trip();
         $old_attributes = $trip->attributes;
         unset($old_attributes['id']);
         foreach ($old_attributes as $attribute => $value) $new_trip->$attribute = $value;
+
+        if ($time) {
+            $new_trip->start_time = time() + 1800;
+            $new_trip->taxi_time = time() + 900;
+        }
 
         if (!empty($trip->luggages)) {
             /** @var TripLuggage $luggage */
