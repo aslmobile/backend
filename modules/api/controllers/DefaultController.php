@@ -1,11 +1,10 @@
 <?php namespace app\modules\api\controllers;
 
+use app\components\ArrayQuery\ArrayQuery;
 use app\components\Socket\SocketPusher;
 use app\models\Answers;
 use app\models\Notifications;
-use app\models\Trip;
 use app\modules\admin\models\Agreement;
-use app\modules\api\models\Devices;
 use app\modules\api\models\Faq;
 use app\modules\api\models\Legal;
 use app\modules\api\models\UploadFiles;
@@ -98,18 +97,32 @@ class DefaultController extends BaseController
 
     public function actionLegal($id)
     {
-        switch ($id)
-        {
-            case Legal::TYPE_DRIVER: $id = Legal::TYPE_DRIVER; break;
-            case Legal::TYPE_PASSENGER: $id = Legal::TYPE_PASSENGER; break;
-            default: $id = Legal::TYPE_DRIVER;
+        switch ($id) {
+            case Legal::TYPE_DRIVER:
+                $id = Legal::TYPE_DRIVER;
+                break;
+            case Legal::TYPE_PASSENGER:
+                $id = Legal::TYPE_PASSENGER;
+                break;
+            default:
+                $id = Legal::TYPE_DRIVER;
         }
 
         $legals = Legal::find()->where(['type' => $id])->orderBy(['weight' => SORT_ASC])->all();
         $legal_data = [];
 
         /** @var \app\modules\api\models\Legal $legal */
-        if ($legals && count($legals) > 0) foreach ($legals as $legal) $legal_data[] = $legal->toArray();
+        foreach ($legals as $legal) {
+            $result = '';
+            if (is_array($legal->content)) {
+                $query = new ArrayQuery();
+                $query->from($legal->content);
+                $content = $query->orderBy(['weight' => SORT_ASC])->all();
+                foreach ($content as $item) $result .= $item['title'] . '<br>' . $item['description'] . '<br>';
+            }
+            $legal->content = $result;
+            $legal_data[] = $legal->toArray();
+        }
 
         $this->module->data = $legal_data;
         $this->module->setSuccess();
@@ -118,18 +131,32 @@ class DefaultController extends BaseController
 
     public function actionAgreement($id)
     {
-        switch ($id)
-        {
-            case Agreement::TYPE_DRIVER: $id = Agreement::TYPE_DRIVER; break;
-            case Agreement::TYPE_PASSENGER: $id = Agreement::TYPE_PASSENGER; break;
-            default: $id = Agreement::TYPE_DRIVER;
+        switch ($id) {
+            case Agreement::TYPE_DRIVER:
+                $id = Agreement::TYPE_DRIVER;
+                break;
+            case Agreement::TYPE_PASSENGER:
+                $id = Agreement::TYPE_PASSENGER;
+                break;
+            default:
+                $id = Agreement::TYPE_DRIVER;
         }
 
         $agreements = Agreement::find()->where(['type' => $id])->orderBy(['weight' => SORT_ASC])->all();
         $agreement_data = [];
 
-        /** @var \app\modules\api\models\Agreement $legal */
-        if ($agreements && count($agreements) > 0) foreach ($agreements as $agreement) $agreement_data[] = $agreement->toArray();
+        /** @var \app\modules\api\models\Agreement $agreement */
+        foreach ($agreements as $agreement) {
+            $result = '';
+            if (is_array($agreement->content)) {
+                $query = new ArrayQuery();
+                $query->from($agreement->content);
+                $content = $query->orderBy(['weight' => SORT_ASC])->all();
+                foreach ($content as $item) $result .= $item['title'] . '<br>' . $item['description'] . '<br>';
+            }
+            $agreement->content = $result;
+            $agreement_data[] = $agreement->toArray();
+        }
 
         $this->module->data = $agreement_data;
         $this->module->setSuccess();
@@ -138,18 +165,32 @@ class DefaultController extends BaseController
 
     public function actionFaq($id)
     {
-        switch ($id)
-        {
-            case Agreement::TYPE_DRIVER: $id = Agreement::TYPE_DRIVER; break;
-            case Agreement::TYPE_PASSENGER: $id = Agreement::TYPE_PASSENGER; break;
-            default: $id = Agreement::TYPE_DRIVER;
+        switch ($id) {
+            case Agreement::TYPE_DRIVER:
+                $id = Agreement::TYPE_DRIVER;
+                break;
+            case Agreement::TYPE_PASSENGER:
+                $id = Agreement::TYPE_PASSENGER;
+                break;
+            default:
+                $id = Agreement::TYPE_DRIVER;
         }
 
         $faqs = Faq::find()->where(['type' => $id])->orderBy(['weight' => SORT_ASC])->all();
         $faq_data = [];
 
         /** @var \app\modules\api\models\Faq $faq */
-        if ($faqs && count($faqs) > 0) foreach ($faqs as $faq) $faq_data[] = $faq->toArray();
+        foreach ($faqs as $faq) {
+            $result = '';
+            if (is_array($faq->content)) {
+                $query = new ArrayQuery();
+                $query->from($faq->content);
+                $content = $query->orderBy(['weight' => SORT_ASC])->all();
+                foreach ($content as $item) $result .= $item['title'] . '<br>' . $item['description'] . '<br>';
+            }
+            $faq->content = $result;
+            $faq_data[] = $faq->toArray();
+        }
 
         $this->module->data = $faq_data;
         $this->module->setSuccess();
