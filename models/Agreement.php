@@ -99,8 +99,8 @@ class Agreement extends \yii\db\ActiveRecord
 
     public function afterFind()
     {
-        $this->content = json_decode($this->content, true);
         parent::afterFind();
+        $this->content = json_decode($this->content, true);
     }
 
     public function beforeSave($insert)
