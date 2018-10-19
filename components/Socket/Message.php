@@ -405,23 +405,6 @@ class Message
 
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        RestFul::updatePassengerAccept();
-
-        $watchdog = RestFul::findOne([
-            'type' => RestFul::TYPE_PASSENGER_DECLINE,
-            'user_id' => $device->user->id,
-            'message' => json_encode(['status' => 'cancel'])
-        ]);
-        if (!$watchdog) {
-            $watchdog = new RestFul([
-                'type' => RestFul::TYPE_PASSENGER_DECLINE,
-                'message' => json_encode(['status' => 'cancel']),
-                'user_id' => $device->user->id,
-                'uip' => '0.0.0.0'
-            ]);
-            $watchdog->save();
-        }
-
         if (isset($data['data']['trip']) && !empty($data['data']['trip']))
             $trip_data = $data['data']['trip']; else $trip_data = null;
 
@@ -430,7 +413,7 @@ class Message
             'device_id' => $device->id,
             'user_id' => $device->user_id,
             'data' => [
-                'decline_from' => $watchdog->created_at,
+                'decline_from' => time(),
                 'decline_time' => 300,
                 'trip' => $trip_data
             ]
@@ -577,7 +560,7 @@ class Message
 
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        if (isset($data['data']['line']) && !empty($line)) {
+        if (isset($data['data']['line']) && !empty($data['data']['line'])) {
             $line_data = $data['data']['line'];;
             $response = [
                 'message_id' => $this->message_id,
@@ -634,27 +617,17 @@ class Message
             $watchdog->save();
         }
 
-        if (isset($data['data']['line']) && !empty($data['data']['line'])) {
-            $line_data = $data['data']['line'];
-            $response = [
-                'message_id' => $this->message_id,
-                'device_id' => $device->id,
-                'user_id' => $device->user_id,
-                'data' => [
-                    'accept_from' => $watchdog->created_at,
-                    'accept_time' => 300,
-                    'line' => $line_data,
-                ]
-            ];
-        } else {
-            $response = [
-                'message_id' => $this->message_id,
-                'device_id' => $device->id,
-                'user_id' => $device->user_id,
-                'data' => null
-            ];
-            $this->error_code = 2;
-        }
+        $line_data = $data['data']['line'];
+        $response = [
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => [
+                'accept_from' => $watchdog->created_at,
+                'accept_time' => 300,
+                'line' => $line_data,
+            ]
+        ];
 
         $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
 
