@@ -109,10 +109,11 @@ class BaseController extends RestFul
 
         switch ($type) {
             case self::TOKEN:
+
                 if (!$this->device) $this->module->setError(403, '_device', Yii::$app->mv->gt("Не найден", [], false));
                 elseif (!isset ($this->device->auth_token) || empty($this->device->auth_token)) $this->authorizationTokenFailed(Yii::$app->mv->gt("Токен не передан", [], false));
 
-                $user = Users::findOne(['id' => $device->user_id]);
+                $user = Users::findOne(['id' => $device->user_id, 'type' => $device->user_type]);
                 if (!$user) $this->module->setError(403, '_user', Yii::$app->mv->gt("Не найден", [], false));
                 if ($user->status == Users::STATUS_BLOCKED) $this->module->setError(403, '_user', Yii::$app->mv->gt("Вы в черном списке! Доступ ограничен.", [], false));
                 $this->user = $user;
@@ -121,11 +122,13 @@ class BaseController extends RestFul
                 break;
 
             case self::TOKEN_PHONE:
+
                 $hash = strtoupper(hash('sha256', $this->body->phone . Yii::$app->params['salt']));
                 if ($hash !== strtoupper($this->token)) $this->authorizationTokenFailed();
                 break;
 
             case self::TOKEN_SMS:
+
                 $this->prepareBody();
                 $this->validateBodyParams(['code']);
 
@@ -136,7 +139,7 @@ class BaseController extends RestFul
                 $this->device->sms_code = NULL;
                 $this->device->save();
 
-                $user = Users::findOne(['id' => $device->user_id]);
+                $user = Users::findOne(['id' => $device->user_id, 'type' => $device->user_type]);
                 if (!$user) $this->module->setError(403, '_user', Yii::$app->mv->gt("Не найден", [], false));
                 if ($user->status == Users::STATUS_BLOCKED) $this->module->setError(403, '_user', Yii::$app->mv->gt("Вы в черном списке! Доступ ограничен.", [], false));
                 $this->user = $user;
@@ -162,7 +165,10 @@ class BaseController extends RestFul
     {
         $device = false;
         if (isset ($this->device_id) && !empty($this->device_id))
-            $device = Devices::findOne(['device_id' => $this->device_id]);
+            $device = Devices::findOne([
+                'device_id' => $this->device_id,
+                'user_type' => $this->body->type
+            ]);
 
         if ($device && !$device->user) {
             if ($device) $device->delete();
@@ -172,7 +178,7 @@ class BaseController extends RestFul
             $device = false;
         }
 
-        if (!$device && !empty ($this->body->phone)) {
+        if (!$device && !empty($this->body->phone) && !empty($this->body->type)) {
             $user = Users::find()->where(['phone' => $this->body->phone, 'type' => $this->body->type])->one();
             if (!$user) {
                 $user = new Users([
@@ -196,7 +202,8 @@ class BaseController extends RestFul
                 'lang' => $this->lang,
                 'uip' => Yii::$app->request->userIP,
                 'device_id' => $this->device_id,
-                'type' => $this->ostype
+                'type' => $this->ostype,
+                'user_type' => $this->body->type
             ]);
 
             if ($user->type != $this->body->type) {

@@ -182,7 +182,7 @@ class Notifications extends \yii\db\ActiveRecord
             ->andWhere(['notifications' => Devices::NOTIFICATION_ENABLED])->all();
         foreach ($devices as $device) {
             switch (intval($device->type)) {
-                case 1:
+                case Devices::TYPE_IOS:
 //                    $push->ios()->send($device->push_id, ['aps' => [
 //                        'alert' => $notification->text . ': ' . $notification->title,
 //                        'time' => $notification->updated_at,
@@ -191,7 +191,7 @@ class Notifications extends \yii\db\ActiveRecord
 //                        'type' => $notification->type,
 //                    ]]);
                     break;
-                case 2:
+                case Devices::TYPE_ANDROID:
                     $push->firebase()->send($device->push_id, [
                         'priority' => 'high',
                         'notification' => [
