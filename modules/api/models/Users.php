@@ -41,9 +41,7 @@ JSON;
         if (isset ($array['phone']) && !empty ($array['phone'])) $array['phone'] = (string)$array['phone'];
 
         $image_file = UploadFiles::findOne($this->image);
-        if ($image_file) {
-            $array['image_url'] = $image_file->file;
-        } else $array['image_url'] = null;
+        if ($image_file) $array['image_url'] = $image_file->file; else $array['image_url'] = null;
 
         if ($this->type == User::TYPE_DRIVER) {
 
@@ -60,12 +58,12 @@ JSON;
 
             $array['accept'] = !empty($inAccept) ? 1 : 0;
 
-            $inQueue = Line::find()->where(['status' => Line::STATUS_QUEUE, 'driver_id' => $this->id])->one();
-            $array['queue'] = !empty($inQueue) ? 1 : 0;
+            /** @var \app\models\Line $line */
+            $line = Line::find()->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS], 'driver_id' => $this->id])
+                ->orderBy(['created_at' => SORT_DESC])->one();
 
-            /** @var \app\models\Line $onLine */
-            $onLine = Line::find()->where(['status' => Line::STATUS_IN_PROGRESS, 'driver_id' => $this->id])->one();
-            $array['line_id'] = !empty($onLine) ? $onLine->id : 0;
+            $array['queue'] = (!empty($line) && $line->status == Line::STATUS_QUEUE) ? 1 : 0;
+            $array['line_id'] = (!empty($line) && $line->status == Line::STATUS_IN_PROGRESS) ? 1 : 0;
 
         }
 
@@ -95,17 +93,14 @@ JSON;
             $array['accept'] = !empty($inAccept) ? 1 : 0;
             $array['acceptSeat'] = !empty($inAcceptSeat) ? 1 : 0;
 
-            /** @var \app\models\Trip $inQueue */
-            $inQueue = Trip::find()->where(['status' => Trip::STATUS_CREATED, 'user_id' => $this->id])
-                ->orderBy(['created_at' => SORT_DESC])
-                ->one();
-            $array['queue'] = !empty($inQueue) ? 1 : 0;
+            /** @var \app\models\Trip $trip */
+            $trip = Trip::find()->where(['user_id' => $this->id])
+                ->andWhere(['status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING, Trip::STATUS_WAY, Trip::STATUS_FINISHED]])
+                ->orderBy(['created_at' => SORT_DESC])->one();
 
-            /** @var \app\models\Trip $onLine */
-            $onLine = Trip::find()->where(['status' => [Trip::STATUS_WAITING, Trip::STATUS_WAY], 'user_id' => $this->id])
-                ->orderBy(['created_at' => SORT_DESC])
-                ->one();
-            $array['trip_id'] = !empty($onLine) ? $onLine->id : 0;
+            $array['queue'] = (!empty($trip) && $trip->status == Trip::STATUS_CREATED) ? 1 : 0;
+            $array['online'] = (!empty($trip) && in_array($trip->status, [Trip::STATUS_WAITING, Trip::STATUS_WAY])) ? 1 : 0;
+            $array['trip_id'] = !empty($trip) ? $trip->id : 0;
 
         }
 
