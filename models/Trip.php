@@ -801,6 +801,9 @@ class Trip extends \yii\db\ActiveRecord
         if ($this->baggage) $array['baggage'] = $this->baggage;
         else $array['baggage'] = [];
 
+        if (!empty($this->schedule)) $array['schedule'] = json_decode($this->schedule);
+        else $array['schedule'] = [];
+
         return $array;
     }
 }
