@@ -56,14 +56,14 @@ JSON;
                 ['>', 'created_at', time() - 300],
             ])->one();
 
-            $array['accept'] = !empty($inAccept) ? 1 : 0;
-
             /** @var \app\models\Line $line */
             $line = Line::find()->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_IN_PROGRESS], 'driver_id' => $this->id])
                 ->orderBy(['created_at' => SORT_DESC])->one();
 
+            $array['accept'] = !empty($inAccept) ? 1 : 0;
+
             $array['queue'] = (!empty($line) && $line->status == Line::STATUS_QUEUE) ? 1 : 0;
-            $array['line_id'] = (!empty($line) && $line->status == Line::STATUS_IN_PROGRESS) ? 1 : 0;
+            $array['line_id'] = (!empty($line) && $line->status == Line::STATUS_IN_PROGRESS) ? $line->id : 0;
 
         }
 
@@ -90,13 +90,13 @@ JSON;
                 ['>', 'created_at', time() - 300],
             ])->one();
 
-            $array['accept'] = !empty($inAccept) ? 1 : 0;
-            $array['acceptSeat'] = !empty($inAcceptSeat) ? 1 : 0;
-
             /** @var \app\models\Trip $trip */
             $trip = Trip::find()->where(['user_id' => $this->id])
                 ->andWhere(['status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING, Trip::STATUS_WAY, Trip::STATUS_FINISHED]])
                 ->orderBy(['created_at' => SORT_DESC])->one();
+
+            $array['accept'] = !empty($inAccept) ? 1 : 0;
+            $array['acceptSeat'] = !empty($inAcceptSeat) ? 1 : 0;
 
             $array['queue'] = (!empty($trip) && $trip->status == Trip::STATUS_CREATED) ? 1 : 0;
             $array['online'] = (!empty($trip) && in_array($trip->status, [Trip::STATUS_WAITING, Trip::STATUS_WAY])) ? 1 : 0;
