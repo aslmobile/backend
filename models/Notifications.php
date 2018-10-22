@@ -178,7 +178,8 @@ class Notifications extends \yii\db\ActiveRecord
         /** @var $push Push */
         $push = \Yii::$app->push;
         /*** @var $devices Devices */
-        $devices = Devices::find()->where(['user_id' => $notification->user_id])->all();
+        $devices = Devices::find()->where(['user_id' => $notification->user_id])
+            ->andWhere(['notifications' => Devices::NOTIFICATION_ENABLED])->all();
         foreach ($devices as $device) {
             switch (intval($device->type)) {
                 case 1:
