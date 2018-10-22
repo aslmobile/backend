@@ -1285,8 +1285,8 @@ class TripController extends BaseController
                 $luggage = LuggageType::findOne($luggage);
                 if (!$luggage) $this->module->setError(422, '_luggage', Yii::$app->mv->gt("Не найден", [], false));
                 if ($luggage->need_place) {
-                    $tariff = $this->calculateLuggageTariff($id);
-                    $amount = (int)intval($luggage->seats) * (float)floatval($tariff->tariff);
+                    $luggage_tariff = $this->calculateLuggageTariff($id);
+                    $amount = (int)intval($luggage->seats) * (float)floatval($luggage_tariff->tariff);
                 } else $amount = (float)floatval(0.0);
                 $tariff += $amount;
             }
