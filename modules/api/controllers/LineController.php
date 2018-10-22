@@ -215,6 +215,7 @@ class LineController extends BaseController
         $passengers = ArrayHelper::getColumn(Trip::findAll(['status' => Trip::STATUS_WAITING, 'line_id' => $line->id]), 'id');
 
         $line->status = Line::STATUS_IN_PROGRESS;
+        $line->starttime = time();
         $line->save();
 
         RestFul::updateAll(

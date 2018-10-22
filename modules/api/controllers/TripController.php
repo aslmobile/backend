@@ -839,6 +839,7 @@ class TripController extends BaseController
             foreach ($trips as $trip) {
 
                 $trip->status = Trip::STATUS_FINISHED;
+                $trip->finish_time = time();
 
                 switch ($trip->payment_type) {
                     case Trip::PAYMENT_TYPE_CASH:
