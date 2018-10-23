@@ -3,6 +3,7 @@
 namespace app\modules\admin\controllers;
 
 use app\components\Controller;
+use app\models\Notifications;
 use app\modules\admin\models\User;
 use app\modules\admin\models\UserSearch;
 use app\modules\api\models\UploadFiles;
@@ -105,6 +106,11 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @return bool
+     * @throws HttpException
+     * @throws NotFoundHttpException
+     */
     public function actionEditColumn()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -175,7 +181,8 @@ class UserController extends Controller
      * @param $id
      * @return string|Response
      * @throws NotFoundHttpException
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionUpdate($id)
     {
@@ -217,6 +224,11 @@ class UserController extends Controller
                     }
                 }
 
+                if($model->oldAttributes['status'] !== $model::STATUS_APPROVED && $model->status === $model::STATUS_APPROVED){
+                    $notifications = Notifications::create(Notifications::NTD_ACCEPTED, [$model->id]);
+                    foreach ($notifications as $notification) Notifications::send($notification);
+                }
+
                 Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Сохранено', [], 0));
                 return $this->redirect(['update', 'id' => $model->id]);
             }
@@ -227,6 +239,11 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @param null $q
+     * @param null $id
+     * @return array
+     */
     public function actionSelectUsers($q = null, $id = null)
     {
         if (!empty($id)) $id = explode(',', $id);
@@ -252,6 +269,11 @@ class UserController extends Controller
         return $out;
     }
 
+    /**
+     * @param null $q
+     * @param null $id
+     * @return array
+     */
     public function actionSelectDrivers($q = null, $id = null)
     {
         if (!empty($id)) $id = explode(',', $id);
@@ -319,6 +341,10 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @param $path
+     * @return bool
+     */
     public static function validatePath($path)
     {
         if (!file_exists($path)

@@ -2,6 +2,7 @@
 
 use app\components\ArrayQuery\ArrayQuery;
 use app\components\Socket\SocketPusher;
+use app\models\Answers;
 use app\models\Line;
 use app\models\LuggageType;
 use app\models\Notifications;
@@ -729,7 +730,12 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "acceptPassengerSeat",
-            'notifications' => Notifications::create(Notifications::NTD_TRIP_SEAT, [$line->driver_id, $trip->user_id], '', $user->id),
+            'notifications' => Notifications::create(
+                Notifications::NTD_TRIP_SEAT,
+                [$trip->user_id],
+                "Хорошей поездки, {$user->fullName}",
+                $user->id
+            ),
             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id, $trip->user_id], 'trip' => $trip->toArray()]
         ])));
 
@@ -759,12 +765,39 @@ class TripController extends BaseController
         $trip = Trip::findOne($this->body->trip_id);
         if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
+        $notifications = [];
+        $addressed = [$trip->user_id, $line->driver_id];
+        $trip->cancel_reason = 0;
+
         switch ($user->type) {
             case User::TYPE_DRIVER:
+
+                $reason = '';
                 $trip->status = Trip::STATUS_CANCELLED_DRIVER;
                 $trip->penalty = 1;
                 $trip->driver_comment = isset($this->body->driver_comment) ?
-                    $this->body->driver_comment : \Yii::$app->mv->gt('Поездка отменена водителем', [], 0);
+                    $this->body->driver_comment :
+                    \Yii::$app->mv->gt('Поездка отменена водителем', [], 0);
+
+                if (isset($this->body->cancel_reason) && $this->body->cancel_reason) {
+                    $trip->cancel_reason = $this->body->cancel_reason;
+                    $answer = Answers::findOne(['type' => Answers::TYPE_CPR]);
+                    if (!empty($answer)) {
+                        $answer = json_decode($answer->answer);
+                        $query = new ArrayQuery();
+                        $query->from($answer);
+                        $reason = $query->where(['id' => strval($this->body->cancel_reason)])->one();
+                        if ($reason) $reason = $reason['answer'];
+                    }
+
+                }
+
+                $notifications = Notifications::create(
+                    Notifications::NTP_TRIP_CANCEL, [$trip->user_id],
+                    "Вам отказано в поездке. Причина - {$reason}",
+                    $user->id
+                );
+
                 break;
             case User::TYPE_PASSENGER:
                 $trip->status = Trip::STATUS_CANCELLED;
@@ -776,11 +809,11 @@ class TripController extends BaseController
                 $trip->status = Trip::STATUS_CANCELLED;
         }
 
-        $addressed = [$trip->user_id, $line->driver_id];
-        $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
+
         $line->freeseats += $trip->seats;
 
-        if ($trip->save()) $line->save();
+        $trip->save();
+        $line->save();
         $user->save();
 
         /** @var \app\models\Devices $device */
@@ -789,7 +822,7 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "declinePassengerTrip",
-            'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, $addressed, '', $user->id),
+            'notifications' => $notifications,
             'data' => ['message_id' => time(), 'addressed' => $addressed, 'trip' => $trip->toArray()]
         ])));
 
@@ -1412,22 +1445,6 @@ class TripController extends BaseController
             'type' => Checkpoint::TYPE_END,
         ]);
         if (!$checkpoint_end) $this->module->setError(422, '_checkpoint_end', Yii::$app->mv->gt("Не найдена", [], false));
-
-        //        $dependence = TariffDependence::findOne([
-        //            'route_id' => $route->id,
-        //            'start_checkpoint_id' => $checkpoint_start->id,
-        //            'end_checkpoint_id' => $checkpoint_end->id
-        //        ]);
-        //
-        //        if (!$dependence) {
-        //            $dependence = new TariffDependence();
-        //            $dependence->route_id = $route->id;
-        //            $dependence->start_checkpoint_id = $checkpoint_start->id;
-        //            $dependence->end_checkpoint_id = $checkpoint_end->id;
-        //            $dependence->base_tariff = $route->base_tariff;
-        //            $dependence->base_rate = 0;
-        //            $dependence->save();
-        //        }
 
         $tariff = $route->base_tariff * $rate + $taxi_tariff;
 

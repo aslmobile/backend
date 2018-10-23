@@ -294,10 +294,10 @@ class LineController extends BaseController
 
             foreach ($trips as $trip) {
 
-                $trip->cancel_reason = isset($this->body->cancel_reason_trip) ? $this->body->cancel_reason_trip : 0;
-                $trip->driver_comment = isset($this->body->driver_comment) ?
-                    $this->body->driver_comment : Yii::$app->mv->gt('Поездка отменена водителем', [], 0);
-                $trip->status = Trip::STATUS_CANCELLED_DRIVER;
+                $trip->driver_id = 0;
+                $trip->vehicle_id = 0;
+                $trip->line_id = 0;
+                $trip->status = Trip::STATUS_CREATED;
 
                 if (!$trip->validate() || !$trip->save()) {
                     if ($trip->hasErrors()) {
@@ -308,11 +308,17 @@ class LineController extends BaseController
                     } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
                 }
 
+                RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                    'AND',
+                    ['user_id' => $trip->user_id],
+                    ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+                ]);
+
                 $_trips[] = $trip->toArray();
 
                 $socket->push(base64_encode(json_encode([
                     'action' => "declinePassengerTrip",
-                    'notifications' => Notifications::create(Notifications::NTP_TRIP_CANCEL, [$trip->user_id], '', $user->id),
+                    'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, [$trip->user_id], '', $user->id),
                     'data' => ['message_id' => time(), 'addressed' => [$trip->user_id], 'trip' => $trip->toArray()]
                 ])));
 

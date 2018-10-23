@@ -1,6 +1,7 @@
 <?php namespace app\modules\admin\controllers;
 
 use app\components\Controller;
+use app\models\Notifications;
 use app\modules\admin\models\VehicleBrand;
 use app\modules\admin\models\VehicleModel;
 use app\modules\admin\models\Vehicles;
@@ -72,7 +73,14 @@ class VehiclesController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if($model->generate_code) $model->writeQrCode();
+
+            if($model->oldAttributes['status'] !== $model::STATUS_APPROVED && $model->status === $model::STATUS_APPROVED){
+                $notifications = Notifications::create(Notifications::NTD_VEHICLE_ACCEPTED, [$model->user_id]);
+                foreach ($notifications as $notification) Notifications::send($notification);
+            }
+
+            if ($model->generate_code) $model->writeQrCode();
+
             Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Сохранено', [], 0));
             return $this->redirect(['index']);
         } else {
@@ -91,7 +99,7 @@ class VehiclesController extends Controller
         $model = new Vehicles();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if($model->generate_code) $model->writeQrCode();
+            if ($model->generate_code) $model->writeQrCode();
             return $this->redirect(['index']);
         };
 

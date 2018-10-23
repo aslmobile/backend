@@ -96,6 +96,9 @@ class Notifications extends \yii\db\ActiveRecord
         NTD_TRIP_SEAT = 19,
         NTD_TRIP_FIRST = 20,
 
+        NTD_ACCEPTED = 21,
+        NTD_VEHICLE_ACCEPTED = 22,
+
         NTF_NOTIFICATIONS = -1,
         NTF_GEO = -2;
 
@@ -105,24 +108,25 @@ class Notifications extends \yii\db\ActiveRecord
             self::NT_DEFAULT => Yii::t('app', "Стандартная"),
             self::NT_BLACKLIST => Yii::t('app', "Черный список"),
 
-            self::NTP_TRIP_READY => Yii::t('app', "Ваша поездка готова"),
+            self::NTP_TRIP_SCHEDULED => Yii::t('app', "Напоминание о поездке"),
+            self::NTP_TRIP_READY => Yii::t('app', "Машина готова к выезду. Поездка автоматически отменится через 5 минут."),
             self::NTP_TRIP_CANCEL => Yii::t('app', "Поездка отменена"),
             self::NTP_TRIP_WAIT => Yii::t('app', "Ожидание поездки"),
-            self::NTP_TRIP_FINISHED => Yii::t('app', "Ваша поездка завершена"),
-            self::NTP_TRIP_ARRIVED => Yii::t('app', "Прибытие на точку"),
+            self::NTP_TRIP_FINISHED => Yii::t('app', "Поездка завершена, пожалуйста оцените поездку"),
+            self::NTP_TRIP_ARRIVED => Yii::t('app', "Водитель ожидает Вас на остановке. Подтвердите посадку в течении 5 минут."),
 
             self::NTP_FREE_KM => Yii::t('app', "Бесплатные километры"),
             self::NTP_TRIP_REVIEW => Yii::t('app', "Отзыв"),
             self::NTP_TRIP_RATING => Yii::t('app', "Рейтинг"),
 
             self::NTD_TRIP_ADD => Yii::t('app', "К вам добавился пассажир"),
-            self::NTD_TRIP_SEAT => Yii::t('app', "К вам сел пассажир"),
-            self::NTD_TRIP_SEATS => Yii::t('app', "Ваша машина заполнена"),
-            self::NTD_TRIP_CANCEL => Yii::t('app', "Ваша поездка отменена"),
+            self::NTD_TRIP_SEAT => Yii::t('app', "Посадка в автомобиль"),
+            self::NTD_TRIP_SEATS => Yii::t('app', "Ваша машина заполнена. Подтвердите выезд в течении 5 минут."),
+            self::NTD_TRIP_CANCEL => Yii::t('app', "Водитель отменил поездку. Вы поедете на ближайшей свободной машине."),
             self::NTD_TRIP_FINISHED => Yii::t('app', "Ваша поездка завершена"),
             self::NTD_TRIP_QUEUE => Yii::t('app', "Вы стали в очередь"),
             self::NTD_TRIP_READY => Yii::t('app', "Ваша поездка готова"),
-            self::NTD_TRIP_FIRST => Yii::t('app', "Ваша машина первая в очереди на выезд"),
+            self::NTD_TRIP_FIRST => Yii::t('app', "Будьте готовы к выезду. Ваша машина первая в очереди на отправку."),
 
             self::NTD_TRIP_REVIEW => Yii::t('app', "Отзыв"),
             self::NTD_TRIP_RATING => Yii::t('app', "Рейтинг"),
@@ -160,7 +164,7 @@ class Notifications extends \yii\db\ActiveRecord
                 $notification->type = $type;
                 $notification->user_id = $user;
                 $notification->status = $status;
-                $notification->title = self::getTypes()[$type];
+                $notification->title = !empty($message) ? $message : self::getTypes()[$type];
                 $notification->text = $message;
                 $notification->initiator_id = $initiator;
                 if ($notification->save()) $notifications[] = $notification;
