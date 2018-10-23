@@ -5,10 +5,10 @@ namespace app\components\paysystem\Drivers;
 
 
 use app\components\paysystem\PaysystemSnappingCardsInterface;
+use app\models\PaymentCards;
 use app\models\TransactionLog;
 use app\models\Transactions;
-use app\models\UserCards;
-use app\modules\api\exceptions\ApiException;
+use app\modules\api\Module;
 use SimpleXMLElement;
 use Yii;
 use yii\helpers\Url;
@@ -50,20 +50,28 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
     /**
      * Request for initialization iframe
+     * @param $user_id
+     * @return Transactions|null
      */
-    public function addCard()
+    public function addCard($user_id)
     {
-        if (!$transaction = Transactions::findOne(['user_id' => \Yii::$app->user->getId(), 'payment_type' => 4, 'status' => 0])) {
-            $transaction = new Transactions([
-                'user_id' => \Yii::$app->user->getId(),
-                'status' => 0,
-                'payment_system' => 2,
-                'payment_type' => 4,
-                'amount' => 0,
-                'place_id' => 0,
-                'order_id' => 0,
-            ]);
+        if (!$transaction = Transactions::findOne([
+            'user_id' => $user_id,
+            'type' => Transactions::TYPE_OUTCOME,
+            'status' => Transactions::STATUS_REQUEST,
+            'gateway' => Transactions::GATEWAY_PAYBOX,
 
+        ])) {
+            $transaction = new Transactions([
+                'user_id' => $user_id,
+                'type' => Transactions::TYPE_OUTCOME,
+                'status' => Transactions::STATUS_REQUEST,
+                'gateway' => Transactions::GATEWAY_PAYBOX,
+                'currency' => $this->currency,
+                'uip' => Yii::$app->request->userIP,
+                'amount' => 0,
+                'route_id' => 0,
+            ]);
             $transaction->save();
         }
 
@@ -75,7 +83,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
         $data = [
             'pg_merchant_id' => $this->merchant_id,
-            'pg_user_id' => \Yii::$app->user->getId(),
+            'pg_user_id' => $user_id,
             'pg_order_id' => $transaction->id,
             'pg_post_link' => Url::toRoute(['/main/payment/callback', 'driver' => $this->driver], true),
             'pg_back_link' => Url::toRoute(['/main/payment/success'], true),
@@ -103,10 +111,10 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
             $transaction_log->save();
         } elseif ($this->checkSign($response, $this->addUrl)) {
             if (isset($response['pg_payment_id'])) {
-                $transaction->paysystem_id = $response['pg_payment_id'];
+                $transaction->payment_id = $response['pg_payment_id'];
             }
             if (isset($response['pg_redirect_url'])) {
-                $transaction->paysystem_link = $response['pg_redirect_url'];
+                $transaction->payment_link = $response['pg_redirect_url'];
             }
         }
 
@@ -184,24 +192,24 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
                 }
             }
 
-            if (!UserCards::find()->andWhere(['user_id' => $user_id, 'status' => 2])->count()) {
-                if ($t_card = UserCards::findOne(['user_id' => $user_id])) {
-                    $t_card->status = 2;
+            if (!PaymentCards::find()->where(['user_id' => $user_id, 'status' => PaymentCards::STATUS_MAIN])->count()) {
+                if ($t_card = PaymentCards::findOne(['user_id' => $user_id])) {
+                    $t_card->status = PaymentCards::STATUS_MAIN;
                     $t_card->save();
                 }
             }
 
             if (!empty($list_ids)) {
-                UserCards::deleteAll(['AND', ['=', 'user_id', $user_id], ['NOT IN', 'card_id', $list_ids]]);
+                PaymentCards::deleteAll(['AND', ['=', 'user_id', $user_id], ['NOT IN', 'card_id', $list_ids]]);
             } else {
-                UserCards::deleteAll(['user_id' => $user_id]);
+                PaymentCards::deleteAll(['user_id' => $user_id]);
             }
         }
 
         return $list;
     }
 
-    public function deleteCard(UserCards $card)
+    public function deleteCard(PaymentCards $card)
     {
         $transaction_log = new TransactionLog([
             'transaction_id' => 0,
@@ -212,7 +220,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $data = [
             'pg_merchant_id' => $this->merchant_id,
             'pg_user_id' => $card->user_id,
-            'pg_card_id' => $card->card_id,
+            'pg_card_id' => $card->pg_card_id,
             'pg_salt' => substr(md5(time()), 0, 16),
         ];
 
@@ -236,22 +244,27 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
             $transaction_log->save();
         } elseif ($this->checkSign($response, $this->deleteUrl)) {
             $card->delete();
-            if ($card->status == 2 || !UserCards::find()->andWhere(['user_id' => $card->user_id, 'status' => 2])->count()) {
-                if ($t_card = UserCards::findOne(['user_id' => $card->user_id])) {
-                    $t_card->status = 2;
+            if (
+                $card->status == PaymentCards::STATUS_MAIN
+                ||
+                !PaymentCards::find()->where(['user_id' => $card->user_id, 'status' => PaymentCards::STATUS_MAIN])->count()) {
+                if ($t_card = PaymentCards::findOne(['user_id' => $card->user_id])) {
+                    $t_card->status = PaymentCards::STATUS_MAIN;
                     $t_card->save();
                 }
             }
         }
 
         if ($transaction_log->error_code) {
-            throw new ApiException(422, $transaction_log->error_message);
+            /** @var Module $module */
+            $module = Yii::$app->module;
+            $module->setError(422, '_card', $transaction_log->error_message);
         }
 
         return $card;
     }
 
-    public function initTransaction(Transactions $transaction, UserCards $card)
+    public function initTransaction(Transactions $transaction, PaymentCards $card)
     {
         $transaction_log = new TransactionLog([
             'transaction_id' => $transaction->id,
@@ -276,10 +289,10 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
             'pg_sig' => '',
         ];
 
-        if ($transaction->order_id) {
-            $data['pg_description'] = "Оплата счета/доставки № {$transaction->order_id}";
-        } elseif ($transaction->direction == 2) {
-            $data['pg_description'] = "Пополнение кошелька";
+        if ($transaction->route_id) {
+            $data['pg_description'] = "Оплата услуг на маршруте № {$transaction->route_id}";
+        } else {
+            $data['pg_description'] = "Пополнение баланса";
         }
 
         $transaction_log->request = json_encode($data);
@@ -296,7 +309,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
             $transaction_log->save();
         } elseif ($this->checkSign($response, $this->listUrl)) {
             if (isset($response['pg_payment_id'])) {
-                $transaction->paysystem_id = $response['pg_payment_id'];
+                $transaction->payment_id = $response['pg_payment_id'];
                 $transaction->save();
             }
         }
@@ -314,7 +327,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
         $data = [
             'pg_merchant_id' => $this->merchant_id,
-            'pg_payment_id' => $transaction->paysystem_id,
+            'pg_payment_id' => $transaction->payment_id,
             'pg_salt' => substr(md5(time()), 0, 16),
         ];
 
@@ -368,7 +381,9 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
     private function updateData($data, TransactionLog &$log)
     {
-        $url = (isset($_SERVER['REQUEST_URI'])) ? $_SERVER['REQUEST_URI'] : Url::toRoute(['/main/payment/check', 'driver' => $this->driver], true);
+        $url = (isset($_SERVER['REQUEST_URI'])) ?
+            $_SERVER['REQUEST_URI'] :
+            Url::toRoute(['/main/payment/check', 'driver' => $this->driver], true);
         $response = [
             'pg_salt' => substr(md5(time()), 0, 16),
             'pg_status' => 'rejected',
@@ -385,17 +400,17 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
                 if ($order_id) {
                     $transaction = Transactions::findOne(intval($order_id));
                 } else {
-                    $transaction = Transactions::find()->andWhere(['=', 'paysystem_id', intval($payment_id)])->one();
+                    $transaction = Transactions::find()->where(['=', 'payment_id', intval($payment_id)])->one();
                 }
 
                 if (!empty($transaction)) {
                     $log->transaction_id = $transaction->id;
                     if ($transaction->amount == $data['pg_amount'] && $data['pg_currency'] == $this->currency) {
                         if ($data['pg_result']) {
-                            $transaction->status = 2;
+                            $transaction->status = Transactions::STATUS_PAID;
                             $response['pg_status'] = 'ok';
                         } else {
-                            $transaction->status = 3;
+                            $transaction->status = Transactions::STATUS_REJECTED;
                             $response['pg_description'] = $data['pg_failure_description'];
                         }
                         $transaction->save(false);
@@ -419,7 +434,9 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
     private function checkData($data, TransactionLog &$log)
     {
-        $url = (isset($_SERVER['REQUEST_URI'])) ? $_SERVER['REQUEST_URI'] : Url::toRoute(['/main/payment/check', 'driver' => $this->driver], true);
+        $url = (isset($_SERVER['REQUEST_URI'])) ?
+            $_SERVER['REQUEST_URI'] :
+            Url::toRoute(['/main/payment/check', 'driver' => $this->driver], true);
         $response = [
             'pg_salt' => substr(md5(time()), 0, 16),
             'pg_status' => 'rejected',
@@ -435,12 +452,12 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
                 if ($order_id) {
                     $transaction = Transactions::findOne(intval($order_id));
                 } else {
-                    $transaction = Transactions::find()->andWhere(['=', 'paysystem_id', intval($payment_id)])->one();
+                    $transaction = Transactions::find()->where(['=', 'payment_id', intval($payment_id)])->one();
                 }
                 if (!empty($transaction)) {
                     $log->transaction_id = $transaction->id;
                     if ($transaction->amount == $data['pg_amount'] && $data['pg_currency'] == $this->currency) {
-                        $transaction->status = 1;
+                        $transaction->status = Transactions::STATUS_PAID;
                         $transaction->save(false);
                         $response['pg_status'] = 'ok';
                     } else {
@@ -463,15 +480,17 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
     private function updateCard($data, $user_id)
     {
-        $card = UserCards::findOne(['card_id' => $data['pg_card_id'], 'user_id' => $user_id]);
+        $card = PaymentCards::findOne(['pg_card_id' => $data['pg_card_id'], 'user_id' => $user_id]);
 
         if (!$card) {
-            $card = new UserCards([
+            $card = new PaymentCards([
                 'user_id' => $user_id,
-                'card_id' => (isset($data['pg_card_id'])) ? $data['pg_card_id'] : '',
-                'transaction_id' => '',
-                'card_hash' => (isset($data['pg_card_hash'])) ? $data['pg_card_hash'] : '',
-                'status' => (UserCards::find()->andWhere(['user_id' => $user_id])->andWhere(['status' => 2])->count()) ? 1 : 2,
+                'pg_card_id' => (isset($data['pg_card_id'])) ? $data['pg_card_id'] : '',
+                'pg_card_hash' => (isset($data['pg_card_hash'])) ? $data['pg_card_hash'] : '',
+                'pg_merchant_id' => (isset($data['pg_merchant_id'])) ? $data['pg_merchant_id'] : '',
+                'status' => (PaymentCards::find()->where(['user_id' => $user_id, 'status' => PaymentCards::STATUS_MAIN])->count()) ?
+                    PaymentCards::STATUS_ACTIVE :
+                    PaymentCards::STATUS_MAIN,
             ]);
         }
 

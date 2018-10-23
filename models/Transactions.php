@@ -4,9 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\helpers\ArrayHelper;
-use app\components\MultilingualBehavior;
-use app\components\MultilingualQuery;
+
 /**
  * This is the model class for table "transactions".
  *
@@ -31,6 +29,7 @@ use app\components\MultilingualQuery;
  * @property int $payment_id
  * @property string $payment_link
  */
+
 class Transactions extends \yii\db\ActiveRecord
 {
     const
@@ -97,42 +96,42 @@ class Transactions extends \yii\db\ActiveRecord
             'type' => Yii::$app->mv->gt('Тип транзакции', [], 0),
             'request' => Yii::$app->mv->gt('Запрос', [], 0),
             'response' => Yii::$app->mv->gt('Ответ', [], 0),
-            'route_id'  => Yii::$app->mv->gt('Маршрут', [], 0),
+            'route_id' => Yii::$app->mv->gt('Маршрут', [], 0),
         ];
     }
 
     public static function getTypeList()
     {
         return [
-            self::TYPE_INCOME   => Yii::t('app', "Пополнение"),
-            self::TYPE_OUTCOME  => Yii::t('app', "Оплата")
+            self::TYPE_INCOME => Yii::t('app', "Пополнение"),
+            self::TYPE_OUTCOME => Yii::t('app', "Оплата")
         ];
     }
 
     public static function getTypeListArrows()
     {
         return [
-            self::TYPE_INCOME   => Yii::t('app', "<i class='fa fa-long-arrow-up text-success'></i>"),
-            self::TYPE_OUTCOME  => Yii::t('app', "<i class='fa fa-long-arrow-down text-danger'></i>")
+            self::TYPE_INCOME => Yii::t('app', "<i class='fa fa-long-arrow-up text-success'></i>"),
+            self::TYPE_OUTCOME => Yii::t('app', "<i class='fa fa-long-arrow-down text-danger'></i>")
         ];
     }
 
     public static function getStatusList()
     {
         return [
-            self::STATUS_REQUEST    => Yii::t('app', "Запрос на оплату в обработке"),
-            self::STATUS_PAID       => Yii::t('app', "Оплачено"),
-            self::STATUS_CANCELLED  => Yii::t('app', "Отменен"),
-            self::STATUS_REJECTED   => Yii::t('app', "Заблокирован")
+            self::STATUS_REQUEST => Yii::t('app', "Запрос на оплату в обработке"),
+            self::STATUS_PAID => Yii::t('app', "Оплачено"),
+            self::STATUS_CANCELLED => Yii::t('app', "Отменен"),
+            self::STATUS_REJECTED => Yii::t('app', "Заблокирован")
         ];
     }
 
     public static function getGatewayServices()
     {
         return [
-            self::GATEWAY_PAYBOX    => Yii::t('app', "PayBox"),
-            self::GATEWAY_CASH      => Yii::t('app', "Наличные"),
-            self::GATEWAY_KM        => Yii::t('app', "Бесплатные КМ")
+            self::GATEWAY_PAYBOX => Yii::t('app', "PayBox"),
+            self::GATEWAY_CASH => Yii::t('app', "Наличные"),
+            self::GATEWAY_KM => Yii::t('app', "Бесплатные КМ")
         ];
     }
 

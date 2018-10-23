@@ -101,7 +101,7 @@ class PaymentCards extends \yii\db\ActiveRecord
 
     public static function getCards($user_id)
     {
-        $cards = self::find()->andWhere(['user_id' => $user_id, 'status' => [self::STATUS_ACTIVE, self::STATUS_MAIN]])->all();
+        $cards = self::find()->where(['user_id' => $user_id, 'status' => [self::STATUS_ACTIVE, self::STATUS_MAIN]])->all();
 
         $cards_list = [];
         if (!empty($cards)) foreach ($cards as $card) $cards_list[] = $card->toArray();

@@ -16,11 +16,10 @@ use app\models\Transactions;
 use app\models\UserSeminar;
 use SimpleXMLElement;
 use Yii;
-use yii\db\Transaction;
 use yii\helpers\Url;
 use yii\web\Response;
 
-class PayBox  implements PaysystemInterface
+class PayBox implements PaysystemInterface
 {
     // Pay system settings
     private $actionUrl = 'https://www.paybox.kz/init_payment.php';
@@ -34,15 +33,16 @@ class PayBox  implements PaysystemInterface
     private $currency = 'KZT';
     public $result = 0;
 
-    public function __construct($receipt = true) {
-        if($receipt){
+    public function __construct($receipt = true)
+    {
+        if ($receipt) {
             $this->key = \Yii::$app->params['paysystem'][$this->driver]['secret_key_receipt'];
-        }else{
+        } else {
             $this->key = \Yii::$app->params['paysystem'][$this->driver]['secret_key_pay'];
         }
         $this->merchant_id = \Yii::$app->params['paysystem'][$this->driver]['merchant_id'];
         $this->devMod = \Yii::$app->params['paysystem'][$this->driver]['dev'];
-        if(isset(\Yii::$app->params['paysystem'][$this->driver]['currency'])){
+        if (isset(\Yii::$app->params['paysystem'][$this->driver]['currency'])) {
             $this->currency = \Yii::$app->params['paysystem'][$this->driver]['currency'];
         }
     }
@@ -52,8 +52,9 @@ class PayBox  implements PaysystemInterface
         // TODO: Implement getForm() method.
     }
 
-    public function getLink(Transactions $transaction) {
-        if($transaction->isNewRecord){
+    public function getLink(Transactions $transaction)
+    {
+        if ($transaction->isNewRecord) {
             $transaction->save();
         }
         $log = new TransactionLog([
@@ -72,15 +73,15 @@ class PayBox  implements PaysystemInterface
             'pg_success_url' => Url::toRoute(['/main/payment/success'], true),
             'pg_failure_url' => Url::toRoute(['/main/payment/fail'], true),
             'pg_testing_mode' => intval($this->devMod),
-            'pg_salt' => substr(md5(time()),0,16),
+            'pg_salt' => substr(md5(time()), 0, 16),
             'pg_description' => 'test',
             'pg_sig' => '',
         ];
 
-        if($transaction->order_id){
-            $data['pg_description'] = "Оплата счета/доставки № {$transaction->order_id}";
-        }elseif($transaction->direction == 2){
-            $data['pg_description'] = "Пополнение кошелька";
+        if ($transaction->route_id) {
+            $data['pg_description'] = "Оплата услуг на маршруте № {$transaction->route_id}";
+        } else {
+            $data['pg_description'] = "Пополнение баланса";
         }
 
         $data['pg_sig'] = $this->getSignature($data, $url);
@@ -102,14 +103,14 @@ class PayBox  implements PaysystemInterface
         $log->response = $response;
         $transaction->response = $response;
 
-        if($response = simplexml_load_string($response)){
-            if($response->pg_sig == $this->getSignature((array)$response, $url)){
+        if ($response = simplexml_load_string($response)) {
+            if ($response->pg_sig == $this->getSignature((array)$response, $url)) {
                 $response = (array)$response;
-                if(isset($response['pg_status']) && !empty($response['pg_status'])){
-                    switch ($response['pg_status']){
+                if (isset($response['pg_status']) && !empty($response['pg_status'])) {
+                    switch ($response['pg_status']) {
                         case 'ok':
-                            $transaction->paysystem_id = $response['pg_payment_id'];
-                            $transaction->paysystem_link = $response['pg_redirect_url'];
+                            $transaction->payment_id = $response['pg_payment_id'];
+                            $transaction->payment_link = $response['pg_redirect_url'];
                             break;
                         case 'rejected':
                         case 'error':
@@ -117,11 +118,11 @@ class PayBox  implements PaysystemInterface
                             $log->error_message = $response['pg_description'];
                             break;
                     }
-                }else{
+                } else {
                     $log->error_code = 1;
                     $log->error_message = 'Invalid server response';
                 }
-            }else{
+            } else {
                 $log->error_code = 1;
                 $log->error_message = 'Invalid signature';
             }
@@ -133,7 +134,8 @@ class PayBox  implements PaysystemInterface
         return $transaction;
     }
 
-    public function updateTransaction(){
+    public function updateTransaction()
+    {
         $log = new TransactionLog([
             'driver' => $this->driver,
         ]);
@@ -142,15 +144,15 @@ class PayBox  implements PaysystemInterface
         $data = Yii::$app->request->post();
         $log->request = json_encode($data);
 
-        if($this->result){
+        if ($this->result) {
             $log->action = 'checkTransaction';
             $response = $this->checkData($data, $log);
-        }else{
+        } else {
             $log->action = 'updateTransaction';
             $response = $this->updateData($data, $log);
         }
 
-        if($response['pg_status'] == 'rejected'){
+        if ($response['pg_status'] == 'rejected') {
             $log->error_code = 1;
             $log->error_message = $response['pg_description'];
         }
@@ -161,49 +163,52 @@ class PayBox  implements PaysystemInterface
         return $response;
     }
 
-    private function updateData($data,TransactionLog &$log){
-        $url = (isset($_SERVER['REQUEST_URI']))? $_SERVER['REQUEST_URI'] : Url::toRoute(['/main/payment/check', 'driver' => $this->driver], true);
+    private function updateData($data, TransactionLog &$log)
+    {
+        $url = (isset($_SERVER['REQUEST_URI'])) ?
+            $_SERVER['REQUEST_URI'] :
+            Url::toRoute(['/main/payment/check', 'driver' => $this->driver], true);
         $response = [
-            'pg_salt' => substr(md5(time()),0,16),
+            'pg_salt' => substr(md5(time()), 0, 16),
             'pg_status' => 'rejected',
             'pg_sig' => '',
         ];
 
-        if($data['pg_sig'] == $this->getSignature((array)$data, $url)){
+        if ($data['pg_sig'] == $this->getSignature((array)$data, $url)) {
             $data = (array)$data;
 
-            $order_id = (isset($data['pg_order_id']) && !empty($data['pg_order_id']))? $data['pg_order_id'] : false;
-            $payment_id = (isset($data['pg_payment_id']) && !empty($data['pg_payment_id']))? $data['pg_payment_id'] : false;
+            $order_id = (isset($data['pg_order_id']) && !empty($data['pg_order_id'])) ? $data['pg_order_id'] : false;
+            $payment_id = (isset($data['pg_payment_id']) && !empty($data['pg_payment_id'])) ? $data['pg_payment_id'] : false;
 
-            if($order_id || $payment_id){
-                if($order_id){
+            if ($order_id || $payment_id) {
+                if ($order_id) {
                     $transaction = Transactions::findOne(intval($order_id));
-                }else{
-                    $transaction = Transactions::find()->andWhere(['=','paysystem_id',intval($payment_id)])->one();
+                } else {
+                    $transaction = Transactions::find()->where(['=', 'payment_id', intval($payment_id)])->one();
                 }
 
-                if(!empty($transaction)){
+                if (!empty($transaction)) {
                     $log->transaction_id = $transaction->id;
-                    if($transaction->amount == $data['pg_amount'] && $data['pg_currency'] == $this->currency){
-                        if($data['pg_result']){
-                            $transaction->status = 2;
+                    if ($transaction->amount == $data['pg_amount'] && $data['pg_currency'] == $this->currency) {
+                        if ($data['pg_result']) {
+                            $transaction->status = Transactions::STATUS_PAID;
                             $response['pg_status'] = 'ok';
-                        }else{
-                            $transaction->status = 3;
+                        } else {
+                            $transaction->status = Transactions::STATUS_REJECTED;
                             $response['pg_description'] = $data['pg_failure_description'];
                         }
                         $transaction->save(false);
-                    }else{
-                        $response['pg_description'] = Yii::$app->mv->gt('Не верная валюта или сумма',[],false);
+                    } else {
+                        $response['pg_description'] = Yii::$app->mv->gt('Не верная валюта или сумма', [], false);
                     }
-                }else{
-                    $response['pg_description'] = Yii::$app->mv->gt('Транзакция не найдена',[],false);
+                } else {
+                    $response['pg_description'] = Yii::$app->mv->gt('Транзакция не найдена', [], false);
                 }
-            }else{
-                $response['pg_description'] = Yii::$app->mv->gt('pg_order_id обязательно для заполнения',[],false);
+            } else {
+                $response['pg_description'] = Yii::$app->mv->gt('pg_order_id обязательно для заполнения', [], false);
             }
-        }else{
-            $response['pg_description'] = Yii::$app->mv->gt('Не верная подпись запроса',[],false);
+        } else {
+            $response['pg_description'] = Yii::$app->mv->gt('Не верная подпись запроса', [], false);
         }
 
         $response['pg_sig'] = $this->getSignature($response, $url);
@@ -211,42 +216,45 @@ class PayBox  implements PaysystemInterface
         return $response;
     }
 
-    private function checkData($data,TransactionLog &$log){
-        $url = (isset($_SERVER['REQUEST_URI']))? $_SERVER['REQUEST_URI'] : Url::toRoute(['/main/payment/check', 'driver' => $this->driver], true);
+    private function checkData($data, TransactionLog &$log)
+    {
+        $url = (isset($_SERVER['REQUEST_URI'])) ?
+            $_SERVER['REQUEST_URI'] :
+            Url::toRoute(['/main/payment/check', 'driver' => $this->driver], true);
         $response = [
-            'pg_salt' => substr(md5(time()),0,16),
+            'pg_salt' => substr(md5(time()), 0, 16),
             'pg_status' => 'rejected',
             'pg_sig' => '',
         ];
-        if($data['pg_sig'] == $this->getSignature((array)$data, $url)){
+        if ($data['pg_sig'] == $this->getSignature((array)$data, $url)) {
             $data = (array)$data;
 
-            $order_id = (isset($data['pg_order_id']) && !empty($data['pg_order_id']))? $data['pg_order_id'] : false;
-            $payment_id = (isset($data['pg_payment_id']) && !empty($data['pg_payment_id']))? $data['pg_payment_id'] : false;
+            $order_id = (isset($data['pg_order_id']) && !empty($data['pg_order_id'])) ? $data['pg_order_id'] : false;
+            $payment_id = (isset($data['pg_payment_id']) && !empty($data['pg_payment_id'])) ? $data['pg_payment_id'] : false;
 
-            if($order_id || $payment_id){
-                if($order_id){
+            if ($order_id || $payment_id) {
+                if ($order_id) {
                     $transaction = Transactions::findOne(intval($order_id));
-                }else{
-                    $transaction = Transactions::find()->andWhere(['=','paysystem_id',intval($payment_id)])->one();
+                } else {
+                    $transaction = Transactions::find()->where(['=', 'payment_id', intval($payment_id)])->one();
                 }
-                if(!empty($transaction)){
+                if (!empty($transaction)) {
                     $log->transaction_id = $transaction->id;
-                    if($transaction->amount == $data['pg_amount'] && $data['pg_currency'] == $this->currency){
-                        $transaction->status = 1;
+                    if ($transaction->amount == $data['pg_amount'] && $data['pg_currency'] == $this->currency) {
+                        $transaction->status = Transactions::STATUS_PAID;
                         $transaction->save(false);
                         $response['pg_status'] = 'ok';
-                    }else{
-                        $response['pg_description'] = Yii::$app->mv->gt('Не верная валюта или сумма',[],false);
+                    } else {
+                        $response['pg_description'] = Yii::$app->mv->gt('Не верная валюта или сумма', [], false);
                     }
-                }else{
-                    $response['pg_description'] = Yii::$app->mv->gt('Транзакция не найдена',[],false);
+                } else {
+                    $response['pg_description'] = Yii::$app->mv->gt('Транзакция не найдена', [], false);
                 }
-            }else{
-                $response['pg_description'] = Yii::$app->mv->gt('pg_order_id обязательно для заполнения',[],false);
+            } else {
+                $response['pg_description'] = Yii::$app->mv->gt('pg_order_id обязательно для заполнения', [], false);
             }
-        }else{
-            $response['pg_description'] = Yii::$app->mv->gt('Не верная подпись запроса',[],false);
+        } else {
+            $response['pg_description'] = Yii::$app->mv->gt('Не верная подпись запроса', [], false);
         }
 
         $response['pg_sig'] = $this->getSignature($response, $url);
@@ -254,27 +262,28 @@ class PayBox  implements PaysystemInterface
         return $response;
     }
 
-    public static function toXML($data,SimpleXMLElement &$xml_data){
-        foreach( $data as $key => $value ) {
-            if( is_numeric($key) ){
-                $key = 'item'.$key; //dealing with <0/>..<n/> issues
+    public static function toXML($data, SimpleXMLElement &$xml_data)
+    {
+        foreach ($data as $key => $value) {
+            if (is_numeric($key)) {
+                $key = 'item' . $key; //dealing with <0/>..<n/> issues
             }
-            if( is_array($value) ) {
+            if (is_array($value)) {
                 $subnode = $xml_data->addChild($key);
                 self::toXML($value, $subnode);
             } else {
-                $xml_data->addChild("$key",htmlspecialchars("$value"));
+                $xml_data->addChild("$key", htmlspecialchars("$value"));
             }
         }
     }
 
     private function getSignature(array $data, $url)
     {
-        preg_match_all('/\/([\w.-]+)[?]?/m',$url, $matches);
+        preg_match_all('/\/([\w.-]+)[?]?/m', $url, $matches);
 
-        if(empty($matches)){
-            throw new \Exception(Yii::$app->mv->gt('Платежная система: Не верный платежный метод',[],false));
-        }else{
+        if (empty($matches)) {
+            throw new \Exception(Yii::$app->mv->gt('Платежная система: Не верный платежный метод', [], false));
+        } else {
             $action = array_pop($matches[1]);
         }
 

@@ -9,7 +9,7 @@ use app\models\Transactions;
 
 interface PaysystemSnappingCardsInterface
 {
-    public function addCard();
+    public function addCard($user_id);
 
     public function callbackCard();
 

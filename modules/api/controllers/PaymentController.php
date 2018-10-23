@@ -212,9 +212,9 @@ class PaymentController extends BaseController
         $result = '';
 
         if ($paysystem instanceof PaysystemSnappingCardsInterface) {
-            $transaction = $paysystem->addCard();
-            if (!empty($transaction->paysystem_link)) {
-                $result = $transaction->paysystem_link;
+            $transaction = $paysystem->addCard($user->id);
+            if (!empty($transaction->payment_link)) {
+                $result = $transaction->payment_link;
             } else {
                 $this->module->setError(422, '_card', Yii::$app->mv->gt("Платежная система не доступна", [], false));
             }
