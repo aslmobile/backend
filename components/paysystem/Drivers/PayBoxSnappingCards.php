@@ -173,11 +173,13 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $transaction_log->save();
 
         if (isset($response['error'])) {
+
             $transaction_log->error_code = $response['error'];
             $transaction_log->error_message = $response['message'];
-
             $transaction_log->save();
+
         } elseif ($this->checkSign($response, $this->listUrl)) {
+
             $list_ids = [];
 
             if (isset($response['card']) && is_array($response['card'])) {
@@ -229,26 +231,33 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $response = $this->sendRequest($data, $this->deleteUrl);
 
         $transaction_log->response = json_encode($response);
-
         $transaction_log->save();
+
+        $card_response = isset($response['card']) ? $response['card'] : [];
 
         if (isset($response['error'])) {
             $transaction_log->error_code = $response['error'];
             $transaction_log->error_message = $response['message'];
-
             $transaction_log->save();
-        } elseif ($response['pg_status'] == 'error') {
+        } elseif (isset($card_response['pg_status']) && $card_response['pg_status'] == 'error') {
+
+            $error_description = isset($card_response['pg_error_description']) ?
+                $card_response['pg_error_description'] :
+                isset($response['pg_error_description']) ? $response['pg_error_description'] : '';
+
             $transaction_log->error_code = 1;
-            $transaction_log->error_message = $response['pg_error_description'];
-
+            $transaction_log->error_message = $error_description;
             $transaction_log->save();
+
         } elseif ($this->checkSign($response, $this->deleteUrl)) {
             $card->delete();
             if (
-                $card->status == PaymentCards::STATUS_MAIN
+                $card->oldAttributes['status'] == PaymentCards::STATUS_MAIN
                 ||
-                !PaymentCards::find()->where(['user_id' => $card->user_id, 'status' => PaymentCards::STATUS_MAIN])->count()) {
-                if ($t_card = PaymentCards::findOne(['user_id' => $card->user_id])) {
+                !PaymentCards::find()->where(['user_id' => $card->user_id, 'status' => PaymentCards::STATUS_MAIN])->count()
+            ) {
+                $t_card = PaymentCards::findOne(['user_id' => $card->user_id]);
+                if (!empty($t_card)) {
                     $t_card->status = PaymentCards::STATUS_MAIN;
                     $t_card->save();
                 }
