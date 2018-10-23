@@ -24,6 +24,8 @@ class Km extends \app\models\Km
             $start = strlen($item['to']) - 2;
             $item['to'] = substr_replace(strval($item['to']), ':', $start, 0);
             $item['route'] = intval($item['route']);
+            $route = Route::findOne($item['route']);
+            empty($route)?:$item += ['title' => $route->title];
             $item['rate'] = doubleval($item['rate']);
             array_walk($item['days'], function (&$day) { $day = intval($day); });
             return $item;
@@ -35,6 +37,8 @@ class Km extends \app\models\Km
             $start = strlen($item['to']) - 2;
             $item['to'] = substr_replace(strval($item['to']), ':', $start, 0);
             $item['route'] = intval($item['route']);
+            $route = Route::findOne($item['route']);
+            empty($route)?:$item += ['title' => $route->title];
             array_walk($item['days'], function (&$day) { $day = intval($day); });
             return $item;
         });
