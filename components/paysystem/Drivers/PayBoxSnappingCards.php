@@ -200,7 +200,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
             }
 
             if (!empty($list_ids)) {
-                PaymentCards::deleteAll(['AND', ['=', 'user_id', $user_id], ['NOT IN', 'card_id', $list_ids]]);
+                PaymentCards::deleteAll(['AND', ['=', 'user_id', $user_id], ['NOT IN', 'pg_card_id', $list_ids]]);
             } else {
                 PaymentCards::deleteAll(['user_id' => $user_id]);
             }

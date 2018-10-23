@@ -192,8 +192,18 @@ class PaymentController extends BaseController
 
     public function actionCards()
     {
+
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
+
+        $data = ['driver' => \Yii::$app->params['use_paysystem']];
+        $paysystem = PaysystemProvider::getDriver($data);
+
+        if ($paysystem instanceof PaysystemSnappingCardsInterface) {
+            $paysystem->getCardsList($user->id);
+        } else {
+            $this->module->setError(422, '_card', Yii::$app->mv->gt("Привязка карты не доступна!", [], false));
+        }
 
         $this->module->data['user_id'] = $user->id;
         $this->module->data['cards'] = PaymentCards::getCards($user->id);
