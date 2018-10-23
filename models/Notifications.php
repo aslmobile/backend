@@ -199,12 +199,14 @@ class Notifications extends \yii\db\ActiveRecord
                 case Devices::TYPE_ANDROID:
                     $push->firebase()->send($device->push_id, [
                         'priority' => 'high',
-                        'notification' => [
+//                        'notification' => [
+//                            'title' => $notification->title,
+//                            'body' => $notification->text,
+//                            'sound' => 'default',
+//                        ],
+                        'data' => [
                             'title' => $notification->title,
                             'body' => $notification->text,
-                            'sound' => 'default',
-                        ],
-                        'data' => [
                             'time' => $notification->time,
                             'type' => $notification->type,
                         ],
