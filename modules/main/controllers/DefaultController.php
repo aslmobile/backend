@@ -5,8 +5,8 @@ namespace app\modules\main\controllers;
 use app\components\Controller;
 use app\modules\main\models\Dynamic;
 use Yii;
-use yii\web\NotFoundHttpException;
 use yii\helpers\Url;
+use yii\web\NotFoundHttpException;
 
 class DefaultController extends Controller
 {
@@ -26,8 +26,7 @@ class DefaultController extends Controller
 
     public function actionIndex($page = false)
     {
-        if (!$page)
-        {
+        if (!$page) {
             if (Yii::$app->user->isGuest) return $this->redirect(Url::toRoute('/user/default/login/'));
 
             return $this->redirect(Url::toRoute('/admin/'));
@@ -52,14 +51,11 @@ class DefaultController extends Controller
     {
         $fname = Yii::$app->request->get('model');
         $module = Yii::$app->request->get('module');
-        if (!$module) {
-            $module = 'admin';
-        }
+        if (!$module) $module = 'admin';
         $rdir = $_SERVER['DOCUMENT_ROOT'] . '/modules/' . $module . '/models/';
         $mdir = $_SERVER['DOCUMENT_ROOT'] . '/models/';
-        if ($fname) {
-            $fname = ucfirst($fname);
-        }
+        if ($fname) $fname = ucfirst($fname);
+
         if ($fname && file_exists($mdir . $fname . '.php') && !file_exists($rdir . $fname . '.php')) {
             $newfile = <<<HTML
 <?php
@@ -73,9 +69,8 @@ class $fname extends \app\models\\$fname
 }
 HTML;
             file_put_contents($rdir . $fname . '.php', $newfile);
-        } else {
-            die('uber nevernij fail');
-        }
+        } else die('uber nevernij fail');
+
     }
 
 }
