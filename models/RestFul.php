@@ -9,6 +9,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int $id
  * @property int $type
  * @property int $user_id
+ * @property int $target_id
  * @property string $message
  * @property string $baggage
  * @property string $uip
@@ -47,7 +48,7 @@ class RestFul extends \yii\db\ActiveRecord
     {
         return [
             [['type', 'user_id', 'uip'], 'required'],
-            [['user_id', 'created_at', 'updated_at'], 'integer'],
+            [['user_id', 'created_at', 'updated_at', 'target_id'], 'integer'],
             [['message', 'baggage', 'uip'], 'string'],
             ['type', 'default', 'value' => self::TYPE_LOG]
         ];
@@ -62,6 +63,7 @@ class RestFul extends \yii\db\ActiveRecord
             'id' => Yii::t('app', "ID"),
             'type' => Yii::t('app', "Type"),
             'user_id' => Yii::t('app', "User ID"),
+            'target_id' => Yii::t('app', "Target ID"),
             'message' => Yii::t('app', "Message"),
             'baggage' => Yii::t('app', "Baggage"),
             'uip' => Yii::t('app', "User IP"),

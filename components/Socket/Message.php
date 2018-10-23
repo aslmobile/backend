@@ -597,32 +597,50 @@ class Message
         if ($this->validateDevice($from)) $device = $from->device;
 
         $this->message_id = intval($data['data']['message_id']);
-        $passenger = intval($data['data']['passenger']);
+        $line_data = [];
 
-        RestFul::updatePassengerAccept();
+        if (isset($data['data']['passenger'])) {
 
-        $watchdog = RestFul::findOne([
-            'type' => RestFul::TYPE_PASSENGER_ACCEPT,
-            'user_id' => $passenger,
-            'message' => json_encode(['status' => 'request'])
-        ]);
-        if (!$watchdog) {
-            $watchdog = new RestFul([
+            $passenger = intval($data['data']['passenger']);
+            $line_data = $data['data']['line'];
+            RestFul::updatePassengerAccept();
+
+            $watchdog = RestFul::findOne([
                 'type' => RestFul::TYPE_PASSENGER_ACCEPT,
-                'message' => json_encode(['status' => 'request']),
                 'user_id' => $passenger,
-                'uip' => '0.0.0.0'
+                'message' => json_encode(['status' => 'request'])
             ]);
-            $watchdog->save();
+            if (!$watchdog) {
+                $watchdog = new RestFul([
+                    'type' => RestFul::TYPE_PASSENGER_ACCEPT,
+                    'message' => json_encode(['status' => 'request']),
+                    'user_id' => $passenger,
+                    'target_id' => $line_data['id'],
+                    'uip' => '0.0.0.0'
+                ]);
+                $watchdog->save();
+            }
+
+        } else {
+
+            $watchdog = RestFul::findOne([
+                'type' => RestFul::TYPE_PASSENGER_ACCEPT,
+                'user_id' => $device->user_id,
+                'message' => json_encode(['status' => 'request'])
+            ]);
+            if (!empty($watchdog)) {
+                $line_data = \app\modules\api\models\Line::findOne($watchdog->target_id);
+                $line_data = !empty($line_data) ? $line_data->toArray() : [];
+            }
+
         }
 
-        $line_data = $data['data']['line'];
         $response = [
             'message_id' => $this->message_id,
             'device_id' => $device->id,
             'user_id' => $device->user_id,
             'data' => [
-                'accept_from' => $watchdog->created_at,
+                'accept_from' => !empty($watchdog) ? $watchdog->created_at : time(),
                 'accept_time' => 300,
                 'line' => $line_data,
             ]
