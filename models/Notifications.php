@@ -166,6 +166,7 @@ class Notifications extends \yii\db\ActiveRecord
                 $notification->status = $status;
                 $notification->title = !empty($message) ? $message : self::getTypes()[$type];
                 $notification->text = $message;
+                $notification->time = time();
                 $notification->initiator_id = $initiator;
                 if ($notification->save()) $notifications[] = $notification;
             }
@@ -204,8 +205,7 @@ class Notifications extends \yii\db\ActiveRecord
                             'sound' => 'default',
                         ],
                         'data' => [
-                            'time' => $notification->updated_at,
-                            'notification_id' => $notification->id,
+                            'time' => $notification->time,
                             'type' => $notification->type,
                         ],
                     ], $device->app);
