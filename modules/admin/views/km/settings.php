@@ -81,7 +81,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_DROPDOWN,
                                     'title' => Yii::t('app', "Маршрут"),
                                     'items' => $routes,
-                                    'options' => ['class' => '']
+                                    'options' => ['class' => '', 'required' => true]
                                 ],
                                 [
                                     'name' => 'days',
@@ -92,7 +92,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     },
                                     'options' => [
                                         'data' => $days,
-                                        'options' => ['multiple' => true],
+                                        'options' => ['multiple' => true, 'required' => true],
                                         'pluginOptions' => [
                                             'closeOnSelect' => false,
                                         ],
@@ -103,7 +103,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'type' => \kartik\time\TimePicker::class,
                                     'title' => Yii::t('app', "С"),
                                     'options' => [
-                                        'options' => [],
+                                        'options' => ['required' => true],
                                         'pluginOptions' => [
                                             'showMeridian' => false,
                                         ],
@@ -114,7 +114,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'type' => \kartik\time\TimePicker::class,
                                     'title' => Yii::t('app', "по"),
                                     'options' => [
-                                        'options' => [],
+                                        'options' => ['required' => true],
                                         'pluginOptions' => [
                                             'showMeridian' => false,
                                         ],
@@ -124,7 +124,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'name' => 'rate',
                                     'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_TEXT_INPUT,
                                     'title' => Yii::t('app', "Ставка на 1 км"),
-                                    'options' => ['type' => 'number', 'step' => 0.01]
+                                    'options' => ['type' => 'number', 'step' => 0.01, 'required' => true]
                                 ]
                             ],
                         ])->label(Yii::t('app', "Настройки накоплений")); ?>
@@ -137,11 +137,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             'allowEmptyList' => true,
                             'columns' => [
                                 [
-                                    'name' => 'type',
+                                    'name' => 'route',
                                     'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_DROPDOWN,
                                     'title' => Yii::t('app', "Маршрут"),
                                     'items' => $routes,
-                                    'options' => ['class' => '']
+                                    'options' => ['class' => '', 'required' => true]
                                 ],
                                 [
                                     'name' => 'days',
@@ -152,7 +152,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     },
                                     'options' => [
                                         'data' => $days,
-                                        'options' => ['multiple' => true],
+                                        'options' => ['multiple' => true, 'required' => true],
                                         'pluginOptions' => [
                                             'closeOnSelect' => false,
                                         ],
@@ -163,7 +163,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'type' => \kartik\time\TimePicker::class,
                                     'title' => Yii::t('app', "С"),
                                     'options' => [
-                                        'options' => [],
+                                        'options' => ['required' => true],
                                         'pluginOptions' => [
                                             'showMeridian' => false,
                                         ],
@@ -174,7 +174,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'type' => \kartik\time\TimePicker::class,
                                     'title' => Yii::t('app', "по"),
                                     'options' => [
-                                        'options' => [],
+                                        'options' => ['required' => true],
                                         'pluginOptions' => [
                                             'showMeridian' => false,
                                         ],

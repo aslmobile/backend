@@ -23,6 +23,9 @@ class Km extends \app\models\Km
             $item['from'] = substr_replace(strval($item['from']), ':', $start, 0);
             $start = strlen($item['to']) - 2;
             $item['to'] = substr_replace(strval($item['to']), ':', $start, 0);
+            $item['route'] = intval($item['route']);
+            $item['rate'] = doubleval($item['rate']);
+            array_walk($item['days'], function (&$day) { $day = intval($day); });
             return $item;
         });
 
@@ -31,6 +34,8 @@ class Km extends \app\models\Km
             $item['from'] = substr_replace(strval($item['from']), ':', $start, 0);
             $start = strlen($item['to']) - 2;
             $item['to'] = substr_replace(strval($item['to']), ':', $start, 0);
+            $item['route'] = intval($item['route']);
+            array_walk($item['days'], function (&$day) { $day = intval($day); });
             return $item;
         });
 
@@ -48,6 +53,9 @@ class Km extends \app\models\Km
             array_walk($settings['accumulation'], function (&$item) {
                 $item['from'] = intval(str_replace(':', '', $item['from']));
                 $item['to'] = intval(str_replace(':', '', $item['to']));
+                $item['route'] = intval($item['route']);
+                $item['rate'] = doubleval($item['rate']);
+                array_walk($item['days'], function (&$day) { $day = intval($day); });
                 return $item;
             });
         } else $settings['accumulation'] = [];
@@ -57,6 +65,8 @@ class Km extends \app\models\Km
             array_walk($settings['waste'], function (&$item) {
                 $item['from'] = intval(str_replace(':', '', $item['from']));
                 $item['to'] = intval(str_replace(':', '', $item['to']));
+                $item['route'] = intval($item['route']);
+                array_walk($item['days'], function (&$day) { $day = intval($day); });
                 return $item;
             });
         } else $settings['waste'] = [];

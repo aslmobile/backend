@@ -11,6 +11,7 @@ use app\models\Taxi;
 use app\models\TripLuggage;
 use app\models\User;
 use app\modules\admin\models\Checkpoint;
+use app\modules\admin\models\Km;
 use app\modules\api\models\Devices;
 use app\modules\api\models\Trip;
 use Yii;
@@ -125,17 +126,22 @@ class TripController extends BaseController
 
     }
 
-    public function actionGetKm(){
+    public function actionGetKm()
+    {
 
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $km_settings = \app\models\Km::findOne(1);
+        $km_settings = Km::findOne(1);
         $km_desc = $km_settings->description;
 
         $this->module->data['km'] = $user->km;
         $this->module->data['min'] = Yii::$app->params['distance'];
         $this->module->data['description'] = $km_desc;
+        $this->module->data['settings'] = [
+            'accumulation' => $km_settings->settings_accumulation,
+            'waste' => $km_settings->settings_waste,
+        ];
         $this->module->setSuccess();
         $this->module->sendResponse();
 
@@ -159,7 +165,7 @@ class TripController extends BaseController
 
         if ($this->body->payment_type == Trip::PAYMENT_TYPE_KM) {
 
-            if(isset($this->body->schedule) && !empty($this->body->schedule))$this->module->setError(422,
+            if (isset($this->body->schedule) && !empty($this->body->schedule)) $this->module->setError(422,
                 '_km', Yii::$app->mv->gt("Вы не можете оплатить зпланированную поездку бесплатными километрами", [], false));
 
             $query = new ArrayQuery();
