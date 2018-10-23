@@ -47,4 +47,35 @@ class DefaultController extends Controller
     {
         return $this->render('page', ['model' => $page]);
     }
+
+    public function actionUbermodelextender()
+    {
+        $fname = Yii::$app->request->get('model');
+        $module = Yii::$app->request->get('module');
+        if (!$module) {
+            $module = 'admin';
+        }
+        $rdir = $_SERVER['DOCUMENT_ROOT'] . '/modules/' . $module . '/models/';
+        $mdir = $_SERVER['DOCUMENT_ROOT'] . '/models/';
+        if ($fname) {
+            $fname = ucfirst($fname);
+        }
+        if ($fname && file_exists($mdir . $fname . '.php') && !file_exists($rdir . $fname . '.php')) {
+            $newfile = <<<HTML
+<?php
+
+namespace app\modules\\$module\models;
+
+
+class $fname extends \app\models\\$fname
+{
+
+}
+HTML;
+            file_put_contents($rdir . $fname . '.php', $newfile);
+        } else {
+            die('uber nevernij fail');
+        }
+    }
+
 }
