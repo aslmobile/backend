@@ -76,7 +76,7 @@ class TripController extends BaseController
                     'passengers-route' => ['GET'],
                     'arrive-endpoint' => ['POST'],
                     'passenger-trips' => ['GET'],
-                    'decline-passenger' => ['DELETE'],
+                    'decline-passenger' => ['POST'],
                     'cancel-trip-queue' => ['POST'],
                     'rate-passenger' => ['POST'],
                     'comment-passenger' => ['POST'],
