@@ -14,6 +14,7 @@ use yii\widgets\ActiveForm;
         <div class="box">
             <div class="box-body">
                 <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'max_seats')->textInput(['type' => 'number', 'step' => 1, 'min' => 0]) ?>
                 <?= $form->field($model, 'status')->dropDownList($model->statusList) ?>
             </div>
             <div class="box-footer clearfix text-right">
