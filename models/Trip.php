@@ -51,6 +51,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property \app\models\Checkpoint $startpoint
  * @property \app\models\User $user
+ * @property \app\models\User $driver
  * @property \app\models\Dispatch $dispatch
  */
 class Trip extends \yii\db\ActiveRecord

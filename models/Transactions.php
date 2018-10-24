@@ -32,6 +32,7 @@ use yii\behaviors\TimestampBehavior;
 
 class Transactions extends \yii\db\ActiveRecord
 {
+    //region CONSTANTA
     const
         TYPE_OUTCOME = 1,
         TYPE_INCOME = 2;
@@ -46,6 +47,8 @@ class Transactions extends \yii\db\ActiveRecord
         GATEWAY_PAYBOX = 1,
         GATEWAY_CASH = 2,
         GATEWAY_KM = 3;
+    //endregion
+
 
     /**
      * @inheritdoc

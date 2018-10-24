@@ -25,6 +25,7 @@ use yii\web\IdentityInterface;
  * @property integer $gender
  * @property integer $city_id
  * @property integer $image
+ * @property float $balance
  * @property float $phone
  * @property float $phone_on_verify
  * @property string $password_hash

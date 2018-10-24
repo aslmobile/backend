@@ -5,6 +5,8 @@ use app\components\paysystem\PaysystemSnappingCardsInterface;
 use app\models\PaymentCards;
 use app\models\Ticket;
 use app\models\Transactions;
+use app\models\User;
+use app\modules\api\models\Trip;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -217,6 +219,83 @@ class PaymentController extends BaseController
         $ticket->save();
 
         $this->module->data['ticket'] = $ticket->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionPay($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['type']);
+
+        $trip = Trip::findOne($id);
+        if (!$trip) $this->module->setError(422,
+            '_trip', Yii::$app->mv->gt("Не найдено", [], false));
+
+        $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
+
+        $validator = new NumberValidator();
+        $validator->min = 1;
+        $validator->integerOnly = true;
+
+        $transaction = new Transactions();
+        $transaction->user_id = $user->id;
+        $transaction->status = Transactions::STATUS_REQUEST;
+        $transaction->amount = $trip->amount;
+        $transaction->gateway = Transactions::getGatewayServices()[$this->body->type];
+        $transaction->uip = Yii::$app->request->userIP;
+        $transaction->currency = $trip->currency;
+        $transaction->route_id = $trip->route_id;
+        $transaction->save();
+
+
+        if (isset($this->body->card) && $this->body->card) {
+
+            if ($this->body->type != Transactions::GATEWAY_PAYBOX) $this->module->setError(422,
+                '_type', Yii::$app->mv->gt("Тип оплаты не верен.", [], false));
+
+            if (!$validator->validate($this->body->card)) $this->module->setError(422,
+                '_card', Yii::$app->mv->gt("Карта не верна", [], false));
+
+            $card = PaymentCards::findOne(['id' => $this->body->card, 'user_id' => $user->id]);
+            if (!$card) $this->module->setError(422,
+                '_card', Yii::$app->mv->gt("Не найдено", [], false));
+
+            $data = ['driver' => \Yii::$app->params['use_paysystem']];
+            $paysystem = PaysystemProvider::getDriver($data);
+
+            if ($paysystem instanceof PaysystemSnappingCardsInterface) {
+
+                $init_payment = $paysystem->initTransaction($transaction, $card);
+
+                if (!$init_payment) $this->module->setError(422, '_payment',
+                    Yii::$app->mv->gt("Во время инициализации платежа произошла ошибка!", [], false));
+
+                $transaction = $paysystem->payTransaction($init_payment);
+                if (!$transaction) $this->module->setError(422, '_payment',
+                    Yii::$app->mv->gt("Во время проведения платежа произошла ошибка!", [], false));
+
+                $trip->payment_status = Trip::PAYMENT_STATUS_PAID;
+
+                /** @var User $driver */
+                $driver = $trip->driver;
+                if (!empty($driver)) {
+                    $driver->balance += $transaction->amount;
+                    $driver->save();
+                }
+
+            } else {
+                $this->module->setError(422, '_card', Yii::$app->mv->gt("Осуществление платежа не доступно!", [], false));
+            }
+
+        }
+
+        $trip->update();
+
+        $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

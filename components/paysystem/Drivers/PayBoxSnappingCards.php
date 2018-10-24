@@ -31,6 +31,10 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
     private $currency = 'KZT';
     public $result = 0;
 
+    /**
+     * PayBoxSnappingCards constructor.
+     * @param bool $receipt
+     */
     public function __construct($receipt = true)
     {
         if ($receipt) {
@@ -123,6 +127,9 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         return $transaction;
     }
 
+    /**
+     * @return array
+     */
     public function callbackCard()
     {
         $log = new TransactionLog([
@@ -149,6 +156,10 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         return [];
     }
 
+    /**
+     * @param $user_id
+     * @return array
+     */
     public function getCardsList($user_id)
     {
         $transaction_log = new TransactionLog([
@@ -211,6 +222,12 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         return $list;
     }
 
+    /**
+     * @param PaymentCards $card
+     * @return PaymentCards
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function deleteCard(PaymentCards $card)
     {
         $transaction_log = new TransactionLog([
@@ -273,6 +290,11 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         return $card;
     }
 
+    /**
+     * @param Transactions $transaction
+     * @param PaymentCards $card
+     * @return Transactions|bool
+     */
     public function initTransaction(Transactions $transaction, PaymentCards $card)
     {
         $transaction_log = new TransactionLog([
@@ -312,10 +334,16 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $transaction_log->save();
 
         if (isset($response['error'])) {
+
             $transaction_log->error_code = $response['error'];
             $transaction_log->error_message = $response['message'];
-
             $transaction_log->save();
+
+            $transaction->status = Transactions::STATUS_REJECTED;
+            $transaction->save();
+
+            return false;
+
         } elseif ($this->checkSign($response, $this->listUrl)) {
             if (isset($response['pg_payment_id'])) {
                 $transaction->payment_id = $response['pg_payment_id'];
@@ -326,6 +354,10 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         return $transaction;
     }
 
+    /**
+     * @param Transactions $transaction
+     * @return Transactions|bool
+     */
     public function payTransaction(Transactions $transaction)
     {
         $transaction_log = new TransactionLog([
@@ -348,17 +380,27 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $transaction_log->save();
 
         if (isset($response['error'])) {
+
+            $transaction->status = Transactions::STATUS_REJECTED;
+
             $transaction_log->error_code = $response['error'];
             $transaction_log->error_message = $response['message'];
-
             $transaction_log->save();
+
+            return false;
+
         } elseif ($this->checkSign($response, $this->listUrl)) {
-            // TODO: After create
+            var_dump($response);
+            $transaction->status = Transactions::STATUS_PAID;
+            $transaction->save();
         }
 
         return $transaction;
     }
 
+    /**
+     * @return array
+     */
     public function updateTransaction()
     {
         $log = new TransactionLog([
@@ -388,6 +430,12 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         return $response;
     }
 
+    /**
+     * @param $data
+     * @param TransactionLog $log
+     * @return array
+     * @throws \Exception
+     */
     private function updateData($data, TransactionLog &$log)
     {
         $url = (isset($_SERVER['REQUEST_URI'])) ?
@@ -441,6 +489,12 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         return $response;
     }
 
+    /**
+     * @param $data
+     * @param TransactionLog $log
+     * @return array
+     * @throws \Exception
+     */
     private function checkData($data, TransactionLog &$log)
     {
         $url = (isset($_SERVER['REQUEST_URI'])) ?
@@ -487,6 +541,10 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         return $response;
     }
 
+    /**
+     * @param $data
+     * @param $user_id
+     */
     private function updateCard($data, $user_id)
     {
         $card = PaymentCards::findOne(['pg_card_id' => $data['pg_card_id'], 'user_id' => $user_id]);
@@ -506,6 +564,12 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $card->save();
     }
 
+    /**
+     * @param array $data
+     * @param $url
+     * @return array|mixed
+     * @throws \Exception
+     */
     private function sendRequest(array $data, $url)
     {
         $data['pg_sig'] = $this->getSignature($data, $url);
@@ -549,6 +613,10 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         }
     }
 
+    /**
+     * @param $data
+     * @return array|mixed
+     */
     public static function xmlToArray($data)
     {
         try {
@@ -587,6 +655,11 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         return md5($signString);
     }
 
+    /**
+     * @param $array
+     * @param string $glue
+     * @return string
+     */
     private static function arrayImplodeData($array, $glue = ';')
     {
         $res = '';
@@ -609,6 +682,12 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         return $res;
     }
 
+    /**
+     * @param $data
+     * @param $url
+     * @return bool
+     * @throws \Exception
+     */
     private function checkSign($data, $url)
     {
         $sign = $this->getSignature($data, $url);
