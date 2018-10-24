@@ -49,27 +49,27 @@ class DefaultController extends Controller
 
     public function actionUbermodelextender()
     {
-        $fname = Yii::$app->request->get('model');
+        $f_name = Yii::$app->request->get('model');
         $module = Yii::$app->request->get('module');
         if (!$module) $module = 'admin';
-        $rdir = $_SERVER['DOCUMENT_ROOT'] . '/modules/' . $module . '/models/';
-        $mdir = $_SERVER['DOCUMENT_ROOT'] . '/models/';
-        if ($fname) $fname = ucfirst($fname);
+        $r_dir = $_SERVER['DOCUMENT_ROOT'] . '/modules/' . $module . '/models/';
+        $m_dir = $_SERVER['DOCUMENT_ROOT'] . '/models/';
+        if ($f_name) $f_name = ucfirst($f_name);
 
-        if ($fname && file_exists($mdir . $fname . '.php') && !file_exists($rdir . $fname . '.php')) {
-            $newfile = <<<HTML
+        if ($f_name && file_exists($m_dir . $f_name . '.php') && !file_exists($r_dir . $f_name . '.php')) {
+            $new_file = <<<HTML
 <?php
 
 namespace app\modules\\$module\models;
 
 
-class $fname extends \app\models\\$fname
+class $f_name extends \app\models\\$f_name
 {
 
 }
 HTML;
-            file_put_contents($rdir . $fname . '.php', $newfile);
-        } else die('uber nevernij fail');
+            file_put_contents($r_dir . $f_name . '.php', $new_file);
+        } else die('uber fail');
 
     }
 

@@ -157,7 +157,7 @@ class SocketServer implements MessageComponentInterface
             }
         }
 
-        $from->send($response);
+        if (is_object($from->device) && !in_array($from->device->user_id, $result->addressed)) $from->send($response);
 
         $sender = is_object($from->device) ? $from->device->id : 'Server';
 
