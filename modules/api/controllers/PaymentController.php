@@ -28,7 +28,7 @@ class PaymentController extends BaseController
                             'transactions', 'transaction', 'methods', 'in-out-methods', 'in-out-amounts',
                             'transactions-km',
 
-                            'create-card', 'delete-card', 'cards',
+                            'create-card', 'delete-card', 'cards', 'pay',
                             'ticket'
                         ],
                         'allow' => true
@@ -46,6 +46,7 @@ class PaymentController extends BaseController
                     'in-out-amounts' => ['POST'],
 
                     'create-card' => ['PUT'],
+                    'pay' => ['PUT'],
                     'ticket' => ['PUT'],
                     'delete-card' => ['DELETE'],
                     'cards' => ['GET']
