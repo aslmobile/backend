@@ -778,25 +778,25 @@ class Trip extends \yii\db\ActiveRecord
         $array = parent::toArray($fields, $expand, $recursive);
 
         if ($this->startpoint) $array['startpoint'] = $this->startpoint->toArray();
-        else $array['startpoint'] = [];
+        else $array['startpoint'] = (object)['id' => -1];
 
         if ($this->endpoint) $array['endpoint'] = $this->endpoint->toArray();
-        else $array['endpoint'] = [];
+        else $array['endpoint'] = (object)['id' => -1];
 
         if ($this->route) $array['route'] = $this->route->toArray();
-        else $array['route'] = [];
+        else $array['route'] = (object)['id' => -1];
 
         if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
-        else $array['vehicle'] = [];
+        else $array['vehicle'] = (object)['id' => -1];
 
         if ($this->driver) $array['driver'] = $this->driver->toArray();
-        else $array['driver'] = [];
+        else $array['driver'] = (object)['id' => -1];
 
         if ($this->user) $array['passenger'] = $this->user->toArray();
-        else $array['passenger'] = [];
+        else $array['passenger'] = (object)['id' => -1];
 
         if ($this->dispatch) $array['dispatch'] = $this->dispatch->toArray();
-        else $array['dispatch'] = [];
+        else $array['dispatch'] = (object)['id' => -1];
 
         if ($this->baggage) $array['baggage'] = $this->baggage;
         else $array['baggage'] = [];
