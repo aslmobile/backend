@@ -379,7 +379,8 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
         $response = $this->sendRequest($data, $this->payUrl);
 
-        var_dump($response);die();
+        var_dump($response);
+        die();
 
         $transaction_log->response = json_encode($response);
         $transaction_log->save();
@@ -577,7 +578,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
      */
     private function sendRequest(array $data, $url)
     {
-        $data['pg_sig'] = $this->getSignature($data, $url);
+        $data += ['pg_sig' => $this->getSignature($data, $url)];
 
         $ch = curl_init();
 
