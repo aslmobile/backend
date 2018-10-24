@@ -379,7 +379,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
         $response = $this->sendRequest($data, $this->payUrl);
 
-        var_dump($response);
+        var_dump($response);die();
 
         $transaction_log->response = json_encode($response);
         $transaction_log->save();
