@@ -380,7 +380,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
         $response = $this->sendRequest($data, $this->payUrl);
 
-        var_dump($response);die();
+        $transaction_log->save();var_dump($response);die();
 
         $transaction_log->response = json_encode($response);
         $transaction_log->save();
@@ -591,6 +591,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $response = curl_exec($ch);
         curl_close($ch);
 
+        var_dump($response);die();
         if (!$response = self::xmlToArray($response)) {
             $response = ['error' => 500, 'message' => 'Paysystem return invalid response!'];
         }
