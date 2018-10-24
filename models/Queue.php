@@ -26,7 +26,7 @@ class Queue extends Model
 
         $trips = \app\modules\api\models\Trip::find()
             ->where(['status' => Trip::STATUS_CREATED])
-            //->andWhere(['<=', 'start_time', time()])
+            ->andWhere(['!=', 'line_id', 0])
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])
             ->all();
 
@@ -42,7 +42,7 @@ class Queue extends Model
                 $ids = ArrayHelper::getColumn($applicants, 'id');
                 $applicants = ArrayHelper::getColumn($applicants, 'user_id');
                 self::unsetQueue($ids, $query);
-                if (!empty($ids)) self::send($applicants, $line);
+                if (!empty($ids)) self::send($applicants, $ids, $line);
             }
 
         }
@@ -98,13 +98,15 @@ class Queue extends Model
      * @param $line Line
      * @return bool
      */
-    public static function send($applicants, $line)
+    public static function send($applicants, $ids, $line)
     {
 
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $line->driver_id]);
         if (!$device) return false;
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
+
+        Trip::updateAll(['line_id' => $line->id], ['id' => $ids]);
 
         foreach ($applicants as $user_id) {
             $socket->push(base64_encode(json_encode([
