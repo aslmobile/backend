@@ -36,7 +36,7 @@ class NotificationController extends ConsoleController
 
         $notifications = Notifications::find()->where([
             'OR',
-            ['=', 'status', [Notifications::STATUS_NEW]],
+            ['=', 'status', Notifications::STATUS_NEW],
             ['AND', ['=', 'status', Notifications::STATUS_SCHEDULED], ['!=', 'time', 0], ['>=', 'time', time() - 3600]]
         ])->all();
 
