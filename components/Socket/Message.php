@@ -2,8 +2,10 @@
 
 namespace app\components\Socket;
 
+use app\components\ArrayQuery\ArrayQuery;
 use app\components\Socket\models\Line;
 use app\models\Devices;
+use app\models\Notifications;
 use app\models\Queue;
 use app\modules\api\models\RestFul;
 use app\modules\api\models\Trip;
@@ -261,11 +263,11 @@ class Message
         $angle = (isset ($data['data']['angle']) && !empty ($data['data']['angle'])) ? $data['data']['angle'] : '0,0';
 
         /** @var \app\models\Line $line */
-        $line = Line::find()->andWhere([
+        $line = Line::find()->where([
             'AND',
             ['=', 'driver_id', $device->user_id],
-            ['=', 'status', Line::STATUS_IN_PROGRESS]
-        ])->one();
+            ['IN', 'status', [Line::STATUS_IN_PROGRESS, Line::STATUS_WAITING]]
+        ])->orderBy(['created_at' => SORT_DESC])->one();
 
         if ($line) {
 
@@ -509,7 +511,7 @@ class Message
             ];
 
             if (isset($data['data']['timer']) && $data['data']['timer']) {
-                $this->loop->addTimer(300, function ($timer) use ($line) {
+                $this->loop->addTimer(300, function ($timer) use ($line, $connections, $response) {
                     $line = \app\modules\api\models\Line::findOne($line['id']);
                     if (!empty($line) && $line->status !== Line::STATUS_IN_PROGRESS) {
                         $line->status = Line::STATUS_CANCELED;
@@ -519,10 +521,21 @@ class Message
                         $trips = Trip::find()->where(['line_id' => $line->id])->all();
                         if (!empty($trips)) {
                             foreach ($trips as $trip) {
-                                $trip->cancel_reason = 0;
-                                $trip->driver_comment = '';
-                                $trip->status = Trip::STATUS_CANCELLED_DRIVER;
+                                $trip->driver_id = 0;
+                                $trip->vehicle_id = 0;
+                                $trip->line_id = 0;
+                                $trip->status = Trip::STATUS_CREATED;
                                 $trip->save();
+
+                                $query = new ArrayQuery();
+                                $query->from($connections);
+                                $devices = $query->where(['device.user_id' => intval($trip->user_id)])->all();
+                                if (empty($devices)) {
+                                    $notifications = Notifications::create(Notifications::NTD_TRIP_CANCEL, [$trip->user_id]);
+                                    foreach ($notifications as $notification) Notifications::send($notification);
+                                } else {
+                                    foreach ($devices as $device) $device->send($response);
+                                }
                             }
                         };
                         Queue::processingQueue();
