@@ -246,7 +246,7 @@ class PaymentController extends BaseController
         $transaction->user_id = $user->id;
         $transaction->status = Transactions::STATUS_REQUEST;
         $transaction->amount = $trip->amount;
-        $transaction->gateway = Transactions::getGatewayServices()[$this->body->type];
+        $transaction->gateway = $this->body->type;
         $transaction->uip = Yii::$app->request->userIP;
         $transaction->currency = $trip->currency;
         $transaction->route_id = $trip->route_id;
