@@ -53,9 +53,9 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
     }
 
     /**
-     * Request for initialization iframe
      * @param $user_id
      * @return Transactions|null
+     * @throws \Exception
      */
     public function addCard($user_id)
     {
@@ -159,6 +159,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
     /**
      * @param $user_id
      * @return array
+     * @throws \Exception
      */
     public function getCardsList($user_id)
     {
@@ -294,6 +295,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
      * @param Transactions $transaction
      * @param PaymentCards $card
      * @return Transactions|bool
+     * @throws \Exception
      */
     public function initTransaction(Transactions $transaction, PaymentCards $card)
     {
@@ -357,13 +359,14 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
     /**
      * @param Transactions $transaction
      * @return Transactions|bool
+     * @throws \Exception
      */
     public function payTransaction(Transactions $transaction)
     {
         $transaction_log = new TransactionLog([
             'transaction_id' => $transaction->id,
             'driver' => $this->driver,
-            'action' => 'initTransaction'
+            'action' => 'payTransaction'
         ]);
 
         $data = [
@@ -375,6 +378,8 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $transaction_log->request = json_encode($data);
 
         $response = $this->sendRequest($data, $this->payUrl);
+
+        var_dump($response);
 
         $transaction_log->response = json_encode($response);
         $transaction_log->save();
@@ -390,7 +395,6 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
             return false;
 
         } elseif ($this->checkSign($response, $this->listUrl)) {
-            var_dump($response);
             $transaction->status = Transactions::STATUS_PAID;
             $transaction->save();
         }
@@ -400,6 +404,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function updateTransaction()
     {

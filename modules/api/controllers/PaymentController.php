@@ -273,12 +273,14 @@ class PaymentController extends BaseController
             if (!$validator->validate($this->body->card)) $this->module->setError(422,
                 '_card', Yii::$app->mv->gt("Карта не верна", [], false));
 
+            $data = ['driver' => \Yii::$app->params['use_paysystem']];
+            $paysystem = PaysystemProvider::getDriver($data);
+
+            $paysystem->getCardsList($user->id);
+
             $card = PaymentCards::findOne(['id' => $this->body->card, 'user_id' => $user->id]);
             if (!$card) $this->module->setError(422,
                 '_card', Yii::$app->mv->gt("Не найдено", [], false));
-
-            $data = ['driver' => \Yii::$app->params['use_paysystem']];
-            $paysystem = PaysystemProvider::getDriver($data);
 
             if ($paysystem instanceof PaysystemSnappingCardsInterface) {
 
