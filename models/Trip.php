@@ -778,25 +778,25 @@ class Trip extends \yii\db\ActiveRecord
         $array = parent::toArray($fields, $expand, $recursive);
 
         if ($this->startpoint) $array['startpoint'] = $this->startpoint->toArray();
-        else $array['startpoint'] = null;
+        else $array['startpoint'] = [];
 
         if ($this->endpoint) $array['endpoint'] = $this->endpoint->toArray();
-        else $array['endpoint'] = null;
+        else $array['endpoint'] = [];
 
         if ($this->route) $array['route'] = $this->route->toArray();
-        else $array['route'] = null;
+        else $array['route'] = [];
 
         if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
-        else $array['vehicle'] = null;
+        else $array['vehicle'] = [];
 
         if ($this->driver) $array['driver'] = $this->driver->toArray();
-        else $array['driver'] = null;
+        else $array['driver'] = [];
 
         if ($this->user) $array['passenger'] = $this->user->toArray();
-        else $array['passenger'] = null;
+        else $array['passenger'] = [];
 
         if ($this->dispatch) $array['dispatch'] = $this->dispatch->toArray();
-        else $array['dispatch'] = null;
+        else $array['dispatch'] = [];
 
         if ($this->baggage) $array['baggage'] = $this->baggage;
         else $array['baggage'] = [];
