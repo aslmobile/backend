@@ -49,6 +49,7 @@ class DefaultController extends Controller
 
     public function actionUbermodelextender()
     {
+        if (Yii::$app->user->isGuest || !Yii::$app->user->can('admin')) return $this->goBack();
         $f_name = Yii::$app->request->get('model');
         $module = Yii::$app->request->get('module');
         if (!$module) $module = 'admin';
