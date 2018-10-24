@@ -336,27 +336,27 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $response = $this->sendRequest($data, $this->initUrl);
 
         $transaction_log->response = json_encode($response);
-        $transaction_log->save();
+
+        $result = false;
 
         if (isset($response['error'])) {
 
             $transaction_log->error_code = $response['error'];
             $transaction_log->error_message = $response['message'];
-            $transaction_log->save();
 
             $transaction->status = Transactions::STATUS_REJECTED;
-            $transaction->save();
-
-            return false;
 
         } elseif ($this->checkSign($response, $this->initUrl)) {
             if (isset($response['pg_payment_id'])) {
                 $transaction->payment_id = $response['pg_payment_id'];
-                $transaction->save();
+                $result = $transaction;
             }
         }
 
-        return $transaction;
+        $transaction_log->save();
+        $transaction->save();
+
+        return $result;
     }
 
     /**
@@ -384,7 +384,8 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $response = $this->sendRequest($data, $this->payUrl);
 
         $transaction_log->response = json_encode($response);
-        $transaction_log->save();
+
+        $result = false;
 
         if (isset($response['error'])) {
 
@@ -392,25 +393,26 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
             $transaction_log->error_code = $response['error'];
             $transaction_log->error_message = $response['message'];
-            $transaction_log->save();
-
-            return false;
 
         } elseif ($this->checkSign($response, $this->payUrl)) {
 
             $response_string = json_encode($response);
-            $transaction->status = Transactions::STATUS_CANCELLED;
 
             if (strpos($response_string, 'success')) {
                 $transaction->status = Transactions::STATUS_PAID;
+                $result = $transaction;
             } else if (strpos($response_string, 'fail')) {
                 $transaction->status = Transactions::STATUS_REJECTED;
+            } else {
+                $transaction->status = Transactions::STATUS_CANCELLED;
             }
 
-            $transaction->save();
         }
 
-        return $transaction;
+        $transaction_log->save();
+        $transaction->save();
+
+        return $result;
     }
 
     /**
