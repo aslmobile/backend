@@ -13,6 +13,7 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $updated_at
  * @property integer $status
  * @property integer $user_id
+ * @property integer $recipient_id
  * @property double $amount
  * @property integer $gateway
  * @property integer $cancel_reason
@@ -29,7 +30,6 @@ use yii\behaviors\TimestampBehavior;
  * @property int $payment_id
  * @property string $payment_link
  */
-
 class Transactions extends \yii\db\ActiveRecord
 {
     //region CONSTANTA
@@ -71,7 +71,8 @@ class Transactions extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['created_at', 'updated_at', 'status', 'user_id', 'gateway', 'cancel_reason', 'created_by', 'updated_by', 'type'], 'integer'],
+            [['created_at', 'updated_at', 'status', 'user_id', 'recipient_id', 'gateway', 'cancel_reason', 'created_by', 'updated_by', 'type'],
+                'integer'],
             [['amount'], 'number'],
             [['gateway_response', 'request', 'response'], 'string'],
             [['gateway_status', 'uip', 'currency'], 'string', 'max' => 255],
@@ -89,6 +90,7 @@ class Transactions extends \yii\db\ActiveRecord
             'updated_at' => Yii::$app->mv->gt('Обновлена', [], 0),
             'status' => Yii::$app->mv->gt('Статус', [], 0),
             'user_id' => Yii::$app->mv->gt('Пользователь', [], 0),
+            'recipient_id' => Yii::$app->mv->gt('recipient_id', [], 0),
             'amount' => Yii::$app->mv->gt('Сумма', [], 0),
             'gateway' => Yii::$app->mv->gt('Сервис', [], 0),
             'cancel_reason' => Yii::$app->mv->gt('Причина отмены', [], 0),
@@ -165,6 +167,11 @@ class Transactions extends \yii\db\ActiveRecord
     public function getUser()
     {
         return \app\modules\admin\models\User::findOne($this->user_id);
+    }
+
+    public function getRecipient()
+    {
+        return \app\modules\admin\models\User::findOne($this->recipient_id);
     }
 
     public function getRoute()

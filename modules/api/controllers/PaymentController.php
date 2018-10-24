@@ -1,5 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
+use app\components\ArrayQuery\ArrayQuery;
 use app\components\paysystem\PaysystemProvider;
 use app\components\paysystem\PaysystemSnappingCardsInterface;
 use app\models\PaymentCards;
@@ -236,20 +237,27 @@ class PaymentController extends BaseController
         if (!$trip) $this->module->setError(422,
             '_trip', Yii::$app->mv->gt("Не найдено", [], false));
 
-        $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
+        $recipient = User::findOne(['id' => $trip->driver_id, 'status' => User::STATUS_APPROVED]);
+        if (!$recipient) $this->module->setError(422,
+            '_driver', Yii::$app->mv->gt("Не найдено", [], false));
 
-        $validator = new NumberValidator();
-        $validator->min = 1;
-        $validator->integerOnly = true;
+        $validator = new NumberValidator(['min' => 1, 'max' => 3, 'integerOnly' => true]);
+        if (!$validator->validate($this->body->type)) $this->module->setError(422,
+            '_amount', Yii::$app->mv->gt("Тип оплаты не верен.", [], false));
+
+        $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
+        $trip->payment_type = $this->body->type;
 
         $transaction = new Transactions();
         $transaction->user_id = $user->id;
+        $transaction->recipient_id = $recipient->id;
         $transaction->status = Transactions::STATUS_REQUEST;
         $transaction->amount = $trip->amount;
         $transaction->gateway = $this->body->type;
         $transaction->uip = Yii::$app->request->userIP;
         $transaction->currency = $trip->currency;
         $transaction->route_id = $trip->route_id;
+
         if (!$transaction->validate() || !$transaction->save()) {
             if ($transaction->hasErrors()) {
                 foreach ($transaction->errors as $field => $error_message) {
@@ -258,7 +266,8 @@ class PaymentController extends BaseController
                         foreach ($error_message as $error) $result .= $error;
                         $error_message = $result;
                     }
-                    $this->module->setError(422, 'transaction.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                    $this->module->setError(422,
+                        'transaction.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
                     $this->module->sendResponse();
                 }
             } else $this->module->setError(422, '_transaction', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
@@ -269,9 +278,6 @@ class PaymentController extends BaseController
 
             if ($this->body->type != Transactions::GATEWAY_PAYBOX) $this->module->setError(422,
                 '_type', Yii::$app->mv->gt("Тип оплаты не верен.", [], false));
-
-            if (!$validator->validate($this->body->card)) $this->module->setError(422,
-                '_card', Yii::$app->mv->gt("Карта не верна", [], false));
 
             $data = ['driver' => \Yii::$app->params['use_paysystem']];
             $paysystem = PaysystemProvider::getDriver($data);
@@ -293,22 +299,43 @@ class PaymentController extends BaseController
                 if (!$transaction) $this->module->setError(422, '_payment',
                     Yii::$app->mv->gt("Во время проведения платежа произошла ошибка!", [], false));
 
-                $trip->payment_status = Trip::PAYMENT_STATUS_PAID;
-
-                /** @var User $driver */
-                $driver = $trip->driver;
-                if (!empty($driver)) {
-                    $driver->balance += $transaction->amount;
-                    $driver->save();
-                }
-
             } else {
                 $this->module->setError(422, '_card', Yii::$app->mv->gt("Осуществление платежа не доступно!", [], false));
             }
 
         }
 
-        $trip->update();
+        if ($this->body->type == Transactions::GATEWAY_KM) {
+
+            $query = new ArrayQuery();
+
+            $km_settings = \app\models\Km::findOne(1);
+            $km_waste = $km_settings->settings_waste;
+            $day = date('N');
+            $time = intval(str_replace(':', '', date('H:i')));
+            $query->from($km_waste);
+
+            $waste_exist = $query->where(['route' => strval($trip->route_id)])->one();
+
+            if ($waste_exist) {
+                $waste = $query->where(['CALLBACK', function ($data) use ($day) {
+                    return in_array($day, $data['days']);
+                }])->andWhere(['route' => strval($trip->route_id)])
+                    ->andWhere(['<=', 'from', $time])->andWhere(['>=', 'to', $time])
+                    ->one();
+                if (!$waste || $user->km < Yii::$app->params['distance']) $this->module->setError(422,
+                    '_km', Yii::$app->mv->gt("Вы не можете оплатить данную поездку бесплатными километрами", [], false));
+            }
+
+            $user->km -= Yii::$app->params['distance'];
+            $user->save();
+
+        }
+
+        $trip->payment_status = Trip::PAYMENT_STATUS_PAID;
+        $recipient->balance += $transaction->amount;
+        $trip->save();
+        $recipient->save();
 
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
