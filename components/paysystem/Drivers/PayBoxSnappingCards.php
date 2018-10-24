@@ -48,6 +48,9 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
             $this->currency = \Yii::$app->params['paysystem'][$this->driver]['currency'];
         }
         $this->addUrl = str_replace('{merchant_id}', $this->merchant_id, $this->addUrl);
+        $this->initUrl = str_replace('{merchant_id}', $this->merchant_id, $this->initUrl);
+        $this->payUrl = str_replace('{merchant_id}', $this->merchant_id, $this->payUrl);
+        $this->addUrl = str_replace('{merchant_id}', $this->merchant_id, $this->addUrl);
         $this->listUrl = str_replace('{merchant_id}', $this->merchant_id, $this->listUrl);
         $this->deleteUrl = str_replace('{merchant_id}', $this->merchant_id, $this->deleteUrl);
     }
@@ -306,10 +309,10 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         ]);
 
         $data = [
-            'pg_merchant_id' => $this->merchant_id,
+            'pg_merchant_id' => $card->pg_merchant_id,
+            'pg_user_id' => $card->user_id,
+            'pg_card_id' => $card->pg_card_id,
             'pg_order_id' => $transaction->id,
-            'pg_user_id' => $transaction->user_id,
-            'pg_card_id' => $card->id,
             'pg_amount' => $transaction->amount,
             'pg_currency' => $this->currency,
             'pg_check_url' => Url::toRoute(['/main/payment/check', 'driver' => $this->driver], true),
@@ -346,7 +349,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
             return false;
 
-        } elseif ($this->checkSign($response, $this->listUrl)) {
+        } elseif ($this->checkSign($response, $this->initUrl)) {
             if (isset($response['pg_payment_id'])) {
                 $transaction->payment_id = $response['pg_payment_id'];
                 $transaction->save();
@@ -393,8 +396,17 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
             return false;
 
-        } elseif ($this->checkSign($response, $this->listUrl)) {
-            $transaction->status = Transactions::STATUS_PAID;
+        } elseif ($this->checkSign($response, $this->payUrl)) {
+
+            $response_string = json_encode($response);
+            $transaction->status = Transactions::STATUS_CANCELLED;
+
+            if (strpos($response_string, 'success')) {
+                $transaction->status = Transactions::STATUS_PAID;
+            } else if (strpos($response_string, 'fail')) {
+                $transaction->status = Transactions::STATUS_REJECTED;
+            }
+
             $transaction->save();
         }
 
