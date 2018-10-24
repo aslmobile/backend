@@ -34,6 +34,12 @@ $act = Yii::$app->controller->action->id;
                     <span><?= Yii::$app->mv->gt('Заказы Такси', [], false); ?></span>
                 </a>
             </li>
+            <li<?= ($cont == 'ticket') ? ' class="active"' : '' ?>>
+                <a href="<?= Url::toRoute(['/admin/ticket/index']) ?>">
+                    <i class="fa fa-ticket"></i>
+                    <span><?= Yii::$app->mv->gt('Заявки вывода средств', [], false); ?></span>
+                </a>
+            </li>
             <li class="header"><?= Yii::$app->mv->gt('Контент', [], false); ?></li>
             <li class="treeview<?= ($cont == 'legal') ? ' active' : '' ?>">
                 <a href="#"> <i class="fa fa-file-text"></i>

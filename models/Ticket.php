@@ -2,11 +2,10 @@
 
 namespace app\models;
 
+use app\components\UserBehavior;
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\helpers\ArrayHelper;
-use app\components\MultilingualBehavior;
-use app\components\MultilingualQuery;
+
 /**
  * This is the model class for table "ticket".
  *
@@ -22,6 +21,11 @@ use app\components\MultilingualQuery;
  */
 class Ticket extends \yii\db\ActiveRecord
 {
+
+    const STATUS_NEW = 0;
+    const STATUS_PAYED = 1;
+    const STATUS_REJECTED = 2;
+
     /**
      * @inheritdoc
      */
@@ -29,7 +33,6 @@ class Ticket extends \yii\db\ActiveRecord
     {
         return 'ticket';
     }
-
 
     /**
      * @inheritdoc
@@ -42,6 +45,14 @@ class Ticket extends \yii\db\ActiveRecord
         ];
     }
 
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::class,
+            UserBehavior::class
+        ];
+    }
+
     /**
      * @inheritdoc
      */
@@ -49,15 +60,49 @@ class Ticket extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::$app->mv->gt('ID', [], 0),
-            'status' => Yii::$app->mv->gt('Status', [], 0),
-            'created_at' => Yii::$app->mv->gt('Created At', [], 0),
-            'updated_at' => Yii::$app->mv->gt('Updated At', [], 0),
-            'created_by' => Yii::$app->mv->gt('Created By', [], 0),
-            'user_id' => Yii::$app->mv->gt('User ID', [], 0),
-            'updated_by' => Yii::$app->mv->gt('Updated By', [], 0),
-            'amount' => Yii::$app->mv->gt('Amount', [], 0),
-            'transaction_id' => Yii::$app->mv->gt('Transaction ID', [], 0),
+            'status' => Yii::$app->mv->gt('Статус', [], 0),
+            'created_at' => Yii::$app->mv->gt('Создано', [], 0),
+            'updated_at' => Yii::$app->mv->gt('Обновлено', [], 0),
+            'created_by' => Yii::$app->mv->gt('Создал', [], 0),
+            'user_id' => Yii::$app->mv->gt('Водитель', [], 0),
+            'updated_by' => Yii::$app->mv->gt('Обновил', [], 0),
+            'amount' => Yii::$app->mv->gt('Сумма', [], 0),
+            'transaction_id' => Yii::$app->mv->gt('Транзакция', [], 0),
         ];
+    }
+
+    public static function statusLabels()
+    {
+        return [
+            self::STATUS_NEW => Yii::t('app', 'Новая'),
+            self::STATUS_PAYED => Yii::t('app', 'Оплачена'),
+            self::STATUS_REJECTED => Yii::t('app', 'Отменена'),
+        ];
+    }
+
+    public function getStatusLabel()
+    {
+        return isset(self::statusLabels()[$this->status]) ? self::statusLabels()[$this->status] : '';
+    }
+
+    public function getUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    public function getTransaction()
+    {
+        return $this->hasOne(Transactions::class, ['id' => 'transaction_id']);
+    }
+
+    public function getUpdated()
+    {
+        return $this->hasOne(User::class, ['id' => 'updated_by']);
+    }
+
+    public function getCreated()
+    {
+        return $this->hasOne(User::class, ['id' => 'created_by']);
     }
 
 }

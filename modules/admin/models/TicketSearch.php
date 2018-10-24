@@ -2,10 +2,8 @@
 
 namespace app\modules\admin\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\admin\models\Ticket;
 
 /**
  * TicketSearch represents the model behind the search form about `app\modules\admin\models\Ticket`.
@@ -18,8 +16,9 @@ class TicketSearch extends Ticket
     public function rules()
     {
         return [
-            [['id', 'status', 'created_at', 'updated_at', 'created_by', 'user_id', 'updated_by', 'transaction_id'], 'integer'],
+            [['id', 'status', 'created_by', 'user_id', 'updated_by', 'transaction_id'], 'integer'],
             [['amount'], 'number'],
+            [['created_at', 'updated_at'], 'safe']
         ];
     }
 
@@ -45,10 +44,10 @@ class TicketSearch extends Ticket
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'pagination' => [
-				'pageSize' => 50,
-			],
-			'sort'=> ['defaultOrder' => ['id' => SORT_DESC]]
+            'pagination' => [
+                'pageSize' => 50,
+            ],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
 
         $this->load($params);
@@ -62,9 +61,8 @@ class TicketSearch extends Ticket
         $query->andFilterWhere([
             'id' => $this->id,
             'status' => $this->status,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'created_by' => $this->created_by,
+            "to_char(date(to_timestamp(created_at)),'dd.mm.yyyy h:ii')" => $this->created_at,
+            "to_char(date(to_timestamp(updated_at)),'dd.mm.yyyy h:ii')" => $this->updated_at,
             'user_id' => $this->user_id,
             'updated_by' => $this->updated_by,
             'amount' => $this->amount,

@@ -2,21 +2,20 @@
 
 namespace app\modules\admin\controllers;
 
-use Yii;
+use app\components\Controller;
 use app\modules\admin\models\Ticket;
 use app\modules\admin\models\TicketSearch;
-use app\components\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
+use Yii;
 use yii\filters\AccessControl;
-use yii\helpers\ArrayHelper;
+use yii\filters\VerbFilter;
+use yii\web\NotFoundHttpException;
 
 /**
  * TicketController implements the CRUD actions for Ticket model.
  */
 class TicketController extends Controller
 {
-	public $layout = "./sidebar";
+    public $layout = "./sidebar";
 
     public function behaviors()
     {
@@ -46,22 +45,23 @@ class TicketController extends Controller
     }
 
     /**
-     * Lists all Ticket models.
-     * @return mixed
+     * @return string|\yii\web\Response
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionIndex()
     {
-		if (Yii::$app->request->isAjax) {
-			$keys = (isset($_POST['keys']))?$_POST['keys']:[];
-			if (count($keys)) {
-				foreach ($keys as $k => $v) {
-					if (($model = Ticket::findOne($v)) !== null) {
-						$model->delete();
-					}
-				}
-				return $this->redirect(['index']);
-			}
-		}
+        if (Yii::$app->request->isAjax) {
+            $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
+            if (count($keys)) {
+                foreach ($keys as $k => $v) {
+                    if (($model = Ticket::findOne($v)) !== null) {
+                        $model->delete();
+                    }
+                }
+                return $this->redirect(['index']);
+            }
+        }
 
         $searchModel = new TicketSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
@@ -73,9 +73,9 @@ class TicketController extends Controller
     }
 
     /**
-     * Displays a single Ticket model.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
@@ -103,17 +103,16 @@ class TicketController extends Controller
     }
 
     /**
-     * Updates an existing Ticket model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved',[],0));
+            Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved', [], 0));
             return $this->redirect(['update', 'id' => $model->id]);
         } else {
             return $this->render('update', [
@@ -123,10 +122,11 @@ class TicketController extends Controller
     }
 
     /**
-     * Deletes an existing Ticket model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id)
     {
@@ -134,6 +134,7 @@ class TicketController extends Controller
 
         return $this->redirect(['index']);
     }
+
     /**
      * Finds the Ticket model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
