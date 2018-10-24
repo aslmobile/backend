@@ -40,7 +40,7 @@ $statuses = BotTrip::getStatusList();
                         [
                             'class' => 'btn btn-danger btn-sm',
                             'onclick' => "
-                                var keys = $('#grid').yiiGridView('getSelectedRows');
+                                var keys = $('#w0').yiiGridView('getSelectedRows');
                                 if (keys!='') {
                                     if (confirm('" . Yii::$app->mv->gt('Are you sure you want to delete the selected items?', [], false) . "')) {
                                         $.ajax({
@@ -59,7 +59,6 @@ $statuses = BotTrip::getStatusList();
             <!-- /.box-header -->
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
-                'id' => 'grid',
                 'pjax' => true,
                 'pjaxSettings' => [
                     'neverTimeout' => true,
