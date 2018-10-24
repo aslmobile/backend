@@ -153,7 +153,7 @@ class Notifications extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function create($type = self::NT_DEFAULT, $addressed, $message = '', $initiator = 0, $status = self::STATUS_NEW)
+    public static function create($type = self::NT_DEFAULT, $addressed, $message = '', $initiator = 0, $status = self::STATUS_NEW, $time = null)
     {
         $types = self::getTypes();
         if (!isset ($types[$type])) return false;
@@ -166,7 +166,7 @@ class Notifications extends \yii\db\ActiveRecord
                 $notification->status = $status;
                 $notification->title = !empty($message) ? $message : self::getTypes()[$type];
                 $notification->text = $message;
-                $notification->time = time();
+                $notification->time = $time ? $time : time();
                 $notification->initiator_id = $initiator;
                 if ($notification->save()) $notifications[] = $notification;
             }

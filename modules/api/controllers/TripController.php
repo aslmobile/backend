@@ -308,7 +308,7 @@ class TripController extends BaseController
         if (isset($this->body->schedule) && !empty($this->body->schedule)) {
             $trip->schedule = json_encode($this->body->schedule);
             Trip::cloneTrip($trip, Trip::STATUS_SCHEDULED);
-            Notifications::create(Notifications::NTP_TRIP_SCHEDULED, [$trip->user_id], '', $trip->id, $this->body->time);
+            Notifications::create(Notifications::NTP_TRIP_SCHEDULED, [$trip->user_id], '', $trip->id, Notifications::STATUS_SCHEDULED, $this->body->time);
         }
 
         Queue::processingQueue();
