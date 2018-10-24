@@ -511,7 +511,7 @@ class Message
             ];
 
             if (isset($data['data']['timer']) && $data['data']['timer']) {
-                $this->loop->addTimer(300, function ($timer) use ($line, $connections, $response) {
+                $this->loop->addTimer(300, function ($timer) use ($line, $connections, $response, $device) {
                     $line = \app\modules\api\models\Line::findOne($line['id']);
                     if (!empty($line) && $line->status !== Line::STATUS_IN_PROGRESS) {
                         $line->status = Line::STATUS_CANCELED;
@@ -530,11 +530,27 @@ class Message
                                 $query = new ArrayQuery();
                                 $query->from($connections);
                                 $devices = $query->where(['device.user_id' => intval($trip->user_id)])->all();
+
+                                $send_response = [
+                                    'action' => 'declinePassengerTrip',
+                                    'error_code' => 0,
+                                    'data' => [
+                                        'message_id' => $this->message_id,
+                                        'device_id' => $device->id,
+                                        'user_id' => $device->user_id,
+                                        'data' => [
+                                            'decline_from' => time(),
+                                            'decline_time' => 300,
+                                            'trip' => $trip->toArray()
+                                        ]
+                                    ]
+                                ];
+
                                 if (empty($devices)) {
                                     $notifications = Notifications::create(Notifications::NTD_TRIP_CANCEL, [$trip->user_id]);
                                     foreach ($notifications as $notification) Notifications::send($notification);
                                 } else {
-                                    foreach ($devices as $device) $device->send($response);
+                                    foreach ($devices as $device) $device->send(base64_encode(json_encode($send_response)));
                                 }
                             }
                         };
@@ -699,27 +715,6 @@ class Message
 
         $this->addressed = isset($data['addressed']) ? $data['addressed'] : [];
 
-        if ($timer) {
-            $this->loop->addTimer(300, function ($timer) use ($line, $checkpoint) {
-                /** @var Trip $trip */
-                $trips = Trip::find()->where([
-                    'startpoint_id' => intval($checkpoint['id']),
-                    'line_id' => intval($line['id']),
-                    'status' => Trip::STATUS_WAITING
-                ])->all();
-                if (!empty($trips)) {
-                    foreach ($trips as $trip) {
-                        $trip->cancel_reason = 0;
-                        $trip->passenger_comment = '';
-                        $trip->status = Trip::STATUS_CANCELLED;
-                        $trip->penalty = 1;
-                        $trip->save();
-                    }
-                    Queue::processingQueue();
-                }
-            });
-        }
-
         $response = [
             'message_id' => $this->message_id,
             'device_id' => $device->id,
@@ -732,6 +727,59 @@ class Message
                 'checkpoint' => $checkpoint
             ]
         ];
+
+        if ($timer) {
+            $this->loop->addTimer(300, function ($timer) use ($line, $checkpoint, $connections, $response, $device) {
+                /** @var Trip $trip */
+                $trips = Trip::find()->where([
+                    'startpoint_id' => intval($checkpoint['id']),
+                    'line_id' => intval($line['id']),
+                    'status' => Trip::STATUS_WAITING
+                ])->all();
+                if (!empty($trips)) {
+                    foreach ($trips as $trip) {
+
+                        $trip->cancel_reason = 0;
+                        $trip->passenger_comment = '';
+                        $trip->status = Trip::STATUS_CANCELLED;
+                        $trip->penalty = 1;
+                        $trip->save();
+
+                        $query = new ArrayQuery();
+                        $query->from($connections);
+                        $devices = $query->where(['device.user_id' => intval($trip->user_id)])->all();
+
+                        $send_response = [
+                            'action' => 'declinePassengerTrip',
+                            'error_code' => 0,
+                            'data' => [
+                                'message_id' => $this->message_id,
+                                'device_id' => $device->id,
+                                'user_id' => $device->user_id,
+                                'data' => [
+                                    'decline_from' => time(),
+                                    'decline_time' => 300,
+                                    'trip' => $trip->toArray()
+                                ]
+                            ]
+                        ];
+
+                        if (empty($devices)) {
+                            $notifications = Notifications::create(
+                                Notifications::NTP_TRIP_CANCEL, [$trip->user_id],
+                                "Вам отказано в поездке. Причина - опоздание.",
+                                $device->user_id
+                            );
+                            foreach ($notifications as $notification) Notifications::send($notification);
+                        } else {
+                            foreach ($devices as $device) $device->send(base64_encode(json_encode($send_response)));
+                        }
+
+                    }
+                    Queue::processingQueue();
+                }
+            });
+        }
 
         return $response;
 
