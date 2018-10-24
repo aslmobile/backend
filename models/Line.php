@@ -226,11 +226,11 @@ class Line extends \yii\db\ActiveRecord
     {
         $array = parent::toArray($fields, $expand, $recursive);
 
-        if ($this->driver) $array['driver'] = $this->driver->toArray();
-        if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
-        if ($this->route) $array['route'] = $this->route->toArray();
-        if ($this->startPoint) $array['startpoint'] = $this->startPoint->toArray();
-        if ($this->endPoint) $array['endpoint'] = $this->endPoint->toArray();
+        if ($this->driver) $array['driver'] = $this->driver->toArray();else $array['driver'] = (object)['id' => -1];
+        if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();else $array['vehicle'] = (object)['id' => -1];
+        if ($this->route) $array['route'] = $this->route->toArray();else $array['route'] = (object)['id' => -1];
+        if ($this->startPoint) $array['startpoint'] = $this->startPoint->toArray();else $array['startpoint'] = (object)['id' => -1];
+        if ($this->endPoint) $array['endpoint'] = $this->endPoint->toArray();else $array['endpoint'] = (object)['id' => -1];
 
         return $array;
     }
