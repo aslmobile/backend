@@ -34,6 +34,26 @@ $statuses = BotTrip::getStatusList();
                         ['create'],
                         ['class' => 'btn btn-default btn-sm']
                     ); ?>
+                    <?= Html::a(
+                        Yii::$app->mv->gt('{i} Удалить выбранные', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false),
+                        [''],
+                        [
+                            'class' => 'btn btn-danger btn-sm',
+                            'onclick' => "
+                                var keys = $('#grid').yiiGridView('getSelectedRows');
+                                if (keys!='') {
+                                    if (confirm('" . Yii::$app->mv->gt('Are you sure you want to delete the selected items?', [], false) . "')) {
+                                        $.ajax({
+                                            type : 'POST',
+                                            data: {keys : keys},
+                                            success : function(data) {}
+                                        });
+                                    }
+                                }
+                                return false;
+                            ",
+                        ]
+                    ); ?>
                 </div>
             </div>
             <!-- /.box-header -->
@@ -47,12 +67,6 @@ $statuses = BotTrip::getStatusList();
                         'options' => ['tag' => 'span']
                     ],
                 ],
-//                'rowOptions' => function ($model, $key, $index, $grid) {
-//                    return [
-//                        'role' => 'button',
-//                        'onclick' => "window.location = '" . \yii\helpers\Url::toRoute("/admin/bot-trip/update/" . $key) . "'"
-//                    ];
-//                },
                 'layout' => "
                     <div class='box-body' style='display: block;'><div class='col-sm-12 right-text'>{summary}</div><div class='col-sm-12'>{items}</div></div>
                     <div class='box-footer' style='display: block;'>{pager}</div>
@@ -62,6 +76,7 @@ $statuses = BotTrip::getStatusList();
                 ],
                 'filterModel' => $searchModel,
                 'columns' => [
+                    ['class' => 'yii\grid\CheckboxColumn'],
                     'id',
                     [
                         'attribute' => 'user_id',
