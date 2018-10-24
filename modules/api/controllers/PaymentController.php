@@ -250,7 +250,13 @@ class PaymentController extends BaseController
         $transaction->uip = Yii::$app->request->userIP;
         $transaction->currency = $trip->currency;
         $transaction->route_id = $trip->route_id;
-        $transaction->save();
+        if (!$transaction->validate() || !$transaction->save()) {
+            if ($transaction->hasErrors()) {
+                foreach ($transaction->errors as $field => $error_message) {
+                    $this->module->setError(422, 'transaction.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
+            } else $this->module->setError(422, '_transaction', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+        }
 
 
         if (isset($this->body->card) && $this->body->card) {

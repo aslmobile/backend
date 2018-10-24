@@ -4,9 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\helpers\ArrayHelper;
-use app\components\MultilingualBehavior;
-use app\components\MultilingualQuery;
+
 /**
  * This is the model class for table "transaction_log".
  *
