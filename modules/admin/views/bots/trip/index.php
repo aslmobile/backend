@@ -59,6 +59,7 @@ $statuses = BotTrip::getStatusList();
             <!-- /.box-header -->
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
+                'id' => 'grid',
                 'pjax' => true,
                 'pjaxSettings' => [
                     'neverTimeout' => true,
