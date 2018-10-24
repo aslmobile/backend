@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\NotNullBehavior;
 use app\components\UserBehavior;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -49,7 +50,8 @@ class Ticket extends \yii\db\ActiveRecord
     {
         return [
             TimestampBehavior::class,
-            UserBehavior::class
+            UserBehavior::class,
+            NotNullBehavior::class
         ];
     }
 

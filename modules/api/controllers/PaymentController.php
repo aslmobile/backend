@@ -3,10 +3,12 @@
 use app\components\paysystem\PaysystemProvider;
 use app\components\paysystem\PaysystemSnappingCardsInterface;
 use app\models\PaymentCards;
+use app\models\Ticket;
 use app\models\Transactions;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\validators\NumberValidator;
 
 /** @property \app\modules\api\Module $module */
 class PaymentController extends BaseController
@@ -24,7 +26,8 @@ class PaymentController extends BaseController
                             'transactions', 'transaction', 'methods', 'in-out-methods', 'in-out-amounts',
                             'transactions-km',
 
-                            'create-card', 'delete-card', 'cards'
+                            'create-card', 'delete-card', 'cards',
+                            'ticket'
                         ],
                         'allow' => true
                     ]
@@ -41,6 +44,7 @@ class PaymentController extends BaseController
                     'in-out-amounts' => ['POST'],
 
                     'create-card' => ['PUT'],
+                    'ticket' => ['PUT'],
                     'delete-card' => ['DELETE'],
                     'cards' => ['GET']
                 ]
@@ -186,6 +190,33 @@ class PaymentController extends BaseController
         if ($user) $user = $this->user;
 
         $this->module->data = Transactions::getInOutMethods();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionTicket()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['amount']);
+
+        $validator = new NumberValidator();
+        $validator->min = 1;
+
+        if (!$validator->validate($this->body->amount)) $this->module->setError(422,
+            '_amount', Yii::$app->mv->gt("Сумма должна быть не менее 1", [], false));
+
+        $ticket = new Ticket();
+        $ticket->user_id = $user->id;
+        $ticket->status = Ticket::STATUS_NEW;
+        $ticket->transaction_id = 0;
+        $ticket->amount = floatval($this->body->amount);
+
+        $ticket->save();
+
+        $this->module->data['ticket'] = $ticket->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
