@@ -714,9 +714,9 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $sign = $this->getSignature($data, $url);
 
         if (isset($data['pg_sig'])) {
-            echo __FILE__ . ':' . __LINE__ . ' <pre>';
-            print_r([$sign, $data['pg_sig']]);
-            echo '</pre>';
+//            echo __FILE__ . ':' . __LINE__ . ' <pre>';
+//            print_r([$sign, $data['pg_sig']]);
+//            echo '</pre>';
             if (isset($data['pg_sig']) && $data['pg_sig'] == $sign) {
                 return true;
             }
