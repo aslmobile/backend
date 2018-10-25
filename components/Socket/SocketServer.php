@@ -142,7 +142,12 @@ class SocketServer implements MessageComponentInterface
         $response = base64_encode($response);
 
         if (empty($result->addressed)) {
-            foreach ($this->devices as $device) $device->send($response);
+            foreach ($this->devices as $device) {
+                $device->send($response);
+                $recipient = $device->device->id;
+                echo "Response to ({$recipient})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "
+                \n ----------------------------------------- \n";
+            }
         } else {
             $query = new ArrayQuery();
             $query->from($this->devices);
@@ -154,7 +159,12 @@ class SocketServer implements MessageComponentInterface
                         if ($notification instanceof Notifications) Notifications::send($notification);
                     }
                 } else {
-                    foreach ($devices as $device) $device->send($response);
+                    foreach ($devices as $device) {
+                        $device->send($response);
+                        $recipient = $device->device->id;
+                        echo "Response to ({$recipient})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "
+                        \n ----------------------------------------- \n";
+                    }
                 }
             }
         }
@@ -163,7 +173,8 @@ class SocketServer implements MessageComponentInterface
 
         $sender = is_object($from->device) ? $from->device->id : 'Server';
 
-        echo "Message from ({$sender})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "\n ----------------------------------------- \n";
+        echo "Message from ({$sender})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "
+        \n ----------------------------------------- \n";
     }
 
     /**
