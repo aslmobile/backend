@@ -26,7 +26,7 @@ use yii\widgets\ActiveForm;
 
                 <?php if (!empty($model->code)) { ?>
                     <?= \yii\helpers\Html::a(
-                        \yii\helpers\Html::img(\yii\helpers\Url::to($model->code), ['class' => 'img-bordered', 'style' => 'max-width:500px;']),
+                        \yii\helpers\Html::img(\yii\helpers\Url::to($model->code), ['class' => 'img-bordered', 'style' => 'max-width:400px;']),
                         \yii\helpers\Url::to($model->code),
                         [
                             'target' => '_blank',
