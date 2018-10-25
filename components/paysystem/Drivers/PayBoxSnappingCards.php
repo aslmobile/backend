@@ -396,6 +396,9 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
         } elseif ($this->checkSign($response, $this->payUrl)) {
 
+
+        } else {
+
             $response_string = json_encode($response);
 
             if (strpos($response_string, 'success')) {
