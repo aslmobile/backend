@@ -7,6 +7,7 @@ namespace app\modules\main\controllers;
 use app\components\Controller;
 use app\components\paysystem\PaysystemProvider;
 use app\models\Transactions;
+use app\models\User;
 use Yii;
 use yii\web\Response;
 
@@ -60,11 +61,12 @@ class PaymentController extends Controller
                 if ($order_id || $payment_id) {
                     if ($order_id) $transaction = Transactions::findOne(intval($order_id));
                     else $transaction = Transactions::findOne(['payment_id' => intval($payment_id)]);
-                    if (!empty($transaction)
-                        && $transaction->status == Transactions::STATUS_PAID
-                        && !empty($transaction->recipient)) {
-                        $transaction->recipient->balance += $transaction->amount;
-                        $transaction->recipient->save(false);
+                    if (!empty($transaction) && $transaction->status == Transactions::STATUS_PAID) {
+                        $recipient = User::findOne($transaction->recipient_id);
+                        if (!empty($recipient)) {
+                            $recipient->balance += $transaction->amount;
+                            $recipient->save(false);
+                        }
                     }
                 }
             }
