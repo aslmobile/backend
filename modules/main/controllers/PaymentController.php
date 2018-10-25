@@ -31,31 +31,44 @@ class PaymentController extends Controller
 
     public function actionCheck($driver = '')
     {
-        if (!$driver) {
-            $driver = \Yii::$app->request->post('driver');
-        }
+        if (!$driver) $driver = \Yii::$app->request->post('driver');
+
         $data = ['driver' => $driver];
 
         $controller = PaysystemProvider::getDriver($data);
 
-        if (method_exists($controller, 'updateTransaction')) {
-            return $controller->checkTransaction();
-        }
+        if (method_exists($controller, 'updateTransaction')) return $controller->checkTransaction();
 
         return false;
     }
 
     public function actionResult($driver = '')
     {
-        if (!$driver) {
-            $driver = \Yii::$app->request->post('driver');
-        }
+        if (!$driver) $driver = \Yii::$app->request->post('driver');
+
         $data = ['driver' => $driver];
 
         $controller = PaysystemProvider::getDriver($data);
 
         if (method_exists($controller, 'updateTransaction')) {
-            return $controller->updateTransaction();
+            $response = $controller->updateTransaction();
+            if (isset($response['pg_status']) && $response['pg_status'] == 'ok') {
+                $order_id = (isset($data['pg_order_id']) && !empty($data['pg_order_id']))
+                    ? $data['pg_order_id'] : false;
+                $payment_id = (isset($data['pg_payment_id']) && !empty($data['pg_payment_id']))
+                    ? $data['pg_payment_id'] : false;
+                if ($order_id || $payment_id) {
+                    if ($order_id) $transaction = Transactions::findOne(intval($order_id));
+                    else $transaction = Transactions::findOne(['payment_id' => intval($payment_id)]);
+                    if (!empty($transaction)
+                        && $transaction->status == Transactions::STATUS_PAID
+                        && !empty($transaction->recipient)) {
+                        $transaction->recipient->balance += $transaction->amount;
+                        $transaction->recipient->save(false);
+                    }
+                }
+            }
+            return $response;
         }
 
         return false;
@@ -63,31 +76,20 @@ class PaymentController extends Controller
 
     public function actionCallback($driver = '')
     {
-        if (!$driver) {
-            $driver = \Yii::$app->request->post('driver');
-        }
+        if (!$driver) $driver = \Yii::$app->request->post('driver');
+
         $data = ['driver' => $driver];
 
         $controller = PaysystemProvider::getDriver($data);
 
-        if (method_exists($controller, 'callbackCard')) {
-            return $controller->callbackCard();
-        }
+        if (method_exists($controller, 'callbackCard')) return $controller->callbackCard();
 
         return false;
     }
 
-    public function actionSuccess($id = 0)
+    public function actionSuccess()
     {
         \Yii::$app->response->format = Response::FORMAT_JSON;
-
-        if (!$id) $id = \Yii::$app->request->post('id', 0);
-
-        $transaction = Transactions::findOne(intval($id));
-        if (!empty($transaction) && !empty($transaction->recipient)) {
-            $transaction->recipient->balance += $transaction->amount;
-            $transaction->recipient->save(false);
-        }
 
         return ['status' => 'success'];
 
