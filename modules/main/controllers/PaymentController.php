@@ -53,6 +53,12 @@ class PaymentController extends Controller
 
         if (method_exists($controller, 'updateTransaction')) {
             $response = $controller->updateTransaction();
+            Yii::info(json_encode([
+                'url' => 'actionResult',
+                'ip' => Yii::$app->request->userIP,
+                'headers' => Yii::$app->request->headers,
+                'params' => ['response' => $response],
+            ]), 'payment_info');
             if (isset($response['pg_status']) && $response['pg_status'] == 'ok') {
                 $order_id = (isset($data['pg_order_id']) && !empty($data['pg_order_id']))
                     ? $data['pg_order_id'] : false;
