@@ -163,7 +163,7 @@ class SocketServer implements MessageComponentInterface
 
         $sender = is_object($from->device) ? $from->device->id : 'Server';
 
-        echo "Message from ({$sender})\n Action: {$result->action}\n" . date('d.m.Y h:i', time()) . "\n";
+        echo "Message from ({$sender})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "\n";
     }
 
     /**
