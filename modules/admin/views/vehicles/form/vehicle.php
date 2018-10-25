@@ -26,7 +26,7 @@ use yii\widgets\ActiveForm;
 
                 <?php if (!empty($model->code)) { ?>
                     <?= \yii\helpers\Html::a(
-                        Yii::$app->imageCache->img(Yii::getAlias('@webroot') . $model->code, '300x300', ['class' => 'img-bordered']),
+                        \yii\helpers\Html::img(\yii\helpers\Url::to($model->code), ['class' => 'img-bordered', 'style' => 'max-width:500px;']),
                         \yii\helpers\Url::to($model->code),
                         [
                             'target' => '_blank',
