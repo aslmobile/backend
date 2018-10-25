@@ -60,7 +60,7 @@ class PaymentController extends Controller
                 'params' => ['response' => $response],
             ]), 'payment_info');
             if (isset($response['pg_status']) && $response['pg_status'] == 'ok') {
-                Transactions::findOne(intval(Yii::$app->request->post('pg_order_id', 0)));
+                $transaction = Transactions::findOne(intval(Yii::$app->request->post('pg_order_id', 0)));
                 if (!empty($transaction) && $transaction->status == Transactions::STATUS_PAID) {
                     $recipient = User::findOne($transaction->recipient_id);
                     if (!empty($recipient)) {
