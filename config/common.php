@@ -149,6 +149,12 @@ $config = [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
+                [
+                    'class' => 'yii\log\DbTarget',
+                    'logTable' => 'log',
+                    'levels' => ['info'],
+                    'categories' => ['payment_info'],
+                ],
             ],
         ],
     ],
