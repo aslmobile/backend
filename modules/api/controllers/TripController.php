@@ -694,7 +694,7 @@ class TripController extends BaseController
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Trip $trip */
-        $trip = Trip::find()->where(['id' => $this->body->trip_id, 'status' => Trip::STATUS_WAITING])->one();
+        $trip = Trip::find()->where(['id' => $this->body->trip_id, 'status' => Trip::STATUS_WAITING, 'line_id' => $line->id])->one();
 
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
