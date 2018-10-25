@@ -41,7 +41,8 @@ class Transactions extends \yii\db\ActiveRecord
         STATUS_REQUEST = 0,
         STATUS_PAID = 1,
         STATUS_CANCELLED = 2,
-        STATUS_REJECTED = 3;
+        STATUS_REJECTED = 3,
+        STATUS_WAITING = 4;
 
     const
         GATEWAY_PAYBOX = 1,

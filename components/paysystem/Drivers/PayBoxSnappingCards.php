@@ -482,7 +482,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
                     $log->transaction_id = $transaction->id;
                     if ($transaction->amount == $data['pg_amount'] && $data['pg_currency'] == $this->currency) {
                         if ($data['pg_result']) {
-                            $transaction->status = Transactions::STATUS_PAID;
+                            $transaction->status = Transactions::STATUS_WAITING;
                             $response['pg_status'] = 'ok';
                         } else {
                             $transaction->status = Transactions::STATUS_REJECTED;
@@ -538,7 +538,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
                 if (!empty($transaction)) {
                     $log->transaction_id = $transaction->id;
                     if ($transaction->amount == $data['pg_amount'] && $data['pg_currency'] == $this->currency) {
-                        $transaction->status = Transactions::STATUS_PAID;
+                        $transaction->status = Transactions::STATUS_WAITING;
                         $transaction->save(false);
                         $response['pg_status'] = 'ok';
                     } else {
