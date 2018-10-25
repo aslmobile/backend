@@ -1,6 +1,7 @@
 <?php namespace app\modules\api\controllers;
 
 use app\components\ArrayQuery\ArrayQuery;
+use app\components\paysystem\PaysystemInterface;
 use app\components\paysystem\PaysystemProvider;
 use app\components\paysystem\PaysystemSnappingCardsInterface;
 use app\models\PaymentCards;
@@ -29,7 +30,7 @@ class PaymentController extends BaseController
                             'transactions', 'transaction', 'methods', 'in-out-methods', 'in-out-amounts',
                             'transactions-km',
 
-                            'create-card', 'delete-card', 'cards', 'pay',
+                            'create-card', 'delete-card', 'cards', 'pay', 'refill',
                             'ticket'
                         ],
                         'allow' => true
@@ -49,6 +50,7 @@ class PaymentController extends BaseController
                     'create-card' => ['PUT'],
                     'pay' => ['PUT'],
                     'ticket' => ['PUT'],
+                    'refill' => ['PUT'],
                     'delete-card' => ['DELETE'],
                     'cards' => ['GET']
                 ]
@@ -225,6 +227,45 @@ class PaymentController extends BaseController
         $this->module->sendResponse();
     }
 
+    public function actionRefill()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['amount']);
+
+        $data = ['driver' => \Yii::$app->params['use_pay']];
+        $paysystem = PaysystemProvider::getDriver($data);
+
+        $transaction = new Transactions();
+        $transaction->user_id = $user->id;
+        $transaction->recipient_id = $user->id;
+        $transaction->route_id = 0;
+        $transaction->status = Transactions::STATUS_REQUEST;
+        $transaction->amount = $this->body->amount;
+        $transaction->gateway = Transactions::TYPE_INCOME;
+        $transaction->uip = Yii::$app->request->userIP;
+
+        $result = '';
+
+        if ($paysystem instanceof PaysystemInterface) {
+            $transaction = $paysystem->getLink($transaction);
+            if (!empty($transaction->payment_link)) {
+                $result = $transaction->payment_link;
+            } else {
+                $this->module->setError(422, '_refill', Yii::$app->mv->gt("Платежная система не доступна", [], false));
+            }
+        } else {
+            $this->module->setError(422, '_refill', Yii::$app->mv->gt("Пополнение баланса не доступно!", [], false));
+        }
+
+        $this->module->data['user_id'] = $user->id;
+        $this->module->data['iframe'] = $result;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
     public function actionPay($id)
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -254,6 +295,7 @@ class PaymentController extends BaseController
         $transaction->status = Transactions::STATUS_REQUEST;
         $transaction->amount = $trip->amount;
         $transaction->gateway = $this->body->type;
+        $transaction->type = Transactions::TYPE_INCOME;
         $transaction->uip = Yii::$app->request->userIP;
         $transaction->currency = $trip->currency;
         $transaction->route_id = $trip->route_id;
@@ -333,9 +375,9 @@ class PaymentController extends BaseController
         }
 
         $trip->payment_status = Trip::PAYMENT_STATUS_PAID;
-        $recipient->balance += $transaction->amount;
+        //$recipient->balance += $transaction->amount;
         $trip->save();
-        $recipient->save();
+        //$recipient->save();
 
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();

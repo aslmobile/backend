@@ -29,6 +29,9 @@ use yii\behaviors\TimestampBehavior;
  * @property string $response
  * @property int $payment_id
  * @property string $payment_link
+ *
+ * @property User recipient
+ *
  */
 class Transactions extends \yii\db\ActiveRecord
 {

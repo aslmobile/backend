@@ -6,6 +6,7 @@ namespace app\modules\main\controllers;
 
 use app\components\Controller;
 use app\components\paysystem\PaysystemProvider;
+use app\models\Transactions;
 use Yii;
 use yii\web\Response;
 
@@ -76,9 +77,17 @@ class PaymentController extends Controller
         return false;
     }
 
-    public function actionSuccess()
+    public function actionSuccess($id = 0)
     {
         \Yii::$app->response->format = Response::FORMAT_JSON;
+
+        if (!$id) $id = \Yii::$app->request->post('id', 0);
+
+        $transaction = Transactions::findOne(intval($id));
+        if (!empty($transaction) && !empty($transaction->recipient)) {
+            $transaction->recipient->balance += $transaction->amount;
+            $transaction->recipient->save(false);
+        }
 
         return ['status' => 'success'];
 

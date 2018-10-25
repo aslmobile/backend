@@ -9,11 +9,8 @@
 namespace app\components\paysystem\Drivers;
 
 use app\components\paysystem\PaysystemInterface;
-use app\models\Log;
-use app\models\Paysystem;
 use app\models\TransactionLog;
 use app\models\Transactions;
-use app\models\UserSeminar;
 use SimpleXMLElement;
 use Yii;
 use yii\helpers\Url;
@@ -55,6 +52,7 @@ class PayBox implements PaysystemInterface
     public function getLink(Transactions $transaction)
     {
         if ($transaction->isNewRecord) {
+            $transaction->currency = $this->currency;
             $transaction->save();
         }
         $log = new TransactionLog([
@@ -70,7 +68,7 @@ class PayBox implements PaysystemInterface
             'pg_currency' => $this->currency,
             'pg_check_url' => Url::toRoute(['/main/payment/check', 'driver' => $this->driver], true),
             'pg_result_url' => Url::toRoute(['/main/payment/result', 'driver' => $this->driver], true),
-            'pg_success_url' => Url::toRoute(['/main/payment/success'], true),
+            'pg_success_url' => Url::toRoute(['/main/payment/success', 'id' => $transaction->id], true),
             'pg_failure_url' => Url::toRoute(['/main/payment/fail'], true),
             'pg_testing_mode' => intval($this->devMod),
             'pg_salt' => substr(md5(time()), 0, 16),
