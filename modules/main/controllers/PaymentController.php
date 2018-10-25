@@ -60,21 +60,15 @@ class PaymentController extends Controller
                 'params' => ['response' => $response],
             ]), 'payment_info');
             if (isset($response['pg_status']) && $response['pg_status'] == 'ok') {
-                $order_id = (isset($data['pg_order_id']) && !empty($data['pg_order_id']))
-                    ? $data['pg_order_id'] : false;
-                $payment_id = (isset($data['pg_payment_id']) && !empty($data['pg_payment_id']))
-                    ? $data['pg_payment_id'] : false;
-                if ($order_id || $payment_id) {
-                    if ($order_id) $transaction = Transactions::findOne(intval($order_id));
-                    else $transaction = Transactions::findOne(['payment_id' => intval($payment_id)]);
-                    if (!empty($transaction) && $transaction->status == Transactions::STATUS_PAID) {
-                        $recipient = User::findOne($transaction->recipient_id);
-                        if (!empty($recipient)) {
-                            $recipient->balance += $transaction->amount;
-                            $recipient->save(false);
-                        }
+                Transactions::findOne(intval(Yii::$app->request->post('pg_order_id', 0)));
+                if (!empty($transaction) && $transaction->status == Transactions::STATUS_PAID) {
+                    $recipient = User::findOne($transaction->recipient_id);
+                    if (!empty($recipient)) {
+                        $recipient->balance += $transaction->amount;
+                        $recipient->save(false);
                     }
                 }
+
             }
             return $response;
         }
