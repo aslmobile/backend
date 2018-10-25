@@ -169,7 +169,12 @@ class SocketServer implements MessageComponentInterface
             }
         }
 
-        if (is_object($from->device) && !in_array($from->device->user_id, $result->addressed)) $from->send($response);
+        if (is_object($from->device) && !in_array($from->device->user_id, $result->addressed)){
+            $from->send($response);
+            $recipient = $from->device->id;
+            echo "Response to ({$recipient})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "
+            \n ----------------------------------------- \n";
+        }
 
         $sender = is_object($from->device) ? $from->device->id : 'Server';
 
