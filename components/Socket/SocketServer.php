@@ -64,7 +64,8 @@ class SocketServer implements MessageComponentInterface
                 echo "Server connected.\n" . date('d.m.Y h:i', time()) . "\n";
             } else {
                 $conn->device = $device;
-                isset($this->devices[$conn->device->id]) ? $this->devices[$conn->device->id] = $conn : $this->devices += [$conn->device->id => $conn];
+                if (isset($this->devices[$conn->device->id])) $this->devices[$conn->device->id]->close();
+                $this->devices += [$conn->device->id => $conn];
                 Yii::$app->db->createCommand()->update('users', ['last_activity' => null], 'id = ' . $device->user_id)->execute();
                 echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; connected.\n" . date('d.m.Y h:i', time()) . "\n";
             }
