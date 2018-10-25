@@ -59,12 +59,12 @@ class SocketServer implements MessageComponentInterface
                 echo "Connection closed! No device auth!\n";
                 $conn->close();
             } elseif ($authkey === $this->server) {
-                $conn->device = $device;
-                $this->devices[$conn->resourceId] = $conn;
+                $conn->device = (object)['id' => 0];
+                $this->devices += [$conn->device->id => $conn];
                 echo "Server connected.\n" . date('d.m.Y h:i', time()) . "\n";
             } else {
                 $conn->device = $device;
-                $this->devices[$conn->resourceId] = $conn;
+                isset($this->devices[$conn->device->id]) ? $this->devices[$conn->device->id] = $conn : $this->devices += [$conn->device->id => $conn];
                 Yii::$app->db->createCommand()->update('users', ['last_activity' => null], 'id = ' . $device->user_id)->execute();
                 echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; connected.\n" . date('d.m.Y h:i', time()) . "\n";
             }
@@ -92,8 +92,8 @@ class SocketServer implements MessageComponentInterface
 
         if (isset($conn->device)) {
 
-            if (isset($this->devices[$conn->resourceId])) {
-                unset($this->devices[$conn->resourceId]);
+            if (isset($this->devices[$conn->device->id])) {
+                unset($this->devices[$conn->device->id]);
             }
         }
 
@@ -169,14 +169,14 @@ class SocketServer implements MessageComponentInterface
             }
         }
 
-        if (is_object($from->device) && !in_array($from->device->user_id, $result->addressed)){
+        if (is_object($from->device) && !in_array($from->device->user_id, $result->addressed)) {
             $from->send($response);
             $recipient = $from->device->id;
             echo "Response to ({$recipient})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "
             \n ----------------------------------------- \n";
         }
 
-        $sender = is_object($from->device) ? $from->device->id : 'Server';
+        $sender = ($from->device->id == 0) ? 'Server' : $from->device->id;
 
         echo "Message from ({$sender})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "
         \n ----------------------------------------- \n";
