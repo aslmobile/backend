@@ -141,7 +141,9 @@ class SocketServer implements MessageComponentInterface
         $response = json_encode($response);
         $response = base64_encode($response);
 
-        if (empty($result->addressed)) foreach ($this->devices as $device) $device->send($response); else {
+        if (empty($result->addressed)) {
+            foreach ($this->devices as $device) $device->send($response);
+        } else {
             $query = new ArrayQuery();
             $query->from($this->devices);
             foreach ($result->addressed as $user_id) {
