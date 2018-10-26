@@ -9,7 +9,7 @@ use app\models\Transactions;
 
 interface PaysystemSnappingCardsInterface
 {
-    public function payOut(Transactions $transaction, PaymentCards $card);
+    public function payOutCard(Transactions $transaction, PaymentCards $card);
 
     public function addCard($user_id);
 

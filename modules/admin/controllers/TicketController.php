@@ -3,6 +3,7 @@
 namespace app\modules\admin\controllers;
 
 use app\components\Controller;
+use app\components\paysystem\Drivers\PayBoxSnappingCards;
 use app\components\paysystem\PaysystemProvider;
 use app\components\paysystem\PaysystemSnappingCardsInterface;
 use app\models\PaymentCards;
@@ -90,9 +91,7 @@ class TicketController extends Controller
     }
 
     /**
-     * Creates a new Ticket model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
@@ -144,11 +143,13 @@ class TicketController extends Controller
         $transaction->save();
 
         $data = ['driver' => \Yii::$app->params['use_paysystem']];
+
+        /** @var PayBoxSnappingCards $paysystem */
         $paysystem = PaysystemProvider::getDriver($data);
 
         if ($paysystem instanceof PaysystemSnappingCardsInterface) {
             /** @var Transactions $transaction */
-            $transaction = $paysystem->payOut($transaction, $card);
+            $transaction = $paysystem->payOutCard($transaction, $card);
             if (!$transaction) {
                 Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
                 return $this->redirect(['update', 'id' => $ticket->id]);
@@ -204,11 +205,9 @@ class TicketController extends Controller
     }
 
     /**
-     * Finds the Ticket model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Ticket the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return Ticket|null
+     * @throws NotFoundHttpException
      */
     protected function findModel($id)
     {

@@ -22,8 +22,8 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
     private $deleteUrl = "https://paybox.kz/v1/merchant/{merchant_id}/cardstorage/remove";
     private $initUrl = "https://paybox.kz/v1/merchant/{merchant_id}/card/init";
     private $payUrl = "https://paybox.kz/v1/merchant/{merchant_id}/card/pay";
-    private $payOutUrl = 'https://api.paybox.money/api/reg2reg';
-    //private $payOutUrl = 'https://paybox.kz/api/reg2reg';
+    //private $payOutUrl = 'https://api.paybox.money/api/reg2reg';
+    private $payOutUrl = 'https://paybox.kz/api/reg2reg';
 
     // driver settings
     private $driver = 'PayBoxSnappingCards';
@@ -63,7 +63,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
      * @return Transactions|bool
      * @throws \Exception
      */
-    public function payOut(Transactions $transaction, PaymentCards $card)
+    public function payOutCard(Transactions $transaction, PaymentCards $card)
     {
 
         $this->key = \Yii::$app->params['paysystem'][$this->driver]['secret_key_pay'];

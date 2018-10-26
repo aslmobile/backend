@@ -154,10 +154,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         'headerOptions' => ['style' => ['min-width' => '200px']]
                     ],
                     'amount',
-                    // 'transaction_id',
                     [
                         'class' => 'yii\grid\ActionColumn',
-                        'template' => '{view} {update} {delete}',
+                        'template' => '{view} {update}',
                         'buttons' => [
                             'view' => function ($url, $model) {
                                 return Html::a('<button type="button" class="btn btn-info btn-sm"><i class="fa fa-search"></i></button>', $url);

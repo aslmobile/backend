@@ -1,6 +1,7 @@
 <?php namespace app\modules\api\controllers;
 
 use app\components\ArrayQuery\ArrayQuery;
+use app\components\paysystem\Drivers\PayBoxSnappingCards;
 use app\components\paysystem\PaysystemInterface;
 use app\components\paysystem\PaysystemProvider;
 use app\components\paysystem\PaysystemSnappingCardsInterface;
@@ -346,10 +347,12 @@ class PaymentController extends BaseController
                 $this->module->sendResponse();
                 break;
             case Transactions::GATEWAY_PAYBOX_CARD:
+
                 if (!isset($this->body->card) || !$this->body->card) $this->module->setError(422,
                     '_card', Yii::$app->mv->gt("Требуется номер карты.", [], false));
 
                 $data = ['driver' => \Yii::$app->params['use_paysystem']];
+                /** @var PayBoxSnappingCards $paysystem */
                 $paysystem = PaysystemProvider::getDriver($data);
 
                 $paysystem->getCardsList($user->id);
@@ -374,6 +377,9 @@ class PaymentController extends BaseController
                 }
 
                 $trip->penalty = 0;
+                $recipient->balance += $transaction->amount;
+                $recipient->save();
+
                 break;
             case Transactions::GATEWAY_KM:
                 $query = new ArrayQuery();
@@ -409,9 +415,6 @@ class PaymentController extends BaseController
             $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
         } else $trip->payment_status = Trip::PAYMENT_STATUS_PAID;
         $trip->save();
-
-        //$recipient->balance += $transaction->amount;
-        //$recipient->save();
 
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();

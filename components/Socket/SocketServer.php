@@ -142,12 +142,14 @@ class SocketServer implements MessageComponentInterface
         $response = json_encode($response);
         $response = base64_encode($response);
 
+        $time = date('d.m.Y h:i:s', time()) . "
+        \n ----------------------------------------- \n";
+
         if (empty($result->addressed)) {
             foreach ($this->devices as $device) {
                 $device->send($response);
                 $recipient = $device->device->id;
-                echo "Response to ({$recipient})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "
-                \n ----------------------------------------- \n";
+                echo "Response to ({$recipient})\n Action: {$result->action}\n" . $time;
             }
         } else {
             $query = new ArrayQuery();
@@ -163,8 +165,7 @@ class SocketServer implements MessageComponentInterface
                     foreach ($devices as $device) {
                         $device->send($response);
                         $recipient = $device->device->id;
-                        echo "Response to ({$recipient})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "
-                        \n ----------------------------------------- \n";
+                        echo "Response to ({$recipient})\n Action: {$result->action}\n" . $time;
                     }
                 }
             }
@@ -173,14 +174,12 @@ class SocketServer implements MessageComponentInterface
         if (is_object($from->device) && !in_array($from->device->user_id, $result->addressed)) {
             $from->send($response);
             $recipient = $from->device->id;
-            echo "Response to ({$recipient})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "
-            \n ----------------------------------------- \n";
+            echo "Response to ({$recipient})\n Action: {$result->action}\n" . $time;
         }
 
         $sender = ($from->device->id == 0) ? 'Server' : $from->device->id;
 
-        echo "Message from ({$sender})\n Action: {$result->action}\n" . date('d.m.Y h:i:s', time()) . "
-        \n ----------------------------------------- \n";
+        echo "Message from ({$sender})\n Action: {$result->action}\n" . $time;
     }
 
     /**
