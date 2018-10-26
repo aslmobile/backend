@@ -739,8 +739,6 @@ class Message
                 if (!empty($trips)) {
                     foreach ($trips as $trip) {
 
-                        $trip->cancel_reason = 0;
-                        $trip->passenger_comment = '';
                         $trip->status = Trip::STATUS_CANCELLED;
                         $trip->penalty = 1;
                         $trip->save();
@@ -750,7 +748,7 @@ class Message
                         $devices = $query->where(['device.user_id' => intval($trip->user_id)])->all();
 
                         $send_response = [
-                            'action' => 'declinePassengerTrip',
+                            'action' => 'declineByTimer',
                             'error_code' => 0,
                             'data' => [
                                 'message_id' => $this->message_id,
@@ -776,7 +774,6 @@ class Message
                         }
 
                     }
-                    Queue::processingQueue();
                 }
             });
         }
