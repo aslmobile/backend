@@ -108,7 +108,7 @@ class TicketController extends Controller
     }
 
     /**
-     * @param $ticket
+     * @param $ticket Ticket
      * @return \yii\web\Response
      * @throws \Exception
      */
@@ -169,7 +169,7 @@ class TicketController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        if ($model->status == Ticket::STATUS_PAYED) return $this->redirect(['index']);
+        //if ($model->status == Ticket::STATUS_PAYED) return $this->redirect(['index']);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
