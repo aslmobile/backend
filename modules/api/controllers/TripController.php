@@ -369,7 +369,7 @@ class TripController extends BaseController
                 $this->module->setError(422, '_penalty', Yii::$app->mv->gt("У вас не оплачен штраф", [], false));
         }
 
-        $trip = Trip::findOne(['id' => $id, 'status' => Trip::STATUS_SCHEDULED]);
+        $trip = Trip::findOne(['id' => $id]);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         if (isset($this->body->route) && !empty($this->body->route)) {
@@ -486,13 +486,26 @@ class TripController extends BaseController
 
         if ($trip->payment_type == Trip::PAYMENT_TYPE_CASH) $trip->amount += $penalty_amount;
 
+
         if (isset($this->body->schedule) && !empty($this->body->schedule)) {
             $trip->schedule = json_encode($this->body->schedule);
-            Notifications::updateAll(['time' => $this->body->time, 'status' => Notifications::STATUS_NEW], [
-                'type' => Notifications::NTP_TRIP_SCHEDULED,
-                'user_id' => $trip->user_id,
-                'initiator_id' => $trip->id,
-            ]);
+            if ($trip->status == Trip::STATUS_SCHEDULED) {
+                Notifications::updateAll(['time' => $this->body->time, 'status' => Notifications::STATUS_NEW], [
+                    'type' => Notifications::NTP_TRIP_SCHEDULED,
+                    'user_id' => $trip->user_id,
+                    'initiator_id' => $trip->id,
+                ]);
+            } else {
+                Trip::cloneTrip($trip, Trip::STATUS_SCHEDULED);
+                Notifications::create(
+                    Notifications::NTP_TRIP_SCHEDULED,
+                    [$trip->user_id],
+                    '',
+                    $trip->id,
+                    Notifications::STATUS_SCHEDULED,
+                    $this->body->time
+                );
+            }
         }
 
         if (!$trip->validate() || !$trip->save()) {
@@ -508,6 +521,8 @@ class TripController extends BaseController
             $taxi->trip_id = $trip->id;
             $taxi->save();
         }
+
+        Queue::processingQueue();
 
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
