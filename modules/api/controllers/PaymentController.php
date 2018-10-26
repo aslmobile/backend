@@ -278,7 +278,7 @@ class PaymentController extends BaseController
         if (!$trip) $this->module->setError(422,
             '_trip', Yii::$app->mv->gt("Не найдено", [], false));
 
-        $recipient = User::findOne(['id' => $trip->driver_id, 'status' => User::STATUS_APPROVED]);
+        $recipient = User::findOne($trip->driver_id);
         if (!$recipient) $this->module->setError(422,
             '_driver', Yii::$app->mv->gt("Не найдено", [], false));
 
@@ -286,7 +286,6 @@ class PaymentController extends BaseController
         if (!$validator->validate($this->body->type)) $this->module->setError(422,
             '_amount', Yii::$app->mv->gt("Тип оплаты не верен.", [], false));
 
-        $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
         $trip->payment_type = $this->body->type;
 
         if ($trip->penalty) $amount = $trip->amount / 2; else $amount = $trip->amount;
@@ -301,6 +300,7 @@ class PaymentController extends BaseController
         $transaction->uip = Yii::$app->request->userIP;
         $transaction->currency = $trip->currency;
         $transaction->route_id = $trip->route_id;
+        $transaction->trip_id = $trip->id;
 
         if (!$transaction->validate() || !$transaction->save()) {
             if ($transaction->hasErrors()) {
@@ -347,6 +347,8 @@ class PaymentController extends BaseController
                 $this->module->setError(422, '_card', Yii::$app->mv->gt("Осуществление платежа не доступно!", [], false));
             }
 
+            $trip->penalty = 0;
+
         } else if ($this->body->type == Transactions::GATEWAY_KM) {
 
             $query = new ArrayQuery();
@@ -373,13 +375,15 @@ class PaymentController extends BaseController
             $user->save();
 
         } else if ($this->body->type == Transactions::GATEWAY_CASH) {
-            $transaction->status = Transactions::STATUS_PAID;
-            $recipient->balance += $transaction->amount;
-            $recipient->save();
+            $transaction->status = Transactions::STATUS_WAITING;
+            $transaction->save();
         }
 
-        $trip->payment_status = Trip::PAYMENT_STATUS_PAID;
+        if ($trip->penalty && $this->body->type == Transactions::GATEWAY_CASH) {
+            $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
+        } else $trip->payment_status = Trip::PAYMENT_STATUS_PAID;
         $trip->save();
+
         //$recipient->balance += $transaction->amount;
         //$recipient->save();
 

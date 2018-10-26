@@ -11,6 +11,7 @@ use app\models\Notifications;
 use app\models\Queue;
 use app\models\Route;
 use app\models\Taxi;
+use app\models\Transactions;
 use app\models\TripLuggage;
 use app\models\User;
 use app\modules\admin\models\Km;
@@ -823,6 +824,7 @@ class TripController extends BaseController
                     }
 
                 }
+                $trip->driver_description = $reason;
 
                 $notifications = Notifications::create(
                     Notifications::NTP_TRIP_CANCEL, [$trip->user_id],
@@ -894,7 +896,7 @@ class TripController extends BaseController
 
         if ($checkpoint->type === Checkpoint::TYPE_END) {
 
-            $trips = Trip::find()->andWhere(['line_id' => $line->id, 'status' => Trip::STATUS_WAY])->all();
+            $trips = Trip::find()->where(['line_id' => $line->id, 'status' => Trip::STATUS_WAY])->all();
             $addressed = ArrayHelper::getColumn($trips, 'user_id');
             $timer = false;
             $notifications = Notifications::create(Notifications::NTP_TRIP_FINISHED, $addressed, '', $user->id);
@@ -911,6 +913,20 @@ class TripController extends BaseController
 
                 $trip->status = Trip::STATUS_FINISHED;
                 $trip->finish_time = time();
+
+                if (
+                    $trip->payment_type == Trip::PAYMENT_TYPE_CASH
+                    &&
+                    $penalty = Trip::findOne(['user_id' => $user->id, 'penalty' => 1])
+                ) {
+                    if ($transaction = Transactions::findOne(['trip_id' => $penalty->id])) {
+                        $transaction->status = Transactions::STATUS_PAID;
+                        $penalty->penalty = 0;
+                        $penalty->status = Trip::PAYMENT_STATUS_PAID;
+                        $transaction->save();
+                        $penalty->save();
+                    }
+                }
 
                 switch ($trip->payment_type) {
                     case Trip::PAYMENT_TYPE_CASH:

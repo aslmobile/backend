@@ -318,6 +318,7 @@ class LineController extends BaseController
 
                 $socket->push(base64_encode(json_encode([
                     'action' => "declinePassengerTrip",
+                    //'action' => "cancelDriverTrip",
                     'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, [$trip->user_id], '', $user->id),
                     'data' => ['message_id' => time(), 'addressed' => [$trip->user_id], 'trip' => $trip->toArray()]
                 ])));

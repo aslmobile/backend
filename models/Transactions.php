@@ -24,6 +24,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string $uip
  * @property string $currency
  * @property string $route_id
+ * @property string $trip_id
  * @property integer $type
  * @property string $request
  * @property string $response
@@ -75,8 +76,20 @@ class Transactions extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['created_at', 'updated_at', 'status', 'user_id', 'recipient_id', 'gateway', 'cancel_reason', 'created_by', 'updated_by', 'type'],
-                'integer'],
+            [[
+                'created_at',
+                'updated_at',
+                'status',
+                'user_id',
+                'route_id',
+                'trip_id',
+                'recipient_id',
+                'gateway',
+                'cancel_reason',
+                'created_by',
+                'updated_by',
+                'type'
+            ], 'integer'],
             [['amount'], 'number'],
             [['gateway_response', 'request', 'response'], 'string'],
             [['gateway_status', 'uip', 'currency'], 'string', 'max' => 255],
@@ -106,6 +119,7 @@ class Transactions extends \yii\db\ActiveRecord
             'request' => Yii::$app->mv->gt('Запрос', [], 0),
             'response' => Yii::$app->mv->gt('Ответ', [], 0),
             'route_id' => Yii::$app->mv->gt('Маршрут', [], 0),
+            'trip_id' => Yii::$app->mv->gt('Поездка', [], 0),
         ];
     }
 
@@ -170,16 +184,21 @@ class Transactions extends \yii\db\ActiveRecord
 
     public function getUser()
     {
-        return \app\modules\admin\models\User::findOne($this->user_id);
+        return User::findOne($this->user_id);
     }
 
     public function getRecipient()
     {
-        return \app\modules\admin\models\User::findOne($this->recipient_id);
+        return User::findOne($this->recipient_id);
     }
 
     public function getRoute()
     {
-        return \app\modules\admin\models\Route::findOne($this->route_id);
+        return Route::findOne($this->route_id);
+    }
+
+    public function getTrip()
+    {
+        return Trip::findOne($this->route_id);
     }
 }

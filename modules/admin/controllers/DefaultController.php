@@ -52,6 +52,12 @@ class DefaultController extends Controller
      */
     public function actionIndex()
     {
+//        $request = base64_encode(json_encode([
+//            'action' => "ping",
+//            'notifications' => [],
+//            'data' => ['message_id' => time()]
+//        ]));
+        //var_dump($request);die();
         //var_dump(strtoupper(hash('sha256', '380632308442' . \Yii::$app->params['salt'])));die();
         return $this->render('index');
     }
