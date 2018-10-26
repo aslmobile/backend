@@ -147,17 +147,19 @@ class TicketController extends Controller
         $paysystem = PaysystemProvider::getDriver($data);
 
         if ($paysystem instanceof PaysystemInterface) {
+            /** @var Transactions $transaction */
             $transaction = $paysystem->payOut($transaction, $card);
             if (!$transaction) {
                 Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
                 return $this->redirect(['update', 'id' => $ticket->id]);
             }
+            $transaction->status = Transactions::STATUS_PAID;
         } else {
             Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
             return $this->redirect(['update', 'id' => $ticket->id]);
         }
 
-        return $this->redirect(['update', 'id' => $ticket->id]);
+        return $this->redirect(['index']);
 
     }
 
@@ -169,11 +171,12 @@ class TicketController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $oldStatus = $model->status;
         //if ($model->status == Ticket::STATUS_PAYED) return $this->redirect(['index']);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
-            if ($model->oldAttributes['status'] != Ticket::STATUS_PAYED && $model->status == Ticket::STATUS_PAYED) {
+            if ($oldStatus != Ticket::STATUS_PAYED && $model->status == Ticket::STATUS_PAYED) {
                 $this->payOut($model);
             }
 
