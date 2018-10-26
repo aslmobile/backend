@@ -22,8 +22,8 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
     private $deleteUrl = "https://paybox.kz/v1/merchant/{merchant_id}/cardstorage/remove";
     private $initUrl = "https://paybox.kz/v1/merchant/{merchant_id}/card/init";
     private $payUrl = "https://paybox.kz/v1/merchant/{merchant_id}/card/pay";
-    //private $payOutUrl = 'https://api.paybox.money/api/reg2reg';
-    private $payOutUrl = 'https://paybox.kz/api/reg2reg';
+    private $payOutUrl = 'https://api.paybox.money/api/reg2reg';
+    //private $payOutUrl = 'https://paybox.kz/api/reg2reg';
 
     // driver settings
     private $driver = 'PayBoxSnappingCards';
