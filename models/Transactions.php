@@ -51,7 +51,8 @@ class Transactions extends \yii\db\ActiveRecord
     const
         GATEWAY_PAYBOX = 1,
         GATEWAY_CASH = 2,
-        GATEWAY_KM = 3;
+        GATEWAY_KM = 3,
+        GATEWAY_PAYBOX_CARD = 4;
     //endregion
 
 
@@ -153,6 +154,7 @@ class Transactions extends \yii\db\ActiveRecord
     {
         return [
             self::GATEWAY_PAYBOX => Yii::t('app', "PayBox"),
+            self::GATEWAY_PAYBOX_CARD => Yii::t('app', "PayBox CARD"),
             self::GATEWAY_CASH => Yii::t('app', "Наличные"),
             self::GATEWAY_KM => Yii::t('app', "Бесплатные КМ")
         ];
@@ -164,6 +166,10 @@ class Transactions extends \yii\db\ActiveRecord
             [
                 'id' => self::GATEWAY_PAYBOX,
                 'value' => Yii::t('app', "PayBox")
+            ],
+            [
+                'id' => self::GATEWAY_PAYBOX_CARD,
+                'value' => Yii::t('app', "PayBox CARD")
             ],
             [
                 'id' => self::GATEWAY_CASH,

@@ -394,9 +394,6 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
             $transaction_log->error_code = $response['error'];
             $transaction_log->error_message = $response['message'];
 
-        } elseif ($this->checkSign($response, $this->payUrl)) {
-
-
         } else {
 
             $response_string = json_encode($response);
