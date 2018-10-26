@@ -22,7 +22,8 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
     private $deleteUrl = "https://paybox.kz/v1/merchant/{merchant_id}/cardstorage/remove";
     private $initUrl = "https://paybox.kz/v1/merchant/{merchant_id}/card/init";
     private $payUrl = "https://paybox.kz/v1/merchant/{merchant_id}/card/pay";
-    private $payOutUrl = 'https://api.paybox.money/api/reg2reg';
+    //private $payOutUrl = 'https://api.paybox.money/api/reg2reg';
+    private $payOutUrl = 'https://paybox.kz/api/reg2reg';
 
     // driver settings
     private $driver = 'PayBoxSnappingCards';
@@ -64,6 +65,9 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
      */
     public function payOut(Transactions $transaction, PaymentCards $card)
     {
+
+        //$this->key = \Yii::$app->params['paysystem'][$this->driver]['secret_key_pay'];
+
         if ($transaction->isNewRecord) {
             $transaction->currency = $this->currency;
             $transaction->save();
@@ -80,17 +84,38 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
             'pg_amount' => $transaction->amount,
             'pg_user_id' => $transaction->user_id,
             'pg_card_id_to' => $card->pg_card_id,
-            'pg_order_time_limit' => date('Ymd'),
+            'pg_description' => 'testpay',
             'pg_post_link' => Url::toRoute(['/main/payment/result', 'driver' => $this->driver], true),
+            'pg_order_time_limit' => date('Y-m-d H:i:s'),
             'pg_testing_mode' => intval($this->devMod),
             'pg_salt' => substr(md5(time()), 0, 16),
-            'pg_description' => 'testpay',
             'pg_sig' => '',
         ];
 
         $transaction_log->request = json_encode($data);
 
-        $response = $this->sendRequest($data, $url);
+        $sig_data = $data;
+        $res = 'reg2reg;';
+        unset($sig_data['pg_sig']);
+        ksort($sig_data, SORT_STRING);
+        foreach ($sig_data as $key => $value) $res .= $value . ';';
+        $res .= $this->key;
+        $res = strtolower(md5($res));
+
+        $data['pg_sig'] = $res;
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $response = json_decode(json_encode(simplexml_load_string($response)));
 
         $transaction_log->response = json_encode($response);
 
