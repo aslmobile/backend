@@ -84,6 +84,7 @@ class PayBox implements PaysystemInterface
 
         $log->response = $response;
         $transaction->response = $response;
+        $result = false;
 
         if ($response = simplexml_load_string($response)) {
             if ($response->pg_sig == $this->getSignature((array)$response, $url)) {
@@ -92,6 +93,7 @@ class PayBox implements PaysystemInterface
                     switch ($response['pg_status']) {
                         case 'ok':
                             $transaction->payment_id = $response['pg_payment_id'];
+                            $result = $transaction;
                             break;
                         case 'rejected':
                         case 'error':
@@ -112,7 +114,7 @@ class PayBox implements PaysystemInterface
         $transaction->save();
         $log->save();
 
-        return $transaction;
+        return $result;
     }
 
     public function getLink(Transactions $transaction)

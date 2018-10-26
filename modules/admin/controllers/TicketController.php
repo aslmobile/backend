@@ -147,7 +147,7 @@ class TicketController extends Controller
         $paysystem = PaysystemProvider::getDriver($data);
 
         if ($paysystem instanceof PaysystemInterface) {
-            $transaction = $paysystem->payOut($transaction);
+            $transaction = $paysystem->payOut($transaction, $card);
             if (!$transaction) {
                 Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
                 return $this->redirect(['update', 'id' => $ticket->id]);
