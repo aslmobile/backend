@@ -56,13 +56,19 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $this->deleteUrl = str_replace('{merchant_id}', $this->merchant_id, $this->deleteUrl);
     }
 
+    /**
+     * @param Transactions $transaction
+     * @param PaymentCards $card
+     * @return Transactions|bool
+     * @throws \Exception
+     */
     public function payOut(Transactions $transaction, PaymentCards $card)
     {
         if ($transaction->isNewRecord) {
             $transaction->currency = $this->currency;
             $transaction->save();
         }
-        $log = new TransactionLog([
+        $transaction_log = new TransactionLog([
             'transaction_id' => $transaction->id,
             'driver' => $this->driver,
             'action' => 'payOut'
@@ -82,55 +88,32 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
             'pg_sig' => '',
         ];
 
-        $data['pg_sig'] = $this->getSignature($data, $url);
+        $transaction_log->request = json_encode($data);
 
-        $log->request = json_encode($data);
-        $transaction->request = json_encode($data);
+        $response = $this->sendRequest($data, $url);
 
-        $ch = curl_init();
+        $transaction_log->response = json_encode($response);
 
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
-
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        $log->response = $response;
-        $transaction->response = $response;
         $result = false;
 
-        if ($response = simplexml_load_string($response)) {
-            if ($response->pg_sig == $this->getSignature((array)$response, $url)) {
-                $response = (array)$response;
-                if (isset($response['pg_status']) && !empty($response['pg_status'])) {
-                    switch ($response['pg_status']) {
-                        case 'ok':
-                            $transaction->payment_id = $response['pg_payment_id'];
-                            $result = $transaction;
-                            break;
-                        case 'rejected':
-                        case 'error':
-                            $log->error_code = 1;
-                            $log->error_message = $response['pg_description'];
-                            break;
-                    }
-                } else {
-                    $log->error_code = 1;
-                    $log->error_message = 'Invalid server response';
-                }
-            } else {
-                $log->error_code = 1;
-                $log->error_message = 'Invalid signature';
+        if (isset($response['error'])) {
+
+            $transaction_log->error_code = $response['error'];
+            $transaction_log->error_message = $response['message'];
+            $transaction->status = Transactions::STATUS_REJECTED;
+
+        } elseif ($this->checkSign($response, $url)) {
+            if (isset($response['pg_payment_id']) && $response['pg_status'] == 'ok') {
+                $transaction->payment_id = $response['pg_payment_id'];
+                $result = $transaction;
             }
         }
 
+        $transaction_log->save();
         $transaction->save();
-        $log->save();
 
         return $result;
+
     }
 
     /**
