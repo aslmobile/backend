@@ -3,8 +3,8 @@
 namespace app\modules\admin\controllers;
 
 use app\components\Controller;
-use app\components\paysystem\PaysystemInterface;
 use app\components\paysystem\PaysystemProvider;
+use app\components\paysystem\PaysystemSnappingCardsInterface;
 use app\models\PaymentCards;
 use app\models\Transactions;
 use app\modules\admin\models\Ticket;
@@ -143,10 +143,10 @@ class TicketController extends Controller
         $transaction->line_id = 0;
         $transaction->save();
 
-        $data = ['driver' => \Yii::$app->params['use_pay']];
+        $data = ['driver' => \Yii::$app->params['use_paysystem']];
         $paysystem = PaysystemProvider::getDriver($data);
 
-        if ($paysystem instanceof PaysystemInterface) {
+        if ($paysystem instanceof PaysystemSnappingCardsInterface) {
             /** @var Transactions $transaction */
             $transaction = $paysystem->payOut($transaction, $card);
             if (!$transaction) {

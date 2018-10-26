@@ -22,6 +22,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
     private $deleteUrl = "https://paybox.kz/v1/merchant/{merchant_id}/cardstorage/remove";
     private $initUrl = "https://paybox.kz/v1/merchant/{merchant_id}/card/init";
     private $payUrl = "https://paybox.kz/v1/merchant/{merchant_id}/card/pay";
+    private $payOutUrl = 'https://api.paybox.money/api/reg2reg';
 
     // driver settings
     private $driver = 'PayBoxSnappingCards';
@@ -53,6 +54,83 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $this->addUrl = str_replace('{merchant_id}', $this->merchant_id, $this->addUrl);
         $this->listUrl = str_replace('{merchant_id}', $this->merchant_id, $this->listUrl);
         $this->deleteUrl = str_replace('{merchant_id}', $this->merchant_id, $this->deleteUrl);
+    }
+
+    public function payOut(Transactions $transaction, PaymentCards $card)
+    {
+        if ($transaction->isNewRecord) {
+            $transaction->currency = $this->currency;
+            $transaction->save();
+        }
+        $log = new TransactionLog([
+            'transaction_id' => $transaction->id,
+            'driver' => $this->driver,
+            'action' => 'payOut'
+        ]);
+        $url = $this->payOutUrl;
+        $data = [
+            'pg_merchant_id' => $this->merchant_id,
+            'pg_order_id' => $transaction->id,
+            'pg_amount' => $transaction->amount,
+            'pg_user_id' => $transaction->user_id,
+            'pg_card_id_to' => $card->pg_card_id,
+            'pg_order_time_limit' => date('Ymd'),
+            'pg_post_link' => Url::toRoute(['/main/payment/result', 'driver' => $this->driver], true),
+            'pg_testing_mode' => intval($this->devMod),
+            'pg_salt' => substr(md5(time()), 0, 16),
+            'pg_description' => 'testpay',
+            'pg_sig' => '',
+        ];
+
+        $data['pg_sig'] = $this->getSignature($data, $url);
+
+        $log->request = json_encode($data);
+        $transaction->request = json_encode($data);
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $log->response = $response;
+        $transaction->response = $response;
+        $result = false;
+
+        if ($response = simplexml_load_string($response)) {
+            if ($response->pg_sig == $this->getSignature((array)$response, $url)) {
+                $response = (array)$response;
+                if (isset($response['pg_status']) && !empty($response['pg_status'])) {
+                    switch ($response['pg_status']) {
+                        case 'ok':
+                            $transaction->payment_id = $response['pg_payment_id'];
+                            $result = $transaction;
+                            break;
+                        case 'rejected':
+                        case 'error':
+                            $log->error_code = 1;
+                            $log->error_message = $response['pg_description'];
+                            break;
+                    }
+                } else {
+                    $log->error_code = 1;
+                    $log->error_message = 'Invalid server response';
+                }
+            } else {
+                $log->error_code = 1;
+                $log->error_message = 'Invalid signature';
+            }
+        }
+
+        $transaction->save();
+        $log->save();
+
+        return $result;
     }
 
     /**
