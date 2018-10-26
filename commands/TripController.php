@@ -36,6 +36,8 @@ class TripController extends ConsoleController
             foreach ($trips as $trip) {
                 $schedule = json_decode($trip->schedule);
                 if (is_array($schedule) && in_array(intval(date('N')), $schedule)) {
+                    $penalty = Trip::findOne(['user_id' => $trip->user_id, 'penalty' => 1]);
+                    if (!empty($penalty)) continue;
                     $trip->start_time += 60 * 60 * 24;
                     $trip->update(false);
                     $trip->schedule = '';

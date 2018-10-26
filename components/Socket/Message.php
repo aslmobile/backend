@@ -627,6 +627,7 @@ class Message
 
         $this->message_id = intval($data['data']['message_id']);
         $line_data = [];
+        $timer = isset($data['timer']) ? $data['timer'] : false;
 
         if (isset($data['data']['passenger'])) {
 
@@ -648,6 +649,21 @@ class Message
                     'uip' => '0.0.0.0'
                 ]);
                 $watchdog->save();
+            }
+
+            if ($timer) {
+                $this->loop->addTimer(300, function ($timer) use ($connections, $device, $passenger, $line_data) {
+                    /** @var Trip $trip */
+                    $trip = Trip::find()->where([
+                        'user_id' => $passenger,
+                        'line_id' => intval($line_data['id']),
+                        'status' => Trip::STATUS_WAITING
+                    ])->andWhere(['driver_id' => 0]);
+                    if (!empty($trip)) {
+                        $trip->line_id = 0;
+                        $trip->save();
+                    }
+                });
             }
 
         } else {

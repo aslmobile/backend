@@ -289,11 +289,13 @@ class PaymentController extends BaseController
         $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
         $trip->payment_type = $this->body->type;
 
+        if ($trip->penalty) $amount = $trip->amount / 2; else $amount = $trip->amount;
+
         $transaction = new Transactions();
         $transaction->user_id = $user->id;
         $transaction->recipient_id = $recipient->id;
         $transaction->status = Transactions::STATUS_REQUEST;
-        $transaction->amount = $trip->amount;
+        $transaction->amount = $amount;
         $transaction->gateway = $this->body->type;
         $transaction->type = Transactions::TYPE_INCOME;
         $transaction->uip = Yii::$app->request->userIP;
@@ -345,9 +347,7 @@ class PaymentController extends BaseController
                 $this->module->setError(422, '_card', Yii::$app->mv->gt("Осуществление платежа не доступно!", [], false));
             }
 
-        }
-
-        if ($this->body->type == Transactions::GATEWAY_KM) {
+        } else if ($this->body->type == Transactions::GATEWAY_KM) {
 
             $query = new ArrayQuery();
 
@@ -372,11 +372,15 @@ class PaymentController extends BaseController
             $user->km -= Yii::$app->params['distance'];
             $user->save();
 
+        } else if ($this->body->type == Transactions::GATEWAY_CASH) {
+            $transaction->status = Transactions::STATUS_PAID;
+            $recipient->balance += $transaction->amount;
+            $recipient->save();
         }
 
         $trip->payment_status = Trip::PAYMENT_STATUS_PAID;
-        //$recipient->balance += $transaction->amount;
         $trip->save();
+        //$recipient->balance += $transaction->amount;
         //$recipient->save();
 
         $this->module->data['trip'] = $trip->toArray();

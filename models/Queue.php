@@ -117,7 +117,12 @@ class Queue extends Model
                     '',
                     $line->driver_id
                 ),
-                'data' => ['message_id' => time(), 'addressed' => [$user_id], 'line' => $line->toArray(), 'passenger' => $user_id]
+                'data' => [
+                    'message_id' => time(),
+                    'addressed' => [$user_id],
+                    'line' => $line->toArray(),
+                    'passenger' => $user_id
+                ]
             ])));
         }
 

@@ -3,6 +3,8 @@
 use app\components\ArrayQuery\ArrayQuery;
 use app\components\Socket\SocketPusher;
 use app\models\Answers;
+use app\models\Checkpoint;
+use app\models\Dispatch;
 use app\models\Line;
 use app\models\LuggageType;
 use app\models\Notifications;
@@ -11,7 +13,6 @@ use app\models\Route;
 use app\models\Taxi;
 use app\models\TripLuggage;
 use app\models\User;
-use app\modules\admin\models\Checkpoint;
 use app\modules\admin\models\Km;
 use app\modules\api\models\Devices;
 use app\modules\api\models\Trip;
@@ -44,6 +45,7 @@ class TripController extends BaseController
                             'checkpoint-arrived',
                             'luggage-type',
                             'taxi',
+                            'penalty',
                             'queue',
                             'passengers-route',
                             'passenger-trips',
@@ -64,6 +66,7 @@ class TripController extends BaseController
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
+                    'penalty' => ['GET'],
                     'calculate-driver-tariff' => ['POST'],
                     'calculate-passenger-tariff' => ['POST'],
                     'passengers' => ['GET'],
@@ -148,6 +151,25 @@ class TripController extends BaseController
 
     }
 
+    public function actionPenalty()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $dispatch = Dispatch::findOne(1);
+        if ($dispatch) $dispatch = $dispatch->toArray();
+        else $dispatch = (object)['id' => -1];
+        $penalty = Trip::findOne(['user_id' => $user->id, 'penalty' => 1]);
+        if (!$penalty) $penalty = (object)['id' => -1, 'amount' => 0];
+
+        $penalty->amount /= 2;
+
+        $this->module->data['penalty'] = $penalty;
+        $this->module->data['dispatch'] = $dispatch;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
     public function actionQueue()
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -156,12 +178,16 @@ class TripController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['checkpoint', 'route', 'time', 'seats', 'payment_type', 'vehicle_type_id']);
 
-        /** @var \app\models\Route $route */
-        $route = Route::find()->andWhere([
-            'AND',
-            ['=', 'status', Route::STATUS_ACTIVE],
-            ['=', 'id', $this->body->route]
-        ])->one();
+        $penalty = Trip::findOne(['user_id' => $user->id, 'penalty' => 1]);
+        $penalty_amount = 0;
+
+        if ($penalty) {
+            $penalty_amount = $penalty->amount / 2;
+            if (!isset($this->body->penalty) || $this->body->penalty != $penalty_amount)
+                $this->module->setError(422, '_penalty', Yii::$app->mv->gt("У вас не оплачен штраф", [], false));
+        }
+
+        $route = Route::findOne(['status' => Route::STATUS_ACTIVE, 'id' => $this->body->route]);
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         if ($this->body->payment_type == Trip::PAYMENT_TYPE_KM) {
@@ -191,22 +217,11 @@ class TripController extends BaseController
 
         }
 
-        /** @var \app\models\Checkpoint $checkpoint */
-        $checkpoint = \app\models\Checkpoint::find()->andWhere([
-            'AND',
-            ['=', 'type', \app\models\Checkpoint::TYPE_STOP],
-            ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
-            ['=', 'id', $this->body->checkpoint]
-        ])->one();
+        $chp_id = $this->body->checkpoint;
+        $checkpoint = Checkpoint::findOne(['type' => Checkpoint::TYPE_STOP, 'status' => Checkpoint::STATUS_ACTIVE, 'id' => $chp_id]);
         if (!$checkpoint) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найден", [], false));
 
-        /** @var \app\models\Checkpoint $endpoint */
-        $endpoint = \app\models\Checkpoint::find()->andWhere([
-            'AND',
-            ['=', 'type', \app\models\Checkpoint::TYPE_END],
-            ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
-            ['=', 'route', $route->id]
-        ])->one();
+        $endpoint = Checkpoint::findOne(['type' => Checkpoint::TYPE_END, 'status' => Checkpoint::STATUS_ACTIVE, 'route' => $route->id]);
         if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         $seats = $this->body->seats;
@@ -286,6 +301,7 @@ class TripController extends BaseController
 
         }
 
+        if ($trip->payment_type == Trip::PAYMENT_TYPE_CASH) $trip->amount += $penalty_amount;
         $trip->driver_id = 0;
         $trip->vehicle_id = 0;
         $trip->vehicle_type_id = $this->body->vehicle_type_id;
@@ -308,7 +324,14 @@ class TripController extends BaseController
         if (isset($this->body->schedule) && !empty($this->body->schedule)) {
             $trip->schedule = json_encode($this->body->schedule);
             Trip::cloneTrip($trip, Trip::STATUS_SCHEDULED);
-            Notifications::create(Notifications::NTP_TRIP_SCHEDULED, [$trip->user_id], '', $trip->id, Notifications::STATUS_SCHEDULED, $this->body->time);
+            Notifications::create(
+                Notifications::NTP_TRIP_SCHEDULED,
+                [$trip->user_id],
+                '',
+                $trip->id,
+                Notifications::STATUS_SCHEDULED,
+                $this->body->time
+            );
         }
 
         Queue::processingQueue();
@@ -337,37 +360,30 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
         $this->prepareBody();
 
+        $penalty = Trip::findOne(['user_id' => $user->id, 'penalty' => 1]);
+        $penalty_amount = 0;
+
+        if ($penalty) {
+            $penalty_amount = $penalty->amount / 2;
+            if (!isset($this->body->penalty) || $this->body->penalty != $penalty_amount)
+                $this->module->setError(422, '_penalty', Yii::$app->mv->gt("У вас не оплачен штраф", [], false));
+        }
+
         $trip = Trip::findOne(['id' => $id, 'status' => Trip::STATUS_SCHEDULED]);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
         if (isset($this->body->route) && !empty($this->body->route)) {
-            /** @var \app\models\Route $route */
-            $route = Route::find()->where([
-                'AND',
-                ['=', 'status', Route::STATUS_ACTIVE],
-                ['=', 'id', $this->body->route]
-            ])->one();
+            $route = Route::findOne(['status' => Route::STATUS_ACTIVE, 'id' => $this->body->route]);
         } else $route = Route::findOne($trip->route_id);
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         if (isset($this->body->checkpoint) && !empty($this->body->checkpoint)) {
-            /** @var \app\models\Checkpoint $checkpoint */
-            $checkpoint = \app\models\Checkpoint::find()->andWhere([
-                'AND',
-                ['=', 'type', \app\models\Checkpoint::TYPE_STOP],
-                ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
-                ['=', 'id', $this->body->checkpoint]
-            ])->one();
-        } else $checkpoint = \app\models\Checkpoint::findOne($trip->startpoint_id);
+            $chp_id = $this->body->checkpoint;
+            $checkpoint = Checkpoint::findOne(['type' => Checkpoint::TYPE_STOP, 'status' => Checkpoint::STATUS_ACTIVE, 'id' => $chp_id]);
+        } else $checkpoint = Checkpoint::findOne($trip->startpoint_id);
         if (!$checkpoint) $this->module->setError(422, '_checkpoint', Yii::$app->mv->gt("Не найден", [], false));
 
-        /** @var \app\models\Checkpoint $endpoint */
-        $endpoint = \app\models\Checkpoint::find()->andWhere([
-            'AND',
-            ['=', 'type', \app\models\Checkpoint::TYPE_END],
-            ['=', 'status', \app\models\Checkpoint::STATUS_ACTIVE],
-            ['=', 'route', $route->id]
-        ])->one();
+        $endpoint = Checkpoint::findOne(['type' => Checkpoint::TYPE_END, 'status' => Checkpoint::STATUS_ACTIVE, 'route' => $route->id]);
         if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
 
         if (isset($this->body->seats) && !empty($this->body->seats))
@@ -467,6 +483,8 @@ class TripController extends BaseController
             }
 
         }
+
+        if ($trip->payment_type == Trip::PAYMENT_TYPE_CASH) $trip->amount += $penalty_amount;
 
         if (isset($this->body->schedule) && !empty($this->body->schedule)) {
             $trip->schedule = json_encode($this->body->schedule);
