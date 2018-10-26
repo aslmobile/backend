@@ -327,6 +327,8 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
 
         if ($transaction->route_id) {
             $data['pg_description'] = "Оплата услуг на маршруте № {$transaction->route_id}";
+        } else if ($transaction->gateway == Transactions::GATEWAY_OUT) {
+            $data['pg_description'] = "Вывод средств";
         } else {
             $data['pg_description'] = "Пополнение баланса";
         }

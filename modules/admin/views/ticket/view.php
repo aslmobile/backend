@@ -26,14 +26,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="box-header with-border">
                         <h3></h3>
                         <div class="box-tools pull-right">
-                            <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-<!--                            --><?//= Html::a('Удалить', ['delete', 'id' => $model->id], [
+                            <?php if ($model->status != \app\models\Ticket::STATUS_PAYED) { ?>
+                                <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                                <!--                            --><? //= Html::a('Удалить', ['delete', 'id' => $model->id], [
 //                                'class' => 'btn btn-danger',
 //                                'data' => [
 //                                    'confirm' => 'Are you sure you want to delete this item?',
 //                                    'method' => 'post',
 //                                ],
 //                            ]) ?>
+                            <?php } ?>
                         </div>
                     </div>
                     <div class="box-body">

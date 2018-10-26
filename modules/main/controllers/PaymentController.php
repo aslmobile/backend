@@ -64,7 +64,12 @@ class PaymentController extends Controller
                 if (!empty($transaction) && $transaction->status == Transactions::STATUS_PAID) {
                     $recipient = User::findOne($transaction->recipient_id);
                     if (!empty($recipient)) {
-                        $recipient->balance += $transaction->amount;
+
+                        if ($transaction->gateway == Transactions::GATEWAY_OUT)
+                            $recipient->balance -= $transaction->amount;
+                        else
+                            $recipient->balance += $transaction->amount;
+
                         $recipient->save(false);
                     }
                 }

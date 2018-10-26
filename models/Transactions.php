@@ -23,8 +23,9 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $updated_by
  * @property string $uip
  * @property string $currency
- * @property string $route_id
- * @property string $trip_id
+ * @property integer $route_id
+ * @property integer $trip_id
+ * @property integer $line_id
  * @property integer $type
  * @property string $request
  * @property string $response
@@ -52,7 +53,10 @@ class Transactions extends \yii\db\ActiveRecord
         GATEWAY_PAYBOX = 1,
         GATEWAY_CASH = 2,
         GATEWAY_KM = 3,
-        GATEWAY_PAYBOX_CARD = 4;
+        GATEWAY_PAYBOX_CARD = 4,
+        GATEWAY_COMMISSION = 5,
+        GATEWAY_OUT = 6;
+
     //endregion
 
 
@@ -83,6 +87,7 @@ class Transactions extends \yii\db\ActiveRecord
                 'status',
                 'user_id',
                 'route_id',
+                'line_id',
                 'trip_id',
                 'recipient_id',
                 'gateway',
@@ -121,6 +126,7 @@ class Transactions extends \yii\db\ActiveRecord
             'response' => Yii::$app->mv->gt('Ответ', [], 0),
             'route_id' => Yii::$app->mv->gt('Маршрут', [], 0),
             'trip_id' => Yii::$app->mv->gt('Поездка', [], 0),
+            'line_id' => Yii::$app->mv->gt('Линия', [], 0),
         ];
     }
 
@@ -156,7 +162,8 @@ class Transactions extends \yii\db\ActiveRecord
             self::GATEWAY_PAYBOX => Yii::t('app', "PayBox"),
             self::GATEWAY_PAYBOX_CARD => Yii::t('app', "PayBox CARD"),
             self::GATEWAY_CASH => Yii::t('app', "Наличные"),
-            self::GATEWAY_KM => Yii::t('app', "Бесплатные КМ")
+            self::GATEWAY_KM => Yii::t('app', "Бесплатные КМ"),
+            self::GATEWAY_COMMISSION => Yii::t('app', "Комиссия")
         ];
     }
 
@@ -201,6 +208,11 @@ class Transactions extends \yii\db\ActiveRecord
     public function getRoute()
     {
         return Route::findOne($this->route_id);
+    }
+
+    public function getLine()
+    {
+        return Line::findOne($this->line_id);
     }
 
     public function getTrip()

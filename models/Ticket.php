@@ -16,6 +16,7 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $updated_at
  * @property integer $created_by
  * @property integer $user_id
+ * @property integer $card_id
  * @property integer $updated_by
  * @property double $amount
  * @property integer $transaction_id
@@ -41,7 +42,7 @@ class Ticket extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['status', 'created_at', 'updated_at', 'created_by', 'user_id', 'updated_by', 'transaction_id'], 'integer'],
+            [['status', 'created_at', 'updated_at', 'created_by', 'user_id', 'card_id', 'updated_by', 'transaction_id'], 'integer'],
             [['amount'], 'number'],
         ];
     }
@@ -67,6 +68,7 @@ class Ticket extends \yii\db\ActiveRecord
             'updated_at' => Yii::$app->mv->gt('Обновлено', [], 0),
             'created_by' => Yii::$app->mv->gt('Создал', [], 0),
             'user_id' => Yii::$app->mv->gt('Водитель', [], 0),
+            'card_id' => Yii::$app->mv->gt('Карта', [], 0),
             'updated_by' => Yii::$app->mv->gt('Обновил', [], 0),
             'amount' => Yii::$app->mv->gt('Сумма', [], 0),
             'transaction_id' => Yii::$app->mv->gt('Транзакция', [], 0),
@@ -90,6 +92,11 @@ class Ticket extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    public function getCard()
+    {
+        return $this->hasOne(PaymentCards::class, ['id' => 'card_id']);
     }
 
     public function getTransaction()

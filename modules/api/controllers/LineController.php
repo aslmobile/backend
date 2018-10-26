@@ -148,6 +148,10 @@ class LineController extends BaseController
         $line->startpoint = $startpoint->id;
         $line->endpoint = $endpoint->id;
 
+        $commission = 1.5 * $vehicle->seats * $route->base_tariff / 10;
+        if ($user->balance < $commission) $this->module->setError(422,
+            '_balance', Yii::$app->mv->gt("Не достаточно средств для совершения поездки.", [], false));
+
         if (!$line->validate() || !$line->save()) {
             if ($line->hasErrors()) {
                 foreach ($line->errors as $field => $error_message)

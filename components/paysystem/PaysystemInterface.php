@@ -1,18 +1,16 @@
 <?php
 
 namespace app\components\paysystem;
+
+use app\models\PaymentCards;
 use app\models\Transactions;
 
 
-/**
- * Created by PhpStorm.
- * User: Graf
- * Date: 29.03.2017
- * Time: 10:53
- */
 interface PaysystemInterface
 {
-    public function getForm(Transactions $transaction);
     public function getLink(Transactions $transaction);
+
+    public function payOut(Transactions $transaction, PaymentCards $card);
+
     public function updateTransaction();
 }

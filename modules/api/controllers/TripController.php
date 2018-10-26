@@ -977,6 +977,24 @@ class TripController extends BaseController
             $line->status = Line::STATUS_FINISHED;
             $line->save();
 
+            $commission = ($total['cash'] + $total['card']) / 10;
+
+            $transaction = new Transactions();
+            $transaction->user_id = $user->id;
+            $transaction->recipient_id = 0;
+            $transaction->status = Transactions::STATUS_PAID;
+            $transaction->amount = $commission;
+            $transaction->gateway = Transactions::GATEWAY_COMMISSION;
+            $transaction->type = Transactions::TYPE_OUTCOME;
+            $transaction->uip = Yii::$app->request->userIP;
+            $transaction->currency = $trip->currency;
+            $transaction->route_id = $line->route_id;
+            $transaction->line_id = $line->id;
+
+            $user->balance -= $commission;
+
+            $transaction->save();
+
             $data += ['trips' => $_trips, 'total' => $total];
 
         } else {

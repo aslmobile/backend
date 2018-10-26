@@ -3,8 +3,13 @@
 namespace app\modules\admin\controllers;
 
 use app\components\Controller;
+use app\components\paysystem\PaysystemInterface;
+use app\components\paysystem\PaysystemProvider;
+use app\models\PaymentCards;
+use app\models\Transactions;
 use app\modules\admin\models\Ticket;
 use app\modules\admin\models\TicketSearch;
+use app\modules\user\models\User;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -24,15 +29,15 @@ class TicketController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index', 'create', 'update', 'view'],
+                        'actions' => ['index', 'update', 'view'],
                         'allow' => true,
                         'roles' => ['admin', 'moderator'],
                     ],
-                    [
-                        'actions' => ['delete', 'delete-group'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
+//                    [
+//                        'actions' => ['delete', 'delete-group'],
+//                        'allow' => true,
+//                        'roles' => ['admin'],
+//                    ],
                 ],
             ],
             'verbs' => [
@@ -103,6 +108,60 @@ class TicketController extends Controller
     }
 
     /**
+     * @param $ticket
+     * @return \yii\web\Response
+     * @throws \Exception
+     */
+    private function payOut($ticket)
+    {
+        $driver = User::findOne($ticket->user_id);
+        if (empty($driver)) {
+            Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Пользователь не найден', [], 0));
+            return $this->redirect(['update', 'id' => $ticket->id]);
+        }
+        $card = PaymentCards::findOne($ticket->card_id);
+        if (empty($card)) {
+            Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Карта пользователя не найдена', [], 0));
+            return $this->redirect(['update', 'id' => $ticket->id]);
+        }
+        if ($ticket->amount > $driver->balance) {
+            Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
+            return $this->redirect(['update', 'id' => $ticket->id]);
+        }
+
+        $transaction = new Transactions();
+        $transaction->user_id = $driver->id;
+        $transaction->recipient_id = $driver->id;
+        $transaction->status = Transactions::STATUS_REQUEST;
+        $transaction->amount = $ticket->amount;
+        $transaction->gateway = Transactions::GATEWAY_OUT;
+        $transaction->type = Transactions::TYPE_OUTCOME;
+        $transaction->uip = Yii::$app->request->userIP;
+        $transaction->currency = 'KZT';
+        $transaction->route_id = 0;
+        $transaction->trip_id = 0;
+        $transaction->line_id = 0;
+        $transaction->save();
+
+        $data = ['driver' => \Yii::$app->params['use_pay']];
+        $paysystem = PaysystemProvider::getDriver($data);
+
+        if ($paysystem instanceof PaysystemInterface) {
+            $transaction = $paysystem->payOut($transaction);
+            if (!$transaction) {
+                Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
+                return $this->redirect(['update', 'id' => $ticket->id]);
+            }
+        } else {
+            Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
+            return $this->redirect(['update', 'id' => $ticket->id]);
+        }
+
+        return $this->redirect(['update', 'id' => $ticket->id]);
+
+    }
+
+    /**
      * @param $id
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException
@@ -110,10 +169,16 @@ class TicketController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        if ($model->status == Ticket::STATUS_PAYED) return $this->redirect(['index']);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
+            if ($model->oldAttributes['status'] != Ticket::STATUS_PAYED && $model->status == Ticket::STATUS_PAYED) {
+                $this->payOut($model);
+            }
+
             Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Saved', [], 0));
-            return $this->redirect(['update', 'id' => $model->id]);
+            return $this->redirect(['index']);
         } else {
             return $this->render('update', [
                 'model' => $model,
