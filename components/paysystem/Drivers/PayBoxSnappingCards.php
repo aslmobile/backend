@@ -66,7 +66,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
     public function payOut(Transactions $transaction, PaymentCards $card)
     {
 
-        //$this->key = \Yii::$app->params['paysystem'][$this->driver]['secret_key_pay'];
+        $this->key = \Yii::$app->params['paysystem'][$this->driver]['secret_key_pay'];
 
         if ($transaction->isNewRecord) {
             $transaction->currency = $this->currency;
@@ -115,7 +115,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $response = curl_exec($ch);
         curl_close($ch);
 
-        $response = json_decode(json_encode(simplexml_load_string($response)));
+        $response = json_decode(json_encode(simplexml_load_string($response)), true);
 
         $transaction_log->response = json_encode($response);
 
