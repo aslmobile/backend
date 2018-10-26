@@ -101,35 +101,6 @@ class TripController extends BaseController
         return parent::beforeAction($event);
     }
 
-    public function actionReturn($id)
-    {
-
-        /** @var \app\modules\api\models\Trip $trip */
-        $trip = Trip::findOne($id);
-        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
-
-        $trip->status = Trip::STATUS_CREATED;
-        $trip->driver_id = 0;
-        $trip->vehicle_id = 0;
-        $trip->line_id = 0;
-
-        if (!$trip->validate() || !$trip->save()) {
-            if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message)
-                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false),
-                        true, false);
-                $this->module->sendResponse();
-            } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
-        }
-
-        //Queue::processingQueue();
-
-        $this->module->data['trip'] = $trip->toArray();
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-
-    }
-
     public function actionGetKm()
     {
 
@@ -160,9 +131,10 @@ class TripController extends BaseController
         if ($dispatch) $dispatch = $dispatch->toArray();
         else $dispatch = (object)['id' => -1];
         $penalty = Trip::findOne(['user_id' => $user->id, 'penalty' => 1]);
-        if (!$penalty) $penalty = (object)['id' => -1, 'amount' => 0];
-
-        $penalty->amount /= 2;
+        if (!$penalty) $penalty = (object)['id' => -1, 'amount' => 0]; else {
+            $penalty->amount /= 2;
+            $penalty = $penalty->toArray();
+        }
 
         $this->module->data['penalty'] = $penalty;
         $this->module->data['dispatch'] = $dispatch;
@@ -354,6 +326,33 @@ class TripController extends BaseController
         $this->module->sendResponse();
     }
 
+    public function actionReturn($id)
+    {
+
+        /** @var \app\modules\api\models\Trip $trip */
+        $trip = Trip::findOne($id);
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+
+        $trip->status = Trip::STATUS_CREATED;
+        $trip->driver_id = 0;
+        $trip->vehicle_id = 0;
+        $trip->line_id = 0;
+
+        if (!$trip->validate() || !$trip->save()) {
+            if ($trip->hasErrors()) {
+                foreach ($trip->errors as $field => $error_message)
+                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false),
+                        true, false);
+                $this->module->sendResponse();
+            } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
+        }
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+
+    }
+
     public function actionUpdateTrip($id)
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -393,7 +392,7 @@ class TripController extends BaseController
         if (isset($this->body->comment) && !empty($this->body->comment))
             $comment = $this->body->comment; else $comment = $trip->passenger_description;
         if (isset($this->body->time) && !empty($this->body->time))
-            $time = $this->body->time; else $time = $trip->start_time;
+            $time = $this->body->time == -1 ? time() + 1800 : $this->body->time; else $time = $trip->start_time;
         if (isset($this->body->vehicle_type_id) && !empty($this->body->vehicle_type_id))
             $vehicle_type_id = $this->body->vehicle_type_id; else $vehicle_type_id = $trip->vehicle_type_id;
 
