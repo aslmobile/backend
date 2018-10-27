@@ -1,6 +1,7 @@
 <?php namespace app\modules\api\controllers;
 
 use app\components\ArrayQuery\ArrayQuery;
+use app\components\paysystem\Drivers\PayBox;
 use app\components\paysystem\Drivers\PayBoxSnappingCards;
 use app\components\paysystem\PaysystemInterface;
 use app\components\paysystem\PaysystemProvider;
@@ -210,6 +211,7 @@ class PaymentController extends BaseController
         $this->validateBodyParams(['amount']);
 
         $data = ['driver' => \Yii::$app->params['use_pay']];
+        /** @var PayBox $paysystem */
         $paysystem = PaysystemProvider::getDriver($data);
 
         $transaction = new Transactions();
@@ -230,10 +232,10 @@ class PaymentController extends BaseController
             if (!empty($transaction->payment_link)) {
                 $result = $transaction->payment_link;
             } else {
-                $this->module->setError(422, '_refill', Yii::$app->mv->gt("Платежная система не доступна", [], false));
+                $this->module->setError(422, '_payout', Yii::$app->mv->gt("Платежная система не доступна", [], false));
             }
         } else {
-            $this->module->setError(422, '_refill', Yii::$app->mv->gt("Пополнение баланса не доступно!", [], false));
+            $this->module->setError(422, '_payout', Yii::$app->mv->gt("Вывод средств не доступен!", [], false));
         }
 
         $this->module->data['user_id'] = $user->id;
