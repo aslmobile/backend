@@ -31,7 +31,7 @@ class PaymentController extends BaseController
                             'transactions', 'transaction', 'methods', 'in-out-methods', 'in-out-amounts',
                             'transactions-km',
 
-                            'create-card', 'delete-card', 'cards', 'pay', 'refill',
+                            'create-card', 'delete-card', 'cards', 'pay', 'refill', 'pay-out',
                             'ticket'
                         ],
                         'allow' => true
@@ -52,6 +52,7 @@ class PaymentController extends BaseController
                     'pay' => ['PUT'],
                     'ticket' => ['PUT'],
                     'refill' => ['PUT'],
+                    'pay-out' => ['PUT'],
                     'delete-card' => ['DELETE'],
                     'cards' => ['GET']
                 ]
@@ -197,6 +198,46 @@ class PaymentController extends BaseController
         if ($user) $user = $this->user;
 
         $this->module->data = Transactions::getInOutMethods();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionPayOut(){
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['amount']);
+
+        $data = ['driver' => \Yii::$app->params['use_pay']];
+        $paysystem = PaysystemProvider::getDriver($data);
+
+        $transaction = new Transactions();
+        $transaction->user_id = $user->id;
+        $transaction->recipient_id = $user->id;
+        $transaction->route_id = 0;
+        $transaction->line_id = 0;
+        $transaction->trip_id = 0;
+        $transaction->status = Transactions::STATUS_REQUEST;
+        $transaction->amount = $this->body->amount;
+        $transaction->gateway = Transactions::TYPE_INCOME;
+        $transaction->uip = Yii::$app->request->userIP;
+
+        $result = '';
+
+        if ($paysystem instanceof PaysystemInterface) {
+            $transaction = $paysystem->payOut($transaction, $user);
+            if (!empty($transaction->payment_link)) {
+                $result = $transaction->payment_link;
+            } else {
+                $this->module->setError(422, '_refill', Yii::$app->mv->gt("Платежная система не доступна", [], false));
+            }
+        } else {
+            $this->module->setError(422, '_refill', Yii::$app->mv->gt("Пополнение баланса не доступно!", [], false));
+        }
+
+        $this->module->data['user_id'] = $user->id;
+        $this->module->data['iframe'] = $result;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

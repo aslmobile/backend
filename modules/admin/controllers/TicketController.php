@@ -128,19 +128,24 @@ class TicketController extends Controller
             return $this->redirect(['update', 'id' => $ticket->id]);
         }
 
-        $transaction = new Transactions();
-        $transaction->user_id = $driver->id;
-        $transaction->recipient_id = $driver->id;
-        $transaction->status = Transactions::STATUS_REQUEST;
-        $transaction->amount = $ticket->amount;
-        $transaction->gateway = Transactions::GATEWAY_OUT;
-        $transaction->type = Transactions::TYPE_OUTCOME;
-        $transaction->uip = Yii::$app->request->userIP;
-        $transaction->currency = 'KZT';
-        $transaction->route_id = 0;
-        $transaction->trip_id = 0;
-        $transaction->line_id = 0;
-        $transaction->save();
+        $transaction = Transactions::findOne($ticket->transaction_id);
+        if (empty($transaction)) {
+            $transaction = new Transactions();
+            $transaction->user_id = $driver->id;
+            $transaction->recipient_id = $driver->id;
+            $transaction->status = Transactions::STATUS_REQUEST;
+            $transaction->amount = $ticket->amount;
+            $transaction->gateway = Transactions::GATEWAY_OUT;
+            $transaction->type = Transactions::TYPE_OUTCOME;
+            $transaction->uip = Yii::$app->request->userIP;
+            $transaction->currency = 'KZT';
+            $transaction->route_id = 0;
+            $transaction->trip_id = 0;
+            $transaction->line_id = 0;
+            $transaction->save();
+            $ticket->transaction_id = $transaction->id;
+            $ticket->save();
+        }
 
         $data = ['driver' => \Yii::$app->params['use_paysystem']];
 
@@ -155,6 +160,8 @@ class TicketController extends Controller
                 return $this->redirect(['update', 'id' => $ticket->id]);
             }
             $transaction->status = Transactions::STATUS_PAID;
+            $transaction->save();
+
         } else {
             Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
             return $this->redirect(['update', 'id' => $ticket->id]);

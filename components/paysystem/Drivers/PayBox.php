@@ -5,6 +5,7 @@ namespace app\components\paysystem\Drivers;
 use app\components\paysystem\PaysystemInterface;
 use app\models\TransactionLog;
 use app\models\Transactions;
+use app\models\User;
 use SimpleXMLElement;
 use Yii;
 use yii\helpers\Url;
@@ -14,6 +15,7 @@ class PayBox implements PaysystemInterface
 {
     // Pay system settings
     private $actionUrl = 'https://www.paybox.kz/init_payment.php';
+    private $payOutUrl = 'https://paybox.kz/api/reg2nonreg';
 
     // driver settings
     private $driver = 'PayBox';
@@ -41,6 +43,91 @@ class PayBox implements PaysystemInterface
     public function getForm(Transactions $transaction)
     {
         // TODO: Implement getForm() method.
+    }
+
+    /**
+     * @param Transactions $transaction
+     * @param User $user
+     * @return Transactions|bool
+     */
+    public function payOut(Transactions $transaction, User $user)
+    {
+
+        $this->key = \Yii::$app->params['paysystem'][$this->driver]['secret_key_pay'];
+
+        if ($transaction->isNewRecord) {
+            $transaction->currency = $this->currency;
+            $transaction->save();
+        }
+        $transaction_log = new TransactionLog([
+            'transaction_id' => $transaction->id,
+            'driver' => $this->driver,
+            'action' => 'payOut'
+        ]);
+        $url = $this->payOutUrl;
+        $data = [
+            'pg_merchant_id' => $this->merchant_id,
+            'pg_order_id' => $transaction->id,
+            'pg_amount' => $transaction->amount,
+            'pg_user_email' => $user->email,
+            'pg_user_id' => $transaction->user_id,
+            'pg_description' => 'testpay',
+            'pg_back_link' => Url::toRoute(['/main/payment/success', 'driver' => $this->driver], true),
+            'pg_post_link' => Url::toRoute(['/main/payment/result', 'driver' => $this->driver], true),
+            'pg_order_time_limit' => date('Y-m-d H:i:s'),
+            'pg_testing_mode' => intval($this->devMod),
+            'pg_salt' => substr(md5(time()), 0, 16),
+            'pg_sig' => '',
+        ];
+
+        $transaction_log->request = json_encode($data);
+
+        $sig_data = $data;
+        $res = 'reg2nonreg;';
+        unset($sig_data['pg_sig']);
+        ksort($sig_data, SORT_STRING);
+        foreach ($sig_data as $key => $value) $res .= $value . ';';
+        $res .= $this->key;
+        $res = strtolower(md5($res));
+
+        $data['pg_sig'] = $res;
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $response = json_decode(json_encode(simplexml_load_string($response)), true);
+
+        $transaction_log->response = json_encode($response);
+
+        $result = false;
+
+        if (isset($response['error'])) {
+
+            $transaction_log->error_code = $response['error'];
+            $transaction_log->error_message = $response['message'];
+            $transaction->status = Transactions::STATUS_REJECTED;
+
+        } else if (isset($response['pg_payment_id']) && $response['pg_status'] == 'ok') {
+
+            $transaction->payment_id = $response['pg_payment_id'];
+            $transaction->payment_link = $response['pg_redirect_url'];
+            $result = $transaction;
+
+        }
+
+        $transaction_log->save();
+        $transaction->save();
+
+        return $result;
+
     }
 
     public function getLink(Transactions $transaction)
