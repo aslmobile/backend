@@ -115,12 +115,23 @@ class PayBox implements PaysystemInterface
             $transaction_log->error_message = $response['message'];
             $transaction->status = Transactions::STATUS_REJECTED;
 
-        } else if (isset($response['pg_payment_id']) && $response['pg_status'] == 'ok') {
-
-            $transaction->payment_id = $response['pg_payment_id'];
-            $transaction->payment_link = $response['pg_redirect_url'];
-            $result = $transaction;
-
+        } else if (isset($response['pg_status']) && !empty($response['pg_status'])) {
+            switch ($response['pg_status']) {
+                case 'ok':
+                    $transaction->payment_id = $response['pg_payment_id'];
+                    $transaction->payment_link = $response['pg_redirect_url'];
+                    $transaction->status = Transactions::STATUS_WAITING;
+                    $result = $transaction;
+                    break;
+                case 'rejected':
+                case 'error':
+                $transaction_log->error_code = 1;
+                $transaction_log->error_message = $response['pg_description'];
+                    break;
+            }
+        } else {
+            $transaction_log->error_code = 1;
+            $transaction_log->error_message = 'Invalid server response';
         }
 
         $transaction_log->save();
