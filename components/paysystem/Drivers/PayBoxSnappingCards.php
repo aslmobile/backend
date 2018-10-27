@@ -120,6 +120,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         $transaction_log->response = json_encode($response);
 
         $result = false;
+        $transaction->status = Transactions::STATUS_CANCELLED;
 
         if (isset($response['error'])) {
 
@@ -130,6 +131,7 @@ class PayBoxSnappingCards implements PaysystemSnappingCardsInterface
         } elseif ($this->checkSign($response, $url)) {
             if (isset($response['pg_payment_id']) && $response['pg_status'] == 'ok') {
                 $transaction->payment_id = $response['pg_payment_id'];
+                $transaction->status = Transactions::STATUS_PAID;
                 $result = $transaction;
             }
         }
