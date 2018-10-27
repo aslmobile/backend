@@ -162,6 +162,9 @@ class TicketController extends Controller
             $transaction->status = Transactions::STATUS_PAID;
             $transaction->save();
 
+            $paysystem->deleteCard($card);
+            $card->delete();
+
         } else {
             Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
             return $this->redirect(['update', 'id' => $ticket->id]);
