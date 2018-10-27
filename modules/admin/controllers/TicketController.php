@@ -109,7 +109,8 @@ class TicketController extends Controller
     /**
      * @param $ticket Ticket
      * @return \yii\web\Response
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     private function payOut($ticket)
     {
@@ -153,10 +154,11 @@ class TicketController extends Controller
         $paysystem = PaysystemProvider::getDriver($data);
 
         if ($paysystem instanceof PaysystemSnappingCardsInterface) {
+
             /** @var Transactions $transaction */
             $transaction = $paysystem->payOutCard($transaction, $card);
             if (!$transaction) {
-                Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
+                Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Вывод средств не доступен', [], 0));
                 return $this->redirect(['update', 'id' => $ticket->id]);
             }
             $transaction->status = Transactions::STATUS_PAID;
@@ -166,7 +168,7 @@ class TicketController extends Controller
             $card->delete();
 
         } else {
-            Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('У пользователя не достаточно баланса', [], 0));
+            Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Платежная система не доступнаы', [], 0));
             return $this->redirect(['update', 'id' => $ticket->id]);
         }
 
@@ -178,12 +180,14 @@ class TicketController extends Controller
      * @param $id
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
         $oldStatus = $model->status;
-        //if ($model->status == Ticket::STATUS_PAYED) return $this->redirect(['index']);
+        if ($model->status == Ticket::STATUS_PAYED) return $this->redirect(['index']);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
