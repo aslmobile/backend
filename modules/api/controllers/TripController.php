@@ -129,16 +129,19 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $dispatch = Dispatch::findOne(1);
-        if ($dispatch) $dispatch = $dispatch->toArray();
+        if (!$dispatch) $dispatch = (object)['phone' => 70123456789];
         else $dispatch = (object)['id' => -1];
         $penalty = Trip::findOne(['user_id' => $user->id, 'penalty' => 1]);
-        if (!$penalty) $penalty = (object)['id' => -1, 'amount' => 0]; else {
-            $penalty->amount /= 2;
-            $penalty = $penalty->toArray();
+        if (!$penalty) $penalty = (object)['id' => -1]; else {
+            $penalty = (object)[
+                'id' => $penalty->id,
+                'amount' => $penalty->amount / 2,
+                'cancel_reason' => $penalty->driver_description,
+                'phone' => $dispatch->phone,
+            ];
         }
 
         $this->module->data['penalty'] = $penalty;
-        $this->module->data['dispatch'] = $dispatch;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
@@ -282,10 +285,10 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message){
+                foreach ($trip->errors as $field => $error_message) {
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= '; '.$error;
+                        foreach ($error_message as $error) $result .= '; ' . $error;
                         $error_message = $result;
                     }
                     $this->module->setError(422,
@@ -347,10 +350,10 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message){
+                foreach ($trip->errors as $field => $error_message) {
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= '; '.$error;
+                        foreach ($error_message as $error) $result .= '; ' . $error;
                         $error_message = $result;
                     }
                     $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false),
@@ -522,10 +525,10 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message){
+                foreach ($trip->errors as $field => $error_message) {
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= '; '.$error;
+                        foreach ($error_message as $error) $result .= '; ' . $error;
                         $error_message = $result;
                     }
                     $this->module->setError(422,
@@ -767,10 +770,10 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message){
+                foreach ($trip->errors as $field => $error_message) {
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= '; '.$error;
+                        foreach ($error_message as $error) $result .= '; ' . $error;
                         $error_message = $result;
                     }
                     $this->module->setError(422,
@@ -859,7 +862,10 @@ class TripController extends BaseController
                 break;
             case User::TYPE_PASSENGER:
                 $trip->status = Trip::STATUS_CANCELLED;
-                if ($line->status == Line::STATUS_IN_PROGRESS) $trip->penalty = 1;
+                if ($line->status == Line::STATUS_IN_PROGRESS) {
+                    $trip->penalty = 1;
+                    $trip->driver_description = \Yii::t('app', "Вы отменили поездку после выезда водителя.");
+                }
                 $trip->passenger_comment = isset($this->body->passenger_comment) ?
                     $this->body->passenger_comment : \Yii::$app->mv->gt('Поездка отменена', [], 0);
                 break;
@@ -1074,10 +1080,10 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message){
+                foreach ($trip->errors as $field => $error_message) {
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= '; '.$error;
+                        foreach ($error_message as $error) $result .= '; ' . $error;
                         $error_message = $result;
                     }
                     $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
@@ -1117,10 +1123,10 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message){
+                foreach ($trip->errors as $field => $error_message) {
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= '; '.$error;
+                        foreach ($error_message as $error) $result .= '; ' . $error;
                         $error_message = $result;
                     }
                     $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
@@ -1170,10 +1176,10 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message){
+                foreach ($trip->errors as $field => $error_message) {
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= '; '.$error;
+                        foreach ($error_message as $error) $result .= '; ' . $error;
                         $error_message = $result;
                     }
                     $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
@@ -1379,10 +1385,10 @@ class TripController extends BaseController
 
         if (!$taxi->validate() || !$taxi->save()) {
             if ($taxi->hasErrors()) {
-                foreach ($taxi->errors as $field => $error_message){
+                foreach ($taxi->errors as $field => $error_message) {
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= '; '.$error;
+                        foreach ($error_message as $error) $result .= '; ' . $error;
                         $error_message = $result;
                     }
                     $this->module->setError(422, 'taxi.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);

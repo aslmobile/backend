@@ -788,6 +788,7 @@ class Message
                     foreach ($trips as $trip) {
 
                         $trip->status = Trip::STATUS_CANCELLED;
+                        $trip->driver_description = \Yii::t('app', "Вам отказано в поездке. Причина - опоздание.");
                         $trip->penalty = 1;
                         $trip->save();
 
@@ -813,7 +814,7 @@ class Message
                         if (empty($devices)) {
                             $notifications = Notifications::create(
                                 Notifications::NTP_TRIP_CANCEL, [$trip->user_id],
-                                "Вам отказано в поездке. Причина - опоздание.",
+                                \Yii::t('app', "Вам отказано в поездке. Причина - опоздание."),
                                 $device->user_id
                             );
                             foreach ($notifications as $notification) Notifications::send($notification);

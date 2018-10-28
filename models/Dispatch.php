@@ -26,7 +26,6 @@ class Dispatch extends \yii\db\ActiveRecord
         return 'dispatch';
     }
 
-
     /**
      * @inheritdoc
      */
