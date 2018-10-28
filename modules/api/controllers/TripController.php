@@ -130,7 +130,6 @@ class TripController extends BaseController
 
         $dispatch = Dispatch::findOne(1);
         if (!$dispatch) $dispatch = (object)['phone' => 70123456789];
-        else $dispatch = (object)['id' => -1];
         $penalty = Trip::findOne(['user_id' => $user->id, 'penalty' => 1]);
         if (!$penalty) $penalty = (object)['id' => -1]; else {
             $penalty = (object)[
