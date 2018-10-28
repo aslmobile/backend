@@ -356,7 +356,7 @@ class PaymentController extends BaseController
                 foreach ($transaction->errors as $field => $error_message) {
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= $error;
+                        foreach ($error_message as $error) $result .= '; '.$error;
                         $error_message = $result;
                     }
                     $this->module->setError(422,

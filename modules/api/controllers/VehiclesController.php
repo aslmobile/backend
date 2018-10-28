@@ -198,9 +198,14 @@ class VehiclesController extends BaseController
         if (!$vehicle->load($data)) $this->module->setError(422, 'vehicle.load', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
         if (!$vehicle->validate() || !$vehicle->save()) {
             if ($vehicle->hasErrors()) {
-                foreach ($vehicle->errors as $field => $error)
-                    $this->module->setError(422, 'vehicle.' . $field, Yii::$app->mv->gt($error[0], [], false), true, false);
-
+                foreach ($vehicle->errors as $field => $error_message) {
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; ' . $error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422, 'vehicle.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
@@ -236,8 +241,14 @@ class VehiclesController extends BaseController
 
         if (!$vehicle->validate() || !$vehicle->save()) {
             if ($vehicle->hasErrors()) {
-                foreach ($vehicle->errors as $field => $error_message)
-                    $this->module->setError(422, 'vehicle.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                foreach ($vehicle->errors as $field => $error_message) {
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; ' . $error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422, 'vehicle.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }

@@ -154,9 +154,15 @@ class LineController extends BaseController
 
         if (!$line->validate() || !$line->save()) {
             if ($line->hasErrors()) {
-                foreach ($line->errors as $field => $error_message)
+                foreach ($line->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
                     $this->module->setError(422,
-                        '_line.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                        '_line.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422,
                 '_line', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
@@ -191,8 +197,15 @@ class LineController extends BaseController
         if (!$line->validate() || !$line->save()) {
             if ($line->hasErrors()) {
                 foreach ($line->errors as $field => $error_message)
-                    $this->module->setError(422, 'line.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
-                $this->module->sendResponse();
+                {
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422, 'line.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                    $this->module->sendResponse();
+                }
             } else $this->module->setError(422, '_line', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
@@ -306,6 +319,11 @@ class LineController extends BaseController
                 if (!$trip->validate() || !$trip->save()) {
                     if ($trip->hasErrors()) {
                         foreach ($trip->errors as $field => $error_message) {
+                            if (is_array($error_message)) {
+                                $result = '';
+                                foreach ($error_message as $error) $result .= '; '.$error;
+                                $error_message = $result;
+                            }
                             $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
                             $trip_errors++;
                         }
@@ -605,7 +623,6 @@ class LineController extends BaseController
         ]);
         if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
 
-        // TODO: Переделать логику
         $rate = $this->getRate($route->id);
         $seat = (float)round($route->base_tariff * $rate, 2);
 

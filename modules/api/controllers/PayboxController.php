@@ -1,6 +1,6 @@
 <?php namespace app\modules\api\controllers;
 
-use app\components\Payments\PaymentProvider;
+use app\components\paysystem\PaysystemProvider;
 use Yii;
 use yii\helpers\Url;
 use yii\filters\AccessControl;
@@ -30,12 +30,12 @@ class PayboxController extends RestFul
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'check'     => ['POST'],
-                    'result'    => ['POST'],
-                    'refund'    => ['POST'],
-                    'capture'   => ['POST'],
-                    'success'   => ['POST'],
-                    'failure'   => ['POST']
+                    'check' => ['POST'],
+                    'result' => ['POST'],
+                    'refund' => ['POST'],
+                    'capture' => ['POST'],
+                    'success' => ['POST'],
+                    'failure' => ['POST']
                 ]
             ]
         ];
@@ -53,9 +53,16 @@ class PayboxController extends RestFul
         return parent::beforeAction($event);
     }
 
-    public function actionSuccess()
+    public function actionRefund()
     {
-        $paybox = PaymentProvider::getDriver([
+        $paybox = PaysystemProvider::getDriver([
+            'driver' => 'PayBox'
+        ]);
+    }
+
+    public function actionCapture()
+    {
+        $paybox = PaysystemProvider::getDriver([
             'driver' => 'PayBox'
         ]);
     }
@@ -63,7 +70,7 @@ class PayboxController extends RestFul
     protected function logEvent()
     {
         $params = [
-            'type'  => RestFulModel::TYPE_LOG,
+            'type' => RestFulModel::TYPE_LOG,
             'message' => json_encode([
                 'controller' => Yii::$app->controller->id,
                 'action' => Yii::$app->controller->action->id,
@@ -72,7 +79,7 @@ class PayboxController extends RestFul
                 'token' => false
             ]),
             'user_id' => Yii::$app->user->id ? Yii::$app->user->id : 0,
-            'uip'   => Yii::$app->request->getUserIP()
+            'uip' => Yii::$app->request->getUserIP()
         ];
 
         $logger = new RestFulModel($params);

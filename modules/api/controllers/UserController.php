@@ -230,8 +230,14 @@ class UserController extends BaseController
 
         if (!$user->validate() || !$user->save()) {
             if ($user->hasErrors()) {
-                foreach ($user->errors as $field => $error_message)
-                    $this->module->setError(422, 'user.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                foreach ($user->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422, 'user.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_user', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
@@ -265,8 +271,14 @@ class UserController extends BaseController
 
         if (!$user->validate() || !$user->save()) {
             if ($user->hasErrors()) {
-                foreach ($user->errors as $field => $error_message)
-                    $this->module->setError(422, 'user.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                foreach ($user->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422, 'user.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, 'user', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
@@ -386,7 +398,14 @@ class UserController extends BaseController
         if (!$licences->save()) {
             $save_errors = $licences->getErrors();
             if ($save_errors && count($save_errors) > 0) {
-                foreach ($save_errors as $field => $error) $this->module->setError(422, $field, Yii::$app->mv->gt($error[0], [], false), true, false);
+                foreach ($save_errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422, $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_licenses', Yii::$app->mv->gt("Не удалось сохранить файл", [], false));
         }

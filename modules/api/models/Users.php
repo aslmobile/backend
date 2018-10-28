@@ -69,6 +69,12 @@ JSON;
 
         if ($this->type == User::TYPE_PASSENGER) {
 
+            $penalty = Trip::findOne(['user_id' => $this->id, 'penalty' => 1]);
+            if (!$penalty) $penalty = (object)['id' => -1, 'amount' => 0]; else {
+                $penalty->amount /= 2;
+                $penalty = (object)['id' => $penalty->id, 'amount' => $penalty->amount];
+            }
+
             RestFul::updatePassengerAccept();
             RestFul::updatePassengerAcceptSeat();
 
@@ -97,7 +103,7 @@ JSON;
 
             $array['accept'] = !empty($inAccept) ? 1 : 0;
             $array['acceptSeat'] = !empty($inAcceptSeat) ? 1 : 0;
-
+            $array['penalty'] = $penalty;
             $array['queue'] = (!empty($trip) && $trip->status == Trip::STATUS_CREATED) ? 1 : 0;
             $array['online'] = (!empty($trip) && in_array($trip->status, [Trip::STATUS_WAITING, Trip::STATUS_WAY])) ? 1 : 0;
             $array['trip_id'] = !empty($trip) ? $trip->id : 0;

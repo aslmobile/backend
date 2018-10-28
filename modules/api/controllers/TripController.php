@@ -282,9 +282,15 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message)
+                foreach ($trip->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
                     $this->module->setError(422,
-                        'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                        'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
         }
@@ -341,9 +347,15 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message)
-                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false),
+                foreach ($trip->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false),
                         true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
         }
@@ -510,9 +522,15 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message)
+                foreach ($trip->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
                     $this->module->setError(422,
-                        'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                        'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
         }
@@ -749,9 +767,15 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message)
+                foreach ($trip->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
                     $this->module->setError(422,
-                        '_trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                        '_trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422,
                 '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
@@ -1050,8 +1074,14 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message)
-                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                foreach ($trip->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
@@ -1087,8 +1117,14 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message)
-                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                foreach ($trip->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
@@ -1134,8 +1170,14 @@ class TripController extends BaseController
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message)
+                foreach ($trip->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
                     $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, 'trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
@@ -1237,8 +1279,6 @@ class TripController extends BaseController
 
         $trips['tariff'] = floatval(round($tariff * 0.8, 2));
 
-//        echo '<pre>' . print_r(array_values($trips), true) . '</pre>'; exit;
-
         $this->module->data = $trips;
         $this->module->setSuccess();
         $this->module->sendResponse();
@@ -1339,8 +1379,14 @@ class TripController extends BaseController
 
         if (!$taxi->validate() || !$taxi->save()) {
             if ($taxi->hasErrors()) {
-                foreach ($taxi->errors as $field => $error_message)
-                    $this->module->setError(422, 'taxi.' . $field, Yii::$app->mv->gt($error_message[0], [], false), true, false);
+                foreach ($taxi->errors as $field => $error_message){
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; '.$error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422, 'taxi.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_taxi', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
