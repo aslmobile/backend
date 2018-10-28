@@ -99,7 +99,7 @@ JSON;
 
             $array['accept'] = !empty($inAccept) ? 1 : 0;
             $array['acceptSeat'] = !empty($inAcceptSeat) ? 1 : 0;
-            $array['penalty'] = $penalty ? ($penalty->amount / 2) : 0;
+            $array['penalty'] = doubleval($penalty ? ($penalty->amount / 2) : 0);
             $array['queue'] = (!empty($trip) && $trip->status == Trip::STATUS_CREATED) ? 1 : 0;
             $array['online'] = (!empty($trip) && in_array($trip->status, [Trip::STATUS_WAITING, Trip::STATUS_WAY])) ? 1 : 0;
             $array['trip_id'] = !empty($trip) ? $trip->id : 0;
