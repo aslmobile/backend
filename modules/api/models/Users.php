@@ -77,7 +77,7 @@ JSON;
                 $penalty = Trip::findOne(['user_id' => $this->id, 'penalty' => 1]);
                 $dispatch = Dispatch::findOne(1);
                 if (!$dispatch) $dispatch = (object)['phone' => 70123456789];
-                if (!$penalty) $penalty = (object)['id' => -1]; else {
+                if (!$penalty) $penalty = (object)['id' => -1, 'amount' => 0]; else {
                     $penalty = (object)[
                         'id' => $penalty->id,
                         'amount' => $penalty->amount / 2,
