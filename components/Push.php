@@ -302,9 +302,9 @@ class Push extends Component
         if (!$this->fcmEnabled) throw new InvalidConfigException('FCM in not enabled.');
 
         if (!empty($tokens)) {
+
             $fields = ArrayHelper::merge(['to' => $tokens], $payload);
 
-            $headers = [];
             $headers[] = 'Content-Type: application/json';
             $headers[] = 'Authorization: key=' . ArrayHelper::getValue($this->fcmConfig, 'apiAccessKey');
 
@@ -312,10 +312,6 @@ class Push extends Component
             curl_setopt($curl, CURLOPT_URL, self::FCM_URL);
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-//            curl_setopt($curl, CURLOPT_HTTPHEADER, [
-//                sprintf('Authorization: key=%s', ArrayHelper::getValue($this->fcmConfig, 'apiAccessKey')),
-//                'Content-Type: application/json'
-//            ]);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($curl, CURLOPT_POSTFIELDS, Json::encode($fields));
@@ -328,6 +324,7 @@ class Push extends Component
             if ($err) throw new Exception($err);
 
             Yii::info($result);
+
         }
     }
 
