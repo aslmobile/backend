@@ -49,10 +49,15 @@ use yii\helpers\ArrayHelper;
  * @property int $updated_at
  * @property int $updated_by
  *
- * @property \app\models\Checkpoint $startpoint
+ * @property Route $route
+ * @property Checkpoint $startpoint
+ * @property Checkpoint $endpoint
  * @property \app\models\User $user
  * @property \app\models\User $driver
  * @property \app\models\Dispatch $dispatch
+ * @property  Vehicles $vehicle
+ * @property VehicleType $vehicleType
+ * @property LuggageType $baggage
  */
 class Trip extends \yii\db\ActiveRecord
 {
@@ -791,6 +796,9 @@ class Trip extends \yii\db\ActiveRecord
 
         if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
         else $array['vehicle'] = (object)['id' => -1];
+
+        if ($this->vehicleType) $array['vehicleType'] = $this->vehicleType->toArray();
+        else $array['vehicleType'] = (object)['id' => -1];
 
         if ($this->driver) $array['driver'] = $this->driver->toArray();
         else $array['driver'] = (object)['id' => -1];
