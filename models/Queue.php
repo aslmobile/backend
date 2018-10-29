@@ -26,7 +26,7 @@ class Queue extends Model
 
         $trips = \app\modules\api\models\Trip::find()
             ->where(['status' => Trip::STATUS_CREATED])
-            ->andWhere(['!=', 'line_id', 0])
+            ->andWhere(['line_id' => 0])
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])
             ->all();
 
