@@ -690,7 +690,7 @@ class Message
                         'user_id' => $passenger,
                         'line_id' => intval($line_data['id']),
                         'status' => Trip::STATUS_WAITING
-                    ])->andWhere(['driver_id' => 0]);
+                    ])->andWhere(['driver_id' => 0])->one();
                     if (!empty($trip)) {
                         $trip->line_id = 0;
                         $trip->save();
