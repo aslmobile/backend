@@ -25,6 +25,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 <h3 class="box-title"><?= Html::encode($this->title) ?></h3>
                 <div class="box-tools pull-right">
                     <?= Html::a(Yii::$app->mv->gt('{i} Добавить', ['i' => Html::tag('i', '', ['class' => 'fa fa-plus'])], false), ['create'], ['class' => 'btn btn-default btn-sm']); ?>
+                    <?= Html::a(
+                        Yii::$app->mv->gt('{i} Удалить выбранные', ['i' => Html::tag('i', '', ['class' => 'fa fa-fire'])], false),
+                        [''],
+                        [
+                            'class' => 'btn btn-danger btn-sm',
+                            'onclick' => "
+                    								var keys = $('#grid').yiiGridView('getSelectedRows');
+                    								if (keys!='') {
+                    									if (confirm('" . Yii::$app->mv->gt('Are you sure you want to delete the selected items?', [], false) . "')) {
+                    										$.ajax({
+                    											type : 'POST',
+                    											data: {keys : keys},
+                    											success : function(data) {}
+                    										});
+                    									}
+                    								}
+                    								return false;
+                    							",
+                        ]
+                    ); ?>
                 </div>
             </div>
             <!-- /.box-header -->
@@ -47,6 +67,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'filterModel' => $searchModel,
                     'columns' => [
+                        ['class' => 'yii\grid\CheckboxColumn'],
+                        ['attribute' => 'id', 'headerOptions' => ['style' => 'width: 50px;']],
                         'user_id' => [
                             'attribute' => 'user_id',
                             'content' => function ($data) {
@@ -74,14 +96,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'initSelection' => new JsExpression('function(element, callback) { var id = $(element).val();if(id !== "") {$.ajax("'.\yii\helpers\Url::toRoute(['/admin/user/select-users']).'", {data: {id: id},dataType: "json"}).done(function(data) {callback(data.results);});}}'),
                                 ]
                             ]),
-                        ],
-                        'vehicle_type_id' => [
-                            'attribute' => 'vehicle_type_id',
-                            'content' => function ($data) {
-                                $types = \app\modules\admin\models\VehicleType::getTypesList();
-                                return key_exists($data->vehicle_type_id, $types) ? $types[$data->vehicle_type_id] : false;
-                            },
-                            'filter' => \app\modules\admin\models\VehicleType::getTypesList(),
                         ],
                         'vehicle_type_id' => [
                             'attribute' => 'vehicle_type_id',
