@@ -597,6 +597,7 @@ class TripController extends BaseController
 
         /** @var \app\modules\api\models\Trip $trip */
         if ($trips && count($trips)) foreach ($trips as $trip) {
+
             $past = [
                 Trip::STATUS_FINISHED,
                 Trip::STATUS_CANCELLED,
@@ -604,18 +605,26 @@ class TripController extends BaseController
             ];
 
             $feature = [
-                Trip::STATUS_CREATED,
                 Trip::STATUS_SCHEDULED
             ];
 
             $current = [
+                Trip::STATUS_CREATED,
                 Trip::STATUS_WAITING,
                 Trip::STATUS_WAY
             ];
 
-            if (in_array($trip->status, $past)) $trips_list_past[] = $trip->toArray();
-            if (in_array($trip->status, $feature)) $trips_list_feature[] = $trip->toArray();
-            if (in_array($trip->status, $current)) $trips_list_current[] = $trip->toArray();
+            $array_trip = $trip->toArray();
+
+            if (in_array($trip->status, $past)) {
+                $array_trip += [
+                    'wait_time' => $trip->taxi_time - 900 - $trip->created_at,
+                    'way_time' => $trip->finish_time - $trip->start_time,
+                ];
+                $trips_list_past[] = $array_trip;
+            }
+            if (in_array($trip->status, $feature)) $trips_list_feature[] = $array_trip;
+            if (in_array($trip->status, $current)) $trips_list_current[] = $array_trip;
         }
 
         $this->module->data['trips']['past'] = $trips_list_past;

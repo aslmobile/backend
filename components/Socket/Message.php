@@ -96,7 +96,7 @@ class Message
         /** @var \app\models\Trip $trip */
         /** @var \app\models\Trip|bool $device_trip */
 
-        $device_trip = Trip::find()->andWhere([
+        $device_trip = Trip::find()->where([
             'AND',
             ['=', 'user_id', $device->user_id],
             ['=', 'status', Trip::STATUS_CREATED]
@@ -106,7 +106,7 @@ class Message
 
             $queue_position = 1;
 
-            $trips = Trip::find()->andWhere([
+            $trips = Trip::find()->where([
                 'AND',
                 ['=', 'status', Trip::STATUS_CREATED],
                 ['=', 'route_id', $device_trip->route_id]
@@ -117,7 +117,7 @@ class Message
                 $queue_position++;
             }
 
-            $vehicles_queue = Line::find()->andWhere(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
+            $vehicles_queue = Line::find()->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
                 ->andWhere(['>=', 'freeseats', $device_trip->seats])->count();
 
             $basic_estimated_time = $queue_position * 300;

@@ -312,7 +312,7 @@ class User extends ActiveRecord implements IdentityInterface
     public function getUserPhoto()
     {
         if ($this->image && intval($this->image) > 0) {
-            $image = \app\modules\api\models\UploadFiles::findOne($this->image);
+            $image = UploadFiles::findOne($this->image);
             if ($image) {
                 return Yii::$app->imageCache->img(Yii::getAlias('@webroot') . $image->file, '128x128', ['class' => 'img-circle']);
             }

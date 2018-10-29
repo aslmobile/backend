@@ -771,6 +771,8 @@ class Trip extends \yii\db\ActiveRecord
         }
 
         $new_trip->status = $status;
+        $new_trip->created_at = time();
+        $new_trip->updated_at = time();
         return $new_trip->save();
     }
 
