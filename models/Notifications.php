@@ -131,6 +131,9 @@ class Notifications extends \yii\db\ActiveRecord
             self::NTD_TRIP_REVIEW => Yii::t('app', "Отзыв"),
             self::NTD_TRIP_RATING => Yii::t('app', "Рейтинг"),
 
+            self::NTD_ACCEPTED => Yii::t('app', "Вы подтверждены в приложении."),
+            self::NTD_VEHICLE_ACCEPTED => Yii::t('app', "Ваша машина подтверждена в приложении."),
+
             self::NTF_NOTIFICATIONS => Yii::t('app', "Уведомления"),
             self::NTF_GEO => Yii::t('app', "Геолокация"),
         ];
