@@ -698,6 +698,8 @@ class Message
                 });
             }
 
+            $this->addressed = $data['data']['addressed'];
+
         } else {
 
             $watchdog = RestFul::findOne([
@@ -709,6 +711,8 @@ class Message
                 $line_data = \app\modules\api\models\Line::findOne($watchdog->target_id);
                 $line_data = !empty($line_data) ? $line_data->toArray() : [];
             }
+
+            $this->addressed = [$device->user_id];
 
         }
 
@@ -722,8 +726,6 @@ class Message
                 'line' => $line_data,
             ]
         ];
-
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
 
         return $response;
     }
