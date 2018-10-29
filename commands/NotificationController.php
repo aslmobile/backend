@@ -61,7 +61,6 @@ class NotificationController extends ConsoleController
     public function actionTest()
     {
         $push = \Yii::$app->push;
-        $notification = Notifications::findOne(2);
 //        $push->ios()->send('8a27747526c52cc5a66e920981ee069baa55ae4cd769b86125a1fe39494c0788', ['aps' => [
 //            'alert' => $notification->text . ': ' . $notification->title,
 //            'sound' => 'default',
@@ -77,10 +76,10 @@ class NotificationController extends ConsoleController
 //                ],
                 'priority' => 'high',
                 'data' => [
-                    'title' => $notification->title,
-                    'body' => $notification->text,
-                    'time' => $notification->time,
-                    'type' => $notification->type,
+                    'title' => 'Test title',
+                    'body' => 'Test body',
+                    'time' => time(),
+                    'type' => Notifications::NT_DEFAULT,
                 ],
             ], 1);
     }
