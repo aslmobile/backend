@@ -121,7 +121,7 @@ class Message
                 ->andWhere(['>=', 'freeseats', $device_trip->seats])->count();
 
             $basic_estimated_time = $queue_position * 300;
-            $estimated_time = $basic_estimated_time * 3 / $vehicles_queue;
+            $estimated_time = $basic_estimated_time * 3 / ($vehicles_queue ? $vehicles_queue : 1);
             if ($estimated_time < 900) $estimated_time = 900;
 
             $response = [
