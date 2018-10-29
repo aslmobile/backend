@@ -225,7 +225,7 @@ class UserController extends Controller
                     }
                 }
 
-                if($oldStatus !== $model::STATUS_APPROVED && $model->status === $model::STATUS_APPROVED){
+                if($oldStatus != $model::STATUS_APPROVED && $model->status == $model::STATUS_APPROVED){
                     $notifications = Notifications::create(Notifications::NTD_ACCEPTED, [$model->id]);
                     foreach ($notifications as $notification) Notifications::send($notification);
                 }
