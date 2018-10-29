@@ -1,18 +1,14 @@
 <?php namespace app\modules\api;
 
 
+use app\components\Sms\SMSCenter;
+use app\models\Lang;
 use app\models\SmsTemplates;
 use app\modules\api\models\Devices;
-use app\modules\api\models\Users;
-use Yii;
 use Opis\JsonSchema\{
-    Validator,
-    ValidationResult,
-    ValidationError
+    ValidationError, ValidationResult, Validator
 };
-
-use app\models\Lang;
-use app\components\Sms\SMSCenter;
+use Yii;
 
 class Module extends \yii\base\Module
 {
@@ -37,8 +33,7 @@ class Module extends \yii\base\Module
         $this->salt = Yii::$app->params['salt'];
 
         $headers = Yii::$app->request->headers;
-        if ($headers->has('Accept-Language'))
-        {
+        if ($headers->has('Accept-Language')) {
             $this->lang = $headers->get('Accept-Language');
             Lang::setCurrent($this->lang);
         }
@@ -48,7 +43,9 @@ class Module extends \yii\base\Module
 
     public function validateBody()
     {
-        if (empty($this->body)) { $this->setError(401, '_body', Yii::$app->mv->gt("Тело запроса не должно быть пустым", [], false)); }
+        if (empty($this->body)) {
+            $this->setError(401, '_body', Yii::$app->mv->gt("Тело запроса не должно быть пустым", [], false));
+        }
     }
 
     public function setError($code, $key, $message, $needheader = true, $immediatelyExit = true)
@@ -77,8 +74,7 @@ class Module extends \yii\base\Module
 
     public function replaceNullWithEmptyString($array)
     {
-        foreach ($array as $key => $value)
-        {
+        foreach ($array as $key => $value) {
             if (is_array($value)) $array[$key] = $this->replaceNullWithEmptyString($value);
             elseif (is_null($value)) $array[$key] = "";
         }
@@ -90,25 +86,22 @@ class Module extends \yii\base\Module
      * @param $data string
      * @param $scheme array|object|bool
      */
-    public function JSONValidate ($data, $scheme)
+    public function JSONValidate($data, $scheme)
     {
         /** @var Validator $validator */
         $validator = new Validator();
 
         /** @var ValidationResult $result */
-        $result = $validator->dataValidation((object) $this->data[$data], $scheme);
-        if (!$result->isValid())
-        {
+        $result = $validator->dataValidation((object)$this->data[$data], $scheme);
+        if (!$result->isValid()) {
             /** @var ValidationError $validation_error */
             $validation_errors = $result->getErrors();
-            foreach ($validation_errors as $validation_error)
-            {
-                foreach ($validation_error->dataPointer() as $pointer)
-                {
+            foreach ($validation_errors as $validation_error) {
+                foreach ($validation_error->dataPointer() as $pointer) {
                     $this->setError(422, $data . '.' . $pointer, Yii::$app->mv->gt($validation_error->keyword(), [], false), true, false);
 
                     foreach ($validation_error->keywordArgs() as $param => $value)
-                        $this->setError(422, $data . '.'. $pointer . '.' . $param, Yii::$app->mv->gt($value, [], false), true, false);
+                        $this->setError(422, $data . '.' . $pointer . '.' . $param, Yii::$app->mv->gt($value, [], false), true, false);
                 }
             }
 
@@ -124,19 +117,16 @@ class Module extends \yii\base\Module
      */
     public function sendSms($device, $sandbox = false)
     {
-        if ($device && isset ($device->user->phone))
-        {
+        if ($device && isset ($device->user->phone)) {
             $SMSCenter = new SMSCenter(true, ['charset' => SMSCenter::CHARSET_UTF8, 'fmt' => SMSCenter::FMT_XML]);
-            $code = (string) mt_rand(100000, 999999);
+            $code = (string)mt_rand(100000, 999999);
 
             $device->sms_code = $code;
             $device->auth_token = Yii::$app->security->generateRandomString();
 
-            if (!$device->save())
-            {
+            if (!$device->save()) {
                 $save_errors = $device->getErrors();
-                if ($save_errors && count ($save_errors) > 0) foreach ($save_errors as $error)
-                {
+                if ($save_errors && count($save_errors) > 0) foreach ($save_errors as $error) {
                     echo '<pre>' . print_r($error, true) . '</pre>';
                     exit;
                 }
@@ -150,13 +140,15 @@ class Module extends \yii\base\Module
                 /** @var \app\models\SmsTemplates $template */
                 $template = SmsTemplates::find()->where(['name' => "auth-template"])->one();
                 if ($template) $template = Yii::t('app', $template->template, ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
-                else $template = Yii::t('app','{name} | Авторизация: {code}', ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
-
+                else $template = Yii::t('app', '{name} | Авторизация: {code}', ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
                 $response = $SMSCenter->send($device->user->phone, $template, Yii::$app->params['smsc']['sender']);
-                $send = new \SimpleXMLElement($response);
-            } else $send = (object) ['cnt' => 1];
-        }
-        else $this->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
+                try {
+                    $send = new \SimpleXMLElement($response);
+                } catch (\Exception $e) {
+                    $send = (object)['cnt' => 1];
+                }
+            } else $send = (object)['cnt' => 1];
+        } else $this->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
 
         return isset ($send->cnt) && isset ($device) ? $device : false;
     }
@@ -169,30 +161,26 @@ class Module extends \yii\base\Module
      */
     public function verifyPhone($device, $phone, $sandbox = false)
     {
-        if ($device && isset ($device->user->phone))
-        {
+        if ($device && isset ($device->user->phone)) {
             $SMSCenter = new SMSCenter(true, ['charset' => SMSCenter::CHARSET_UTF8, 'fmt' => SMSCenter::FMT_XML]);
-            $code = (string) mt_rand(100000, 999999);
+            $code = (string)mt_rand(100000, 999999);
 
             $device->sms_code = $code;
             $device->save();
 
-            if (!$sandbox)
-            {
+            if (!$sandbox) {
                 if (!is_numeric($phone) || empty($phone) || intval($phone) == 0)
                     $this->setError(422, 'phone', Yii::$app->mv->gt("Не верный формат. " . $device->user->phone, [], false));
 
                 /** @var \app\models\SmsTemplates $template */
                 $template = SmsTemplates::find()->where(['name' => "verify-phone-template"])->one();
                 if ($template) $template = Yii::t('app', $template->template, ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
-                else $template = Yii::t('app','{name} | Подтверждение: {code}', ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
+                else $template = Yii::t('app', '{name} | Подтверждение: {code}', ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
 
                 $response = $SMSCenter->send($phone, $template, Yii::$app->params['smsc']['sender']);
                 $send = new \SimpleXMLElement($response);
-            }
-            else $send = (object) ['cnt' => 1];
-        }
-        else $this->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
+            } else $send = (object)['cnt' => 1];
+        } else $this->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
 
         return isset ($send->cnt) && isset ($device) ? $device : false;
     }

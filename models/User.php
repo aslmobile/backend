@@ -149,29 +149,6 @@ class User extends ActiveRecord implements IdentityInterface
         ];
     }
 
-    /**
-     * Finds an identity by the given ID.
-     * @param string|integer $id the ID to be looked for
-     * @return IdentityInterface the identity object that matches the given ID.
-     * Null should be returned if such an identity cannot be found
-     * or the identity is not in an active state (disabled, deleted, etc.)
-     */
-    public static function findIdentity($id)
-    {
-        return static::findOne(['id' => $id, 'status' => 1]);
-    }
-
-    /**
-     * @param mixed $token
-     * @param null $type
-     * @return void|IdentityInterface
-     * @throws NotSupportedException
-     */
-    public static function findIdentityByAccessToken($token, $type = null)
-    {
-        throw new NotSupportedException('findIdentityByAccessToken is not implemented.');
-    }
-
     public static function getStatuses()
     {
         return Yii::$app->params['statuses'];
@@ -212,6 +189,29 @@ class User extends ActiveRecord implements IdentityInterface
         }
 
         return Url::to('/files/images/photo-placeholder-256.png', true);
+    }
+
+    /**
+     * Finds an identity by the given ID.
+     * @param string|integer $id the ID to be looked for
+     * @return IdentityInterface the identity object that matches the given ID.
+     * Null should be returned if such an identity cannot be found
+     * or the identity is not in an active state (disabled, deleted, etc.)
+     */
+    public static function findIdentity($id)
+    {
+        return static::findOne(['id' => $id, 'status' => 1]);
+    }
+
+    /**
+     * @param mixed $token
+     * @param null $type
+     * @return void|IdentityInterface
+     * @throws NotSupportedException
+     */
+    public static function findIdentityByAccessToken($token, $type = null)
+    {
+        throw new NotSupportedException('findIdentityByAccessToken is not implemented.');
     }
 
     /**
@@ -312,7 +312,7 @@ class User extends ActiveRecord implements IdentityInterface
     public function getUserPhoto()
     {
         if ($this->image && intval($this->image) > 0) {
-            $image = UploadFiles::findOne($this->image);
+            $image = \app\modules\api\models\UploadFiles::findOne($this->image);
             if ($image) {
                 return Yii::$app->imageCache->img(Yii::getAlias('@webroot') . $image->file, '128x128', ['class' => 'img-circle']);
             }

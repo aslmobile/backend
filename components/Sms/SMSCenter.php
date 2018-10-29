@@ -82,16 +82,9 @@ class SMSCenter {
     private static $curl = null;
 
     /**
-     * Инициализация.
-     *
-     * @access public
-     *
-     * @param string $login    логин
-     * @param string $password пароль или MD5-хэш пароля
-     * @param bool   $useSSL   использовать HTTPS или нет
-     * @param array  $options  прочие параметры
-     *
-     * @return \SMSCenter\SMSCenter
+     * SMSCenter constructor.
+     * @param bool $useSSL
+     * @param array $options
      */
     public function __construct($useSSL = false, array $options = []) {
         $this->login = Yii::$app->params['smsc']['login'];
