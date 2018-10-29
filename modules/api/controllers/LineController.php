@@ -542,7 +542,7 @@ class LineController extends BaseController
             ['=', 'status', Checkpoint::STATUS_ACTIVE]
         ];
 
-        $checkpoints = Checkpoint::find()->andWhere($params)->all();
+        $checkpoints = Checkpoint::find()->where($params)->all();
         if ($checkpoints && sizeof($checkpoints) > 0) foreach ($checkpoints as $point) {
             /** @var $point \app\models\Checkpoint */
             $points[] = $point->toArray();

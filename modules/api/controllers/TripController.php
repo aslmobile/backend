@@ -1515,7 +1515,7 @@ class TripController extends BaseController
         /** @var \app\models\Line $line */
         $lines = Line::findAll(['route_id' => $route_id]);
 
-        if (!$lines) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+        //if (!$lines) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $seats = 0;
         foreach ($lines as $line) $seats += $line->freeseats;
