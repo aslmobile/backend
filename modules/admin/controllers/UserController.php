@@ -187,6 +187,7 @@ class UserController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $oldStatus = $model->status;
 
         if ($model->load(Yii::$app->request->post())) {
 
@@ -224,7 +225,7 @@ class UserController extends Controller
                     }
                 }
 
-                if($model->oldAttributes['status'] !== $model::STATUS_APPROVED && $model->status === $model::STATUS_APPROVED){
+                if($oldStatus !== $model::STATUS_APPROVED && $model->status === $model::STATUS_APPROVED){
                     $notifications = Notifications::create(Notifications::NTD_ACCEPTED, [$model->id]);
                     foreach ($notifications as $notification) Notifications::send($notification);
                 }
