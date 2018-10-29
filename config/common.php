@@ -49,8 +49,8 @@ $config = [
 //                'passphrase' => 'lyres374;fascia', //optional
 //            ],
             'fcmConfig' => [
-                1 => ['apiAccessKey' => 'AIzaSyCzwjm0emzf4aVUdjPTAfn0fhk79cdJ3Jc'],
-                2 => ['apiAccessKey' => 'AIzaSyDjpbHCJFPPWOE8hx2PHmufI5tVS-XuGPE']
+                1 => ['apiAccessKey' => 'AAAACWlobmk:APA91bEdbIyq3nutK_S7-KH1wjDizQKqGGsBeVu4l6YfN5zxp7ikCMIE5I6FOg5_hc_ccLYlR9_9ojuYYNXGRl13J1DIbizrS20REYOLPikdy289WzngQHr75kNkMRbeW86U3EPCbS3U'],
+                2 => ['apiAccessKey' => 'AAAA45toJLA:APA91bHNZbgEI7rUFtLfXhmWhx2BB_vnpx5Y_XSCTutGR2Z6v42PXeUxsijPHxkzAHLUB9Uxp9V5culfr-yCby-7Oq_u484eN7zs3Gi8J3WT0VJJG-ZrUF_1Mq4NofWTLhGPEESgQl6p']
             ],
 //            'gcmConfig' => [
 //                'apiAccessKey' => 'AIzaSyCUfMeKft1Vw1YGxGYw7AMNEMBxw082Eno'

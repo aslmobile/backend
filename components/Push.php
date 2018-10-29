@@ -74,20 +74,28 @@ class Push extends Component
     {
         parent::init();
 
-        if (is_array($this->apnsConfig) && !empty($this->apnsConfig)) {$this->validateApns();$this->apnsEnabled = true;}
+        if (is_array($this->apnsConfig) && !empty($this->apnsConfig)) {
+            $this->validateApns();
+            $this->apnsEnabled = true;
+        }
 
-        if (is_array($this->gcmConfig) && !empty($this->gcmConfig)) {$this->validateGcm();$this->gcmEnabled = true;}
+        if (is_array($this->gcmConfig) && !empty($this->gcmConfig)) {
+            $this->validateGcm();
+            $this->gcmEnabled = true;
+        }
 
         $this->setApp($this->defaultApplication);
 
     }
 
-    public function setApp($app = Devices::APP_DRIVER){
-        if(is_array($this->fcmConfig) && isset($this->fcmConfig[$app])){
+    public function setApp($app = Devices::APP_DRIVER)
+    {
+        if (is_array($this->fcmConfig) && isset($this->fcmConfig[$app])) {
             $this->application = $app;
             $this->fcmConfig = $this->fcmConfig[$app];
             if (is_array($this->fcmConfig) && !empty($this->fcmConfig)) {
-                $this->validateFcm(); $this->fcmEnabled = true;
+                $this->validateFcm();
+                $this->fcmEnabled = true;
             }
         }
     }
@@ -101,7 +109,9 @@ class Push extends Component
             !ArrayHelper::keyExists('environment', $this->apnsConfig)
             || !ArrayHelper::isIn(ArrayHelper::getValue($this->apnsConfig, 'environment'), [
                 self::APNS_ENVIRONMENT_SANDBOX, self::APNS_ENVIRONMENT_PRODUCTION])
-        ) {throw new InvalidConfigException('Apns environment is invalid.');}
+        ) {
+            throw new InvalidConfigException('Apns environment is invalid.');
+        }
 
         if (ArrayHelper::keyExists('pem', $this->apnsConfig)) {
             if (0 === strpos(ArrayHelper::getValue($this->apnsConfig, 'pem'), '@')) {
@@ -110,7 +120,9 @@ class Push extends Component
                 $path = ArrayHelper::getValue($this->apnsConfig, 'pem');
             }
 
-            if (!is_file($path)) {throw new InvalidConfigException('Apns pem is invalid.');}
+            if (!is_file($path)) {
+                throw new InvalidConfigException('Apns pem is invalid.');
+            }
 
             $this->apnsConfig['pem'] = $path;
         } else {
@@ -200,13 +212,21 @@ class Push extends Component
      */
     public function send($tokens, $payload = [], $app)
     {
-        if($this->application != $app){ $this->setApp($app); }
+        if ($this->application != $app) {
+            $this->setApp($app);
+        }
 
         if ($this->type) {
             switch ($this->type) {
-                case self::TYPE_GCM:self::sendGcm($tokens, $payload);break;
-                case self::TYPE_FCM:self::sendFcm($tokens, $payload);break;
-                case self::TYPE_APNS:self::sendApns($tokens, $payload);break;
+                case self::TYPE_GCM:
+                    self::sendGcm($tokens, $payload);
+                    break;
+                case self::TYPE_FCM:
+                    self::sendFcm($tokens, $payload);
+                    break;
+                case self::TYPE_APNS:
+                    self::sendApns($tokens, $payload);
+                    break;
             }
         } else {
             $tokens = self::splitDeviceTokens($tokens);
@@ -239,7 +259,9 @@ class Push extends Component
      */
     private function sendGcm($tokens, $data = [])
     {
-        if (!$this->gcmEnabled) {throw new InvalidConfigException('Gcm in not enabled.');}
+        if (!$this->gcmEnabled) {
+            throw new InvalidConfigException('Gcm in not enabled.');
+        }
 
         if (!empty($tokens)) {
             $fields = ['registration_ids' => $tokens, 'data' => $data];
@@ -260,7 +282,9 @@ class Push extends Component
 
             curl_close($curl);
 
-            if ($err) {throw new Exception($err);}
+            if ($err) {
+                throw new Exception($err);
+            }
 
             Yii::info($result);
         }
@@ -275,18 +299,23 @@ class Push extends Component
      */
     private function sendFcm($tokens, $payload = [])
     {
-        if (!$this->fcmEnabled) {throw new InvalidConfigException('FCM in not enabled.');}
+        if (!$this->fcmEnabled) throw new InvalidConfigException('FCM in not enabled.');
 
         if (!empty($tokens)) {
             $fields = ArrayHelper::merge(['to' => $tokens], $payload);
 
+            $headers = [];
+            $headers[] = 'Content-Type: application/json';
+            $headers[] = 'Authorization: key=' . ArrayHelper::getValue($this->fcmConfig, 'apiAccessKey');
+
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, self::FCM_URL);
             curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, [
-                sprintf('Authorization: key=%s', ArrayHelper::getValue($this->fcmConfig, 'apiAccessKey')),
-                'Content-Type: application/json'
-            ]);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+//            curl_setopt($curl, CURLOPT_HTTPHEADER, [
+//                sprintf('Authorization: key=%s', ArrayHelper::getValue($this->fcmConfig, 'apiAccessKey')),
+//                'Content-Type: application/json'
+//            ]);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($curl, CURLOPT_POSTFIELDS, Json::encode($fields));
@@ -296,7 +325,7 @@ class Push extends Component
 
             curl_close($curl);
 
-            if ($err) {throw new Exception($err);}
+            if ($err) throw new Exception($err);
 
             Yii::info($result);
         }
@@ -309,7 +338,9 @@ class Push extends Component
      */
     private function sendApns($token, $body)
     {
-        if (!$this->apnsEnabled) {throw new InvalidConfigException('Apns in not enabled.');}
+        if (!$this->apnsEnabled) {
+            throw new InvalidConfigException('Apns in not enabled.');
+        }
 
         $path = sprintf('ssl://gateway%s.push.apple.com:2195', ArrayHelper::getValue($this->apnsConfig, 'environment'));
         $this->ctx = stream_context_create();
@@ -321,13 +352,21 @@ class Push extends Component
 
         $fp = stream_socket_client($path, $err, $message, 60, STREAM_CLIENT_CONNECT | STREAM_CLIENT_PERSISTENT, $this->ctx);
 
-        if (!$fp) {throw new Exception("Failed to connect: $err $message");}
+        if (!$fp) {
+            throw new Exception("Failed to connect: $err $message");
+        }
 
-        if (is_array($body)) {$body = Json::encode($body);}
+        if (is_array($body)) {
+            $body = Json::encode($body);
+        }
 
         $tokens = [];
 
-        if (is_string($token)) {$tokens[] = $token;} else {$tokens = $token;}
+        if (is_string($token)) {
+            $tokens[] = $token;
+        } else {
+            $tokens = $token;
+        }
 
         foreach ($tokens as $token) {
             try {

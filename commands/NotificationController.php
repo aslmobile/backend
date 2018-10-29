@@ -61,26 +61,27 @@ class NotificationController extends ConsoleController
     public function actionTest()
     {
         $push = \Yii::$app->push;
-        $notification = Notifications::findOne(1);
-        $push->ios()->send('8a27747526c52cc5a66e920981ee069baa55ae4cd769b86125a1fe39494c0788', ['aps' => [
-            'alert' => $notification->text . ': ' . $notification->title,
-            'sound' => 'default',
-            'notification_id' => $notification->id,
-            'type' => $notification->type,
-        ]]);
-        $push->firebase()->send('dxVCzDP7Hdg:APA91bEpaCBtoT8pIsvY0J9pSyqH2XsMDHAYR8WHaDXG35RY3gsr52tGmbtlpKIVkljC_trH0AipigFg0eF_ElGTeyeoCjEtuOAFvvz88jswlSbrYd_53Ds-RY1y2FVYYihh9445tB6f_aQeII2Kj_hrrVqGy6S95g',
+        $notification = Notifications::findOne(2);
+//        $push->ios()->send('8a27747526c52cc5a66e920981ee069baa55ae4cd769b86125a1fe39494c0788', ['aps' => [
+//            'alert' => $notification->text . ': ' . $notification->title,
+//            'sound' => 'default',
+//            'notification_id' => $notification->id,
+//            'type' => $notification->type,
+//        ]]);
+        $push->firebase()->send('fFmvUgR_p0E:APA91bGZRVq90J1SfGBqTDt1e0JQMAVnlkD5nO6vFbAM4XTPdr7FooY1R-G5fAJt0F82ijnsjnKp25344feDxuP_7yt7gaSJmp7VridE9L-rPcZWQQwrY_JuHu3W1poibvZXmZIbgiC-',
             [
-                'notification' => [
-                    'body' => $notification->text . ': ' . $notification->title,
-                    'title' => $notification->title,
-                    'sound' => 'default',
-                ],
+//                'notification' => [
+//                    'body' => $notification->text,
+//                    'title' => $notification->title,
+//                    'sound' => 'default',
+//                ],
                 'priority' => 'high',
                 'data' => [
-                    'notification_id' => $notification->id,
+                    'title' => $notification->title,
+                    'body' => $notification->text,
+                    'time' => $notification->time,
                     'type' => $notification->type,
                 ],
-            ]
-        );
+            ], 1);
     }
 }
