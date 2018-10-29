@@ -40,7 +40,6 @@ class TripController extends ConsoleController
                     if (!empty($penalty)) continue;
                     $trip->start_time += 60 * 60 * 24;
                     $trip->update(false);
-                    $trip->schedule = '';
                     Trip::cloneTrip($trip, Trip::STATUS_CREATED, true);
                 }
             }

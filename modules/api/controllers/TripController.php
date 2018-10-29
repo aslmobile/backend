@@ -303,8 +303,8 @@ class TripController extends BaseController
         }
 
         if (isset($this->body->schedule) && !empty($this->body->schedule)) {
-            $trip->schedule = json_encode($this->body->schedule);
-            Trip::cloneTrip($trip, Trip::STATUS_SCHEDULED);
+            $schedule = json_encode($this->body->schedule);
+            Trip::cloneTrip($trip, Trip::STATUS_SCHEDULED, false, $schedule);
             Notifications::create(
                 Notifications::NTP_TRIP_SCHEDULED,
                 [$trip->user_id],
@@ -505,15 +505,16 @@ class TripController extends BaseController
 
 
         if (isset($this->body->schedule) && !empty($this->body->schedule)) {
-            $trip->schedule = json_encode($this->body->schedule);
+            $schedule = json_encode($this->body->schedule);
             if ($trip->status == Trip::STATUS_SCHEDULED) {
+                $trip->schedule = $schedule;
                 Notifications::updateAll(['time' => $this->body->time, 'status' => Notifications::STATUS_NEW], [
                     'type' => Notifications::NTP_TRIP_SCHEDULED,
                     'user_id' => $trip->user_id,
                     'initiator_id' => $trip->id,
                 ]);
             } else {
-                Trip::cloneTrip($trip, Trip::STATUS_SCHEDULED);
+                Trip::cloneTrip($trip, Trip::STATUS_SCHEDULED, false, $schedule);
                 Notifications::create(
                     Notifications::NTP_TRIP_SCHEDULED,
                     [$trip->user_id],
@@ -619,7 +620,7 @@ class TripController extends BaseController
 
             $array_trip = $trip->toArray();
 
-            if (in_array($trip->status, $past)) {
+            if (in_array($trip->status, $past) && empty($trip->schedule)) {
                 $wait_time = $trip->taxi_time - 900 - $trip->created_at;
                 $way_time = $trip->finish_time - $trip->start_time;
                 $array_trip += [

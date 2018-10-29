@@ -739,12 +739,14 @@ class Trip extends \yii\db\ActiveRecord
      * @param $trip
      * @param $status
      * @param bool $time
+     * @param string $schedule
      * @return bool
      */
-    public static function cloneTrip($trip, $status, $time = false)
+    public static function cloneTrip($trip, $status, $time = false, $schedule = '')
     {
 
         $new_trip = new Trip();
+        $new_trip->schedule = $schedule;
         $old_attributes = $trip->attributes;
         unset($old_attributes['id']);
         foreach ($old_attributes as $attribute => $value) $new_trip->$attribute = $value;
