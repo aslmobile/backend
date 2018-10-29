@@ -59,7 +59,7 @@ class SocketServer implements MessageComponentInterface
                 echo "Connection closed! No device auth!\n";
                 $conn->close();
             } elseif ($authkey === $this->server) {
-                $conn->device = (object)['id' => 0];
+                $conn->device = (object)['id' => 0, 'user_id' => 0];
                 $this->devices += [$conn->device->id => $conn];
                 echo "Server connected.\n" . date('d.m.Y h:i', time()) . "\n";
             } else {
