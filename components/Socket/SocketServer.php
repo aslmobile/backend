@@ -60,12 +60,12 @@ class SocketServer implements MessageComponentInterface
                 $conn->close();
             } elseif ($authkey === $this->server) {
                 $conn->device = (object)['id' => 0, 'user_id' => 0];
-                $this->devices += [$conn->device->id => $conn];
+                $this->devices += [$conn->resourceId => $conn];
                 echo "Server connected.\n" . date('d.m.Y h:i', time()) . "\n";
             } else {
                 $conn->device = $device;
-                if (isset($this->devices[$conn->device->id])) $this->devices[$conn->device->id]->close();
-                $this->devices += [$conn->device->id => $conn];
+                //if (isset($this->devices[$conn->device->id])) $this->devices[$conn->device->id]->close();
+                $this->devices += [$conn->resourceId => $conn];
                 Yii::$app->db->createCommand()->update('users', ['last_activity' => null], 'id = ' . $device->user_id)->execute();
                 echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; connected.\n" . date('d.m.Y h:i', time()) . "\n";
             }
@@ -93,15 +93,16 @@ class SocketServer implements MessageComponentInterface
 
         if (isset($conn->device)) {
 
-            if (isset($this->devices[$conn->device->id])) {
-                unset($this->devices[$conn->device->id]);
+            if (isset($this->devices[$conn->resourceId])) {
+                unset($this->devices[$conn->resourceId]);
             }
         }
 
-        if ($conn->device->id && !empty ($conn->device->id)) {
+        if ($conn->device->id) {
             Yii::$app->db->createCommand()->update('users', ['last_activity' => time()], 'id = ' . $conn->device->user_id)->execute();
-            echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; disconnected.\n" . date('d.m.Y h:i', time()) . "\n";
         }
+        echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; disconnected.\n" . date('d.m.Y h:i', time()) . "\n";
+
     }
 
     /**
