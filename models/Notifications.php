@@ -155,7 +155,7 @@ class Notifications extends \yii\db\ActiveRecord
 
     public static function create($type = self::NT_DEFAULT, $addressed, $message = '', $initiator = 0, $status = self::STATUS_NEW, $time = null)
     {
-        $types = self::getTypes();
+        $types = array_keys(self::getTypes());
         if (!isset ($types[$type])) return false;
         $notifications = [];
         if (is_array($addressed)) {
