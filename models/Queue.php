@@ -94,7 +94,8 @@ class Queue extends Model
     }
 
     /**
-     * @param $applicants integer[]
+     * @param $applicants
+     * @param $ids
      * @param $line Line
      * @return bool
      */

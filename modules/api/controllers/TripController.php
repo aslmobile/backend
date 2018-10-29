@@ -386,6 +386,9 @@ class TripController extends BaseController
         $trip = Trip::findOne(['id' => $id]);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
+        $trip->line_id = 0;
+        $trip->vehicle_id = 0;
+
         if (isset($this->body->route) && !empty($this->body->route)) {
             $route = Route::findOne(['status' => Route::STATUS_ACTIVE, 'id' => $this->body->route]);
         } else $route = Route::findOne($trip->route_id);
