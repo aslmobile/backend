@@ -617,9 +617,11 @@ class TripController extends BaseController
             $array_trip = $trip->toArray();
 
             if (in_array($trip->status, $past)) {
+                $wait_time = $trip->taxi_time - 900 - $trip->created_at;
+                $way_time = $trip->finish_time - $trip->start_time;
                 $array_trip += [
-                    'wait_time' => $trip->taxi_time - 900 - $trip->created_at,
-                    'way_time' => $trip->finish_time - $trip->start_time,
+                    'wait_time' => ($wait_time < 0) ? 0 : $wait_time,
+                    'way_time' => ($way_time < 0) ? 0 : $way_time,
                 ];
                 $trips_list_past[] = $array_trip;
             }
