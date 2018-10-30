@@ -296,7 +296,11 @@ class LineController extends BaseController
         }
 
         /** @var Trip $trip */
-        $trips = Trip::find()->andWhere(['line_id' => $line->id])->all();
+        $trips = Trip::find()
+            ->where(['line_id' => $line->id])
+            ->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])
+            ->all();
+
         if ($trips) {
 
             $line->penalty = 1;

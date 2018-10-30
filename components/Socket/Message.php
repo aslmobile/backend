@@ -339,7 +339,7 @@ class Message
             ]
         ];
 
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
 
         return $response;
     }
@@ -388,7 +388,7 @@ class Message
             ]
         ];
 
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
 
         return $response;
     }
@@ -420,7 +420,7 @@ class Message
             ]
         ];
 
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
 
         return $response;
     }
@@ -452,7 +452,7 @@ class Message
             ]
         ];
 
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
 
         return $response;
     }
@@ -480,7 +480,7 @@ class Message
             'data' => ['path' => $path_data]
         ];
 
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
 
         return $response;
     }
@@ -502,6 +502,7 @@ class Message
 
         /** @var Line $line */
         if (isset($data['data']['line'])) {
+
             $line = $data['data']['line'];
             $watchdog = RestFul::findOne([
                 'type' => RestFul::TYPE_DRIVER_ACCEPT,
@@ -517,7 +518,11 @@ class Message
                 ]);
                 $watchdog->save();
             }
+
+            $this->addressed = $data['data']['addressed'];
+
         } else {
+
             $line = \app\modules\api\models\Line::find()->where([
                 'status' => [
                     \app\modules\api\models\Line::STATUS_WAITING,
@@ -526,6 +531,9 @@ class Message
                 'driver_id' => $device->user_id
             ])->orderBy(['created_at' => SORT_DESC])->one();
             $line = !empty($line) ? $line->toArray() : null;
+
+            $this->addressed = [$device->user_id];
+
         }
 
         if (!empty($line)) {
@@ -602,8 +610,6 @@ class Message
             $this->error_code = 2;
         }
 
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
-
         return $response;
     }
 
@@ -641,7 +647,7 @@ class Message
             $this->error_code = 2;
         }
 
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [];
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
 
         return $response;
     }
@@ -780,12 +786,14 @@ class Message
 
         if ($timer) {
             $this->loop->addTimer(300, function ($timer) use ($line, $checkpoint, $connections, $response, $device) {
+
                 /** @var Trip $trip */
                 $trips = Trip::find()->where([
                     'startpoint_id' => intval($checkpoint['id']),
                     'line_id' => intval($line['id']),
                     'status' => Trip::STATUS_WAITING
                 ])->all();
+
                 if (!empty($trips)) {
                     foreach ($trips as $trip) {
 
