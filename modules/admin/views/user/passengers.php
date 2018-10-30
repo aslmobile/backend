@@ -31,18 +31,18 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'class' => 'btn btn-danger btn-sm',
                             'onclick' => "
-                    								var keys = $('#grid').yiiGridView('getSelectedRows');
-                    								if (keys!='') {
-                    									if (confirm('" . Yii::$app->mv->gt('Are you sure you want to delete the selected items?', [], false) . "')) {
-                    										$.ajax({
-                    											type : 'POST',
-                    											data: {keys : keys},
-                    											success : function(data) {}
-                    										});
-                    									}
-                    								}
-                    								return false;
-                    							",
+                                    var keys = $('#grid').yiiGridView('getSelectedRows');
+                                    if (keys!='') {
+                                        if (confirm('" . Yii::$app->mv->gt('Are you sure you want to delete the selected items?', [], false) . "')) {
+                                            $.ajax({
+                                                type : 'POST',
+                                                data: {keys : keys},
+                                                success : function(data) {}
+                                            });
+                                        }
+                                    }
+                                    return false;
+                                ",
                         ]
                     ); ?>
                 </div>
