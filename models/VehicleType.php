@@ -8,6 +8,7 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property int $id
  * @property string $title
+ * @property string $image
  * @property integer $status
  * @property integer $max_seats
  * @property int $created_at
@@ -37,7 +38,8 @@ class VehicleType extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title'], 'required'],
+            [['title', 'image'], 'required'],
+            ['image', 'string'],
             [['max_seats', 'status'], 'integer'],
 //            [['max_seats'], 'integer', 'min' => 1],
             ['status', 'default', 'value' => self::STATUS_ACTIVE]
@@ -50,12 +52,13 @@ class VehicleType extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'                => Yii::t('app', "ID"),
-            'title'             => Yii::t('app', "Название"),
-            'status'            => Yii::t('app', "Статус"),
-            'max_seats'         => Yii::t('app', "Мест"),
-            'created_at'        => Yii::t('app', "Создано"),
-            'updated_at'        => Yii::t('app', "Обновлено")
+            'id' => Yii::t('app', "ID"),
+            'title' => Yii::t('app', "Название"),
+            'image' => Yii::t('app', "Изображение"),
+            'status' => Yii::t('app', "Статус"),
+            'max_seats' => Yii::t('app', "Мест"),
+            'created_at' => Yii::t('app', "Создано"),
+            'updated_at' => Yii::t('app', "Обновлено")
         ];
     }
 }
