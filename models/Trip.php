@@ -55,7 +55,7 @@ use yii\helpers\ArrayHelper;
  * @property \app\models\User $user
  * @property \app\models\User $driver
  * @property \app\models\Dispatch $dispatch
- * @property  Vehicles $vehicle
+ * @property \app\modules\api\models\Vehicles $vehicle
  * @property VehicleType $vehicleType
  * @property LuggageType $baggage
  */
