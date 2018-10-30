@@ -250,7 +250,7 @@ class PaymentController extends BaseController
         if ($user) $user = $this->user;
 
         $this->prepareBody();
-        $this->validateBodyParams(['amount', 'card']);
+        $this->validateBodyParams(['amount']);
 
         $validator = new NumberValidator();
         $validator->min = 1;
@@ -258,7 +258,7 @@ class PaymentController extends BaseController
         if (!$validator->validate($this->body->amount)) $this->module->setError(422,
             '_amount', Yii::$app->mv->gt("Сумма должна быть не менее 1", [], false));
 
-        $card = PaymentCards::findOne(['id' => $this->body->card, 'user_id' => $user->id]);
+        $card = PaymentCards::findOne(['user_id' => $user->id]);
         if (!$card) $this->module->setError(422,
             '_card', Yii::$app->mv->gt("Не найдено", [], false));
 

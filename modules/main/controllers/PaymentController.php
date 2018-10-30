@@ -5,6 +5,8 @@ namespace app\modules\main\controllers;
 
 
 use app\components\Controller;
+use app\components\paysystem\Drivers\PayBox;
+use app\components\paysystem\Drivers\PayBoxSnappingCards;
 use app\components\paysystem\PaysystemProvider;
 use app\models\Transactions;
 use app\models\User;
@@ -36,9 +38,11 @@ class PaymentController extends Controller
 
         $data = ['driver' => $driver];
 
+        /** @var PayBox | PayBoxSnappingCards $controller */
         $controller = PaysystemProvider::getDriver($data);
+        $controller->result = 1;
 
-        if (method_exists($controller, 'updateTransaction')) return $controller->checkTransaction();
+        if (method_exists($controller, 'updateTransaction')) return $controller->updateTransaction();
 
         return false;
     }
@@ -49,6 +53,7 @@ class PaymentController extends Controller
 
         $data = ['driver' => $driver];
 
+        /** @var PayBox | PayBoxSnappingCards $controller */
         $controller = PaysystemProvider::getDriver($data);
 
         if (method_exists($controller, 'updateTransaction')) {
@@ -87,6 +92,7 @@ class PaymentController extends Controller
 
         $data = ['driver' => $driver];
 
+        /** @var PayBox | PayBoxSnappingCards $controller */
         $controller = PaysystemProvider::getDriver($data);
 
         if (method_exists($controller, 'callbackCard')) return $controller->callbackCard();
@@ -99,8 +105,6 @@ class PaymentController extends Controller
         \Yii::$app->response->format = Response::FORMAT_JSON;
 
         return ['status' => 'success'];
-
-        //return $this->render('success', []);
     }
 
     public function actionFail()
@@ -108,6 +112,5 @@ class PaymentController extends Controller
         \Yii::$app->response->format = Response::FORMAT_JSON;
 
         return ['status' => 'fail'];
-        //return $this->render('fail', []);
     }
 }

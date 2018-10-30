@@ -55,6 +55,18 @@ class UserController extends Controller
 
     public function actionPassengers()
     {
+
+        if (Yii::$app->request->isAjax) {
+            $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
+            if (count($keys)) {
+                foreach ($keys as $k => $v) {
+                    if (($model = User::findOne($v)) !== null) {
+                        $model->delete();
+                    }
+                }
+                return $this->redirect(['index']);
+            }
+        }
         $searchModel = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, User::TYPE_PASSENGER);
 
@@ -66,6 +78,19 @@ class UserController extends Controller
 
     public function actionDrivers()
     {
+
+        if (Yii::$app->request->isAjax) {
+            $keys = (isset($_POST['keys'])) ? $_POST['keys'] : [];
+            if (count($keys)) {
+                foreach ($keys as $k => $v) {
+                    if (($model = User::findOne($v)) !== null) {
+                        $model->delete();
+                    }
+                }
+                return $this->redirect(['index']);
+            }
+        }
+
         $searchModel = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, User::TYPE_DRIVER);
 
