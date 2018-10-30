@@ -240,11 +240,11 @@ class TripController extends BaseController
         $trip->passenger_description = $this->body->comment;
         $trip->need_taxi = $this->body->taxi ? 1 : 0;
         $trip->start_time = $this->body->time == -1 ? time() + 1800 : $this->body->time;
-        $trip->taxi_time = $this->body->time == -1 ? time() + 900 : $this->body->time + 900;
 
         if ($taxi) {
             $trip->taxi_status = $taxi->status;
             $trip->taxi_address = $taxi->address;
+            $trip->taxi_time = $this->body->time == -1 ? time() + 900 : $this->body->time;
         }
 
         if ($luggage_unique) {
@@ -442,7 +442,7 @@ class TripController extends BaseController
         Taxi::deleteAll(['trip_id' => $trip->id]);
         $trip->taxi_status = 0;
         $trip->taxi_address = '';
-        $trip->taxi_time = $time - 900;
+        $trip->taxi_time = 0;
         if (isset($this->body->taxi) && !empty($this->body->taxi)) {
             $taxi = new Taxi([
                 'checkpoint' => $checkpoint->id,
@@ -621,7 +621,7 @@ class TripController extends BaseController
             $array_trip = $trip->toArray();
 
             if (in_array($trip->status, $past) && empty($trip->schedule)) {
-                $wait_time = $trip->taxi_time - 900 - $trip->created_at;
+                $wait_time = $trip->waiting_time - $trip->created_at;
                 $way_time = $trip->finish_time - $trip->start_time;
                 $array_trip += [
                     'wait_time' => ($wait_time < 0) ? 0 : $wait_time,

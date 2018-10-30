@@ -107,7 +107,7 @@ class Queue extends Model
         if (!$device) return false;
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
-        Trip::updateAll(['line_id' => $line->id, 'taxi_time' => time() + 900], ['id' => $ids]);
+        Trip::updateAll(['line_id' => $line->id, 'waiting_time' => time()], ['id' => $ids]);
 
         foreach ($applicants as $user_id) {
             $socket->push(base64_encode(json_encode([

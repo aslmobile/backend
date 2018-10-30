@@ -39,8 +39,9 @@ use yii\helpers\ArrayHelper;
  * @property integer $taxi_status
  * @property integer $taxi_cancel_reason
  * @property string $taxi_address
- * @property integer $taxi_time
  * @property string $schedule
+ * @property integer $taxi_time
+ * @property integer $waiting_time
  * @property integer $start_time
  * @property integer $finish_time
  * @property integer $position
@@ -127,6 +128,7 @@ class Trip extends \yii\db\ActiveRecord
                     'taxi_time',
                     'start_time',
                     'finish_time',
+                    'waiting_time',
                     'penalty'
                 ],
                 'integer'
@@ -203,6 +205,7 @@ class Trip extends \yii\db\ActiveRecord
             'need_taxi' => Yii::t('app', "Заказ такси"),
             'schedule' => Yii::t('app', "По расписанию"),
             'finish_time' => Yii::t('app', "Время окончания"),
+            'waiting_time' => Yii::t('app', "Время ожидания"),
             'driver_description' => Yii::t('app', "Комментарий водителя"),
         ];
     }
@@ -747,6 +750,7 @@ class Trip extends \yii\db\ActiveRecord
 
         $new_trip = new Trip();
         $new_trip->schedule = $schedule;
+
         $old_attributes = $trip->attributes;
         unset($old_attributes['id']);
         foreach ($old_attributes as $attribute => $value) $new_trip->$attribute = $value;
@@ -780,6 +784,7 @@ class Trip extends \yii\db\ActiveRecord
         $new_trip->status = $status;
         $new_trip->created_at = time();
         $new_trip->updated_at = time();
+
         return $new_trip->save();
     }
 
