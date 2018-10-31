@@ -164,7 +164,7 @@ class QueryProcessor extends Component
 
                     $this->prepareColumn($row, $column);
 
-                    return $row[$column] == $value;
+                    return (is_object($row) ? $row->$column : $row[$column]) == $value;
                 });
             }
         }
