@@ -29,6 +29,7 @@ class TripController extends ConsoleController
     public function actionIndex()
     {
         $trips = Trip::find()->where(['status' => Trip::STATUS_SCHEDULED])
+            ->andWhere(['!=', 'queue_time', 0])
             ->andWhere(['<=', 'queue_time', time()])
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_DESC])->all();
         if (!empty($trips)) {
