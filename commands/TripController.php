@@ -5,6 +5,7 @@ namespace app\commands;
 use app\components\ConsoleController;
 use app\models\Queue;
 use app\models\Trip;
+use app\models\User;
 use app\modules\main\models\Settings;
 use Yii;
 use yii\base\Module;
@@ -39,9 +40,13 @@ class TripController extends ConsoleController
                 if (is_array($schedule) && in_array(intval(date('N')), $schedule)) {
                     $penalty = Trip::findOne(['user_id' => $trip->user_id, 'penalty' => 1]);
                     if (!empty($penalty)) continue;
-                    Trip::cloneTrip($trip, Trip::STATUS_CREATED, true);
+                    $user = User::findOne($trip->user_id);
+                    if (empty($user)) continue;
+                    $state = $user->toArray();
                     $trip->queue_time += 60 * 60 * 24;
                     $trip->update(false);
+                    if ($state['queue'] || $state['online']) continue;
+                    Trip::cloneTrip($trip, Trip::STATUS_CREATED, true);
                 }
             }
             Queue::processingQueue();

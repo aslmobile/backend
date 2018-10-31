@@ -150,6 +150,10 @@ class TripController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
+        $state = $user->toArray();
+        if($state['queue'] || $state['online'])
+            $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже на маршруте!", [], false));
+
         $this->prepareBody();
         $this->validateBodyParams(['checkpoint', 'route', 'time', 'seats', 'payment_type', 'vehicle_type_id']);
 
