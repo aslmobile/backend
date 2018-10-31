@@ -41,6 +41,7 @@ use yii\helpers\ArrayHelper;
  * @property string $taxi_address
  * @property string $schedule
  * @property integer $taxi_time
+ * @property integer $queue_time
  * @property integer $waiting_time
  * @property integer $start_time
  * @property integer $finish_time
@@ -129,6 +130,7 @@ class Trip extends \yii\db\ActiveRecord
                     'start_time',
                     'finish_time',
                     'waiting_time',
+                    'queue_time',
                     'penalty'
                 ],
                 'integer'
@@ -185,7 +187,6 @@ class Trip extends \yii\db\ActiveRecord
             'taxi_time' => Yii::t('app', "На какое время"),
             'seats' => Yii::t('app', "Места"),
             'endpoint_id' => Yii::t('app', "Конечная"),
-            'start_time' => Yii::t('app', "Время"),
             'line_id' => Yii::t('app', "Линия"),
             'route_id' => Yii::t('app', "Маршрут"),
             'amount' => Yii::t('app', "Сумма"),
@@ -205,7 +206,9 @@ class Trip extends \yii\db\ActiveRecord
             'need_taxi' => Yii::t('app', "Заказ такси"),
             'schedule' => Yii::t('app', "По расписанию"),
             'finish_time' => Yii::t('app', "Время окончания"),
+            'start_time' => Yii::t('app', "Время начала"),
             'waiting_time' => Yii::t('app', "Время ожидания"),
+            'queue_time' => Yii::t('app', "Время очереди"),
             'driver_description' => Yii::t('app', "Комментарий водителя"),
         ];
     }

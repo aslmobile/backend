@@ -29,7 +29,7 @@ class TripController extends ConsoleController
     public function actionIndex()
     {
         $trips = Trip::find()->where(['status' => Trip::STATUS_SCHEDULED])
-            ->andWhere(['<=', 'start_time', time()])
+            ->andWhere(['<=', 'queue_time', time()])
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_DESC])->all();
         if (!empty($trips)) {
             /** @var Trip $trip */
@@ -38,7 +38,7 @@ class TripController extends ConsoleController
                 if (is_array($schedule) && in_array(intval(date('N')), $schedule)) {
                     $penalty = Trip::findOne(['user_id' => $trip->user_id, 'penalty' => 1]);
                     if (!empty($penalty)) continue;
-                    $trip->start_time += 60 * 60 * 24;
+                    $trip->queue_time += 60 * 60 * 24;
                     $trip->update(false);
                     Trip::cloneTrip($trip, Trip::STATUS_CREATED, true);
                 }
