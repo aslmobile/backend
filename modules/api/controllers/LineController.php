@@ -96,6 +96,10 @@ class LineController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
+        $state = $user->toArray();
+        if($state['queue'] || $state['line_id'])
+            $this->module->setError(422, '_line', Yii::$app->mv->gt("Вы уже на маршруте!", [], false));
+
         $this->prepareBody();
         $this->validateBodyParams(['vehicle_id', 'startpoint', 'seats', 'freeseats']);
 
