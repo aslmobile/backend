@@ -61,4 +61,10 @@ class VehicleType extends \yii\db\ActiveRecord
             'updated_at' => Yii::t('app', "Обновлено")
         ];
     }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        if (empty($this->image)) $this->image = '/img/sedan.png';
+    }
 }
