@@ -226,6 +226,9 @@ class Line extends \yii\db\ActiveRecord
     {
         $array = parent::toArray($fields, $expand, $recursive);
 
+        $action = Yii::$app->controller->action->id;
+        if($action != 'path') unset($array['path']);
+
         if ($this->driver) $array['driver'] = $this->driver->toArray();
         else $array['driver'] = (object)['id' => -1];
         if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
