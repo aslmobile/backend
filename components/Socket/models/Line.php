@@ -11,13 +11,19 @@ class Line extends \app\models\Line
     {
         $array = parent::toArray($fields, $expand, $recursive);
 
-        foreach ($array as $field => $value)
-        {
-            if ($field == 'driver_id') $array[$field] = Users::findOne($this->driver_id)->toArray();
-            if ($field == 'vehicle_id') $array[$field] = Vehicles::findOne($this->vehicle_id)->toArray();
-            if ($field == 'route_id') $array[$field] = Route::findOne($this->route_id)->toArray();
-            if ($field == 'startpoint') $array[$field] = Checkpoint::findOne($this->startpoint)->toArray();
-            if ($field == 'endpoint') $array[$field] = Checkpoint::findOne($this->endpoint)->toArray();
+        $driver = Users::findOne($this->driver_id);
+        $vehicle = Vehicles::findOne($this->vehicle_id);
+        $route = Route::findOne($this->route_id);
+        $startpoint = Checkpoint::findOne($this->startpoint);
+        $endpoint = Checkpoint::findOne($this->endpoint);
+
+
+        foreach ($array as $field => $value) {
+            if ($field == 'driver_id') $array[$field] = !empty($driver) ? $driver->toArray() : (object)['id' => -1];
+            if ($field == 'vehicle_id') $array[$field] = !empty($vehicle) ? $vehicle->toArray() : (object)['id' => -1];
+            if ($field == 'route_id') $array[$field] = !empty($route) ? $route->toArray() : (object)['id' => -1];
+            if ($field == 'startpoint') $array[$field] = !empty($startpoint) ? $startpoint->toArray() : (object)['id' => -1];
+            if ($field == 'endpoint') $array[$field] = !empty($endpoint) ? $endpoint->toArray() : (object)['id' => -1];
         }
 
         return $array;
