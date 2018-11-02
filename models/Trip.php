@@ -726,7 +726,8 @@ class Trip extends \yii\db\ActiveRecord
             $baggages[] = [
                 'id' => $baggage->id,
                 'title' => $baggage->title,
-                'need_place' => $baggage->need_place
+                'need_place' => $baggage->need_place,
+                'seats' => $baggage->seats
             ];
         }
 
