@@ -451,7 +451,9 @@ class Trip extends \yii\db\ActiveRecord
 
         $this->botBeforeSave();
 
-        if (isset($this->oldAttributes['line_id'])) {
+        $controller = Yii::$app->controller->id;
+
+        if ($controller == 'bot-trip' && isset($this->oldAttributes['line_id'])) {
             $old_line_id = $this->oldAttributes['line_id'];
             if ($old_line_id != $this->line_id) {
                 $old_line = Line::findOne($old_line_id);
