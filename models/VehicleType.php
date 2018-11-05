@@ -65,6 +65,6 @@ class VehicleType extends \yii\db\ActiveRecord
     public function afterFind()
     {
         parent::afterFind();
-        if (empty($this->image)) $this->image = '/img/sedan.png';
+        if (empty($this->image)) $this->image = '/files/sedan.png';
     }
 }
