@@ -83,6 +83,7 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             [['phone'], 'required'],
             ['email', 'email'],
+            ['email', 'unique', 'filter' => 'type = 1'],
             [['email', 'type'], 'unique', 'targetAttribute' => ['email', 'type'],
                 'message' => Yii::t('app', 'This email address has already been taken.')
             ],

@@ -26,10 +26,10 @@ $yesno = Yii::$app->params['yesno'];
             <div class="box-body">
                 <div class="row">
                     <div class="col-sm-12"><?= $form->field($model, 'status')->dropDownList($model->statuses) ?></div>
-                    <div class="col-sm-12"><?= $form->field($model, 'type')->dropDownList($model->types) ?></div>
+                    <div class="col-sm-12"><?= $form->field($model, 'type', ['enableAjaxValidation' => true])->dropDownList($model->types) ?></div>
                     <div class="col-sm-12 col-md-6"><?= $form->field($model, 'first_name')->textInput(['maxlength' => true]) ?></div>
                     <div class="col-sm-12 col-md-6"><?= $form->field($model, 'second_name')->textInput(['maxlength' => true]) ?></div>
-                    <div class="col-sm-12 col-md-6"><?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?></div>
+                    <div class="col-sm-12 col-md-6"><?= $form->field($model, 'email', ['enableAjaxValidation' => true])->textInput(['maxlength' => true]) ?></div>
                     <div class="col-sm-12 col-md-6"><?= $form->field($model, 'phone')->textInput() ?></div>
                     <div class="col-sm-12"><?= $form->field($model, 'password')->passwordInput() ?></div>
                 </div>

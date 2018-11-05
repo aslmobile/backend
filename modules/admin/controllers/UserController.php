@@ -15,6 +15,7 @@ use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UploadedFile;
+use yii\widgets\ActiveForm;
 
 /**
  * UserController implements the CRUD actions for User model.
@@ -212,6 +213,11 @@ class UserController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            return ActiveForm::validate($model);
+        }
         $oldStatus = $model->status;
 
         if ($model->load(Yii::$app->request->post())) {
@@ -250,12 +256,15 @@ class UserController extends Controller
                     }
                 }
 
-                if($oldStatus != $model::STATUS_APPROVED && $model->status == $model::STATUS_APPROVED){
+                if ($oldStatus != $model::STATUS_APPROVED && $model->status == $model::STATUS_APPROVED) {
                     $notifications = Notifications::create(Notifications::NTD_ACCEPTED, [$model->id]);
                     foreach ($notifications as $notification) Notifications::send($notification);
                 }
 
                 Yii::$app->getSession()->setFlash('success', Yii::$app->mv->gt('Сохранено', [], 0));
+                return $this->redirect(['update', 'id' => $model->id]);
+            } else {
+                Yii::$app->getSession()->setFlash('error', Yii::$app->mv->gt('Ошибка', [], 0));
                 return $this->redirect(['update', 'id' => $model->id]);
             }
         } else {
