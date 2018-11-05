@@ -10,7 +10,7 @@ class Vehicles extends \app\models\Vehicles
         $model = VehicleModels::findOne($this->vehicle_model_id);
         $brand = VehicleBrands::findOne($this->vehicle_brand_id);
 
-        if (!empty($type)) $array += ['type_image' => $type->image]; else $array += ['type_image' => ''];
+        if (!empty($type)) $array += ['type_image' => $type->image]; else $array += ['type_image' => '/img/sedan.png'];
 
         $images = ['image', 'insurance', 'registration', 'registration2'];
         foreach ($images as $field) {
