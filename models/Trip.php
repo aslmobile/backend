@@ -762,6 +762,7 @@ class Trip extends \yii\db\ActiveRecord
         foreach ($old_attributes as $attribute => $value) $new_trip->$attribute = $value;
 
         if ($time) {
+            $new_trip->queue_time = time();
             $new_trip->start_time = time() + 1800;
             $new_trip->taxi_time = time() + 900;
         }
