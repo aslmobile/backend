@@ -809,10 +809,10 @@ class Trip extends \yii\db\ActiveRecord
         else $array['route'] = (object)['id' => -1];
 
         if ($this->vehicle) $array['vehicle'] = $this->vehicle->toArray();
-        else $array['vehicle'] = (object)['id' => -1];
+        else $array['vehicle'] = (object)['id' => -1, 'type_image' => '/img/sedan.png'];
 
         if ($this->vehicleType) $array['vehicleType'] = $this->vehicleType->toArray();
-        else $array['vehicleType'] = (object)['id' => -1];
+        else $array['vehicleType'] = (object)['id' => -1, 'image' => '/img/sedan.png'];
 
         if ($this->driver) $array['driver'] = $this->driver->toArray();
         else $array['driver'] = (object)['id' => -1];
