@@ -523,6 +523,11 @@ class TripController extends BaseController
                 $trip->amount += $_trip_luggage->amount;
             }
 
+        } else {
+
+            $trip->seats += $luggage_seats;
+            $trip->amount += $luggage_amount;
+
         }
 
         if ($trip->payment_type == Trip::PAYMENT_TYPE_CASH) $trip->amount += $penalty_amount;
