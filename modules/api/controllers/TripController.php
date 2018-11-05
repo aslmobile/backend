@@ -151,7 +151,7 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $state = $user->toArray();
-        if($state['queue'] || $state['online'])
+        if ($state['queue'] || $state['online'])
             $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже на маршруте!", [], false));
 
         $this->prepareBody();
@@ -265,13 +265,13 @@ class TripController extends BaseController
                 } else $amount = (float)floatval(0.0);
 
                 $_trip_luggage = new TripLuggage();
-                $_trip_luggage->unique_id = (string)$luggage_unique;
-                $_trip_luggage->amount = (float)floatval($amount);
-                $_trip_luggage->status = (int)0;
-                $_trip_luggage->need_place = (int)intval($luggage['need_place']);
-                $_trip_luggage->seats = (int)intval($luggage['seats']);
-                $_trip_luggage->currency = (string)"₸";
-                $_trip_luggage->luggage_type = (int)intval($luggage['id']);
+                $_trip_luggage->unique_id = strval($luggage_unique);
+                $_trip_luggage->amount = floatval($amount);
+                $_trip_luggage->status = 0;
+                $_trip_luggage->need_place = intval($luggage['need_place']);
+                $_trip_luggage->seats = intval($luggage['seats']);
+                $_trip_luggage->currency = strval("₸");
+                $_trip_luggage->luggage_type = intval($luggage['id']);
 
                 $_trip_luggage->save();
 
@@ -394,6 +394,9 @@ class TripController extends BaseController
         $trip->line_id = 0;
         $trip->vehicle_id = 0;
 
+        $luggage_seats = 0;
+        $luggage_amount = 0;
+
         if (isset($this->body->route) && !empty($this->body->route)) {
             $route = Route::findOne(['status' => Route::STATUS_ACTIVE, 'id' => $this->body->route]);
         } else $route = Route::findOne($trip->route_id);
@@ -426,15 +429,22 @@ class TripController extends BaseController
             $vehicle_type_id = $this->body->vehicle_type_id; else $vehicle_type_id = $trip->vehicle_type_id;
 
         $luggage_unique = false;
-        if (!empty($trip->luggages)) {
-            /** @var TripLuggage $luggage */
-            foreach ($trip->luggages as $luggage) {
-                $seats -= $luggage->seats;
-                $trip->amount -= $luggage->amount;
-            }
+
+        /** @var TripLuggage $luggage */
+        if (!empty($trip->luggages)) foreach ($trip->luggages as $luggage) {
+            $luggage_amount += $luggage->amount;
+            $luggage_seats += $luggage->seats;
         }
-        TripLuggage::deleteAll(['unique_id' => $trip->luggage_unique_id]);
+
         if (isset($this->body->luggage) && !empty($this->body->luggage)) {
+
+            /** @var TripLuggage $luggage */
+            if (!empty($trip->luggages)) foreach ($trip->luggages as $luggage) {
+                $luggage_seats -= $luggage->seats;
+                $luggage_amount -= $luggage->amount;
+            }
+
+            TripLuggage::deleteAll(['unique_id' => $trip->luggage_unique_id]);
             $_luggages = [];
             $luggages = $this->body->luggage;
             if (is_array($luggages) && count($luggages) > 0) foreach ($luggages as $luggage) {
@@ -447,6 +457,7 @@ class TripController extends BaseController
                 $luggage_unique .= $user->id . '+' . $route->id;
                 $luggage_unique = hash('sha256', md5($luggage_unique) . time());
             }
+
         }
 
         $taxi = false;
@@ -467,10 +478,11 @@ class TripController extends BaseController
         $trip->currency = "₸";
         $trip->startpoint_id = $checkpoint->id;
         $trip->route_id = $route->id;
-        $trip->amount = $trip->seats * $trip->tariff;
         $trip->endpoint_id = $endpoint->id;
 
-        $trip->seats = $seats;
+        $trip->seats = $seats - $luggage_seats;
+        $trip->amount = ($trip->seats * $trip->tariff) - $luggage_amount;
+
         $trip->payment_type = $payment_type;
         $trip->passenger_description = $comment;
         $trip->need_taxi = $taxi ? 1 : 0;
