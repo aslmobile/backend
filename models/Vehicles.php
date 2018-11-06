@@ -131,6 +131,17 @@ class Vehicles extends \yii\db\ActiveRecord
         return parent::beforeSave($insert);
     }
 
+    public function beforeDelete()
+    {
+        $active_lines = Line::findAll(['vehicle_id' => $this->id, 'status' => [
+            Line::STATUS_QUEUE,
+            Line::STATUS_WAITING,
+            Line::STATUS_IN_PROGRESS
+        ]]);
+        if (!empty($active_lines)) return false;
+        return parent::beforeDelete();
+    }
+
     public function getBrand()
     {
         return \app\modules\admin\models\VehicleBrand::findOne($this->vehicle_brand_id);
