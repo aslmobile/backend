@@ -170,7 +170,7 @@ class Line extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if ($this->freeseats === 0 && $this->status === Line::STATUS_WAITING) {
+        if ($this->freeseats == 0 && $this->status == Line::STATUS_WAITING) {
 
             $device = Devices::findOne(['user_id' => $this->driver_id]);
             if ($device) {

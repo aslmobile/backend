@@ -437,7 +437,7 @@ class LineController extends BaseController
                 ['=', 'trip.line_id', $line->id],
                 ['=', 'trip.driver_id', $line->driver_id],
                 ['IN', 'trip.status', [Trip::STATUS_WAITING, Trip::STATUS_WAY]]
-            ])->andWhere(['users.status' => User::STATUS_APPROVED])->orderBy(['checkpoint.weight' => SORT_ASC])->all();
+            ])->orderBy(['checkpoint.weight' => SORT_ASC])->all();
 
             $all_checkpoints = Checkpoint::find()->with(['childrenR'])
                 ->where(['route' => $line->route_id, 'status' => Checkpoint::STATUS_ACTIVE])
@@ -448,7 +448,7 @@ class LineController extends BaseController
                 ])
                 ->orderBy(['type' => SORT_ASC, 'weight' => SORT_ASC])->all();
 
-            if (!empty($all_checkpoints) ?? count($all_checkpoints) > 0) {
+            if (!empty($all_checkpoints) && count($all_checkpoints) > 0) {
 
                 /** @var \app\models\Trip $trip */
                 if ($trips && count($trips) > 0) {
