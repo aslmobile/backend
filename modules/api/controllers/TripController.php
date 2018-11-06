@@ -436,15 +436,11 @@ class TripController extends BaseController
             $luggage_seats += $luggage->seats;
         }
 
-        if (isset($this->body->luggage) && !empty($this->body->luggage)) {
-
-            /** @var TripLuggage $luggage */
-            if (!empty($trip->luggages)) foreach ($trip->luggages as $luggage) {
-                $luggage_seats -= $luggage->seats;
-                $luggage_amount -= $luggage->amount;
-            }
+        if (isset($this->body->luggage) && is_array($this->body->luggage)) {
 
             TripLuggage::deleteAll(['unique_id' => $trip->luggage_unique_id]);
+            $luggage_unique = true;
+
             $_luggages = [];
             $luggages = $this->body->luggage;
             if (is_array($luggages) && count($luggages) > 0) foreach ($luggages as $luggage) {

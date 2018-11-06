@@ -86,9 +86,11 @@ class Trip extends \yii\db\ActiveRecord
         PAYMENT_STATUS_REJECTED = 3;
 
     const
-        PAYMENT_TYPE_CARD = 4,
+        GATEWAY_PAYBOX = 1,
+
         PAYMENT_TYPE_CASH = 2,
-        PAYMENT_TYPE_KM = 3;
+        PAYMENT_TYPE_KM = 3,
+        PAYMENT_TYPE_CARD = 4;
 
     public static function tableName()
     {
