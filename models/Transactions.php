@@ -181,17 +181,31 @@ class Transactions extends \yii\db\ActiveRecord
             [
                 'id' => self::GATEWAY_CASH,
                 'value' => Yii::t('app', "Наличные")
+            ],
+            [
+                'id' => self::GATEWAY_KM,
+                'value' => Yii::t('app', "Бесплатные километры")
             ]
         ];
     }
 
-    public static function getInOutMethods()
+    public static function getInMethods()
     {
         return [
             [
                 'id' => self::GATEWAY_PAYBOX,
                 'value' => Yii::t('app', "PayBox")
-            ]
+            ],
+        ];
+    }
+
+    public static function getOutMethods()
+    {
+        return [
+            [
+                'id' => self::GATEWAY_PAYBOX_CARD,
+                'value' => Yii::t('app', "PayBox CARD")
+            ],
         ];
     }
 

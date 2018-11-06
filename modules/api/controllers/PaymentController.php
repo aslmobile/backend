@@ -198,12 +198,14 @@ class PaymentController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $this->module->data = Transactions::getInOutMethods();
+        $this->module->data['in'] = Transactions::getInMethods();
+        $this->module->data['out'] = Transactions::getOutMethods();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
 
-    public function actionPayOut(){
+    public function actionPayOut()
+    {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
@@ -356,7 +358,7 @@ class PaymentController extends BaseController
                 foreach ($transaction->errors as $field => $error_message) {
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= '; '.$error;
+                        foreach ($error_message as $error) $result .= '; ' . $error;
                         $error_message = $result;
                     }
                     $this->module->setError(422,

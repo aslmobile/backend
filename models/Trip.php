@@ -79,6 +79,17 @@ class Trip extends \yii\db\ActiveRecord
         TAXI_STATUS_WAY = 3,
         TAXI_STATUS_DELIVERED = 4;
 
+    const
+        PAYMENT_STATUS_WAITING = 4,
+        PAYMENT_STATUS_PAID = 1,
+        PAYMENT_STATUS_CANCELLED = 2,
+        PAYMENT_STATUS_REJECTED = 3;
+
+    const
+        PAYMENT_TYPE_CARD = 4,
+        PAYMENT_TYPE_CASH = 2,
+        PAYMENT_TYPE_KM = 3;
+
     public static function tableName()
     {
         return 'trip';
