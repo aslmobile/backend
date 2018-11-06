@@ -658,7 +658,31 @@ class TripController extends BaseController
                 ];
                 $trips_list_past[] = $array_trip;
             }
-            if (in_array($trip->status, $feature)) $trips_list_feature[] = $array_trip;
+
+            if (in_array($trip->status, $feature)) {
+
+                $queue_times = [];
+                $queue_time = $array_trip['queue_time'];
+                $schedule = $array_trip['schedule'];
+
+                if (!empty($schedule)) {
+
+                    foreach ($schedule as $day) {
+                        $target = Yii::$app->params['weekdays'][$day];
+                        $date = new \DateTime();
+                        $date->modify("next $target");
+                        $time = date('H:i:s', $queue_time);
+                        $args = explode(':', $time);
+                        $date->setTime($args[0], $args[1], $args[2]);
+                        $queue_times[] = $date->getTimestamp();
+                    }
+                    sort($queue_times);
+                    $array_trip['queue_time'] = $queue_times[0];
+                    $trips_list_feature[] = $array_trip;
+                }
+
+            }
+
             if (in_array($trip->status, $current)) $trips_list_current[] = $array_trip;
         }
 
