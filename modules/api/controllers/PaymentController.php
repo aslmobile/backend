@@ -430,7 +430,13 @@ class PaymentController extends BaseController
                 $query = new ArrayQuery();
 
                 $km_settings = \app\models\Km::findOne(1);
+                if (empty($km_settings)) $this->module->setError(422,
+                    '_km', Yii::$app->mv->gt("Вы не можете оплатить данную поездку бесплатными километрами", [], false));
+
                 $km_waste = $km_settings->settings_waste;
+                if (empty($km_waste)) $this->module->setError(422,
+                    '_km', Yii::$app->mv->gt("Вы не можете оплатить данную поездку бесплатными километрами", [], false));
+
                 $day = date('N');
                 $time = intval(str_replace(':', '', date('H:i')));
                 $query->from($km_waste);
@@ -444,6 +450,9 @@ class PaymentController extends BaseController
                         ->andWhere(['<=', 'from', $time])->andWhere(['>=', 'to', $time])
                         ->one();
                     if (!$waste || $user->km < Yii::$app->params['distance']) $this->module->setError(422,
+                        '_km', Yii::$app->mv->gt("Вы не можете оплатить данную поездку бесплатными километрами", [], false));
+                } else {
+                    $this->module->setError(422,
                         '_km', Yii::$app->mv->gt("Вы не можете оплатить данную поездку бесплатными километрами", [], false));
                 }
 
