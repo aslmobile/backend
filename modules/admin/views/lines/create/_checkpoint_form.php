@@ -72,22 +72,6 @@ $this->registerJs($script, \yii\web\View::POS_READY);
         <div class="box">
             <div class="box-body">
 
-                <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($model, 'status')->dropDownList($model->statusList) ?>
-                <?= $form->field($model, 'type')->dropDownList($model->typesList) ?>
-
-                <?= $form->field($model, 'children', ['template' => '{label}<br>{input}{error}{hint}'])->dropdownList(
-                    $all_children,
-                    [
-                        'placeholder' => Yii::$app->mv->gt('Городские остановки', [], false),
-                        'selvalue' => $children_v,
-                        'vn' => count($children),
-                        'class' => 'sel2 mpsel outst',
-                        'multiple' => 'true'
-                    ]
-                ); ?>
-
-                <?= $form->field($model, 'weight')->textInput(['maxlength' => true]) ?>
                 <?= $form->field($model, 'route')->widget(Select2::classname(), [
                     'data' => \yii\helpers\ArrayHelper::map
                     (\app\modules\admin\models\Route::find()
@@ -100,6 +84,21 @@ $this->registerJs($script, \yii\web\View::POS_READY);
                     ],
                     'pluginOptions' => ['allowClear' => true]
                 ]); ?>
+                <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
+                <?= $form->field($model, 'type')->dropDownList($model->typesList) ?>
+                <?= $form->field($model, 'weight')->textInput(['maxlength' => true]) ?>
+
+                <?= $form->field($model, 'children', ['template' => '{label}<br>{input}{error}{hint}'])->dropdownList(
+                    $all_children,
+                    [
+                        'placeholder' => Yii::$app->mv->gt('Городские остановки', [], false),
+                        'selvalue' => $children_v,
+                        'vn' => count($children),
+                        'class' => 'sel2 mpsel outst',
+                        'multiple' => 'true'
+                    ]
+                ); ?>
+                <?= $form->field($model, 'status')->dropDownList($model->statusList) ?>
 
                 <!--                --><? //= $form->field($model, 'country_id')->widget(Select2::classname(), [
                 //                    'model' => [],
