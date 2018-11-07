@@ -1,6 +1,7 @@
 <?php namespace app\modules\api\controllers;
 
 use app\models\User;
+use app\modules\api\models\Line;
 use app\modules\api\models\UploadFiles;
 use app\modules\api\models\VehicleBrands;
 use app\modules\api\models\VehicleModels;
@@ -269,6 +270,15 @@ class VehiclesController extends BaseController
         if ($user) $user = $this->user;
 
         $vehicle = Vehicles::findOne(['id' => $id]);
+
+        $active_lines = Line::findAll(['vehicle_id' => $vehicle->id, 'status' => [
+            Line::STATUS_QUEUE,
+            Line::STATUS_WAITING,
+            Line::STATUS_IN_PROGRESS
+        ]]);
+        if (!empty($active_lines))
+            $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Автомобиль используется !", [], false));
+
         if (!$vehicle) $this->module->setError(422, 'vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
         $vehicle->delete();
