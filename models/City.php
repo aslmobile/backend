@@ -14,6 +14,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property integer $id
  * @property integer $status
+ * @property integer $country_id
  * @property string $title
  */
 class City extends \yii\db\ActiveRecord
@@ -72,7 +73,7 @@ class City extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['status'], 'integer'],
+            [['status', 'country_id'], 'integer'],
             [['title'], 'string', 'max' => 64],
         ];
     }
