@@ -39,7 +39,7 @@ $form = ActiveForm::begin(['options' => ['class' => 'form']]); ?>
                 <div class="row">
                     <div class="col-sm-6">
                         <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
-                        <?= $form->field($model, 'country')->widget(
+                        <?= $form->field($model, 'country_id')->widget(
                             \kartik\select2\Select2::className(), [
                                 'data' => \app\models\Countries::filter()
                             ]
