@@ -690,7 +690,7 @@ class Message
             }
 
             if ($timer) {
-                $this->loop->addTimer(300, function () use ($connections, $device, $passenger, $line_data) {
+                $this->loop->addTimer(300, function () use ($passenger, $line_data) {
                     /** @var Trip $trip */
                     $trip = Trip::find()->where([
                         'user_id' => $passenger,
@@ -748,6 +748,8 @@ class Message
         /** @var Devices $device */
         if ($this->validateDevice($from)) $device = $from->device;
 
+        $user_device = clone $device;
+
         $data = $data['data'];
         $this->message_id = intval($data['message_id']);
         $line = $data['line'];
@@ -784,8 +786,8 @@ class Message
             ]
         ];
 
-        if ($timer) {
-            $this->loop->addTimer(300, function () use ($line, $checkpoint, $connections, $response, $device) {
+        if ($timer && isset($user_device)) {
+            $this->loop->addTimer(300, function () use ($line, $checkpoint, $connections, $response, $user_device) {
 
                 /** @var Trip $trip */
                 $trips = Trip::find()->where([
@@ -811,8 +813,8 @@ class Message
                             'error_code' => 0,
                             'data' => [
                                 'message_id' => $this->message_id,
-                                'device_id' => $device->id,
-                                'user_id' => $device->user_id,
+                                'device_id' => $user_device->id,
+                                'user_id' => $user_device->user_id,
                                 'data' => [
                                     'decline_from' => time(),
                                     'decline_time' => 300,
@@ -825,7 +827,7 @@ class Message
                             $notifications = Notifications::create(
                                 Notifications::NTP_TRIP_CANCEL, [$trip->user_id],
                                 \Yii::t('app', "Вам отказано в поездке. Причина - опоздание."),
-                                $device->user_id
+                                $user_device->user_id
                             );
                             foreach ($notifications as $notification) Notifications::send($notification);
                         } else {
