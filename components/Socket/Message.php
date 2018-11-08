@@ -503,6 +503,8 @@ class Message
         /** @var Line $line */
         if (isset($data['data']['line'])) {
 
+            $user_device = clone $device;
+
             $line = $data['data']['line'];
             $watchdog = RestFul::findOne([
                 'type' => RestFul::TYPE_DRIVER_ACCEPT,
@@ -550,8 +552,8 @@ class Message
                 ]
             ];
 
-            if (isset($data['data']['timer']) && $data['data']['timer']) {
-                $this->loop->addTimer(300, function ($timer) use ($line, $connections, $response, $device) {
+            if (isset($data['data']['timer']) && $data['data']['timer'] && isset($user_device)) {
+                $this->loop->addTimer(300, function ($timer) use ($line, $connections, $response, $user_device) {
                     $line = \app\modules\api\models\Line::findOne($line['id']);
                     if (!empty($line) && $line->status !== Line::STATUS_IN_PROGRESS) {
                         $line->status = Line::STATUS_CANCELED;
@@ -576,8 +578,8 @@ class Message
                                     'error_code' => 0,
                                     'data' => [
                                         'message_id' => $this->message_id,
-                                        'device_id' => $device->id,
-                                        'user_id' => $device->user_id,
+                                        'device_id' => $user_device->id,
+                                        'user_id' => $user_device->user_id,
                                         'data' => [
                                             'decline_from' => time(),
                                             'decline_time' => 300,
@@ -596,6 +598,7 @@ class Message
                         };
                         Queue::processingQueue();
                     }
+                    unset($user_device);
                 });
             }
 
