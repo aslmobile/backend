@@ -939,8 +939,7 @@ class TripController extends BaseController
                 $trip->status = Trip::STATUS_CANCELLED;
         }
 
-
-        $line->freeseats += $trip->seats;
+        if ($trip->driver_id == $line->driver_id && $trip->vehicle_id == $line->vehicle_id) $line->freeseats += $trip->seats;
 
         $trip->save();
         $line->save();

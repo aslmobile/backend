@@ -59,7 +59,6 @@ class Transactions extends \yii\db\ActiveRecord
 
         GATEWAY_COMMISSION = 5,
         GATEWAY_OUT = 6;
-
     //endregion
 
     /**
