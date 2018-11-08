@@ -86,7 +86,7 @@ class Trip extends \yii\db\ActiveRecord
         PAYMENT_STATUS_REJECTED = 3;
 
     const
-        GATEWAY_PAYBOX = 1,
+        PAYMENT_TYPE_PAYBOX = 1,
 
         PAYMENT_TYPE_CASH = 2,
         PAYMENT_TYPE_KM = 3,
