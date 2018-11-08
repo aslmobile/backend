@@ -553,7 +553,7 @@ class Message
             ];
 
             if (isset($data['data']['timer']) && $data['data']['timer'] && isset($user_device)) {
-                $this->loop->addTimer(300, function ($timer) use ($line, $connections, $response, $user_device) {
+                $this->loop->addTimer(300, function () use ($line, $connections, $response, $user_device) {
                     $line = \app\modules\api\models\Line::findOne($line['id']);
                     if (!empty($line) && $line->status !== Line::STATUS_IN_PROGRESS) {
                         $line->status = Line::STATUS_CANCELED;
@@ -568,11 +568,9 @@ class Message
                                 $trip->line_id = 0;
                                 $trip->status = Trip::STATUS_CREATED;
                                 $trip->save();
-
                                 $query = new ArrayQuery();
                                 $query->from($connections);
                                 $devices = $query->where(['device.user_id' => intval($trip->user_id)])->all();
-
                                 $send_response = [
                                     'action' => 'declinePassengerTrip',
                                     'error_code' => 0,
@@ -587,7 +585,6 @@ class Message
                                         ]
                                     ]
                                 ];
-
                                 if (empty($devices)) {
                                     $notifications = Notifications::create(Notifications::NTD_TRIP_CANCEL, [$trip->user_id]);
                                     foreach ($notifications as $notification) Notifications::send($notification);
@@ -693,7 +690,7 @@ class Message
             }
 
             if ($timer) {
-                $this->loop->addTimer(300, function ($timer) use ($connections, $device, $passenger, $line_data) {
+                $this->loop->addTimer(300, function () use ($connections, $device, $passenger, $line_data) {
                     /** @var Trip $trip */
                     $trip = Trip::find()->where([
                         'user_id' => $passenger,
@@ -788,7 +785,7 @@ class Message
         ];
 
         if ($timer) {
-            $this->loop->addTimer(300, function ($timer) use ($line, $checkpoint, $connections, $response, $device) {
+            $this->loop->addTimer(300, function () use ($line, $checkpoint, $connections, $response, $device) {
 
                 /** @var Trip $trip */
                 $trips = Trip::find()->where([
