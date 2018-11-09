@@ -603,7 +603,7 @@ class TripController extends BaseController
 
             $this->module->data['trip'] = $trip->toArray();
         } else {
-            $this->module->data['trip'] = [];
+            $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
         };
 
         $this->module->setSuccess();
