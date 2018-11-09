@@ -891,11 +891,13 @@ class TripController extends BaseController
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $notifications = [];
-        $addressed = [$trip->user_id, $line->driver_id];
+        $addressed = [];
         $trip->cancel_reason = 0;
 
         switch ($user->type) {
             case User::TYPE_DRIVER:
+
+                $addressed = [$trip->user_id];
 
                 $reason = '';
                 $trip->status = Trip::STATUS_CANCELLED_DRIVER;
@@ -926,6 +928,9 @@ class TripController extends BaseController
 
                 break;
             case User::TYPE_PASSENGER:
+
+                $addressed = [$line->driver_id];
+
                 $trip->status = Trip::STATUS_CANCELLED;
                 if ($line->status == Line::STATUS_IN_PROGRESS) {
                     $trip->penalty = 1;
