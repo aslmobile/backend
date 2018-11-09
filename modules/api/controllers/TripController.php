@@ -870,9 +870,8 @@ class TripController extends BaseController
 
     /**
      * Decline trip by passenger
-     * @param $id
      */
-    public function actionDeclinePassenger($id)
+    public function actionDeclinePassenger()
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
@@ -880,16 +879,16 @@ class TripController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['trip_id']);
 
-        /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne($id);
-        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
-
         /** @var Trip $trip */
         $trip = Trip::find()
             ->where(['id' => $this->body->trip_id])
             ->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])
             ->one();
         if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($trip->line_id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $notifications = [];
         $addressed = [$trip->user_id, $line->driver_id];
