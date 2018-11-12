@@ -75,7 +75,7 @@ class Queue extends Model
 
         $data = $trips->where(['route_id' => $line->route_id])
             ->andWhere(['OR', ['vehicle_type_id' => $line->vehicle_type_id], ['vehicle_type_id' => 0]])
-            ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_DESC])->all();
+            ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])->all();
 
         $queue = [];
         $need = 0;
