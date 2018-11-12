@@ -940,7 +940,7 @@ class TripController extends BaseController
                     $this->body->passenger_comment : \Yii::$app->mv->gt('Поездка отменена', [], 0);
                 break;
             default:
-                $trip->status = Trip::STATUS_CANCELLED;
+                $this->module->setError(422, '_user', Yii::$app->mv->gt("Не корректный пользователь", [], false));
         }
 
         if ($trip->driver_id == $line->driver_id && $trip->vehicle_id == $line->vehicle_id) $line->freeseats += $trip->seats;

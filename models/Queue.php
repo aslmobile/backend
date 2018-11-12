@@ -36,14 +36,17 @@ class Queue extends Model
 
         /** @var  $line Line */
         foreach ($lines as $key => $line) {
+
             $applicants = self::getQueue($line, $query);
+
+            $ids = ArrayHelper::getColumn($applicants, 'id');
+            $applicants = ArrayHelper::getColumn($applicants, 'user_id');
+            self::unsetQueue($ids, $query);
+            if (!empty($ids)) self::send($applicants, $ids, $line);
+
             if ($line->ready) {
                 $notifications = Notifications::create(Notifications::NTD_TRIP_FIRST, [$line->driver_id]);
                 foreach ($notifications as $notification) Notifications::send($notification);
-                $ids = ArrayHelper::getColumn($applicants, 'id');
-                $applicants = ArrayHelper::getColumn($applicants, 'user_id');
-                self::unsetQueue($ids, $query);
-                if (!empty($ids)) self::send($applicants, $ids, $line);
             }
 
         }
