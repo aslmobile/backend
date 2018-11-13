@@ -16,6 +16,7 @@ use app\models\TripLuggage;
 use app\models\User;
 use app\modules\admin\models\Km;
 use app\modules\api\models\Devices;
+use app\modules\api\models\RestFul;
 use app\modules\api\models\Trip;
 use Yii;
 use yii\filters\AccessControl;
@@ -352,6 +353,12 @@ class TripController extends BaseController
         $trip->vehicle_id = 0;
         $trip->line_id = 0;
 
+        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+            'AND',
+            ['user_id' => $trip->user_id],
+            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+        ]);
+
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
                 foreach ($trip->errors as $field => $error_message) {
@@ -587,10 +594,9 @@ class TripController extends BaseController
         $this->prepareBody();
 
         /** @var \app\models\Trip $trip */
-        $trip = Trip::find()->where([
-            'user_id' => $user->id,
-            'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]
-        ])->orderBy(['created_at' => SORT_DESC])->one();
+        $trip = Trip::find()->where(['user_id' => $user->id])
+            ->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])
+            ->orderBy(['created_at' => SORT_DESC])->one();
 
         if ($trip) {
             if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
@@ -599,11 +605,17 @@ class TripController extends BaseController
             $trip->passenger_comment = isset($this->body->passenger_comment) ? $this->body->passenger_comment : '';
             $trip->save();
 
+            RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                'AND',
+                ['user_id' => $trip->user_id],
+                ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+            ]);
+
             Queue::processingQueue();
 
             $this->module->data['trip'] = $trip->toArray();
         } else {
-            $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+            $this->module->setError(422, '_line', Yii::$app->mv->gt("Уже отменено", [], false));
         };
 
         $this->module->setSuccess();
@@ -884,7 +896,7 @@ class TripController extends BaseController
             ->where(['id' => $this->body->trip_id])
             ->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])
             ->one();
-        if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+        if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Уже отменено", [], false));
 
         /** @var \app\modules\api\models\Line $line */
         $line = \app\modules\api\models\Line::findOne($trip->line_id);
@@ -948,6 +960,13 @@ class TripController extends BaseController
         $trip->save();
         $line->save();
         $user->save();
+
+        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+            'AND',
+            ['user_id' => $trip->user_id],
+            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+        ]);
+
 
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
