@@ -38,9 +38,8 @@ class Queue extends Model
         foreach ($lines as $key => $line) {
 
             $applicants = self::getQueue($line, $query);
-
             $ids = ArrayHelper::getColumn($applicants, 'id');
-            $applicants = ArrayHelper::getColumn($applicants, 'user_id');
+
             self::unsetQueue($ids, $query);
             if (!empty($ids)) self::send($applicants, $ids, $line);
 
@@ -113,22 +112,26 @@ class Queue extends Model
 
         Trip::updateAll(['line_id' => $line->id, 'waiting_time' => time()], ['id' => $ids]);
 
-        foreach ($applicants as $user_id) {
+        foreach ($applicants as $applicant) {
+
+            Line::updateAll(['freeseats' => ($line->freeseats - intval($applicant['seats']))], ['id' => $line->id]);
+
             $socket->push(base64_encode(json_encode([
                 'action' => "readyPassengerTrip",
                 'notifications' => Notifications::create(
                     Notifications::NTP_TRIP_READY,
-                    [$user_id],
+                    [$applicant['user_id']],
                     '',
                     $line->driver_id
                 ),
                 'data' => [
                     'message_id' => time(),
-                    'addressed' => [$user_id],
+                    'addressed' => [$applicant['user_id']],
                     'line' => $line->toArray(),
-                    'passenger' => $user_id
+                    'passenger' => $applicant['user_id']
                 ]
             ])));
+
         }
 
         return true;

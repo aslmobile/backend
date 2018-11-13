@@ -694,16 +694,28 @@ class Message
 
             if ($timer) {
                 $this->loop->addTimer(300, function () use ($passenger, $line_data) {
+
+                    /** @var \app\modules\api\models\Line $line */
+                    $line = \app\modules\api\models\Line::findOne(intval($line_data['id']));
+
                     /** @var Trip $trip */
                     $trip = Trip::find()->where([
                         'user_id' => $passenger,
                         'line_id' => intval($line_data['id']),
-                        'status' => Trip::STATUS_WAITING
+                        'status' => Trip::STATUS_CREATED
                     ])->andWhere(['driver_id' => 0])->one();
+
                     if (!empty($trip)) {
+
                         $trip->line_id = 0;
                         $trip->save();
+
+                        if (!empty($line)) {
+                            $line->freeseats += $trip->seats;
+                            $line->save();
+                        }
                     }
+
                 });
             }
 
@@ -806,6 +818,13 @@ class Message
                         $trip->driver_description = \Yii::t('app', "Вам отказано в поездке. Причина - опоздание.");
                         $trip->penalty = 1;
                         $trip->save();
+
+                        /** @var \app\modules\api\models\Line $line */
+                        $line = \app\modules\api\models\Line::findOne($trip->line_id);
+                        if (!empty($line)) {
+                            $line->freeseats += $trip->seats;
+                            $line->save();
+                        }
 
                         $query = new ArrayQuery();
                         $query->from($connections);

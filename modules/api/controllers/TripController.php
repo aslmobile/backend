@@ -347,6 +347,8 @@ class TripController extends BaseController
         /** @var \app\modules\api\models\Trip $trip */
         $trip = Trip::findOne($id);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($trip->line_id);
 
         $trip->status = Trip::STATUS_CREATED;
         $trip->driver_id = 0;
@@ -372,6 +374,11 @@ class TripController extends BaseController
                 }
                 $this->module->sendResponse();
             } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
+        }
+
+        if (!empty($line)) {
+            $line->freeseats += $trip->seats;
+            $line->save();
         }
 
         $this->module->data['trip'] = $trip->toArray();
@@ -599,11 +606,19 @@ class TripController extends BaseController
             ->orderBy(['created_at' => SORT_DESC])->one();
 
         if ($trip) {
+
             if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
             $trip->status = Trip::STATUS_CANCELLED;
             $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
             $trip->passenger_comment = isset($this->body->passenger_comment) ? $this->body->passenger_comment : '';
             $trip->save();
+
+            /** @var \app\modules\api\models\Line $line */
+            $line = \app\modules\api\models\Line::findOne($trip->line_id);
+            if (!empty($line)) {
+                $line->freeseats += $trip->seats;
+                $line->save();
+            }
 
             RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
                 'AND',
@@ -776,14 +791,9 @@ class TripController extends BaseController
         $trip->vehicle_id = $line->vehicle_id;
         $trip->status = Trip::STATUS_WAITING;
 
-        if ($line->freeseats > $trip->seats) {
-            $line->freeseats = $line->freeseats - $trip->seats;
-        } else if ($line->freeseats == $trip->seats) {
-            $line->freeseats = 0;
+        if ($line->freeseats == 0) {
             $line->status = Line::STATUS_WAITING;
-        } else {
-            $this->module->setError(400, '_seats', Yii::$app->mv->gt("Не достаточно свободных мест", [], false));
-        };
+        }
 
         $trip->save();
         $line->save();
@@ -956,7 +966,7 @@ class TripController extends BaseController
                 $this->module->setError(422, '_user', Yii::$app->mv->gt("Не корректный пользователь", [], false));
         }
 
-        if ($trip->driver_id == $line->driver_id && $trip->vehicle_id == $line->vehicle_id) $line->freeseats += $trip->seats;
+        $line->freeseats += $trip->seats;
 
         $trip->save();
         $line->save();
