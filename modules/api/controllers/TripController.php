@@ -950,6 +950,7 @@ class TripController extends BaseController
                 $trip->status = Trip::STATUS_CANCELLED;
                 $trip->passenger_comment = isset($this->body->passenger_comment) ?
                     $this->body->passenger_comment : \Yii::$app->mv->gt('Поездка отменена', [], 0);
+
                 break;
             default:
                 $this->module->setError(422, '_user', Yii::$app->mv->gt("Не корректный пользователь", [], false));

@@ -164,11 +164,10 @@ class Message
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
         $lines = Line::find()
-            ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]
-                //, 'driver_id' => $device->user_id
-            ])
+            ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
             ->andWhere(['>', 'freeseats', 0])
-            ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_ASC])->all();
+            ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_ASC])
+            ->all();
         $queue = [];
         foreach ($lines as $line) $queue[] = $line->toArray();
 
