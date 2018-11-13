@@ -943,11 +943,11 @@ class TripController extends BaseController
 
                 $addressed = [$line->driver_id];
 
-                $trip->status = Trip::STATUS_CANCELLED;
-                if ($line->status == Line::STATUS_IN_PROGRESS) {
+                if ($trip->status != Trip::STATUS_CREATED && $line->status == Line::STATUS_IN_PROGRESS) {
                     $trip->penalty = 1;
                     $trip->driver_description = \Yii::t('app', "Вы отменили поездку после выезда водителя.");
                 }
+                $trip->status = Trip::STATUS_CANCELLED;
                 $trip->passenger_comment = isset($this->body->passenger_comment) ?
                     $this->body->passenger_comment : \Yii::$app->mv->gt('Поездка отменена', [], 0);
                 break;
