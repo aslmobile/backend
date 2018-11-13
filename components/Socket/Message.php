@@ -277,10 +277,12 @@ class Message
             $line->save();
 
             /** @var \app\models\Trip $trip */
-            $trips = ArrayHelper::getColumn(Trip::findAll([
-                'line_id' => $line->id,
-                'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING],
-            ]), 'user_id');
+            $trips = ArrayHelper::getColumn(
+                Trip::find()->where([
+                    'line_id' => $line->id,
+                    'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING]
+                ])->andWhere(['<=', 'queue_time', time()])->all(),
+                'user_id');
             $this->addressed = $trips;
 
             $response = [
