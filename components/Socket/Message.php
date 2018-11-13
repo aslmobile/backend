@@ -276,7 +276,7 @@ class Message
             $line->angle = $angle;
             $line->save();
 
-            /** @var \app\models\Trip $trip */
+            /** @var \app\models\Trip $trips */
             $trips = ArrayHelper::getColumn(
                 Trip::find()->where([
                     'line_id' => $line->id,
