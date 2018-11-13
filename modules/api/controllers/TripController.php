@@ -667,7 +667,7 @@ class TripController extends BaseController
                 $trips_list_past[] = $array_trip;
             }
 
-            if (in_array($trip->status, $feature)) {
+            if (in_array($trip->status, $feature) || ($trip->status == Trip::STATUS_CREATED && $trip->queue_time >= time())) {
 
                 $queue_times = [];
                 $queue_time = $array_trip['queue_time'];
@@ -691,7 +691,7 @@ class TripController extends BaseController
 
             }
 
-            if (in_array($trip->status, $current)) $trips_list_current[] = $array_trip;
+            if (in_array($trip->status, $current) && $trip->queue_time <= time()) $trips_list_current[] = $array_trip;
         }
 
         $this->module->data['trips']['past'] = $trips_list_past;
