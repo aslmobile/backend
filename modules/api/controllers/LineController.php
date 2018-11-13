@@ -400,7 +400,11 @@ class LineController extends BaseController
             Line::updateAll(['path' => json_encode($path)], ['id' => $line->id]);
 
             /** @var \app\models\Trip[] $trip */
-            $trips = Trip::find()->where(['line_id' => $line->id, 'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING]])->all();
+            $trips = Trip::find()->where([
+                'line_id' => $line->id,
+                'status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING]
+            ])->andWhere(['<=', 'queue_time', time()])->all();
+
             $addressed = ArrayHelper::getColumn($trips, 'user_id');
             /** @var \app\models\Devices $device */
             $device = Devices::findOne(['user_id' => $user->id]);
