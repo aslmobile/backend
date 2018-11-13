@@ -1092,6 +1092,7 @@ class TripController extends BaseController
 
             }
 
+            $line->endtime = time();
             $line->status = Line::STATUS_FINISHED;
             $line->save();
 
