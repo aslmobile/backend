@@ -163,7 +163,7 @@ class TripController extends BaseController
 
         if ($penalty) {
             $penalty_amount = $penalty->amount / 2;
-            if (!isset($this->body->penalty) || $this->body->penalty != $penalty_amount)
+            if (!isset($this->body->penalty) || $this->body->penalty != $penalty_amount || $this->body->payment_type != Trip::PAYMENT_TYPE_CASH)
                 $this->module->setError(422, '_penalty', Yii::$app->mv->gt("У вас не оплачен штраф", [], false));
         }
 
@@ -1012,7 +1012,7 @@ class TripController extends BaseController
         $data = ['line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray()];
         $timer = true;
 
-        if ($checkpoint->type === Checkpoint::TYPE_END) {
+        if ($checkpoint->type == Checkpoint::TYPE_END) {
 
             $trips = Trip::find()->where(['line_id' => $line->id, 'status' => Trip::STATUS_WAY])->all();
             $addressed = ArrayHelper::getColumn($trips, 'user_id');
