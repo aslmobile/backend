@@ -397,6 +397,18 @@ class TripController extends BaseController
             $line->save();
         }
 
+        /** @var \app\models\Devices $device */
+        $device = Devices::findOne(['user_id' => $line->driver_id]);
+        if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
+        $socket = new SocketPusher(['authkey' => $device->auth_token]);
+        $socket->push(base64_encode(json_encode([
+            'action' => "driverQueue",
+            'notifications' => [],
+            'data' => [
+                'message_id' => time(),
+            ]
+        ])));
+
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
