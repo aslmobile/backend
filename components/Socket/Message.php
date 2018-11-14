@@ -94,31 +94,36 @@ class Message
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
         /** @var \app\models\Trip $trip */
-        /** @var \app\models\Trip|bool $device_trip */
+        /** @var \app\models\Trip|bool $d_trip */
 
-        $device_trip = Trip::find()->where([
+        $d_trip = Trip::find()->where([
             'AND',
             ['=', 'user_id', $device->user_id],
             ['=', 'status', Trip::STATUS_CREATED]
         ])->orderBy(['created_at' => SORT_DESC])->one();
 
-        if ($device_trip) {
+        if ($d_trip) {
 
             $queue_position = 1;
 
             $trips = Trip::find()->where([
                 'AND',
                 ['=', 'status', Trip::STATUS_CREATED],
-                ['=', 'route_id', $device_trip->route_id]
-            ])->orderBy(['created_at' => SORT_DESC, 'seats' => SORT_DESC])->all();
+                ['=', 'route_id', $d_trip->route_id]
+            ]);
+            if($d_trip->vehicle_type_id != 0) $trips = $trips->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
+            $trips = $trips->orderBy(['created_at' => SORT_DESC, 'seats' => SORT_DESC])->all();
 
             if ($trips && count($trips)) foreach ($trips as $trip) {
-                if ($trip->id == $device_trip->id) break;
+                if ($trip->id == $d_trip->id) break;
                 $queue_position++;
             }
 
-            $vehicles_queue = Line::find()->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
-                ->andWhere(['>=', 'freeseats', $device_trip->seats])->count();
+            $vehicles_queue = Line::find()
+                ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
+                ->andWhere(['route_id' => $d_trip->route_id]);
+            if($d_trip->vehicle_type_id != 0) $vehicles_queue =  $vehicles_queue->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
+            $vehicles_queue = $vehicles_queue->count();
 
             $basic_estimated_time = $queue_position * 300;
             $estimated_time = $basic_estimated_time * 3 / ($vehicles_queue ? $vehicles_queue : 1);
@@ -131,7 +136,7 @@ class Message
                 'data' => [
                     'queue_position' => $queue_position,
                     'estimated_time' => $estimated_time,
-                    'trip_id' => $device_trip->id
+                    'trip_id' => $d_trip->id
                 ]
             ];
         } else {
@@ -163,13 +168,23 @@ class Message
         if ($this->validateDevice($from)) $device = $from->device;
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
-        $lines = Line::find()
-            ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
-            //->andWhere(['>', 'freeseats', 0])
-            ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_ASC])
-            ->all();
         $queue = [];
-        foreach ($lines as $line) $queue[] = $line->toArray();
+
+        /** @var Line $line */
+        $line = Line::find()
+            ->where(['driver_id' > $device->user_id])
+            ->andWhere(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
+            ->orderBy(['created_at' => SORT_DESC])->one();
+
+        if (!empty($line)) {
+            $lines = Line::find()
+                ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
+                ->andWhere(['route_id' => $line->route_id])
+                ->andWhere(['vehicle_type_id' => $line->vehicle_type_id])
+                ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_ASC])
+                ->all();
+            foreach ($lines as $line) $queue[] = $line->toArray();
+        }
 
         $response = [
             'message_id' => $this->message_id,
