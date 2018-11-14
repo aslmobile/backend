@@ -390,12 +390,12 @@ class TripController extends BaseController
             } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
         }
 
-        Queue::processingQueue($trip->line_id);
-
         if (!empty($line)) {
             $line->freeseats += $trip->seats;
             $line->save();
         }
+
+        Queue::processingQueue($trip->line_id);
 
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $line->driver_id]);
