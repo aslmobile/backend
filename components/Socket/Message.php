@@ -165,7 +165,7 @@ class Message
 
         $lines = Line::find()
             ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
-            ->andWhere(['>', 'freeseats', 0])
+            //->andWhere(['>', 'freeseats', 0])
             ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_ASC])
             ->all();
         $queue = [];
