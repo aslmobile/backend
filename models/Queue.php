@@ -14,12 +14,14 @@ class Queue extends Model
 
     /**
      * Collecting passengers trips and sort them between drivers lines
+     * @param integer $not
      */
-    public static function processingQueue()
+    public static function processingQueue($not = 0)
     {
 
         $lines = \app\modules\api\models\Line::find()
             ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
+            ->andWhere(['!=', 'id', $not])
             ->andWhere(['>', 'freeseats', 0])
             ->orderBy(['freeseats' => SORT_ASC, 'created_at' => SORT_ASC])
             ->all();
