@@ -308,13 +308,27 @@ class TripController extends BaseController
             $taxi->save();
         }
 
+        $future_text = Yii::t('app', 'В');
+        $future_text .= ' '. date('H:i', $this->body->time). ' ';
+        $future_text .= Yii::t('app', 'вы автоматически станете в очередь на поездку');
+        $future_text .= $route->title;
+
         if (isset($this->body->schedule) && !empty($this->body->schedule)) {
             $schedule = json_encode($this->body->schedule);
             Trip::cloneTrip($trip, Trip::STATUS_SCHEDULED, false, $schedule);
             Notifications::create(
                 Notifications::NTP_TRIP_SCHEDULED,
                 [$trip->user_id],
-                '',
+                $future_text,
+                $trip->id,
+                Notifications::STATUS_SCHEDULED,
+                $this->body->time
+            );
+        } else if (($this->body->time - time()) >= (3600 + 900)){
+            Notifications::create(
+                Notifications::NTP_TRIP_SCHEDULED,
+                [$trip->user_id],
+                $future_text,
                 $trip->id,
                 Notifications::STATUS_SCHEDULED,
                 $this->body->time
@@ -542,6 +556,11 @@ class TripController extends BaseController
 
         if ($trip->payment_type == Trip::PAYMENT_TYPE_CASH) $trip->amount += $penalty_amount;
 
+        $future_text = Yii::t('app', 'В');
+        $future_text .= ' '. date('H:i', $this->body->time). ' ';
+        $future_text .= Yii::t('app', 'вы автоматически станете в очередь на поездку');
+        $future_text .= $route->title;
+
 
         if (isset($this->body->schedule) && !empty($this->body->schedule)) {
             $schedule = json_encode($this->body->schedule);
@@ -557,12 +576,28 @@ class TripController extends BaseController
                 Notifications::create(
                     Notifications::NTP_TRIP_SCHEDULED,
                     [$trip->user_id],
-                    '',
+                    $future_text,
                     $trip->id,
                     Notifications::STATUS_SCHEDULED,
                     $this->body->time
                 );
             }
+        } else if (($this->body->time - time()) >= (3600 + 900)){
+
+            Notifications::updateAll(['status' => Notifications::STATUS_DELIVERED], [
+                'type' => Notifications::NTP_TRIP_SCHEDULED,
+                'user_id' => $trip->user_id,
+                'initiator_id' => $trip->id,
+            ]);
+
+            Notifications::create(
+                Notifications::NTP_TRIP_SCHEDULED,
+                [$trip->user_id],
+                $future_text,
+                $trip->id,
+                Notifications::STATUS_SCHEDULED,
+                $this->body->time
+            );
         }
 
         if (!$trip->validate() || !$trip->save()) {
@@ -701,8 +736,9 @@ class TripController extends BaseController
                     }
                     sort($queue_times);
                     $array_trip['queue_time'] = $queue_times[0];
-                    $trips_list_feature[] = $array_trip;
                 }
+
+                $trips_list_feature[] = $array_trip;
 
             }
 
