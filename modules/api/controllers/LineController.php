@@ -233,7 +233,7 @@ class LineController extends BaseController
         $line = Line::findOne($id);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
-        $passengers = ArrayHelper::getColumn(Trip::findAll(['status' => Trip::STATUS_CREATED, 'line_id' => $line->id]), 'id');
+        $passengers = ArrayHelper::getColumn(Trip::findAll(['status' => Trip::STATUS_WAITING, 'line_id' => $line->id]), 'id');
 
         $line->status = Line::STATUS_IN_PROGRESS;
         $line->starttime = time();
