@@ -343,7 +343,7 @@ class User extends ActiveRecord implements IdentityInterface
                 break;
         }
 
-        return $rating;
+        return $rating?$rating:4.8;
     }
 
     protected function driverRating($marks)
