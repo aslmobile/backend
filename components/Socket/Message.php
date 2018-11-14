@@ -172,9 +172,10 @@ class Message
 
         /** @var Line $line */
         $line = Line::find()
-            ->where(['driver_id' > $device->user_id])
+            ->where(['driver_id' => $device->user_id])
             ->andWhere(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
-            ->orderBy(['created_at' => SORT_DESC])->one();
+            ->orderBy(['created_at' => SORT_DESC])
+            ->one();
 
         if (!empty($line)) {
             $lines = Line::find()
