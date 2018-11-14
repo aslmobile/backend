@@ -40,6 +40,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $taxi_cancel_reason
  * @property string $taxi_address
  * @property string $schedule
+ * @property string $not
  * @property integer $taxi_time
  * @property integer $queue_time
  * @property integer $waiting_time
@@ -171,7 +172,8 @@ class Trip extends \yii\db\ActiveRecord
                     'luggage_unique_id',
                     'taxi_address',
                     'position',
-                    'schedule'
+                    'schedule',
+                    'not'
                 ],
                 'string'
             ],
@@ -218,6 +220,7 @@ class Trip extends \yii\db\ActiveRecord
             'vehicle_id' => Yii::t('app', "Автомобиль"),
             'need_taxi' => Yii::t('app', "Заказ такси"),
             'schedule' => Yii::t('app', "По расписанию"),
+            'not' => Yii::t('app', "Нежелательные поездки водителей"),
             'finish_time' => Yii::t('app', "Время окончания"),
             'start_time' => Yii::t('app', "Время начала"),
             'waiting_time' => Yii::t('app', "Время ожидания"),

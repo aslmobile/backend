@@ -309,7 +309,7 @@ class TripController extends BaseController
         }
 
         $future_text = Yii::t('app', 'В');
-        $future_text .= ' '. date('H:i', $this->body->time). ' ';
+        $future_text .= ' ' . date('H:i', $this->body->time) . ' ';
         $future_text .= Yii::t('app', 'вы автоматически станете в очередь на поездку');
         $future_text .= $route->title;
 
@@ -324,7 +324,7 @@ class TripController extends BaseController
                 Notifications::STATUS_SCHEDULED,
                 $this->body->time
             );
-        } else if (($this->body->time - time()) >= (3600 + 900)){
+        } else if (($this->body->time - time()) >= (3600 + 900)) {
             Notifications::create(
                 Notifications::NTP_TRIP_SCHEDULED,
                 [$trip->user_id],
@@ -364,10 +364,14 @@ class TripController extends BaseController
         /** @var \app\modules\api\models\Line $line */
         $line = \app\modules\api\models\Line::findOne($trip->line_id);
 
+        $not = !empty($trip->not) ? json_decode($trip->not) : [];
+        $not[] = $line->id;
+
         $trip->status = Trip::STATUS_CREATED;
         $trip->driver_id = 0;
         $trip->vehicle_id = 0;
         $trip->line_id = 0;
+        $trip->not = json_encode($not);
 
         RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
             'AND',
@@ -395,7 +399,7 @@ class TripController extends BaseController
             $line->save();
         }
 
-        Queue::processingQueue($trip->line_id);
+        Queue::processingQueue();
 
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $line->driver_id]);
@@ -571,7 +575,7 @@ class TripController extends BaseController
         if ($trip->payment_type == Trip::PAYMENT_TYPE_CASH) $trip->amount += $penalty_amount;
 
         $future_text = Yii::t('app', 'В');
-        $future_text .= ' '. date('H:i', $this->body->time). ' ';
+        $future_text .= ' ' . date('H:i', $this->body->time) . ' ';
         $future_text .= Yii::t('app', 'вы автоматически станете в очередь на поездку');
         $future_text .= $route->title;
 
@@ -596,7 +600,7 @@ class TripController extends BaseController
                     $this->body->time
                 );
             }
-        } else if (($this->body->time - time()) >= (3600 + 900)){
+        } else if (($this->body->time - time()) >= (3600 + 900)) {
 
             Notifications::updateAll(['status' => Notifications::STATUS_DELIVERED], [
                 'type' => Notifications::NTP_TRIP_SCHEDULED,
