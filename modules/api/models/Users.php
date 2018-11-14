@@ -45,7 +45,8 @@ JSON;
 
         if (isset ($array['phone']) && !empty ($array['phone'])) $array['phone'] = (string)$array['phone'];
         if ($image_file) $array['image_url'] = $image_file->file; else $array['image_url'] = null;
-        $array['rating'] = $this->getRating();
+        $rating = $this->getRating();
+        $array['rating'] = $rating ? $rating : 4.8;
         $array['blacklisted'] = !empty($blacklist) ? 1 : 0;
 
         switch ($this->type) {
