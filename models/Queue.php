@@ -74,7 +74,7 @@ class Queue extends Model
 
         $data = $trips->where(['route_id' => $line->route_id])
             ->andWhere(['CALLBACK', function ($data) use ($line) {
-                return !in_array($line->id, json_decode($data['not']));
+                return !empty($data['not'])?(!in_array($line->id, json_decode($data['not']))):true;
             }])
             ->andWhere(['OR', ['vehicle_type_id' => $line->vehicle_type_id], ['vehicle_type_id' => 0]])
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])->all();
