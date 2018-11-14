@@ -2,5 +2,8 @@
 
 class Faq extends \app\models\Faq
 {
-
+    public function afterFind()
+    {
+        $this->content = json_decode($this->content);
+    }
 }

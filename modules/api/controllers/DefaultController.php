@@ -113,15 +113,17 @@ class DefaultController extends BaseController
 
         /** @var \app\modules\api\models\Legal $legal */
         foreach ($legals as $legal) {
-            $result = '';
             if (is_array($legal->content) && !empty($legal->content)) {
                 $query = new ArrayQuery();
                 $query->from($legal->content);
                 $content = $query->orderBy(['weight' => SORT_ASC])->all();
-                foreach ($content as $item) $result .= $item['title'] . '<br>' . $item['description'] . '<br>';
+                foreach ($content as $item){
+                    $legal_data[] = [
+                        'title' => $item->title,
+                        'content' => $item->description
+                    ];
+                }
             }
-            $legal->content = $result;
-            $legal_data[] = $legal->toArray();
         }
 
         $this->module->data = $legal_data;
@@ -147,15 +149,17 @@ class DefaultController extends BaseController
 
         /** @var \app\modules\api\models\Agreement $agreement */
         foreach ($agreements as $agreement) {
-            $result = '';
             if (is_array($agreement->content) && !empty($agreement->content)) {
                 $query = new ArrayQuery();
                 $query->from($agreement->content);
                 $content = $query->orderBy(['weight' => SORT_ASC])->all();
-                foreach ($content as $item) $result .= $item['title'] . '<br>' . $item['description'] . '<br>';
+                foreach ($content as $item){
+                    $agreement_data[] = [
+                        'title' => $item->title,
+                        'content' => $item->description
+                    ];
+                }
             }
-            $agreement->content = $result;
-            $agreement_data[] = $agreement->toArray();
         }
 
         $this->module->data = $agreement_data;
@@ -166,14 +170,14 @@ class DefaultController extends BaseController
     public function actionFaq($id)
     {
         switch ($id) {
-            case Agreement::TYPE_DRIVER:
-                $id = Agreement::TYPE_DRIVER;
+            case Faq::TYPE_DRIVER:
+                $id = Faq::TYPE_DRIVER;
                 break;
-            case Agreement::TYPE_PASSENGER:
-                $id = Agreement::TYPE_PASSENGER;
+            case Faq::TYPE_PASSENGER:
+                $id = Faq::TYPE_PASSENGER;
                 break;
             default:
-                $id = Agreement::TYPE_DRIVER;
+                $id = Faq::TYPE_DRIVER;
         }
 
         $faqs = Faq::find()->where(['type' => $id])->orderBy(['weight' => SORT_ASC])->all();
@@ -181,15 +185,17 @@ class DefaultController extends BaseController
 
         /** @var \app\modules\api\models\Faq $faq */
         foreach ($faqs as $faq) {
-            $result = '';
             if (is_array($faq->content) && !empty($faq->content)) {
                 $query = new ArrayQuery();
                 $query->from($faq->content);
                 $content = $query->orderBy(['weight' => SORT_ASC])->all();
-                foreach ($content as $item) $result .= $item['title'] . '<br>' . $item['description'] . '<br>';
+                foreach ($content as $item){
+                    $faq_data[] = [
+                        'title' => $item->title,
+                        'content' => $item->description
+                    ];
+                }
             }
-            $faq->content = $result;
-            $faq_data[] = $faq->toArray();
         }
 
         $this->module->data = $faq_data;
