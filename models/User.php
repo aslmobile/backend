@@ -324,7 +324,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function getOnline()
     {
-        if ($this->last_activity == null || $this->last_activity >= time() - 15) return true;
+        if ($this->last_activity == null || $this->last_activity >= time() - 60) return true;
 
         return false;
     }

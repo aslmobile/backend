@@ -40,10 +40,12 @@ class Queue extends Model
             $applicants = self::getQueue($line, $query);
             $ids = ArrayHelper::getColumn($applicants, 'id');
 
-            self::unsetQueue($ids, $query);
-            if (!empty($ids)) self::send($applicants, $ids, $line);
+            //self::unsetQueue($ids, $query);
+            //if (!empty($ids)) self::send($applicants, $ids, $line);
 
             if ($line->ready) {
+                self::unsetQueue($ids, $query);
+                self::send($applicants, $ids, $line);
                 $notifications = Notifications::create(Notifications::NTD_TRIP_FIRST, [$line->driver_id]);
                 foreach ($notifications as $notification) Notifications::send($notification);
             }

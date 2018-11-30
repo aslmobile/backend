@@ -323,6 +323,7 @@ class LineController extends BaseController
                 $trip->vehicle_id = 0;
                 $trip->line_id = 0;
                 $trip->status = Trip::STATUS_CREATED;
+                // TODO $trip->status = Trip::STATUS_CANCELLED_DRIVER;
 
                 if (!$trip->validate() || !$trip->save()) {
                     if ($trip->hasErrors()) {
@@ -503,9 +504,10 @@ class LineController extends BaseController
 
         if (!$start_city || !$end_city) $this->module->setError(422, '_city', Yii::$app->mv->gt("Не найден", [], false));
 
-        $route = Route::findOne(['start_city_id' => $start_city->id, 'end_city_id' => $end_city->id]);
+        $routes = Route::findAll(['start_city_id' => $start_city->id, 'end_city_id' => $end_city->id, 'status' => Checkpoint::STATUS_ACTIVE]);
+        $data = ArrayHelper::getColumn($routes, 'id');
 
-        if ($route) $data = $route->toArray();
+        //if ($routes) foreach ($routes as $route) $data[] = $route->toArray();
 
         $this->module->data = $data;
         $this->module->setSuccess();
@@ -541,20 +543,23 @@ class LineController extends BaseController
         $this->module->sendResponse();
     }
 
-    public function actionCheckpoints($id)
+    public function actionCheckpoints()
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['routes']);
+        $routes = (array)$this->body->routes;
 
         $points = [];
         $params = [
             'AND',
             ['=', 'type', [Checkpoint::TYPE_STOP, Checkpoint::TYPE_START]],
-            ['=', 'route', $id],
             ['=', 'status', Checkpoint::STATUS_ACTIVE]
         ];
 
-        $checkpoints = Checkpoint::find()->where($params)->all();
+        $checkpoints = Checkpoint::find()->where($params)->andWhere(['route' => $routes])->all();
         if ($checkpoints && sizeof($checkpoints) > 0) foreach ($checkpoints as $point) {
             /** @var $point \app\models\Checkpoint */
             $points[] = $point->toArray();

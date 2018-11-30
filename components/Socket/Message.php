@@ -242,10 +242,9 @@ class Message
                 'driver_id' => $device->user_id,
                 'line_id' => $line->id,
                 'status' => [Trip::STATUS_WAITING, Trip::STATUS_WAY]
+                //TODO 'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING, Trip::STATUS_WAY]
             ])->count('id'));
         }
-
-        // TODO: обработка очереди (приходит с девайсов на создание поездки и поиск пассажиров)
 
         $response = [
             'message_id' => $this->message_id,

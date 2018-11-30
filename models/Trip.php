@@ -667,10 +667,10 @@ class Trip extends \yii\db\ActiveRecord
     {
         $seats = intval($this->seats);
 
-        $luggages = TripLuggage::find(['unique_id' => $this->luggage_unique_id, 'need_place' => 1])->all();
-        if ($luggages) foreach ($luggages as $luggage) {
-            if (intval($luggage->seats) > 0) $seats += intval($luggage->seats);
-        }
+//        $luggages = TripLuggage::find()->where(['unique_id' => $this->luggage_unique_id, 'need_place' => 1])->all();
+//        if ($luggages) foreach ($luggages as $luggage) {
+//            if (intval($luggage->seats) > 0) $seats += intval($luggage->seats);
+//        }
 
         return $seats;
     }

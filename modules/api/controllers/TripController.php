@@ -395,6 +395,7 @@ class TripController extends BaseController
         }
 
         if (!empty($line)) {
+        // TODO if (!empty($line) && $line->status != Line::STATUS_CANCELED) {
             $line->freeseats += $trip->seats;
             $line->save();
         }
