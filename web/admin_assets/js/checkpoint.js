@@ -1,6 +1,8 @@
 $(document).ready(function () {
     var lang = $("html").attr("lang");
-    loadGoogle(lang);
+    if($('#map').length != 0) {
+        loadGoogle(lang);
+    }
 });
 
 var autocomplete;

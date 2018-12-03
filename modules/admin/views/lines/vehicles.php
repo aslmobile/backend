@@ -10,10 +10,30 @@ use yii\widgets\Breadcrumbs;
 /* @var $searchModel app\modules\admin\models\LineSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
+$ws_url = Yii::$app->params['socket']['scheme']
+    . Yii::$app->params['socket']['host']
+    . ':' . Yii::$app->params['socket']['in_port']
+    . '?auth=' . Yii::$app->params['socket']['authkey_server'];
+$script = <<<JS
+    var conn = new ReconnectingWebSocket("$ws_url");
+    conn.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var target = data.data;
+        $.ajax({
+            type: 'POST',
+            url: '/admin/lines/online',
+            data: {user_id: target},
+            success: function (response) {
+                $('.driver_'+target).html(response);
+            }
+        });
+    };
+JS;
+$this->registerJs($script, \yii\web\View::POS_READY);
+
 $this->title = Yii::$app->mv->gt('Маршруты', [], false);
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-
 <div class="content-wrapper">
     <section class="content-header">
         <h2><?= $this->title; ?></h2>
@@ -89,9 +109,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'driver_id',
                         'label' => Yii::t('app', "В сети"),
-                        'value' => function ($model) {
+                        'content' => function ($model) {
                             return isset($model->driver) ?
-                                $model->driver->online ? '<span class="fa fa-circle text-green"></span> <small class="text-uppercase text-green">' . Yii::t('app', "В сети") . '</small>' : '<span class="fa fa-circle text-red"></span> <small class="text-uppercase text-red">' . Yii::t('app', "Оффлайн") . '</small>' :
+                                '<div class="driver_'.$model->driver->id.'">'.
+                                (
+                                $model->driver->online ?
+                                    '<span class="fa fa-circle text-green"></span> <small class="text-uppercase text-green">' . Yii::t('app', "В сети") . '</small>' :
+                                    '<span class="fa fa-circle text-red"></span> <small class="text-uppercase text-red">' . Yii::t('app', "Оффлайн") . '</small>'
+                                ) .
+                                '</div>' :
                                 null;
                         },
                         'format' => 'html'

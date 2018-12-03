@@ -8,6 +8,7 @@ use app\modules\admin\models\LineSearch;
 use app\modules\admin\models\LineSearchVehicles;
 use app\modules\admin\models\Route;
 use app\modules\admin\models\RouteSearch;
+use app\modules\admin\models\User;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -26,6 +27,7 @@ class LinesController extends Controller
                 'rules' => [
                     [
                         'actions' => [
+                            'online',
                             'index', 'create', 'update', 'view',
                             'routes', 'create-route', 'update-route', 'view-route',
                             'checkpoints', 'create-checkpoint', 'update-checkpoint', 'view-checkpoint',
@@ -323,6 +325,15 @@ class LinesController extends Controller
         }
 
         return $out;
+    }
+
+    public function actionOnline(){
+        $user_id = intval(Yii::$app->request->post('user_id', 0));
+        $user = \app\models\User::findOne($user_id);
+        $response = (!empty($user) && $user->online) ?
+            '<span class="fa fa-circle text-green"></span> <small class="text-uppercase text-green">' . Yii::t('app', "В сети") . '</small>' :
+            '<span class="fa fa-circle text-red"></span> <small class="text-uppercase text-red">' . Yii::t('app', "Оффлайн") . '</small>';
+        return $response;
     }
 
     protected function findRouteModel($id)

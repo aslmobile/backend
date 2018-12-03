@@ -45,7 +45,8 @@ class AppAsset extends AssetBundle
         "dist/js/app.min.js",
         "dist/js/all.js",
         "/admin_assets/js/all.js",
-        '/admin_assets/js/checkpoint.js'
+        '/admin_assets/js/checkpoint.js',
+        '/admin_assets/js/reconnecting-websocket.min.js'
     ];
     public $depends = [
         'yii\bootstrap\BootstrapAsset',

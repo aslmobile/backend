@@ -227,6 +227,36 @@ class Message
      * @param $connections
      * @return array
      */
+    public function checkOnline($data, $from, $connections)
+    {
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        $user_id = $data['data']['user_id'];
+
+//        $id = null;
+//        $query = new ArrayQuery();
+//        $query->from($connections);
+//        $device = $query->where(['device.user_id' => intval($user_id)])->one();
+//        if(!empty($device)) $id = $device->device->user_id;
+
+        $response = [
+            'message_id' => $this->message_id,
+            'device_id' => 0,
+            'user_id' => 0,
+            'data' => $user_id
+        ];
+
+        $this->addressed = [0];
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function processingQuery($data, $from, $connections)
     {
         /** @var Devices $device */
