@@ -11,7 +11,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $ws_url = Yii::$app->params['socket']['scheme']
-    . Yii::$app->params['socket']['host']
+    . Yii::$app->params['socket']['in_host']
     . ':' . Yii::$app->params['socket']['in_port']
     . '?auth=' . Yii::$app->params['socket']['authkey_server'];
 $script = <<<JS
