@@ -35,7 +35,7 @@ function initMap() {
         zoom: zoom,
         draggable: true,
         center: {lat: lat, lng: lng},
-        scrollwheel: false,
+        scrollwheel: true,
         styles: [{
             featureType: "poi",
             stylers: [
