@@ -799,6 +799,10 @@ class LineController extends BaseController
 
         $indexed_checkpoints = ArrayHelper::index($all_checkpoints, 'id');
 
+        /**
+         * @var integer $key
+         * @var Checkpoint $checkpoint
+         */
         foreach ($indexed_checkpoints as $key => &$checkpoint) {
 
             if (!empty($checkpoint->childrenR) && $checkpoint->children) {

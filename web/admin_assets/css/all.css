@@ -79,6 +79,10 @@
     margin-top: 10px;
 }
 
+#map {
+    min-height: 500px;
+}
+
 /*MAP STYLES*/
 .dni {
     display: none;

@@ -61,6 +61,7 @@ use yii\helpers\ArrayHelper;
  * @property \app\modules\api\models\Vehicles $vehicle
  * @property VehicleType $vehicleType
  * @property LuggageType $baggage
+ * @property array $baggages
  */
 class Trip extends \yii\db\ActiveRecord
 {

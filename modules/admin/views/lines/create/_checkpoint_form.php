@@ -11,7 +11,9 @@ use yii\widgets\ActiveForm;
 $children = [];
 if (!$model->isNewRecord) {
     $children = $model->childrenR;
-    if (!empty($children)) {$children = \yii\helpers\ArrayHelper::getColumn($children, 'id');}
+    if (!empty($children)) {
+        $children = \yii\helpers\ArrayHelper::getColumn($children, 'id');
+    }
 }
 $children_v = implode(",", $children);
 $all_children = \app\models\Checkpoint::getAllChildren(!$model->isNewRecord ? ['route' => $model->route] : null);
@@ -65,7 +67,7 @@ $this->registerJs($script, \yii\web\View::POS_READY);
 
 ?>
 
-<?php $form = ActiveForm::begin(['options' => ['class' => 'form']]); ?>
+<?php $form = ActiveForm::begin(['options' => ['class' => 'form', 'id' => 'checkpoint_form']]); ?>
 <?= $form->errorSummary($model, ['class' => 'alert-danger alert fade in']); ?>
 <div class="row">
     <div class="col-md-6">
@@ -169,13 +171,23 @@ $this->registerJs($script, \yii\web\View::POS_READY);
                 //                    ],
                 //                ]); ?>
 
-                <?= $form->field($model, 'address')->widget(\kalyabin\maplocation\SelectMapLocationWidget::className(), [
-                    'attributeLatitude' => 'latitude',
-                    'attributeLongitude' => 'longitude',
-                    'googleMapApiKey' => 'AIzaSyALfPPffcWHUHCDKccaIlBj5kLfQjIcD9w',
-                    'draggable' => true,
-                ])->label(Yii::t('app', "Местоположение")); ?>
+                <!--                --><? //= $form->field($model, 'address')->widget(\kalyabin\maplocation\SelectMapLocationWidget::className(), [
+                //                    'attributeLatitude' => 'latitude',
+                //                    'attributeLongitude' => 'longitude',
+                //                    'googleMapApiKey' => 'AIzaSyALfPPffcWHUHCDKccaIlBj5kLfQjIcD9w',
+                //                    'draggable' => true,
+                //                ])->label(Yii::t('app', "Местоположение")); ?>
 
+                <?= $form->field($model, 'address')->textInput(['maxlength' => true])->label(Yii::t('app', "Местоположение")) ?>
+                <div class="row">
+                    <div class="col-md-6">
+                        <?= $form->field($model, 'latitude') ?>
+                    </div>
+                    <div class="col-md-6">
+                        <?= $form->field($model, 'longitude') ?>
+                    </div>
+                </div>
+                <div id="map" class="map" data-zoom="12" data-latitude="<?= $model->latitude ?>" data-longitude="<?= $model->longitude ?>"></div>
             </div>
             <div class="box-footer clearfix text-right">
                 <?= \app\components\widgets\FormButtons::widget(['model' => $model]) ?>

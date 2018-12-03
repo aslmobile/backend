@@ -44,6 +44,7 @@ use yii\web\IdentityInterface;
  * @property int $approved
  * @property integer $last_activity
  * @property integer $km
+ * @property string $fullName
  */
 class User extends ActiveRecord implements IdentityInterface
 {
