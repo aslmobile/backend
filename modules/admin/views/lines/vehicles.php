@@ -10,7 +10,7 @@ use yii\widgets\Breadcrumbs;
 /* @var $searchModel app\modules\admin\models\LineSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$ws_url = Yii::$app->params['socket']['scheme']
+$ws_url = Yii::$app->params['socket']['in_scheme']
     . Yii::$app->params['socket']['in_host']
     . ':' . Yii::$app->params['socket']['in_port']
     . '?auth=' . Yii::$app->params['socket']['authkey_server'];
