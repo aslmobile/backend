@@ -48,7 +48,7 @@ class SocketController extends ConsoleController
         $ws = new WsServer($socket);
         $httpServer = new HttpServer($ws);
 
-        $port = (!empty($this->port)) ? $this->port : \Yii::$app->params['socket']['in_port'];
+        $port = (!empty($this->port)) ? $this->port : \Yii::$app->params['socket']['port'];
         $server = IoServer::factory($httpServer, $port);
         $socket->loop = $server->loop;
         echo 'Server running on port: ' . $port . "\n" . date('d.m.Y h:i', time()) . "\n";
