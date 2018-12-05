@@ -51,7 +51,7 @@ class LineController extends BaseController
                 'actions' => [
                     'startpoints' => ['GET'],
                     'endpoints' => ['GET'],
-                    'checkpoints' => ['GET'],
+                    'checkpoints' => ['POST'],
                     'get-route' => ['GET'],
                     'startpoints-route' => ['GET'],
                     'endpoints-route' => ['GET'],
