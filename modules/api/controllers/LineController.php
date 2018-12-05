@@ -32,7 +32,7 @@ class LineController extends BaseController
                     [
                         'actions' => [
                             'startpoints', 'endpoints', 'checkpoints',
-                            'get-route',
+                            'get-route', 'single-route',
                             'startpoints-route', 'endpoints-route', 'checkpoints-route',
 
                             'accept-arrive',
@@ -53,6 +53,7 @@ class LineController extends BaseController
                     'endpoints' => ['GET'],
                     'checkpoints' => ['POST'],
                     'get-route' => ['GET'],
+                    'single-route' => ['GET'],
                     'startpoints-route' => ['GET'],
                     'endpoints-route' => ['GET'],
                     'checkpoints-route' => ['GET'],
@@ -491,6 +492,26 @@ class LineController extends BaseController
             } else $this->module->setError(422, '_line', Yii::t('app', "Маршрут не может быть построен. Нет контрольных точек"));
         } else $this->module->setError(422, '_line', Yii::$app->mv->gt("Маршрут не может быть построен. Не верный статус поездки.", [], false));
 
+    }
+
+    public function actionSingleRoute($param1, $param2)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $start_city = City::findOne($param1);
+        $end_city = City::findOne($param2);
+        $data = [];
+
+        if (!$start_city || !$end_city) $this->module->setError(422, '_city', Yii::$app->mv->gt("Не найден", [], false));
+
+        $route = Route::findOne(['start_city_id' => $start_city->id, 'end_city_id' => $end_city->id]);
+
+        if ($route) $data = $route->toArray();
+
+        $this->module->data = $data;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionGetRoute($param1, $param2)
