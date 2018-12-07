@@ -39,6 +39,7 @@ class Transactions extends \yii\db\ActiveRecord
 {
 
     //region CONSTANTA
+
     const
         TYPE_OUTCOME = 1,
         TYPE_INCOME = 2;
@@ -58,7 +59,9 @@ class Transactions extends \yii\db\ActiveRecord
         GATEWAY_PAYBOX_CARD = 4,
 
         GATEWAY_COMMISSION = 5,
-        GATEWAY_OUT = 6;
+        GATEWAY_IN = 6,
+        GATEWAY_OUT  = 7;
+
     //endregion
 
     /**

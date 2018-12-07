@@ -224,7 +224,8 @@ class PaymentController extends BaseController
         $transaction->trip_id = 0;
         $transaction->status = Transactions::STATUS_REQUEST;
         $transaction->amount = $this->body->amount;
-        $transaction->gateway = Transactions::TYPE_INCOME;
+        $transaction->gateway = Transactions::GATEWAY_OUT;
+        $transaction->type = Transactions::TYPE_OUTCOME;
         $transaction->uip = Yii::$app->request->userIP;
 
         $result = '';
@@ -295,7 +296,8 @@ class PaymentController extends BaseController
         $transaction->trip_id = 0;
         $transaction->status = Transactions::STATUS_REQUEST;
         $transaction->amount = $this->body->amount;
-        $transaction->gateway = Transactions::TYPE_INCOME;
+        $transaction->gateway = Transactions::GATEWAY_IN;
+        $transaction->type = Transactions::TYPE_INCOME;
         $transaction->uip = Yii::$app->request->userIP;
 
         $result = '';

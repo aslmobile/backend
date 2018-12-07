@@ -274,7 +274,7 @@ class UserController extends BaseController
                 foreach ($user->errors as $field => $error_message){
                     if (is_array($error_message)) {
                         $result = '';
-                        foreach ($error_message as $error) $result .= '; '.$error;
+                        foreach ($error_message as $error) $result .= ' '.$error;
                         $error_message = $result;
                     }
                     $this->module->setError(422, 'user.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);

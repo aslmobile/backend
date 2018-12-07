@@ -86,13 +86,13 @@ class User extends ActiveRecord implements IdentityInterface
             ['email', 'email'],
             ['email', 'unique', 'filter' => 'type = 1'],
             [['email', 'type'], 'unique', 'targetAttribute' => ['email', 'type'],
-                'message' => Yii::t('app', 'This email address has already been taken.')
+                'message' => Yii::t('app', 'Данный email уже зарегистрирован в системе.')
             ],
             ['phone', 'filter', 'filter' => function ($value) {
                 return preg_replace('/[^\d]/i', '', $value);
             }],
             [['phone', 'type'], 'unique', 'targetAttribute' => ['phone', 'type'],
-                'message' => Yii::t('app', 'This phone has already been taken.')
+                'message' => Yii::t('app', 'Данный телефонный номер уже зарегистрирован в системе.')
             ],
             ['phone', 'phoneValidate'],
             ['phone_on_verify', 'number'],
@@ -349,7 +349,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     protected function driverRating($marks)
     {
-        $trips = Trip::find()->andWhere([
+        $trips = Trip::find()->where([
             'AND',
             ['=', 'driver_id', $this->id]
         ])->all();
@@ -364,12 +364,12 @@ class User extends ActiveRecord implements IdentityInterface
 
         if ($ratings > 0) $rating = round(floatval((float) ($rating / $ratings)), 2);
         if ($marks) return $ratings;
-        return $rating;
+        return  $rating?$rating:4.8;
     }
 
     protected function passengerRating($marks)
     {
-        $trips = Trip::find()->andWhere([
+        $trips = Trip::find()->where([
             'AND',
             ['=', 'user_id', $this->id]
         ])->all();
@@ -384,7 +384,7 @@ class User extends ActiveRecord implements IdentityInterface
 
         if ($ratings > 0) $rating = round(floatval((float) ($rating / $ratings)), 2);
         if ($marks) return $ratings;
-        return $rating;
+        return  $rating?$rating:4.8;
     }
 
     public function afterSave($insert, $changedAttributes)
