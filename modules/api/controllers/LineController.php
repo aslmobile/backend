@@ -873,7 +873,7 @@ class LineController extends BaseController
                         'payment_type' => $trip->payment_type,
                         'seats' => $trip->seats,
                         'comment' => $trip->passenger_description,
-                        'rating' => $trip->user->rating,
+                        'rating' => $trip->user->getRating(),
                         'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
                         'tripId' => $trip->id
                     ];
@@ -890,7 +890,7 @@ class LineController extends BaseController
                         'payment_type' => $trip->payment_type,
                         'seats' => $trip->seats,
                         'comment' => $trip->passenger_description,
-                        'rating' => $trip->user->rating,
+                        'rating' => $trip->user->getRating(),
                         'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
                         'tripId' => $trip->id
                     ];
@@ -908,7 +908,7 @@ class LineController extends BaseController
                         'payment_type' => $trip->payment_type,
                         'seats' => $trip->seats,
                         'comment' => $trip->passenger_description,
-                        'rating' => $trip->user->rating,
+                        'rating' => $trip->user->getRating(),
                         'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
                         'tripId' => $trip->id
                     ];
@@ -930,7 +930,7 @@ class LineController extends BaseController
                                 'payment_type' => $trip->payment_type,
                                 'seats' => $trip->seats,
                                 'comment' => $trip->passenger_description,
-                                'rating' => $trip->user->rating,
+                                'rating' => $trip->user->getRating(),
                                 'startPointTitle' => !empty($trip->startpoint) ? $trip->startpoint->title : '',
                                 'tripId' => $trip->id
                             ]
