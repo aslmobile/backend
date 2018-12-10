@@ -209,8 +209,8 @@ class LineController extends BaseController
         if($freeseats > $maxseats || $seats > $maxseats)
             $this->module->setError(422, '_seats', Yii::$app->mv->gt("Недопустимое кол-во мест", [], false));
 
-        $line->freeseats = intval($this->body->freeseats);
-        $line->seats = intval($this->body->seats);
+        $line->freeseats = $freeseats;
+        $line->seats = $seats;
 
         if (!$line->validate() || !$line->save()) {
             if ($line->hasErrors()) {
