@@ -1410,21 +1410,34 @@ class TripController extends BaseController
 
         $tariff = 0;
 
-        $lines = \app\modules\api\models\Line::find()->andWhere([
+        $lines = \app\modules\api\models\Line::find()->where([
             'AND',
             ['=', 'status', Line::STATUS_FINISHED],
             ['=', 'driver_id', $user->id]
         ])->all();
 
+        /** @var \app\modules\api\models\Line $line */
         foreach ($lines as $line) {
-            /** @var \app\modules\api\models\Line $line */
-            $passengers = Trip::find()->where(['line_id' => $line->id])->count();
+
+            /** @var Trip[] $passengers */
+            $passengers = Trip::find()->where(['line_id' => $line->id, 'status' => Trip::STATUS_FINISHED])->all();
+
+            $seats = 0;
+            $amount = 0;
+
+            if(!empty($passengers)) array_map(function ($item) use (&$seats, &$amount){
+                /** @var Trip $item */
+                $seats += $item->seats;
+                $amount += $item->amount;
+            }, $passengers);
+
+            $vehicle_type = $line->vehicle->type;
 
             $trips['trips'][] = [
                 'created' => $line->created_at,
-                'passengers' => intval($passengers),
-                'vehicle_photo_url' => $line->vehicle->photoUrl,
-                'vehicle_type' => $line->vehicle->type->toArray(),
+                'passengers' => intval($seats),
+                'vehicle_photo_url' => $vehicle_type->image,
+                'vehicle_type' => $vehicle_type->toArray(),
                 'start_time' => $line->starttime,
                 'end_time' => $line->endtime,
                 'wait_time' => intval($line->starttime - $line->created_at),
@@ -1432,10 +1445,11 @@ class TripController extends BaseController
                 'startpoint' => $line->startPoint->toArray(),
                 'endpoint' => $line->endPoint->toArray(),
                 'route' => $line->route->toArray(),
-                'tariff' => floatval(round($line->tariff * 0.8, 2))
+                'tariff' => floatval($amount)
             ];
 
-            $tariff += $line->tariff;
+            $tariff += $amount;
+
         }
 
         $trips['tariff'] = floatval(round($tariff * 0.8, 2));

@@ -105,17 +105,11 @@ class LineController extends BaseController
         $this->validateBodyParams(['vehicle_id', 'startpoint', 'seats', 'freeseats']);
 
         /** @var \app\models\Route $route */
-        $route = Route::findOne([
-            'id' => $id,
-            'status' => Route::STATUS_ACTIVE
-        ]);
+        $route = Route::findOne(['id' => $id, 'status' => Route::STATUS_ACTIVE]);
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\modules\api\models\Vehicles $vehicle */
-        $vehicle = Vehicles::findOne([
-            'id' => $this->body->vehicle_id,
-            'status' => Vehicles::STATUS_APPROVED
-        ]);
+        $vehicle = Vehicles::findOne(['id' => $this->body->vehicle_id, 'status' => Vehicles::STATUS_APPROVED]);
         if (!$vehicle) $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Checkpoint $startpoint */
@@ -134,7 +128,7 @@ class LineController extends BaseController
         ]);
         if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
 
-        $seats = isset ($this->body->seats) ? intval($this->body->seats) : $vehicle->seats;
+        $seats = isset($this->body->seats) ? intval($this->body->seats) : $vehicle->seats;
         if ($seats == 0) $seats = $vehicle->seats;
 
         $freeseats = isset ($this->body->freeseats) ? intval($this->body->freeseats) : $vehicle->seats;
@@ -203,6 +197,17 @@ class LineController extends BaseController
         $this->validateBodyParams(['freeseats', 'seats']);
 
         if (!$line->cancel_reason) $line->cancel_reason = '';
+
+        /** @var \app\modules\api\models\Vehicles $vehicle */
+        $vehicle = Vehicles::findOne(['id' => $line->vehicle_id, 'status' => Vehicles::STATUS_APPROVED]);
+        if (!$vehicle) $this->module->setError(422, '_vehicle', Yii::$app->mv->gt("Не найден", [], false));
+
+        $seats = intval($this->body->seats);
+        $freeseats = intval($this->body->freeseats);
+        $maxseats = $vehicle->seats;
+
+        if($freeseats > $maxseats || $seats > $maxseats)
+            $this->module->setError(422, '_seats', Yii::$app->mv->gt("Недопустимое кол-во мест", [], false));
 
         $line->freeseats = intval($this->body->freeseats);
         $line->seats = intval($this->body->seats);

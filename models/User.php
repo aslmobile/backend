@@ -344,7 +344,7 @@ class User extends ActiveRecord implements IdentityInterface
                 break;
         }
 
-        return $rating?$rating:4.8;
+        return boolval($rating) ? $rating : 4.8;
     }
 
     protected function driverRating($marks)
@@ -364,7 +364,7 @@ class User extends ActiveRecord implements IdentityInterface
 
         if ($ratings > 0) $rating = round(floatval((float) ($rating / $ratings)), 2);
         if ($marks) return $ratings;
-        return  $rating?$rating:4.8;
+        return boolval($rating) ? $rating : 4.8;
     }
 
     protected function passengerRating($marks)
@@ -384,18 +384,13 @@ class User extends ActiveRecord implements IdentityInterface
 
         if ($ratings > 0) $rating = round(floatval((float) ($rating / $ratings)), 2);
         if ($marks) return $ratings;
-        return  $rating?$rating:4.8;
-    }
-
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
+        return boolval($rating) ? $rating : 4.8;
     }
 
     public function beforeSave($insert)
     {
 
-        if ((float)$this->rating < 2.5 && $this->getRating(true) > 10 && intval($this->blocked_at) != 0) {
+        if ((float)$this->getRating() < 2.5 && $this->getRating(true) > 10 && intval($this->blocked_at) != 0) {
 
             $blacklist = Blacklist::find()->where(['user_id' => $this->id])->one();
             if (!$blacklist) $blacklist = new Blacklist();
@@ -424,8 +419,7 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return true;
 
-        $roles = array_keys(Yii::$app->authManager->getRolesByUser($this->id));
-
-        return count($roles) !== count(array_diff($roles, $permissionRole));
+        //$roles = array_keys(Yii::$app->authManager->getRolesByUser($this->id));
+        //return count($roles) !== count(array_diff($roles, $permissionRole));
     }
 }
