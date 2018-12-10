@@ -313,14 +313,7 @@ class UserController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $finish = Yii::$app->request->getHeaders()->get('finish', false);
-
-        if (empty ($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
-
-        $documents = [];
-        foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'user-photos/' . $user->id, true);
-
-        if (!empty ($user->image)) {
+        if (!empty($user->image)) {
             $file = UploadFiles::findOne(['id' => $user->image]);
             if ($file && !empty($file->file)) {
                 $oldDocument = Yii::getAlias('@webroot') . $file->file;
@@ -329,15 +322,20 @@ class UserController extends BaseController
             }
         }
 
-        if ($finish) $user->status = User::STATUS_PENDING;
+        $finish = Yii::$app->request->getHeaders()->get('finish', false);
+
+        if (empty($_FILES)) $this->module->setError(411, '_files', Yii::$app->mv->gt("Файлы не были переданы в ожидаемом формате", [], false));
+
+        $documents = [];
+        foreach ($_FILES as $name => $file) $documents[$name] = $this->UploadFile($name, 'user-photos/' . $user->id, true);
 
         $user->image = $documents['image']['file_id'];
+
+        if ($finish) $user->status = User::STATUS_PENDING;
+
         $user->save();
 
-        $this->module->data = [
-            'user' => $user->toArray(),
-            'file' => $documents['image']['file']
-        ];
+        $this->module->data = ['user' => $user->toArray(), 'file' => $documents['image']['file']];
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

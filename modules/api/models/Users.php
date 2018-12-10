@@ -41,10 +41,14 @@ JSON;
         $array = parent::toArray($fields, $expand, $recursive);
 
         $blacklist = Blacklist::find()->where(['status' => Blacklist::STATUS_BLACKLISTED, 'user_id' => $this->id])->one();
-        $image_file = UploadFiles::findOne($this->image);
+        $image_file = UploadFiles::findOne(['id' => $this->image]);
 
         if (isset ($array['phone']) && !empty ($array['phone'])) $array['phone'] = (string)$array['phone'];
-        if ($image_file) $array['image_url'] = $image_file->file; else $array['image_url'] = null;
+        if (!empty($image_file)){
+            $array['image_url'] = $image_file->file;
+        } else {
+            $array['image_url'] = null;
+        }
         $array['rating'] = $this->getRating();
         $array['blacklisted'] = !empty($blacklist) ? 1 : 0;
 

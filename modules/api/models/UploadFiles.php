@@ -82,7 +82,7 @@ class UploadFiles extends ActiveRecord
             $id = $this->afterUpload($filePath);
             return [
                 'file' => $filePath,
-                'file_id' => $id
+                'file_id' => intval($id)
             ];
         }
 

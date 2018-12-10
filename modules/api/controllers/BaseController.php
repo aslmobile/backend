@@ -237,12 +237,18 @@ class BaseController extends RestFul
         $uploader = new UploadFiles();
         $path = '/files/' . $path;
         $path = $uploader->setPath($path);
+
         if ($path) {
+
             $uploader->uploadedFile = $_FILE;
             $_uploaded_file = $uploader->upload();
 
-            if ($return_file_id) return $_uploaded_file;
-            return $_uploaded_file['file'];
+            if ($return_file_id) {
+                return $_uploaded_file;
+            } else {
+                return $_uploaded_file['file'];
+            }
+
         } else $this->module->setError(411, '_path', Yii::$app->mv->gt("Не возможно создать директорию", [], false));
 
         return false;
