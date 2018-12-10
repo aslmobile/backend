@@ -21,6 +21,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int $endpoint
  * @property int $seats
  * @property int $freeseats
+ * @property int $maxseats
  * @property int $starttime
  * @property int $endtime
  * @property int $cancel_reason
@@ -104,6 +105,7 @@ class Line extends \yii\db\ActiveRecord
                     'endpoint',
                     'seats',
                     'freeseats',
+                    'maxseats',
                     'cancel_reason',
                     'penalty'
                 ],
@@ -154,6 +156,7 @@ class Line extends \yii\db\ActiveRecord
             'status' => Yii::t('app', "Статус"),
             'seats' => Yii::t('app', "Мест"),
             'freeseats' => Yii::t('app', "Свободных мест"),
+            'maxseats' => Yii::t('app', "Максимум мест"),
             'starttime' => Yii::t('app', "Время отправления"),
             'endtime' => Yii::t('app', "Время прибытия"),
             'cancel_reason' => Yii::t('app', "Причина отмены"),

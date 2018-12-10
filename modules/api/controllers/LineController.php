@@ -140,6 +140,11 @@ class LineController extends BaseController
         $freeseats = isset ($this->body->freeseats) ? intval($this->body->freeseats) : $vehicle->seats;
         if ($freeseats == 0) $freeseats = $vehicle->seats;
 
+        $maxseats = $vehicle->seats;
+
+        if($freeseats > $maxseats || $seats > $maxseats)
+            $this->module->setError(422, '_seats', Yii::$app->mv->gt("Недопустимое кол-во мест", [], false));
+
         /** @var \app\models\Line $line */
         $line = new Line();
         $line->status = Line::STATUS_QUEUE;
@@ -148,8 +153,11 @@ class LineController extends BaseController
         $line->vehicle_type_id = $vehicle->vehicle_type_id;
         $line->tariff = $route->base_tariff;
         $line->route_id = $route->id;
+
         $line->seats = $seats;
         $line->freeseats = $freeseats;
+        $line->maxseats = $maxseats;
+
         $line->startpoint = $startpoint->id;
         $line->endpoint = $endpoint->id;
 
