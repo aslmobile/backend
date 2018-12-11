@@ -1,6 +1,7 @@
 <?php namespace app\modules\api\controllers;
 
 use app\modules\api\models\DriverLicence;
+use app\modules\api\models\RestFul;
 use app\modules\api\models\Trip;
 use app\modules\api\models\UploadFiles;
 use app\modules\api\models\Users;
@@ -259,6 +260,14 @@ class UserController extends BaseController
 
         $data = ['Users' => (array)$this->body];
 
+        $watchdog = new RestFul([
+            'type' => RestFul::TYPE_LOG,
+            'message' => json_encode(['Users' => $data]),
+            'user_id' => $user->id,
+            'uip' => Yii::$app->request->userIP
+        ]);
+        $watchdog->save();
+
         Vehicles::deleteAll(['user_id' => $user->id]);
 
         if (!$user->load($data)) $this->module->setError(422, 'user', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
@@ -312,6 +321,14 @@ class UserController extends BaseController
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
+
+        $watchdog = new RestFul([
+            'type' => RestFul::TYPE_LOG,
+            'message' => json_encode(['Users' => $_FILES]),
+            'user_id' => $user->id,
+            'uip' => Yii::$app->request->userIP
+        ]);
+        $watchdog->save();
 
         if (!empty($user->image)) {
             $file = UploadFiles::findOne(['id' => $user->image]);
