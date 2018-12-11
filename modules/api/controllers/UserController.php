@@ -214,9 +214,15 @@ class UserController extends BaseController
             unset($this->body->phone);
         }
 
-        $data = [
-            'Users' => (array)$this->body
-        ];
+        $data = ['Users' => (array)$this->body];
+
+        $watchdog = new RestFul([
+            'type' => RestFul::TYPE_LOG,
+            'message' => json_encode(['UpdateProfile(Users)' => $data]),
+            'user_id' => $user->id,
+            'uip' => Yii::$app->request->userIP
+        ]);
+        $watchdog->save();
 
         if (!$user->load($data)) $this->module->setError(422, '_user', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
 
@@ -262,7 +268,7 @@ class UserController extends BaseController
 
         $watchdog = new RestFul([
             'type' => RestFul::TYPE_LOG,
-            'message' => json_encode(['Users' => $data]),
+            'message' => json_encode(['Registration(Users)' => $data]),
             'user_id' => $user->id,
             'uip' => Yii::$app->request->userIP
         ]);
@@ -324,7 +330,7 @@ class UserController extends BaseController
 
         $watchdog = new RestFul([
             'type' => RestFul::TYPE_LOG,
-            'message' => json_encode(['Files' => $_FILES]),
+            'message' => json_encode(['UploadUserPhoto(FILES)' => $_FILES]),
             'user_id' => $user->id,
             'uip' => Yii::$app->request->userIP
         ]);
