@@ -348,7 +348,7 @@ class UserController extends BaseController
 
         if ($finish) $user->status = User::STATUS_PENDING;
 
-        $user->save();
+        $user->update(false, ['image', 'status']);
 
         $watchdog = new RestFul([
             'type' => RestFul::TYPE_LOG,
