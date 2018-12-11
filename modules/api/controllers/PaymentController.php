@@ -75,7 +75,7 @@ class PaymentController extends BaseController
         $income = Transactions::find()->andWhere([
             'AND',
             ['between', 'created_at', $timestamp_min, $timestamp_max],
-            ['=', 'user_id', $user->id],
+            ['=', 'recipient_id', $user->id],
             ['=', 'type', Transactions::TYPE_INCOME],
         ])->sum('amount');
 
@@ -109,25 +109,43 @@ class PaymentController extends BaseController
         $limit = isset ($this->body->limit) ? intval($this->body->limit) : 10;
         $offset = isset ($this->body->offset) ? intval($this->body->offset) : 0;
 
-        $transactions = Transactions::find()->andWhere([
-            'AND',
-            ['between', 'created_at', $timestamp_min, $timestamp_max],
-            ['=', 'user_id', $user->id]
-        ])->orderBy(['created_at' => SORT_DESC])->limit($limit)->offset($offset)->all();
+        $params = [
+            'OR',
+            [
+                'AND',
+                ['=', 'recipient_id', $user->id],
+                ['=', 'type', Transactions::TYPE_INCOME],
+            ],
+            [
+                'AND',
+                ['=', 'user_id', $user->id],
+                ['=', 'type', Transactions::TYPE_OUTCOME],
+            ]
+        ];
 
-        $transactions_data = [];
-        if ($transactions && count($transactions) > 0)
-            foreach ($transactions as $transaction)
-                $transactions_data[] = [
-                    'transaction' => $transaction->toArray(),
-                    'route' => ($transaction->route) ? $transaction->route->toArray() : null
+        $and = ['between', 'created_at', $timestamp_min, $timestamp_max];
+
+        $transactions = Transactions::find()->where($params);
+        $transactions_count = $transactions->count();
+        $transactions = $transactions->andWhere($and)->orderBy(['created_at' => SORT_DESC])->limit($limit)->offset($offset)->all();
+
+        $transactions_data = ['income' => [], 'outcome' => [], 'service' => []];
+        if ($transactions && count($transactions) > 0) {
+            /** @var Transactions $t */
+            foreach ($transactions as $t) {
+                $type = 'service';
+                if ($t->type == Transactions::TYPE_INCOME && $t->recipient_id == $user->id) $type = 'income';
+                else if ($t->type == Transactions::TYPE_OUTCOME && $t->user_id == $user->id) $type = 'outcome';
+                $transactions_data[$type][] = [
+                    'transaction' => $t->toArray(),
+                    'route' => ($t->route) ? $t->route->toArray() : null
                 ];
+            }
+        }
 
         $this->module->data['transactions'] = $transactions_data;
-        $this->module->data['count'] = Transactions::find()->andWhere([
-            'AND',
-            ['=', 'user_id', $user->id]
-        ])->count();
+        $this->module->data['count'] = $transactions_count;
+
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
@@ -294,6 +312,7 @@ class PaymentController extends BaseController
         $transaction->recipient_id = $user->id;
         $transaction->route_id = 0;
         $transaction->trip_id = 0;
+        $transaction->line_id = 0;
         $transaction->status = Transactions::STATUS_REQUEST;
         $transaction->amount = $this->body->amount;
         $transaction->gateway = Transactions::GATEWAY_IN;
@@ -354,6 +373,7 @@ class PaymentController extends BaseController
         $transaction->currency = $trip->currency;
         $transaction->route_id = $trip->route_id;
         $transaction->trip_id = $trip->id;
+        $transaction->line_id = $trip->line_id;
 
         if (!$transaction->validate() || !$transaction->save()) {
             if ($transaction->hasErrors()) {
@@ -471,6 +491,12 @@ class PaymentController extends BaseController
                 $transaction->save();
                 break;
         }
+
+        $outcome_attributes = $transaction->attributes;
+        unset($outcome_attributes['id']);
+        $outcome = new Transactions($outcome_attributes);
+        $outcome->type = Transactions::TYPE_OUTCOME;
+        $outcome->save();
 
         if ($trip->penalty && $this->body->type == Transactions::GATEWAY_CASH) {
             $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;

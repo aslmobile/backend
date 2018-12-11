@@ -1175,6 +1175,7 @@ class TripController extends BaseController
             $transaction->currency = $trip->currency;
             $transaction->route_id = $line->route_id;
             $transaction->line_id = $line->id;
+            $transaction->trip_id = 0;
 
             $user->balance -= $commission;
 

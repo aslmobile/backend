@@ -32,7 +32,8 @@ use yii\behaviors\TimestampBehavior;
  * @property int $payment_id
  * @property string $payment_link
  *
- * @property User recipient
+ * @property User $recipient
+ * @property Route $route
  *
  */
 class Transactions extends \yii\db\ActiveRecord
@@ -117,7 +118,7 @@ class Transactions extends \yii\db\ActiveRecord
             'updated_at' => Yii::$app->mv->gt('Обновлена', [], 0),
             'status' => Yii::$app->mv->gt('Статус', [], 0),
             'user_id' => Yii::$app->mv->gt('Пользователь', [], 0),
-            'recipient_id' => Yii::$app->mv->gt('recipient_id', [], 0),
+            'recipient_id' => Yii::$app->mv->gt('Адресат', [], 0),
             'amount' => Yii::$app->mv->gt('Сумма', [], 0),
             'gateway' => Yii::$app->mv->gt('Сервис', [], 0),
             'cancel_reason' => Yii::$app->mv->gt('Причина отмены', [], 0),
