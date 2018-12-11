@@ -785,14 +785,24 @@ class Trip extends \yii\db\ActiveRecord
         }
 
         if (!empty($trip->luggages)) {
+
+            $luggage_unique = '';
+            foreach ($trip->luggages as $luggage) $luggage_unique .= $luggage->luggage_type . '+';
+            $luggage_unique .= $new_trip->user_id . '+' . $new_trip->route_id;
+            $luggage_unique = hash('sha256', md5($luggage_unique) . time());
+
+            $new_trip->luggage_unique_id = $luggage_unique;
+
             /** @var TripLuggage $luggage */
             foreach ($trip->luggages as $luggage) {
                 $new_luggage = new TripLuggage();
                 $old_attributes = $luggage->attributes;
                 unset($old_attributes['id']);
                 foreach ($old_attributes as $attribute => $value) $new_luggage->$attribute = $value;
+                $new_luggage->unique_id = $luggage_unique;
                 $new_luggage->save();
             }
+
         }
 
         if (!empty($trip->transfer)) {
