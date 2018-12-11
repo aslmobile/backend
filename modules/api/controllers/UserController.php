@@ -352,7 +352,7 @@ class UserController extends BaseController
 
         $watchdog = new RestFul([
             'type' => RestFul::TYPE_LOG,
-            'message' => json_encode(['UploadUserPhoto(FILES)' => $_FILES]),
+            'message' => json_encode(['UploadUserPhoto(FILES)' => $_FILES, 'file' => $documents['image']]),
             'user_id' => $user->id,
             'uip' => Yii::$app->request->userIP
         ]);
