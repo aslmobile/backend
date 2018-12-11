@@ -216,14 +216,6 @@ class UserController extends BaseController
 
         $data = ['Users' => (array)$this->body];
 
-        $watchdog = new RestFul([
-            'type' => RestFul::TYPE_LOG,
-            'message' => json_encode(['UpdateProfile(Users)' => $data]),
-            'user_id' => $user->id,
-            'uip' => Yii::$app->request->userIP
-        ]);
-        $watchdog->save();
-
         if (!$user->load($data)) $this->module->setError(422, '_user', Yii::$app->mv->gt("Не удалось загрузить модель", [], false));
 
         if ($phone && $user->phone != $phone) {
@@ -265,14 +257,6 @@ class UserController extends BaseController
         if ($user) $user = $this->user;
 
         $data = ['Users' => (array)$this->body];
-
-        $watchdog = new RestFul([
-            'type' => RestFul::TYPE_LOG,
-            'message' => json_encode(['Registration(Users)' => $data]),
-            'user_id' => $user->id,
-            'uip' => Yii::$app->request->userIP
-        ]);
-        $watchdog->save();
 
         Vehicles::deleteAll(['user_id' => $user->id]);
 
@@ -349,14 +333,6 @@ class UserController extends BaseController
         if ($finish) $user->status = User::STATUS_PENDING;
 
         $user->update(false, ['image', 'status']);
-
-        $watchdog = new RestFul([
-            'type' => RestFul::TYPE_LOG,
-            'message' => json_encode(['UploadUserPhoto(FILES)' => $_FILES, 'file' => $documents['image']]),
-            'user_id' => $user->id,
-            'uip' => Yii::$app->request->userIP
-        ]);
-        $watchdog->save();
 
         $this->module->data = ['user' => $user->toArray(), 'file' => $documents['image']['file']];
         $this->module->setSuccess();
