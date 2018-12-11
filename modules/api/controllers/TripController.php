@@ -1101,7 +1101,7 @@ class TripController extends BaseController
                 if (
                     $trip->payment_type == Trip::PAYMENT_TYPE_CASH
                     &&
-                    $penalty = Trip::findOne(['user_id' => $user->id, 'penalty' => 1])
+                    $penalty = Trip::findOne(['user_id' => $trip->user_id, 'penalty' => 1])
                 ) {
                     if ($transaction = Transactions::findOne(['trip_id' => $penalty->id])) {
                         $transaction->status = Transactions::STATUS_PAID;
