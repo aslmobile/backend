@@ -41,6 +41,7 @@ class UploadFiles extends ActiveRecord
     public function rules()
     {
         return [
+            ['id', 'integer'],
             [['file'], 'required'],
             [['file'], 'string']
         ];
