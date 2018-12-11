@@ -72,8 +72,7 @@ class UploadFiles extends ActiveRecord
 
     public function upload()
     {
-        if ($this->validate())
-        {
+        if ($this->validate()) {
             $fileName = mb_strtolower(time() . '_' . $this->uploadedFile->baseName);
             $fileName = \Yii::$app->mv->transliterateUrl(str_ireplace(' ', '_', $fileName))  . '.' . $this->uploadedFile->extension;
 

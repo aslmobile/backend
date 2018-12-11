@@ -328,14 +328,6 @@ class UserController extends BaseController
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
-        $watchdog = new RestFul([
-            'type' => RestFul::TYPE_LOG,
-            'message' => json_encode(['UploadUserPhoto(FILES)' => $_FILES]),
-            'user_id' => $user->id,
-            'uip' => Yii::$app->request->userIP
-        ]);
-        $watchdog->save();
-
         if (!empty($user->image)) {
             $file = UploadFiles::findOne(['id' => $user->image]);
             if ($file && !empty($file->file)) {
@@ -357,6 +349,14 @@ class UserController extends BaseController
         if ($finish) $user->status = User::STATUS_PENDING;
 
         $user->save();
+
+        $watchdog = new RestFul([
+            'type' => RestFul::TYPE_LOG,
+            'message' => json_encode(['UploadUserPhoto(FILES)' => $_FILES]),
+            'user_id' => $user->id,
+            'uip' => Yii::$app->request->userIP
+        ]);
+        $watchdog->save();
 
         $this->module->data = ['user' => $user->toArray(), 'file' => $documents['image']['file']];
         $this->module->setSuccess();
