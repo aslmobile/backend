@@ -324,7 +324,7 @@ class UserController extends BaseController
 
         $watchdog = new RestFul([
             'type' => RestFul::TYPE_LOG,
-            'message' => json_encode(['Users' => $_FILES]),
+            'message' => json_encode(['Files' => $_FILES]),
             'user_id' => $user->id,
             'uip' => Yii::$app->request->userIP
         ]);
