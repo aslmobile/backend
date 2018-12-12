@@ -145,12 +145,11 @@ class PaymentController extends BaseController
 
         $transactions_data = [];
         if (!empty($transactions)) {
-            foreach ($transactions as $t) {
-                $transactions_data[] = [
-                    'transaction' => $t->toArray(),
-                    'route' => ($t->route) ? $t->route->toArray() : null
-                ];
-            }
+            /** @var Transactions $t */
+            foreach ($transactions as $t) $transactions_data[] = [
+                'transaction' => $t->toArray(),
+                'route' => ($t->route) ? $t->route->toArray() : null
+            ];
         }
 
         $this->module->data['transactions'] = $transactions_data;
