@@ -253,19 +253,6 @@ class LineController extends BaseController
             'driver_id' => $line->driver_id
         ]), 'id');
 
-        $line->status = Line::STATUS_IN_PROGRESS;
-        $line->starttime = time();
-        $line->save();
-
-        RestFul::updateAll(
-            ['message' => json_encode(['status' => 'closed'])],
-            [
-                'AND',
-                ['=', 'user_id', $line->driver_id],
-                ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT]
-            ]
-        );
-
         /** @var Trip $trip */
         $missed = Trip::find()->where([
             'line_id' => $line->id,
@@ -283,6 +270,8 @@ class LineController extends BaseController
             $trip->vehicle_id = 0;
             $trip->line_id = 0;
             $trip->status = Trip::STATUS_CREATED;
+
+            $line->freeseats -= $trip->seats;
 
             if (!$trip->validate() || !$trip->save()) {
                 if ($trip->hasErrors()) {
@@ -312,6 +301,19 @@ class LineController extends BaseController
             ])));
 
         }
+
+        $line->status = Line::STATUS_IN_PROGRESS;
+        $line->starttime = time();
+        $line->save();
+
+        RestFul::updateAll(
+            ['message' => json_encode(['status' => 'closed'])],
+            [
+                'AND',
+                ['=', 'user_id', $line->driver_id],
+                ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT]
+            ]
+        );
 
         $socket->push(base64_encode(json_encode([
             'action' => "startDriverTrip",
