@@ -247,7 +247,11 @@ class LineController extends BaseController
         $line = Line::findOne(['id' => $id, 'status' => Line::STATUS_WAITING]);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
-        $passengers = ArrayHelper::getColumn(Trip::findAll(['status' => Trip::STATUS_WAITING, 'line_id' => $line->id]), 'id');
+        $passengers = ArrayHelper::getColumn(Trip::findAll([
+            'status' => Trip::STATUS_WAITING,
+            'line_id' => $line->id,
+            'driver_id' => $line->driver_id
+        ]), 'id');
 
         $line->status = Line::STATUS_IN_PROGRESS;
         $line->starttime = time();
@@ -262,16 +266,58 @@ class LineController extends BaseController
             ]
         );
 
+        /** @var Trip $trip */
+        $missed = Trip::find()->where([
+            'line_id' => $line->id,
+            'status' => Trip::STATUS_CREATED,
+        ])->andWhere(['driver_id' => 0])->all();
+
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
         if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
+
+        foreach ($missed as $trip) {
+
+            $trip->driver_id = 0;
+            $trip->vehicle_id = 0;
+            $trip->line_id = 0;
+            $trip->status = Trip::STATUS_CREATED;
+
+            if (!$trip->validate() || !$trip->save()) {
+                if ($trip->hasErrors()) {
+                    foreach ($trip->errors as $field => $error_message) {
+                        if (is_array($error_message)) {
+                            $result = '';
+                            foreach ($error_message as $error) $result .= $error . '; ';
+                            $error_message = $result;
+                        }
+                        $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                    }
+                } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+            }
+
+            RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                'AND',
+                ['user_id' => $trip->user_id],
+                ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+            ]);
+
+            $_trips[] = $trip->toArray();
+
+            $socket->push(base64_encode(json_encode([
+                'action' => "declinePassengerTrip",
+                'notifications' => Notifications::create(Notifications::NTP_TRIP_CANCEL, [$trip->user_id], '', $user->id),
+                'data' => ['message_id' => time(), 'addressed' => [$trip->user_id], 'trip' => $trip->toArray()]
+            ])));
+
+        }
+
         $socket->push(base64_encode(json_encode([
             'action' => "startDriverTrip",
             'notifications' => Notifications::create(Notifications::NTP_TRIP_READY, $passengers, '', $user->id),
             'data' => ['message_id' => time(), 'addressed' => $passengers, 'line' => $line->toArray()]
         ])));
-
 
         $this->module->data['line'] = $line->toArray();
         $this->module->setSuccess();
