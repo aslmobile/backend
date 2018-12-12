@@ -129,14 +129,24 @@ class PaymentController extends BaseController
         $transactions_count = $transactions->count();
         $transactions = $transactions->andWhere($and)->orderBy(['created_at' => SORT_DESC])->limit($limit)->offset($offset)->all();
 
-        $transactions_data = ['income' => [], 'outcome' => [], 'service' => []];
-        if ($transactions && count($transactions) > 0) {
-            /** @var Transactions $t */
+//        $transactions_data = ['income' => [], 'outcome' => [], 'service' => []];
+//        if ($transactions && count($transactions) > 0) {
+//            /** @var Transactions $t */
+//            foreach ($transactions as $t) {
+//                $type = 'service';
+//                if ($t->type == Transactions::TYPE_INCOME && $t->recipient_id == $user->id) $type = 'income';
+//                else if ($t->type == Transactions::TYPE_OUTCOME && $t->user_id == $user->id) $type = 'outcome';
+//                $transactions_data[$type][] = [
+//                    'transaction' => $t->toArray(),
+//                    'route' => ($t->route) ? $t->route->toArray() : null
+//                ];
+//            }
+//        }
+
+        $transactions_data = [];
+        if (!empty($transactions)) {
             foreach ($transactions as $t) {
-                $type = 'service';
-                if ($t->type == Transactions::TYPE_INCOME && $t->recipient_id == $user->id) $type = 'income';
-                else if ($t->type == Transactions::TYPE_OUTCOME && $t->user_id == $user->id) $type = 'outcome';
-                $transactions_data[$type][] = [
+                $transactions_data[] = [
                     'transaction' => $t->toArray(),
                     'route' => ($t->route) ? $t->route->toArray() : null
                 ];
