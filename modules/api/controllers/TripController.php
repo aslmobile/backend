@@ -359,10 +359,14 @@ class TripController extends BaseController
     {
 
         /** @var \app\modules\api\models\Trip $trip */
-        $trip = Trip::findOne($id);
-        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+        $trip = Trip::findOne(['id' => $id, 'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]]);
+        if (!$trip)
+            $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете вернутся в очередь на данной поездки", [], false));
+
         /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne($trip->line_id);
+        $line = \app\modules\api\models\Line::findOne(['id' => $trip->line_id, 'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]]);
+        if (!$line)
+            $this->module->setError(422, '_line', Yii::$app->mv->gt("Вы уже не можете вернутся в очередь с данной поездки", [], false));
 
         $not = !empty($trip->not) ? json_decode($trip->not) : [];
         $not[] = $line->id;
@@ -394,11 +398,8 @@ class TripController extends BaseController
             } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
         }
 
-        if (!empty($line)) {
-        // TODO if (!empty($line) && $line->status != Line::STATUS_CANCELED) {
-            $line->freeseats += $trip->seats;
-            $line->save();
-        }
+        $line->freeseats += $trip->seats;
+        $line->save();
 
         Queue::processingQueue();
 
@@ -409,9 +410,7 @@ class TripController extends BaseController
         $socket->push(base64_encode(json_encode([
             'action' => "driverQueue",
             'notifications' => [],
-            'data' => [
-                'message_id' => time(),
-            ]
+            'data' => ['message_id' => time()]
         ])));
 
         $this->module->data['trip'] = $trip->toArray();
@@ -655,168 +654,42 @@ class TripController extends BaseController
         $this->prepareBody();
 
         /** @var \app\models\Trip $trip */
-        $trip = Trip::find()->where(['user_id' => $user->id])
-            ->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])
+        $trip = Trip::find()
+            ->where(['user_id' => $user->id])
+            ->andWhere(['status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]])
             ->orderBy(['created_at' => SORT_DESC])->one();
 
-        if ($trip) {
-
-            if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
-            $trip->status = Trip::STATUS_CANCELLED;
-            $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
-            $trip->passenger_comment = isset($this->body->passenger_comment) ? $this->body->passenger_comment : '';
-            $trip->save();
-
-            /** @var \app\modules\api\models\Line $line */
-            $line = \app\modules\api\models\Line::findOne($trip->line_id);
-            if (!empty($line)) {
-                $line->freeseats += $trip->seats;
-                $line->save();
-            }
-
-            RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
-                'AND',
-                ['user_id' => $trip->user_id],
-                ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
-            ]);
-
-            Queue::processingQueue();
-
-            $this->module->data['trip'] = $trip->toArray();
-        } else {
-            $this->module->setError(422, '_line', Yii::$app->mv->gt("Уже отменено", [], false));
-        };
-
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
-    public function actionPassengerTrips()
-    {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
-        $trips_list_past = [];
-        $trips_list_feature = [];
-        $trips_list_current = [];
-
-        $trips = Trip::find()->andWhere([
-            'AND',
-            ['=', 'user_id', $user->id]
-        ])->all();
-
-        /** @var \app\modules\api\models\Trip $trip */
-        if ($trips && count($trips)) foreach ($trips as $trip) {
-
-            $past = [
-                Trip::STATUS_FINISHED,
-                Trip::STATUS_CANCELLED,
-                Trip::STATUS_CANCELLED_DRIVER
-            ];
-
-            $feature = [
-                Trip::STATUS_SCHEDULED
-            ];
-
-            $current = [
-                Trip::STATUS_CREATED,
-                Trip::STATUS_WAITING,
-                Trip::STATUS_WAY
-            ];
-
-            $array_trip = $trip->toArray();
-
-            if (in_array($trip->status, $past) && empty($trip->schedule)) {
-                $wait_time = $trip->waiting_time - $trip->queue_time;
-                $way_time = $trip->finish_time - $trip->start_time;
-                $array_trip += [
-                    'wait_time' => ($wait_time < 0) ? 0 : $wait_time,
-                    'way_time' => ($way_time < 0) ? 0 : $way_time,
-                ];
-                $trips_list_past[] = $array_trip;
-            }
-
-            if (in_array($trip->status, $feature) || ($trip->status == Trip::STATUS_CREATED && $trip->queue_time >= time())) {
-
-                $queue_times = [];
-                $queue_time = $array_trip['queue_time'];
-                $schedule = $array_trip['schedule'];
-
-                if (!empty($schedule)) {
-
-                    foreach ($schedule as $day) {
-                        $target = Yii::$app->params['weekdays'][$day];
-                        $date = new \DateTime();
-                        $date->modify("next $target");
-                        $time = date('H:i:s', $queue_time);
-                        $args = explode(':', $time);
-                        $date->setTime($args[0], $args[1], $args[2]);
-                        $queue_times[] = $date->getTimestamp();
-                    }
-                    sort($queue_times);
-                    $array_trip['queue_time'] = $queue_times[0];
-                }
-
-                $trips_list_feature[] = $array_trip;
-
-            }
-
-            if (in_array($trip->status, $current) && $trip->queue_time <= time()) $trips_list_current[] = $array_trip;
-        }
-
-        $this->module->data['trips']['past'] = $trips_list_past;
-        $this->module->data['trips']['feature'] = $trips_list_feature;
-        $this->module->data['trips']['current'] = $trips_list_current;
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
-    public function actionPassengersRoute($id)
-    {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
+        if (!$trip)
+            $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете отменить очередь на данной поездке", [], false));
 
         /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne($id);
-        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
-
-        /** @var \app\modules\api\models\Route $route */
-        $route = \app\modules\api\models\Route::findOne($line->route_id);
-        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
-
-        $trips = Trip::find()->andWhere([
-            'AND',
-            ['=', 'line_id', $line->id],
-            ['=', 'driver_id', $line->driver_id],
-            ['=', 'status', Line::STATUS_WAITING]
-        ])->all();
-
-        $checkpoints = [];
-        if ($trips && count($trips) > 0) foreach ($trips as $trip) {
-            /** @var \app\modules\api\models\Trip $trip */
-
-            $checkpoints[$trip->startpoint->id][] = [
-                'trip' => $trip->toArray(),
-                'position' => $trip->position
-            ];
+        $line = \app\modules\api\models\Line::findOne(['id' => $trip->line_id]);
+        if(!empty($line)){
+            if($line->status == Line::STATUS_IN_PROGRESS)
+                $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете отменить очередь на данной поездке", [], false));
+            $line->freeseats += $trip->seats;
+            $line->save();
         }
 
-        $passengers_seat = Trip::find()->andWhere([
+        if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
+        $trip->status = Trip::STATUS_CANCELLED;
+        $trip->driver_id = 0;
+        $trip->vehicle_id = 0;
+        $trip->line_id = 0;
+        $trip->cancel_reason = isset($this->body->cancel_reason) ? $this->body->cancel_reason : 0;
+        $trip->passenger_comment = isset($this->body->passenger_comment) ? $this->body->passenger_comment : '';
+        $trip->save();
+
+        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
             'AND',
-            ['=', 'line_id', $line->id],
-            ['=', 'driver_id', $line->driver_id],
-            ['=', 'status', Line::STATUS_IN_PROGRESS]
-        ])->all();
+            ['user_id' => $trip->user_id],
+            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+        ]);
 
-        $passengers = [];
-        if ($passengers_seat && count($passengers_seat) > 0) foreach ($passengers_seat as $passenger) {
-            $passengers[] = $passenger->toArray();
-        }
+        Queue::processingQueue();
 
+        $this->module->data['trip'] = $trip->toArray();
 
-        $this->module->data['line'] = $line->toArray();
-        $this->module->data['checkpoints'] = array_values($checkpoints);
-        $this->module->data['passengers'] = $passengers;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
@@ -825,30 +698,27 @@ class TripController extends BaseController
      * Take a trip on a certain line by the passenger
      * @param $id
      */
-    public function actionAcceptPassenger($id)
+    public function actionAcceptPassenger($id = 0)
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
-
-        /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne($id);
-        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $this->prepareBody();
         $this->validateBodyParams(['trip_id']);
 
         /** @var \app\modules\api\models\Trip $trip */
-        $trip = Trip::findOne(['id' => $this->body->trip_id]);
+        $trip = Trip::findOne(['id' => $this->body->trip_id, 'status' => Trip::STATUS_CREATED]);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
-        $trip->line_id = $line->id;
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne(['id' => $trip->line_id, 'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]]);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
         $trip->driver_id = $line->driver_id;
         $trip->vehicle_id = $line->vehicle_id;
         $trip->status = Trip::STATUS_WAITING;
 
-        if ($line->freeseats == 0) {
-            $line->status = Line::STATUS_WAITING;
-        }
+        if ($line->freeseats == 0) $line->status = Line::STATUS_WAITING;
 
         $trip->save();
         $line->save();
@@ -872,80 +742,6 @@ class TripController extends BaseController
     }
 
     /**
-     * Accept landing in the vehicle by both of user types
-     * @param $id
-     */
-    public function actionAcceptSeat($id)
-    {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
-        $this->prepareBody();
-        $this->validateBodyParams(['trip_id']);
-
-        /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne($id);
-        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
-
-        /** @var \app\models\Trip $trip */
-        $trip = Trip::find()->where(['id' => $this->body->trip_id, 'status' => Trip::STATUS_WAITING, 'line_id' => $line->id])->one();
-
-        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
-
-        switch ($user->type) {
-            case User::TYPE_DRIVER:
-                $trip->driver_comment = Yii::$app->mv->gt("Посадка подтверждена водителем", [], false);
-                break;
-            case User::TYPE_PASSENGER:
-                $this->validateBodyParams(['code']);
-                $v_id = intval($this->body->code);
-                if ($v_id != $trip->vehicle_id) $this->module->setError(422,
-                    '_code', Yii::$app->mv->gt("Не правильный код", [], false));
-                $trip->passenger_comment = Yii::$app->mv->gt("Посадка подтверждена пассажиром", [], false);
-                break;
-        }
-
-        $trip->status = Trip::STATUS_WAY;
-        $trip->start_time = time();
-
-        if (!$trip->validate() || !$trip->save()) {
-            if ($trip->hasErrors()) {
-                foreach ($trip->errors as $field => $error_message) {
-                    if (is_array($error_message)) {
-                        $result = '';
-                        foreach ($error_message as $error) $result .= '; ' . $error;
-                        $error_message = $result;
-                    }
-                    $this->module->setError(422,
-                        '_trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
-                }
-                $this->module->sendResponse();
-            } else $this->module->setError(422,
-                '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
-        }
-
-        /** @var \app\models\Devices $device */
-        $device = Devices::findOne(['user_id' => $user->id]);
-        if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
-        $socket = new SocketPusher(['authkey' => $device->auth_token]);
-        $socket->push(base64_encode(json_encode([
-            'action' => "acceptPassengerSeat",
-            'notifications' => Notifications::create(
-                Notifications::NTD_TRIP_SEAT,
-                [$trip->user_id],
-                "Хорошей поездки, {$user->fullName}",
-                $user->id
-            ),
-            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id, $trip->user_id], 'trip' => $trip->toArray()]
-        ])));
-
-        $this->module->data['line'] = $line->toArray();
-        $this->module->data['trip'] = $trip->toArray();
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
-    /**
      * Decline trip by passenger
      */
     public function actionDeclinePassenger()
@@ -959,12 +755,13 @@ class TripController extends BaseController
         /** @var Trip $trip */
         $trip = Trip::find()
             ->where(['id' => $this->body->trip_id])
-            ->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])
-            ->one();
+            ->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])->one();
         if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Уже отменено", [], false));
 
         /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne($trip->line_id);
+        $line = \app\modules\api\models\Line::find()
+            ->where(['id' => $trip->line_id])
+            ->andWhere(['NOT', ['status' => Line::STATUS_CANCELED]])->one();
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $notifications = [];
@@ -972,6 +769,7 @@ class TripController extends BaseController
         $trip->cancel_reason = 0;
 
         switch ($user->type) {
+
             case User::TYPE_DRIVER:
 
                 $addressed = [$trip->user_id];
@@ -1004,6 +802,7 @@ class TripController extends BaseController
                 );
 
                 break;
+
             case User::TYPE_PASSENGER:
 
                 $addressed = [$line->driver_id];
@@ -1019,6 +818,7 @@ class TripController extends BaseController
                 break;
             default:
                 $this->module->setError(422, '_user', Yii::$app->mv->gt("Не корректный пользователь", [], false));
+
         }
 
         $line->freeseats += $trip->seats;
@@ -1068,7 +868,7 @@ class TripController extends BaseController
         $this->validateBodyParams(['checkpoint_id']);
 
         /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne($id);
+        $line = \app\modules\api\models\Line::findOne(['id'=> $id, 'status' => Line::STATUS_IN_PROGRESS]);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var Checkpoint $checkpoint */
@@ -1209,6 +1009,80 @@ class TripController extends BaseController
         ])));
 
         $this->module->data = $data;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    /**
+     * Accept landing in the vehicle by both of user types
+     * @param $id
+     */
+    public function actionAcceptSeat($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $this->prepareBody();
+        $this->validateBodyParams(['trip_id']);
+
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\models\Trip $trip */
+        $trip = Trip::find()->where(['id' => $this->body->trip_id, 'status' => Trip::STATUS_WAITING, 'line_id' => $line->id])->one();
+
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+
+        switch ($user->type) {
+            case User::TYPE_DRIVER:
+                $trip->driver_comment = Yii::$app->mv->gt("Посадка подтверждена водителем", [], false);
+                break;
+            case User::TYPE_PASSENGER:
+                $this->validateBodyParams(['code']);
+                $v_id = intval($this->body->code);
+                if ($v_id != $trip->vehicle_id) $this->module->setError(422,
+                    '_code', Yii::$app->mv->gt("Не правильный код", [], false));
+                $trip->passenger_comment = Yii::$app->mv->gt("Посадка подтверждена пассажиром", [], false);
+                break;
+        }
+
+        $trip->status = Trip::STATUS_WAY;
+        $trip->start_time = time();
+
+        if (!$trip->validate() || !$trip->save()) {
+            if ($trip->hasErrors()) {
+                foreach ($trip->errors as $field => $error_message) {
+                    if (is_array($error_message)) {
+                        $result = '';
+                        foreach ($error_message as $error) $result .= '; ' . $error;
+                        $error_message = $result;
+                    }
+                    $this->module->setError(422,
+                        '_trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
+                }
+                $this->module->sendResponse();
+            } else $this->module->setError(422,
+                '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
+        }
+
+        /** @var \app\models\Devices $device */
+        $device = Devices::findOne(['user_id' => $user->id]);
+        if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
+        $socket = new SocketPusher(['authkey' => $device->auth_token]);
+        $socket->push(base64_encode(json_encode([
+            'action' => "acceptPassengerSeat",
+            'notifications' => Notifications::create(
+                Notifications::NTD_TRIP_SEAT,
+                [$trip->user_id],
+                "Хорошей поездки, {$user->fullName}",
+                $user->id
+            ),
+            'data' => ['message_id' => time(), 'addressed' => [$line->driver_id, $trip->user_id], 'trip' => $trip->toArray()]
+        ])));
+
+        $this->module->data['line'] = $line->toArray();
+        $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
@@ -1394,6 +1268,136 @@ class TripController extends BaseController
         }
 
         $this->module->data = $reviews;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionPassengerTrips()
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $trips_list_past = [];
+        $trips_list_feature = [];
+        $trips_list_current = [];
+
+        $trips = Trip::find()->andWhere([
+            'AND',
+            ['=', 'user_id', $user->id]
+        ])->all();
+
+        /** @var \app\modules\api\models\Trip $trip */
+        if ($trips && count($trips)) foreach ($trips as $trip) {
+
+            $past = [
+                Trip::STATUS_FINISHED,
+                Trip::STATUS_CANCELLED,
+                Trip::STATUS_CANCELLED_DRIVER
+            ];
+
+            $feature = [
+                Trip::STATUS_SCHEDULED
+            ];
+
+            $current = [
+                Trip::STATUS_CREATED,
+                Trip::STATUS_WAITING,
+                Trip::STATUS_WAY
+            ];
+
+            $array_trip = $trip->toArray();
+
+            if (in_array($trip->status, $past) && empty($trip->schedule)) {
+                $wait_time = $trip->waiting_time - $trip->queue_time;
+                $way_time = $trip->finish_time - $trip->start_time;
+                $array_trip += [
+                    'wait_time' => ($wait_time < 0) ? 0 : $wait_time,
+                    'way_time' => ($way_time < 0) ? 0 : $way_time,
+                ];
+                $trips_list_past[] = $array_trip;
+            }
+
+            if (in_array($trip->status, $feature) || ($trip->status == Trip::STATUS_CREATED && $trip->queue_time >= time())) {
+
+                $queue_times = [];
+                $queue_time = $array_trip['queue_time'];
+                $schedule = $array_trip['schedule'];
+
+                if (!empty($schedule)) {
+
+                    foreach ($schedule as $day) {
+                        $target = Yii::$app->params['weekdays'][$day];
+                        $date = new \DateTime();
+                        $date->modify("next $target");
+                        $time = date('H:i:s', $queue_time);
+                        $args = explode(':', $time);
+                        $date->setTime($args[0], $args[1], $args[2]);
+                        $queue_times[] = $date->getTimestamp();
+                    }
+                    sort($queue_times);
+                    $array_trip['queue_time'] = $queue_times[0];
+                }
+
+                $trips_list_feature[] = $array_trip;
+
+            }
+
+            if (in_array($trip->status, $current) && $trip->queue_time <= time()) $trips_list_current[] = $array_trip;
+        }
+
+        $this->module->data['trips']['past'] = $trips_list_past;
+        $this->module->data['trips']['feature'] = $trips_list_feature;
+        $this->module->data['trips']['current'] = $trips_list_current;
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionPassengersRoute($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne($id);
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\modules\api\models\Route $route */
+        $route = \app\modules\api\models\Route::findOne($line->route_id);
+        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
+
+        $trips = Trip::find()->andWhere([
+            'AND',
+            ['=', 'line_id', $line->id],
+            ['=', 'driver_id', $line->driver_id],
+            ['=', 'status', Line::STATUS_WAITING]
+        ])->all();
+
+        $checkpoints = [];
+        if ($trips && count($trips) > 0) foreach ($trips as $trip) {
+            /** @var \app\modules\api\models\Trip $trip */
+
+            $checkpoints[$trip->startpoint->id][] = [
+                'trip' => $trip->toArray(),
+                'position' => $trip->position
+            ];
+        }
+
+        $passengers_seat = Trip::find()->andWhere([
+            'AND',
+            ['=', 'line_id', $line->id],
+            ['=', 'driver_id', $line->driver_id],
+            ['=', 'status', Line::STATUS_IN_PROGRESS]
+        ])->all();
+
+        $passengers = [];
+        if ($passengers_seat && count($passengers_seat) > 0) foreach ($passengers_seat as $passenger) {
+            $passengers[] = $passenger->toArray();
+        }
+
+
+        $this->module->data['line'] = $line->toArray();
+        $this->module->data['checkpoints'] = array_values($checkpoints);
+        $this->module->data['passengers'] = $passengers;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

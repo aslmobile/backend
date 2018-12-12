@@ -48,6 +48,13 @@ class Line extends \yii\db\ActiveRecord
         STATUS_FINISHED = 3;
 
     public $ready = false;
+    public $oldStatus;
+
+    public function init()
+    {
+        parent::init();
+        $this->oldStatus = $this->status;
+    }
 
     public static function getStatusList()
     {
@@ -173,7 +180,7 @@ class Line extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if ($this->freeseats == 0 && $this->status == Line::STATUS_WAITING) {
+        if ($this->freeseats == 0 && $this->status == Line::STATUS_WAITING && $this->oldStatus != Line::STATUS_WAITING) {
 
             $device = Devices::findOne(['user_id' => $this->driver_id]);
             if ($device) {

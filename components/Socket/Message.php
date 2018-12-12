@@ -264,6 +264,7 @@ class Message
 
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
+        /** @var Line $line */
         $line = Line::find()->where(['driver_id' => $device->user_id])->orderBy(['created_at' => SORT_DESC])->one();
         $passengers = 0;
 
@@ -602,13 +603,13 @@ class Message
 
             if (isset($data['data']['timer']) && $data['data']['timer'] && isset($user_device)) {
                 $this->loop->addTimer(300, function () use ($line, $connections, $response, $user_device) {
-                    $line = \app\modules\api\models\Line::findOne($line['id']);
-                    if (!empty($line) && $line->status !== Line::STATUS_IN_PROGRESS) {
+                    $line = \app\modules\api\models\Line::findOne(['id' => $line['id'], 'status' => Line::STATUS_WAITING]);
+                    if (!empty($line)) {
                         $line->status = Line::STATUS_CANCELED;
                         $line->penalty = 1;
                         $line->save();
                         /** @var Trip $trip */
-                        $trips = Trip::find()->where(['line_id' => $line->id])->all();
+                        $trips = Trip::find()->where(['line_id' => $line->id])->andWhere(['status' => Trip::STATUS_WAITING])->all();
                         if (!empty($trips)) {
                             foreach ($trips as $trip) {
                                 $trip->driver_id = 0;
@@ -616,6 +617,11 @@ class Message
                                 $trip->line_id = 0;
                                 $trip->status = Trip::STATUS_CREATED;
                                 $trip->save();
+                                RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                                    'AND',
+                                    ['user_id' => $trip->user_id],
+                                    ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+                                ]);
                                 $query = new ArrayQuery();
                                 $query->from($connections);
                                 $devices = $query->where(['device.user_id' => intval($trip->user_id)])->all();
@@ -741,7 +747,10 @@ class Message
                 $this->loop->addTimer(300, function () use ($passenger, $line_data) {
 
                     /** @var \app\modules\api\models\Line $line */
-                    $line = \app\modules\api\models\Line::findOne(intval($line_data['id']));
+                    $line = \app\modules\api\models\Line::findOne([
+                        'id' => intval($line_data['id']),
+                        'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]
+                    ]);
 
                     /** @var Trip $trip */
                     $trip = Trip::find()->where([
@@ -754,6 +763,12 @@ class Message
 
                         $trip->line_id = 0;
                         $trip->save();
+
+                        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                            'AND',
+                            ['user_id' => $trip->user_id],
+                            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+                        ]);
 
                         if (!empty($line)) {
                             $line->freeseats += $trip->seats;
@@ -863,6 +878,12 @@ class Message
                         $trip->driver_description = \Yii::t('app', "Вам отказано в поездке. Причина - опоздание.");
                         $trip->penalty = 1;
                         $trip->save();
+
+                        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                            'AND',
+                            ['user_id' => $trip->user_id],
+                            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+                        ]);
 
                         /** @var \app\modules\api\models\Line $line */
                         $line = \app\modules\api\models\Line::findOne($trip->line_id);

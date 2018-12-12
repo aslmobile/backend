@@ -244,7 +244,7 @@ class LineController extends BaseController
         if ($user) $user = $this->user;
 
         /** @var \app\models\Line $line */
-        $line = Line::findOne($id);
+        $line = Line::findOne(['id' => $id, 'status' => Line::STATUS_WAITING]);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
 
         $passengers = ArrayHelper::getColumn(Trip::findAll(['status' => Trip::STATUS_WAITING, 'line_id' => $line->id]), 'id');
