@@ -148,7 +148,7 @@ class PaymentController extends BaseController
             /** @var Transactions $t */
             foreach ($transactions as $t) $transactions_data[] = [
                 'transaction' => $t->toArray(),
-                'route' => ($t->route) ? $t->route->toArray() : null
+                'route' => (!empty($t->route)) ? $t->route->toArray() : null
             ];
         }
 

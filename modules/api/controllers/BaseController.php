@@ -110,7 +110,7 @@ class BaseController extends RestFul
         switch ($type) {
             case self::TOKEN:
 
-                if (!$this->device) $this->module->setError(403, '_device', Yii::$app->mv->gt("Не найден", [], false));
+                if (!$this->device) $this->module->setError(403, 'session', Yii::$app->mv->gt("Не найден", [], false));
                 elseif (!isset ($this->device->auth_token) || empty($this->device->auth_token)) $this->authorizationTokenFailed(Yii::$app->mv->gt("Токен не передан", [], false));
 
                 $user = Users::findOne(['id' => $device->user_id, 'type' => $device->user_type]);
@@ -132,7 +132,7 @@ class BaseController extends RestFul
                 $this->prepareBody();
                 $this->validateBodyParams(['code']);
 
-                if (!$this->device) $this->module->setError(403, '_device', Yii::$app->mv->gt("Не найден", [], false));
+                if (!$this->device) $this->module->setError(403, 'session', Yii::$app->mv->gt("Не найден", [], false));
                 elseif ($this->body->code != '000000' && $this->device->sms_code != $this->body->code) $this->module->setError(403, '_device', Yii::$app->mv->gt("Не найден", [], false));
                 elseif (!isset ($this->device->auth_token) || empty($this->device->auth_token)) $this->authorizationTokenFailed(Yii::$app->mv->gt("Токен не передан", [], false));
 
