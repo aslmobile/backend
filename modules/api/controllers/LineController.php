@@ -341,8 +341,8 @@ class LineController extends BaseController
         $this->validateBodyParams(['cancel_reason_line']);
 
         /** @var \app\models\Line $line */
-        $line = Line::findOne($id);
-        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+        $line = Line::find()->where(['id' => $id])->andWhere(['NOT', ['status' => Line::STATUS_CANCELED]])->one();
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Поездка уже отменена или не существует", [], false));
 
         $line->cancel_reason = $this->body->cancel_reason_line;
         $line->status = Line::STATUS_CANCELED;

@@ -361,7 +361,7 @@ class TripController extends BaseController
         /** @var \app\modules\api\models\Trip $trip */
         $trip = Trip::findOne(['id' => $id, 'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]]);
         if (!$trip)
-            $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете вернутся в очередь на данной поездки", [], false));
+            $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете вернутся в очередь на данной поездке", [], false));
 
         /** @var \app\modules\api\models\Line $line */
         $line = \app\modules\api\models\Line::findOne(['id' => $trip->line_id, 'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]]);
@@ -708,11 +708,11 @@ class TripController extends BaseController
 
         /** @var \app\modules\api\models\Trip $trip */
         $trip = Trip::findOne(['id' => $this->body->trip_id, 'status' => Trip::STATUS_CREATED]);
-        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Ваша поездка уже не в очереди", [], false));
 
         /** @var \app\modules\api\models\Line $line */
         $line = \app\modules\api\models\Line::findOne(['id' => $trip->line_id, 'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]]);
-        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Водитель уже выехал или отменил поездку", [], false));
 
         $trip->driver_id = $line->driver_id;
         $trip->vehicle_id = $line->vehicle_id;
@@ -756,13 +756,13 @@ class TripController extends BaseController
         $trip = Trip::find()
             ->where(['id' => $this->body->trip_id])
             ->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])->one();
-        if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Уже отменено", [], false));
+        if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Поездка уже отменена", [], false));
 
         /** @var \app\modules\api\models\Line $line */
         $line = \app\modules\api\models\Line::find()
             ->where(['id' => $trip->line_id])
             ->andWhere(['NOT', ['status' => Line::STATUS_CANCELED]])->one();
-        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Поездка уже отменена", [], false));
 
         $notifications = [];
         $addressed = [];
@@ -869,11 +869,11 @@ class TripController extends BaseController
 
         /** @var \app\modules\api\models\Line $line */
         $line = \app\modules\api\models\Line::findOne(['id'=> $id, 'status' => Line::STATUS_IN_PROGRESS]);
-        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Вы еще не выехали", [], false));
 
         /** @var Checkpoint $checkpoint */
         $checkpoint = Checkpoint::findOne(intval($this->body->checkpoint_id));
-        if (!$checkpoint) $this->module->setError(422, 'checkpoint', Yii::$app->mv->gt("Не найден", [], false));
+        if (!$checkpoint) $this->module->setError(422, 'checkpoint', Yii::$app->mv->gt("Точка не найдена", [], false));
 
         $data = ['line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray()];
         $timer = true;
@@ -881,11 +881,11 @@ class TripController extends BaseController
         if ($checkpoint->type == Checkpoint::TYPE_END) {
 
             $trips = Trip::find()->where(['line_id' => $line->id, 'status' => Trip::STATUS_WAY])->all();
+            if (!$trips) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Пассажиры не найдены", [], false));
+
             $addressed = ArrayHelper::getColumn($trips, 'user_id');
             $timer = false;
             $notifications = Notifications::create(Notifications::NTP_TRIP_FINISHED, $addressed, '', $user->id);
-
-            if (!$trips) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найдены", [], false));
 
             $_trips = [];
             $total = ['cash' => 0, 'card' => 0];
