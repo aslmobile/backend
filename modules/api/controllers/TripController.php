@@ -434,8 +434,8 @@ class TripController extends BaseController
                 $this->module->setError(422, '_penalty', Yii::$app->mv->gt("У вас не оплачен штраф", [], false));
         }
 
-        $trip = Trip::findOne(['id' => $id]);
-        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+        $trip = Trip::findOne(['id' => $id, 'status' => [Trip::STATUS_CREATED, Trip::STATUS_SCHEDULED]]);
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Поездку нельзя изменить", [], false));
 
         $trip->line_id = 0;
         $trip->vehicle_id = 0;
