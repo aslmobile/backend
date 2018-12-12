@@ -719,7 +719,7 @@ class Message
 
         $this->message_id = intval($data['data']['message_id']);
         $line_data = [];
-        $timer = isset($data['timer']) ? $data['timer'] : false;
+        $timer = isset($data['data']['timer']) ? $data['data']['timer'] : false;
 
         if (isset($data['data']['passenger'])) {
 

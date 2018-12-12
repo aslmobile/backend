@@ -133,7 +133,8 @@ class Queue extends Model
                     'message_id' => time(),
                     'addressed' => [$applicant['user_id']],
                     'line' => $line->toArray(),
-                    'passenger' => $applicant['user_id']
+                    'passenger' => $applicant['user_id'],
+                    'timer' => true
                 ]
             ])));
 
