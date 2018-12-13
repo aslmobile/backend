@@ -82,17 +82,19 @@ class Queue extends Model
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])->all();
 
         $queue = [];
-        $need = 0;
+        $data = ArrayHelper::index($data, 'id');
+        $free_seats = $line->freeseats;
 
         /** @var $trip Trip[] */
-        foreach (ArrayHelper::index($data, 'id') as $key => $trip) {
-            $need += $trip['seats'];
-            if ($line->freeseats < $need) {
+        foreach ($data as $key => $trip) {
+            $seats = $trip['seats'];
+            if ($free_seats < $seats) {
                 continue;
-            } elseif ($line->freeseats > $need) {
-                $queue = $queue + [$key => $trip];
-            } elseif ($line->freeseats == $need) {
-                $queue = $queue + [$key => $trip];
+            } elseif ($free_seats > $seats) {
+                $queue[$key] = $trip;
+                $free_seats -= $seats;
+            } elseif ($free_seats == $seats) {
+                $queue[$key] = $trip;
                 $line->ready = true;
                 break;
             }
