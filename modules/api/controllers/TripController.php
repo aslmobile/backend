@@ -1586,7 +1586,7 @@ class TripController extends BaseController
         $route = Route::findOne(['status' => Route::STATUS_ACTIVE, 'id' => $id]);
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
-        $rate = $this->getRate($id);
+        //$rate = $this->getRate($id);
 
         $this->module->data['commission'] = ($route->base_tariff * 1.5 * $this->body->seats) / 10;
         $this->module->data['one'] = ($route->base_tariff * 1.5) / 10;
