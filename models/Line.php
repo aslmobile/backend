@@ -182,16 +182,23 @@ class Line extends \yii\db\ActiveRecord
 
         if ($this->freeseats == 0 && $this->status == Line::STATUS_WAITING) {
 
-            $device = Devices::findOne(['user_id' => $this->driver_id]);
-            if ($device) {
-                $socket = new SocketPusher(['authkey' => $device->auth_token]);
-                $socket->push(base64_encode(json_encode([
-                    'action' => "acceptDriverTrip",
-                    'notifications' => Notifications::create(Notifications::NTD_TRIP_SEATS, [$this->driver_id]),
-                    'data' => ['message_id' => time(), 'addressed' => [$this->driver_id], 'line' => $this->toArray(), 'timer' => true]
-                ])));
-            }
+            $seats = Trip::find()->where([
+                'line_id' => $this->id,
+                'driver_id' => $this->driver_id,
+                'vehicle_id' => $this->vehicle_id
+            ])->andWhere(['status' => Trip::STATUS_WAITING])->sum('seats');
 
+            if (intval($seats) == $this->seats) {
+                $device = Devices::findOne(['user_id' => $this->driver_id]);
+                if ($device) {
+                    $socket = new SocketPusher(['authkey' => $device->auth_token]);
+                    $socket->push(base64_encode(json_encode([
+                        'action' => "acceptDriverTrip",
+                        'notifications' => Notifications::create(Notifications::NTD_TRIP_SEATS, [$this->driver_id]),
+                        'data' => ['message_id' => time(), 'addressed' => [$this->driver_id], 'line' => $this->toArray(), 'timer' => true]
+                    ])));
+                }
+            }
             Queue::processingQueue();
 
         }
@@ -237,7 +244,7 @@ class Line extends \yii\db\ActiveRecord
         $array = parent::toArray($fields, $expand, $recursive);
 
         $action = Yii::$app->controller->action->id;
-        if($action != 'path') unset($array['path']);
+        if ($action != 'path') unset($array['path']);
 
         if ($this->driver) $array['driver'] = $this->driver->toArray();
         else $array['driver'] = (object)['id' => -1];
