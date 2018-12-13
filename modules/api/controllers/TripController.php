@@ -1281,10 +1281,7 @@ class TripController extends BaseController
         $trips_list_feature = [];
         $trips_list_current = [];
 
-        $trips = Trip::find()->andWhere([
-            'AND',
-            ['=', 'user_id', $user->id]
-        ])->all();
+        $trips = Trip::find()->where(['user_id' => $user->id])->orderBy(['created_at' => SORT_DESC])->all();
 
         /** @var \app\modules\api\models\Trip $trip */
         if ($trips && count($trips)) foreach ($trips as $trip) {
