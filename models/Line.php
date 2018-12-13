@@ -199,6 +199,7 @@ class Line extends \yii\db\ActiveRecord
                     ])));
                 }
             }
+
             Queue::processingQueue();
 
         }

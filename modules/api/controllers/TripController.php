@@ -364,7 +364,10 @@ class TripController extends BaseController
             $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете вернутся в очередь на данной поездке", [], false));
 
         /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne(['id' => $trip->line_id, 'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]]);
+        $line = \app\modules\api\models\Line::findOne([
+            'id' => $trip->line_id,
+            'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING, Line::STATUS_CANCELED]
+        ]);
         if (!$line)
             $this->module->setError(422, '_line', Yii::$app->mv->gt("Вы уже не можете вернутся в очередь с данной поездки", [], false));
 
@@ -398,8 +401,10 @@ class TripController extends BaseController
             } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
         }
 
-        $line->freeseats += $trip->seats;
-        $line->save();
+        if($line->status != Line::STATUS_CANCELED) {
+            $line->freeseats += $trip->seats;
+            $line->save();
+        }
 
         Queue::processingQueue();
 
@@ -1288,8 +1293,8 @@ class TripController extends BaseController
 
             $past = [
                 Trip::STATUS_FINISHED,
-                Trip::STATUS_CANCELLED,
-                Trip::STATUS_CANCELLED_DRIVER
+                //Trip::STATUS_CANCELLED,
+                //Trip::STATUS_CANCELLED_DRIVER
             ];
 
             $feature = [
