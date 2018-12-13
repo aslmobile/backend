@@ -111,7 +111,7 @@ class Notifications extends \yii\db\ActiveRecord
             self::NTP_TRIP_SCHEDULED => Yii::t('app', "Напоминание о поездке"),
             self::NTP_TRIP_READY => Yii::t('app', "Машина готова к выезду. Поездка автоматически отменится через 5 минут."),
             self::NTP_TRIP_CANCEL => Yii::t('app', "Поездка отменена"),
-            self::NTP_TRIP_WAIT => Yii::t('app', "Ожидание поездки"),
+            self::NTP_TRIP_WAIT => Yii::t('app', "Машина выехала, ожидайте прибытия."),
             self::NTP_TRIP_FINISHED => Yii::t('app', "Поездка завершена, пожалуйста оцените поездку"),
             self::NTP_TRIP_ARRIVED => Yii::t('app', "Водитель ожидает Вас на остановке. Подтвердите посадку в течении 5 минут."),
 
