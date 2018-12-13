@@ -90,9 +90,9 @@ class Queue extends Model
             if ($line->freeseats < $need) {
                 continue;
             } elseif ($line->freeseats > $need) {
-                $queue = $queue + [$key => $trip];
+                $queue[$key] = $trip;
             } elseif ($line->freeseats == $need) {
-                $queue = $queue + [$key => $trip];
+                $queue[$key] = $trip;
                 $line->ready = true;
                 break;
             }
