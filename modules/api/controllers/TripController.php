@@ -1589,7 +1589,7 @@ class TripController extends BaseController
         $rate = $this->getRate($id);
 
         $this->module->data['commission'] = ($route->base_tariff * 1.5 * $this->body->seats) / 10;
-        $this->module->data['one'] = $route->base_tariff * $rate;
+        $this->module->data['one'] = ($route->base_tariff * 1.5) / 10;
         $this->module->setSuccess();
         $this->module->sendResponse();
 
