@@ -111,7 +111,7 @@ class Message
                 ['=', 'status', Trip::STATUS_CREATED],
                 ['=', 'route_id', $d_trip->route_id]
             ]);
-            if ($d_trip->vehicle_type_id != 0) $trips = $trips->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
+            if($d_trip->vehicle_type_id != 0) $trips = $trips->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
             $trips = $trips->orderBy(['created_at' => SORT_DESC, 'seats' => SORT_DESC])->all();
 
             if ($trips && count($trips)) foreach ($trips as $trip) {
@@ -122,7 +122,7 @@ class Message
             $vehicles_queue = Line::find()
                 ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
                 ->andWhere(['route_id' => $d_trip->route_id]);
-            if ($d_trip->vehicle_type_id != 0) $vehicles_queue = $vehicles_queue->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
+            if($d_trip->vehicle_type_id != 0) $vehicles_queue =  $vehicles_queue->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
             $vehicles_queue = $vehicles_queue->count();
 
             $basic_estimated_time = $queue_position * 300;
@@ -721,65 +721,62 @@ class Message
         $line_data = [];
         $timer = isset($data['data']['timer']) ? $data['data']['timer'] : false;
 
-        if (isset($data['data']['passengers'])) {
+        if (isset($data['data']['passenger'])) {
 
-            $passengers = intval($data['data']['passengers']);
+            $passenger = intval($data['data']['passenger']);
             $line_data = $data['data']['line'];
             RestFul::updatePassengerAccept();
 
-            foreach ($passengers as $passenger) {
-                $watchdog = RestFul::findOne([
+            $watchdog = RestFul::findOne([
+                'type' => RestFul::TYPE_PASSENGER_ACCEPT,
+                'user_id' => $passenger,
+                'message' => json_encode(['status' => 'request'])
+            ]);
+            if (!$watchdog) {
+                $watchdog = new RestFul([
                     'type' => RestFul::TYPE_PASSENGER_ACCEPT,
+                    'message' => json_encode(['status' => 'request']),
                     'user_id' => $passenger,
-                    'message' => json_encode(['status' => 'request'])
+                    'target_id' => $line_data['id'],
+                    'uip' => '0.0.0.0'
                 ]);
-                if (!$watchdog) {
-                    $watchdog = new RestFul([
-                        'type' => RestFul::TYPE_PASSENGER_ACCEPT,
-                        'message' => json_encode(['status' => 'request']),
-                        'user_id' => $passenger,
-                        'target_id' => $line_data['id'],
-                        'uip' => '0.0.0.0'
+                $watchdog->save();
+            }
+
+            if ($timer) {
+                $this->loop->addTimer(300, function () use ($passenger, $line_data) {
+
+                    /** @var \app\modules\api\models\Line $line */
+                    $line = \app\modules\api\models\Line::findOne([
+                        'id' => intval($line_data['id']),
+                        'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]
                     ]);
-                    $watchdog->save();
-                }
 
-                if ($timer) {
-                    $this->loop->addTimer(300, function () use ($passenger, $line_data) {
+                    /** @var Trip $trip */
+                    $trip = Trip::find()->where([
+                        'user_id' => $passenger,
+                        'line_id' => intval($line_data['id']),
+                        'status' => Trip::STATUS_CREATED
+                    ])->andWhere(['driver_id' => 0])->one();
 
-                        /** @var \app\modules\api\models\Line $line */
-                        $line = \app\modules\api\models\Line::findOne([
-                            'id' => intval($line_data['id']),
-                            'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]
+                    if (!empty($trip)) {
+
+                        $trip->line_id = 0;
+                        $trip->save();
+
+                        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                            'AND',
+                            ['user_id' => $trip->user_id],
+                            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
                         ]);
 
-                        /** @var Trip $trip */
-                        $trip = Trip::find()->where([
-                            'user_id' => $passenger,
-                            'line_id' => intval($line_data['id']),
-                            'status' => Trip::STATUS_CREATED
-                        ])->andWhere(['driver_id' => 0])->one();
-
-                        if (!empty($trip)) {
-
-                            $trip->line_id = 0;
-                            $trip->save();
-
-                            RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
-                                'AND',
-                                ['user_id' => $trip->user_id],
-                                ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
-                            ]);
-
-                            if (!empty($line)) {
-                                $line->freeseats += $trip->seats;
-                                $line->save();
-                            }
+                        if (!empty($line)) {
+                            $line->freeseats += $trip->seats;
+                            $line->save();
                         }
+                    }
 
-                    });
-                }
-
+                });
             }
 
             $this->addressed = $data['data']['addressed'];
