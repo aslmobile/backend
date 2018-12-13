@@ -193,6 +193,13 @@ class SocketServer implements MessageComponentInterface
                         $recipient = $device->device->id;
                         echo "Response to ({$recipient})\n Action: {$result->action}\n" . $time;
                     }
+                    foreach ($result->notifications as $notification) {
+                        /** @var Notifications $notification */
+                        if ($notification instanceof Notifications) {
+                            $notification->status = Notifications::STATUS_DELIVERED;
+                            $notification->save();
+                        }
+                    }
                 }
             }
         }
