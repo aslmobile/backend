@@ -92,7 +92,7 @@ class LineController extends BaseController
     /**
      * @param $id
      */
-    public function actionOnLine($id)
+    public function actionOnLine($id = 0)
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
@@ -103,10 +103,6 @@ class LineController extends BaseController
 
         $this->prepareBody();
         $this->validateBodyParams(['vehicle_id', 'startpoint', 'seats', 'freeseats']);
-
-        /** @var \app\models\Route $route */
-        $route = Route::findOne(['id' => $id, 'status' => Route::STATUS_ACTIVE]);
-        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\modules\api\models\Vehicles $vehicle */
         $vehicle = Vehicles::findOne(['id' => $this->body->vehicle_id, 'status' => Vehicles::STATUS_APPROVED]);
@@ -119,6 +115,10 @@ class LineController extends BaseController
             'status' => Checkpoint::STATUS_ACTIVE
         ]);
         if (!$startpoint) $this->module->setError(422, '_startpoint', Yii::$app->mv->gt("Не найден", [], false));
+
+        /** @var \app\models\Route $route */
+        $route = Route::findOne(['id' => $startpoint->route, 'status' => Route::STATUS_ACTIVE]);
+        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         /** @var \app\models\Checkpoint $endpoint */
         $endpoint = Checkpoint::findOne([
@@ -555,26 +555,6 @@ class LineController extends BaseController
 
     }
 
-    public function actionSingleRoute($param1, $param2)
-    {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
-        $start_city = City::findOne($param1);
-        $end_city = City::findOne($param2);
-        $data = [];
-
-        if (!$start_city || !$end_city) $this->module->setError(422, '_city', Yii::$app->mv->gt("Не найден", [], false));
-
-        $route = Route::findOne(['start_city_id' => $start_city->id, 'end_city_id' => $end_city->id]);
-
-        if ($route) $data = $route->toArray();
-
-        $this->module->data = $data;
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
     public function actionGetRoute($param1, $param2)
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -586,7 +566,7 @@ class LineController extends BaseController
 
         if (!$start_city || !$end_city) $this->module->setError(422, '_city', Yii::$app->mv->gt("Не найден", [], false));
 
-        $routes = Route::findAll(['start_city_id' => $start_city->id, 'end_city_id' => $end_city->id, 'status' => Checkpoint::STATUS_ACTIVE]);
+        $routes = Route::findAll(['start_city_id' => $start_city->id, 'end_city_id' => $end_city->id, 'status' => Route::STATUS_ACTIVE]);
         $data = ArrayHelper::getColumn($routes, 'id');
 
         //if ($routes) foreach ($routes as $route) $data[] = $route->toArray();
@@ -652,19 +632,25 @@ class LineController extends BaseController
         $this->module->sendResponse();
     }
 
-    public function actionStartpointsRoute($id)
+    public function actionStartpointsRoute($param1, $param2)
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
 
+        $start_city = City::findOne($param1);
+        $end_city = City::findOne($param2);
+
+        $routes = Route::findAll(['start_city_id' => $start_city->id, 'end_city_id' => $end_city->id, 'status' => Route::STATUS_ACTIVE]);
+        $routes = ArrayHelper::getColumn($routes, 'id');
+
         $points = [];
 
-        $startpoints = Checkpoint::find()->andWhere([
+        $startpoints = Checkpoint::find()->where([
             'AND',
             ['=', 'type', Checkpoint::TYPE_START],
-            ['=', 'route', $id],
             ['status' => Checkpoint::STATUS_ACTIVE]
-        ])->all();
+        ])->andWhere(['route' => $routes])->all();
+
         if ($startpoints && count($startpoints) > 0) foreach ($startpoints as $point) {
             /** @var $point \app\models\Checkpoint */
             $points[] = $point->toArray();
