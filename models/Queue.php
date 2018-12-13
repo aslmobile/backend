@@ -118,10 +118,11 @@ class Queue extends Model
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
         Trip::updateAll(['line_id' => $line->id, 'waiting_time' => time()], ['id' => $ids]);
+        Line::updateAll(['freeseats' => 0], ['id' => $line->id]);
+
+        $line->freeseats = 0;
 
         foreach ($applicants as $applicant) {
-
-            Line::updateAll(['freeseats' => ($line->freeseats - intval($applicant['seats']))], ['id' => $line->id]);
 
             $socket->push(base64_encode(json_encode([
                 'action' => "readyPassengerTrip",
