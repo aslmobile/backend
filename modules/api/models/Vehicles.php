@@ -1,5 +1,7 @@
 <?php namespace app\modules\api\models;
 
+use app\models\User;
+
 class Vehicles extends \app\models\Vehicles
 {
     public function toArray(array $fields = [], array $expand = [], $recursive = true)
@@ -9,6 +11,7 @@ class Vehicles extends \app\models\Vehicles
         $type = VehicleTypes::findOne($this->vehicle_type_id);
         $model = VehicleModels::findOne($this->vehicle_model_id);
         $brand = VehicleBrands::findOne($this->vehicle_brand_id);
+        $driver = User::findOne($this->user_id);
 
         if (!empty($type)) $array += ['type_image' => $type->image]; else $array += ['type_image' => '/files/sedan.png'];
 
@@ -38,6 +41,7 @@ class Vehicles extends \app\models\Vehicles
 
         foreach ($array as $field => $value) {
 
+            if ($field == 'rating') $array[$field] = !empty($driver) ? $driver->getRating() : 4.8;
             if ($field == 'vehicle_type_id') $array[$field] = !empty($type) ? $type->toArray() : [];
             if ($field == 'vehicle_model_id') $array[$field] = !empty($model) ? $model->toArray() : [];
             if ($field == 'vehicle_brand_id') $array[$field] = !empty($brand) ? $brand->toArray() : [];
