@@ -738,6 +738,12 @@ class TripController extends BaseController
             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id], 'trip' => $trip->toArray()]
         ])));
 
+        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+            'AND',
+            ['user_id' => $trip->user_id],
+            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+        ]);
+
         Queue::processingQueue();
 
         $this->module->data['line'] = $line->toArray();
@@ -1085,6 +1091,12 @@ class TripController extends BaseController
             ),
             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id, $trip->user_id], 'trip' => $trip->toArray()]
         ])));
+
+        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+            'AND',
+            ['user_id' => $trip->user_id],
+            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+        ]);
 
         $this->module->data['line'] = $line->toArray();
         $this->module->data['trip'] = $trip->toArray();
