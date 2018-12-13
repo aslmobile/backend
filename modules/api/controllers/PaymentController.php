@@ -77,6 +77,7 @@ class PaymentController extends BaseController
             ['between', 'created_at', $timestamp_min, $timestamp_max],
             ['=', 'recipient_id', $user->id],
             ['=', 'type', Transactions::TYPE_INCOME],
+            ['=', 'status', Transactions::STATUS_PAID]
         ])->sum('amount');
 
         $outcome = Transactions::find()->andWhere([
@@ -84,6 +85,7 @@ class PaymentController extends BaseController
             ['between', 'created_at', $timestamp_min, $timestamp_max],
             ['=', 'user_id', $user->id],
             ['=', 'type', Transactions::TYPE_OUTCOME],
+            ['=', 'status', Transactions::STATUS_PAID]
         ])->sum('amount');
 
         $this->module->data = [
@@ -110,17 +112,21 @@ class PaymentController extends BaseController
         $offset = isset ($this->body->offset) ? intval($this->body->offset) : 0;
 
         $params = [
-            'OR',
+            'AND',
             [
-                'AND',
-                ['=', 'recipient_id', $user->id],
-                ['=', 'type', Transactions::TYPE_INCOME],
+                'OR',
+                [
+                    'AND',
+                    ['=', 'recipient_id', $user->id],
+                    ['=', 'type', Transactions::TYPE_INCOME],
+                ],
+                [
+                    'AND',
+                    ['=', 'user_id', $user->id],
+                    ['=', 'type', Transactions::TYPE_OUTCOME],
+                ]
             ],
-            [
-                'AND',
-                ['=', 'user_id', $user->id],
-                ['=', 'type', Transactions::TYPE_OUTCOME],
-            ]
+            ['=', 'status', Transactions::STATUS_PAID]
         ];
 
         $and = ['between', 'created_at', $timestamp_min, $timestamp_max];
