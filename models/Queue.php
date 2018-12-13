@@ -76,7 +76,7 @@ class Queue extends Model
 
         $data = $trips->where(['route_id' => $line->route_id])
             ->andWhere(['CALLBACK', function ($data) use ($line) {
-                return !empty($data['not']) ? (!in_array($line->id, json_decode($data['not']))) : true;
+                return !empty($data['not'])?(!in_array($line->id, json_decode($data['not']))):true;
             }])
             ->andWhere(['OR', ['vehicle_type_id' => $line->vehicle_type_id], ['vehicle_type_id' => 0]])
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])->all();
@@ -90,9 +90,9 @@ class Queue extends Model
             if ($line->freeseats < $need) {
                 continue;
             } elseif ($line->freeseats > $need) {
-                $queue[$key] = $trip;
+                $queue = $queue + [$key => $trip];
             } elseif ($line->freeseats == $need) {
-                $queue[$key] = $trip;
+                $queue = $queue + [$key => $trip];
                 $line->ready = true;
                 break;
             }
@@ -117,31 +117,28 @@ class Queue extends Model
 
         Trip::updateAll(['line_id' => $line->id, 'waiting_time' => time()], ['id' => $ids]);
 
-        $seats = 0;
-        $passengers = [];
-        foreach ($applicants as $applicant){
-            $seats += $applicant['seats'];
-            $passengers[] = $applicant['user_id'];
+        foreach ($applicants as $applicant) {
+
+            Line::updateAll(['freeseats' => ($line->freeseats - intval($applicant['seats']))], ['id' => $line->id]);
+
+            $socket->push(base64_encode(json_encode([
+                'action' => "readyPassengerTrip",
+                'notifications' => Notifications::create(
+                    Notifications::NTP_TRIP_READY,
+                    [$applicant['user_id']],
+                    '',
+                    $line->driver_id
+                ),
+                'data' => [
+                    'message_id' => time(),
+                    'addressed' => [$applicant['user_id']],
+                    'line' => $line->toArray(),
+                    'passenger' => $applicant['user_id'],
+                    'timer' => true
+                ]
+            ])));
+
         }
-
-        Line::updateAll(['freeseats' => ($line->freeseats - $seats)], ['id' => $line->id]);
-
-        $socket->push(base64_encode(json_encode([
-            'action' => "readyPassengerTrip",
-            'notifications' => Notifications::create(
-                Notifications::NTP_TRIP_READY,
-                $passengers,
-                '',
-                $line->driver_id
-            ),
-            'data' => [
-                'message_id' => time(),
-                'addressed' => $passengers,
-                'line' => $line->toArray(),
-                'passengers' => $passengers,
-                'timer' => true
-            ]
-        ])));
 
         return true;
     }
