@@ -257,46 +257,6 @@ class Message
      * @param $connections
      * @return array
      */
-    public function processingQuery($data, $from, $connections)
-    {
-        /** @var Devices $device */
-        if ($this->validateDevice($from)) $device = $from->device;
-
-        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
-
-        /** @var Line $line */
-        $line = Line::find()->where(['driver_id' => $device->user_id])->orderBy(['created_at' => SORT_DESC])->one();
-        $passengers = 0;
-
-        if (!empty($line)) {
-            $passengers = intval(Trip::find()->where([
-                'driver_id' => $device->user_id,
-                'line_id' => $line->id,
-                'status' => [Trip::STATUS_WAITING, Trip::STATUS_WAY]
-                //TODO 'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING, Trip::STATUS_WAY]
-            ])->count('id'));
-        }
-
-        $response = [
-            'message_id' => $this->message_id,
-            'device_id' => $device->id,
-            'user_id' => $device->user_id,
-            'data' => [
-                'passengers' => $passengers
-            ]
-        ];
-
-        $this->addressed = [$device->user_id];
-
-        return $response;
-    }
-
-    /**
-     * @param $data
-     * @param $from
-     * @param $connections
-     * @return array
-     */
     public function driverAnglePosition($data, $from, $connections)
     {
         /** @var Devices $device */
@@ -774,6 +734,7 @@ class Message
                             $line->freeseats += $trip->seats;
                             $line->save();
                         }
+
                     }
 
                 });
