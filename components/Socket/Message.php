@@ -97,20 +97,15 @@ class Message
         /** @var \app\models\Trip|bool $d_trip */
 
         $d_trip = Trip::find()->where([
-            'AND',
-            ['=', 'user_id', $device->user_id],
-            ['=', 'status', Trip::STATUS_CREATED]
-        ])->orderBy(['created_at' => SORT_DESC])->one();
+            'user_id' => $device->user_id,
+            'status' => Trip::STATUS_CREATED
+        ])->one();
 
         if ($d_trip) {
 
             $queue_position = 1;
 
-            $trips = Trip::find()->where([
-                'AND',
-                ['=', 'status', Trip::STATUS_CREATED],
-                ['=', 'route_id', $d_trip->route_id]
-            ]);
+            $trips = Trip::find()->where(['status' => Trip::STATUS_CREATED, 'route_id' => $d_trip->route_id]);
             if ($d_trip->vehicle_type_id != 0) $trips = $trips->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
             $trips = $trips->orderBy(['created_at' => SORT_ASC, 'seats' => SORT_DESC])->all();
 
