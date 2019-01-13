@@ -529,11 +529,8 @@ class Message
 
         } else {
 
-            $line = \app\modules\api\models\Line::find()->where([
-                'status' => [
-                    \app\modules\api\models\Line::STATUS_WAITING,
-                    \app\modules\api\models\Line::STATUS_IN_PROGRESS
-                ],
+            $line = Line::find()->where([
+                'status' => [Line::STATUS_WAITING, Line::STATUS_IN_PROGRESS],
                 'driver_id' => $device->user_id
             ])->orderBy(['created_at' => SORT_DESC])->one();
             $line = !empty($line) ? $line->toArray() : null;

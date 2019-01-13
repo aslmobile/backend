@@ -706,6 +706,9 @@ class TripController extends BaseController
         if (!$trip)
             $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете отменить очередь на данной поездке", [], false));
 
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne(['id' => $trip->line_id]);
+
         if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
         $trip->status = Trip::STATUS_CANCELLED;
         $trip->driver_id = 0;
@@ -720,9 +723,6 @@ class TripController extends BaseController
             ['user_id' => $trip->user_id],
             ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
         ]);
-
-        /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne(['id' => $trip->line_id]);
 
         if (!empty($line)) {
 
