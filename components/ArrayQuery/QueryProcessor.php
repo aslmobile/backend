@@ -361,8 +361,10 @@ class QueryProcessor extends Component
         }
 
         return array_filter($data, function ($row) use ($column, $values) {
-            if (is_object($row)) $row = ArrayHelper::toArray($row);
-            return in_array($row[$column], $values);
+            //if (is_object($row)) $row = ArrayHelper::toArray($row);
+            $this->prepareColumn($row, $column);
+            return (is_object($row) ? in_array($row->$column, $values) : in_array($row[$column], $values));
+            //return in_array($row[$column], $values);
         });
     }
 
