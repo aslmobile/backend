@@ -367,15 +367,12 @@ class TripController extends BaseController
             $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете вернутся в очередь на данной поездке", [], false));
 
         /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne([
-            'id' => $trip->line_id,
-            'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING, Line::STATUS_CANCELED]
-        ]);
-        if (!$line)
+        $line = Line::findOne(['id' => $trip->line_id, 'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]]);
+        if ($trip->line_id != 0 && !$line)
             $this->module->setError(422, '_line', Yii::$app->mv->gt("Вы уже не можете вернутся в очередь с данной поездки", [], false));
 
         $not = !empty($trip->not) ? json_decode($trip->not) : [];
-        $not[] = $line->id;
+        $not += !empty($line) ? [$line->id] : [];
 
         $trip->status = Trip::STATUS_CREATED;
         $trip->driver_id = 0;
@@ -409,11 +406,13 @@ class TripController extends BaseController
         if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
-        $socket->push(base64_encode(json_encode([
-            'action' => "disbandedTrip",
-            'notifications' => [],
-            'data' => ['message_id' => time(), 'trip_id' => $trip->id, 'line' => $line->toArray()]
-        ])));
+        if (!empty($line)) {
+            $socket->push(base64_encode(json_encode([
+                'action' => "disbandedTrip",
+                'notifications' => [],
+                'data' => ['message_id' => time(), 'trip_id' => $trip->id, 'line' => $line->toArray()]
+            ])));
+        }
 
         $socket->push(base64_encode(json_encode([
             'action' => "driverQueue",
@@ -660,7 +659,7 @@ class TripController extends BaseController
             );
         }
 
-        if($trip->status == Trip::STATUS_EDITING) $trip->status = Trip::STATUS_CREATED;
+        if ($trip->status == Trip::STATUS_EDITING) $trip->status = Trip::STATUS_CREATED;
 
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
