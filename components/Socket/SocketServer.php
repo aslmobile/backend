@@ -182,24 +182,15 @@ class SocketServer implements MessageComponentInterface
             $query->from($this->devices);
             foreach ($result->addressed as $user_id) {
                 $devices = $query->where(['device.user_id' => intval($user_id)])->all();
-                if (empty($devices)) {
-                    foreach ($result->notifications as $notification) {
-                        /** @var Notifications $notification */
-                        if ($notification instanceof Notifications) Notifications::send($notification);
-                    }
-                } else {
+                if (!empty($devices)) {
                     foreach ($devices as $device) {
                         $device->send($response);
                         $recipient = $device->device->id;
                         echo "Response to ({$recipient})\n Action: {$result->action}\n" . $time;
                     }
-                    foreach ($result->notifications as $notification) {
-                        /** @var Notifications $notification */
-                        if ($notification instanceof Notifications) {
-                            $notification->status = Notifications::STATUS_DELIVERED;
-                            $notification->save();
-                        }
-                    }
+                }
+                if (is_array($result->notifications)) foreach ($result->notifications as $notification) {
+                    if ($notification instanceof Notifications) Notifications::send($notification);
                 }
             }
         }
