@@ -816,14 +816,18 @@ class TripController extends BaseController
         /** @var Trip $trip */
         $trip = Trip::find()
             ->where(['id' => $this->body->trip_id])
-            ->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])->one();
-        if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Поездка уже отменена", [], false));
+            ->where(['status' => [Trip::STATUS_WAY, Trip::STATUS_WAITING]])
+            //->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])
+            ->one();
+        if (!$trip) $this->module->setError(422, '_line', Yii::$app->mv->gt("Поездку нельзя отменить", [], false));
 
         /** @var \app\modules\api\models\Line $line */
         $line = \app\modules\api\models\Line::find()
             ->where(['id' => $trip->line_id])
-            ->andWhere(['NOT', ['status' => Line::STATUS_CANCELED]])->one();
-        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Поездка уже отменена", [], false));
+            ->where(['status' => Line::STATUS_IN_PROGRESS])
+            //->andWhere(['NOT', ['status' => Line::STATUS_CANCELED]])
+            ->one();
+        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Поездку нельзя отменить", [], false));
 
         $notifications = [];
         $addressed = [];
