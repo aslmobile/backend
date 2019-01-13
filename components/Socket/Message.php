@@ -925,6 +925,7 @@ class Message
             'user_id' => $device->user_id,
             'data' => [
                 'accept_from' => !empty($watchdog) ? $watchdog->created_at : time(),
+                'current_time' => time(),
                 'accept_time' => 300,
                 'line' => $line_data,
             ]
