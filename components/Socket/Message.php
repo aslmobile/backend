@@ -613,7 +613,7 @@ class Message
                                 Notifications::NT_TRIP_DISBANDED, $ids,
                                 \Yii::t('app', "Не все участники поездки подтвердили поездку. Вы поедете на ближайшей свободной машине.")
                             );
-                            foreach ($notifications as $notification) Notifications::send($notification);
+                            if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
 
                         };
                         Queue::processingQueue();
@@ -752,7 +752,7 @@ class Message
                 Notifications::NT_TRIP_DISBANDED, $ids,
                 \Yii::t('app', "Не все участники поездки подтвердили поездку. Вы поедете на ближайшей свободной машине.")
             );
-            foreach ($notifications as $notification) Notifications::send($notification);
+            if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
 
             $this->addressed = $ids;
 
@@ -892,7 +892,7 @@ class Message
                             Notifications::NT_TRIP_DISBANDED, [$line_data['driver_id']] + $ids,
                             \Yii::t('app', "Возвращение в очередь. Поездка была расформирована.")
                         );
-                        foreach ($notifications as $notification) Notifications::send($notification);
+                        if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
 
                         Queue::processingQueue();
 
@@ -1039,7 +1039,7 @@ class Message
                                 \Yii::t('app', "Вам отказано в поездке. Причина - опоздание."),
                                 $user_device->user_id
                             );
-                            foreach ($notifications as $notification) Notifications::send($notification);
+                            if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
                         } else {
                             foreach ($devices as $device) $device->send(base64_encode(json_encode($send_response)));
                         }
