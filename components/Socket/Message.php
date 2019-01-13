@@ -725,26 +725,24 @@ class Message
                     $trip->status = Trip::STATUS_CREATED;
                     $trip->save();
                 }
+                RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                    'AND',
+                    ['user_id' => $ids],
+                    ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+                ]);
             }
 
             if (!empty($line)) {
-                RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
-                    'AND',
-                    ['user_id' => $line->driver_id],
-                    ['type' => [RestFul::TYPE_DRIVER_ACCEPT, RestFul::TYPE_DRIVER_ACCEPT_DONE]]
-                ]);
+                $ids = $ids + [$line->driver_id];
                 $line->status = Line::STATUS_QUEUE;
                 $line->freeseats = $line->seats;
                 $line->save();
-
-                $ids = $ids + [$line->driver_id];
+                RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                    'AND',
+                    ['user_id' => $line->driver_id],
+                    ['type' => [RestFul::TYPE_DRIVER_ACCEPT]]
+                ]);
             }
-
-            RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
-                'AND',
-                ['user_id' => $ids],
-                ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
-            ]);
 
             $notifications = Notifications::create(
                 Notifications::NT_TRIP_DISBANDED, $ids,
@@ -846,25 +844,23 @@ class Message
                                 $trip->status = Trip::STATUS_CREATED;
                                 $trip->save();
                             }
-
+                            RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                                'AND',
+                                ['user_id' => $ids],
+                                ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+                            ]);
                         }
 
                         if (!empty($line)) {
                             RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
                                 'AND',
                                 ['user_id' => $line->driver_id],
-                                ['type' => [RestFul::TYPE_DRIVER_ACCEPT, RestFul::TYPE_DRIVER_ACCEPT_DONE]]
+                                ['type' => [RestFul::TYPE_DRIVER_ACCEPT]]
                             ]);
                             $line->status = Line::STATUS_QUEUE;
                             $line->freeseats = $line->seats;
                             $line->save();
                         }
-
-                        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
-                            'AND',
-                            ['user_id' => $ids],
-                            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
-                        ]);
 
                         $query = new ArrayQuery();
                         $query->from($connections);
