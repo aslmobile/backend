@@ -552,6 +552,7 @@ class Message
                 'data' => [
                     'accept_from' => isset($watchdog) ? $watchdog->created_at : time(),
                     'accept_time' => 300,
+                    'current_time' => time(),
                     'line' => $line_data
                 ]
             ];
