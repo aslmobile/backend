@@ -736,7 +736,7 @@ class Message
                     ['type' => [RestFul::TYPE_DRIVER_ACCEPT, RestFul::TYPE_DRIVER_ACCEPT_DONE]]
                 ]);
                 $line->status = Line::STATUS_QUEUE;
-                $line->freeseats = $line->maxseats;
+                $line->freeseats = $line->seats;
                 $line->save();
 
                 $ids = $ids + [$line->driver_id];
@@ -858,7 +858,7 @@ class Message
                                 ['type' => [RestFul::TYPE_DRIVER_ACCEPT, RestFul::TYPE_DRIVER_ACCEPT_DONE]]
                             ]);
                             $line->status = Line::STATUS_QUEUE;
-                            $line->freeseats = $line->maxseats;
+                            $line->freeseats = $line->seats;
                             $line->save();
                         }
 
