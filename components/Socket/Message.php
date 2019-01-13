@@ -111,8 +111,8 @@ class Message
                 ['=', 'status', Trip::STATUS_CREATED],
                 ['=', 'route_id', $d_trip->route_id]
             ]);
-            if($d_trip->vehicle_type_id != 0) $trips = $trips->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
-            $trips = $trips->orderBy(['created_at' => SORT_DESC, 'seats' => SORT_DESC])->all();
+            if ($d_trip->vehicle_type_id != 0) $trips = $trips->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
+            $trips = $trips->orderBy(['created_at' => SORT_ASC, 'seats' => SORT_DESC])->all();
 
             if ($trips && count($trips)) foreach ($trips as $trip) {
                 if ($trip->id == $d_trip->id) break;
@@ -122,7 +122,7 @@ class Message
             $vehicles_queue = Line::find()
                 ->where(['status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]])
                 ->andWhere(['route_id' => $d_trip->route_id]);
-            if($d_trip->vehicle_type_id != 0) $vehicles_queue =  $vehicles_queue->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
+            if ($d_trip->vehicle_type_id != 0) $vehicles_queue = $vehicles_queue->andWhere(['vehicle_type_id' => $d_trip->vehicle_type_id]);
             $vehicles_queue = $vehicles_queue->count();
 
             $basic_estimated_time = $queue_position * 300;
@@ -562,50 +562,64 @@ class Message
             ];
 
             if (isset($data['data']['timer']) && $data['data']['timer'] && isset($user_device)) {
+
                 $this->loop->addTimer(300, function () use ($line, $connections, $response, $user_device) {
+
                     $line = \app\modules\api\models\Line::findOne(['id' => $line['id'], 'status' => Line::STATUS_WAITING]);
+
                     if (!empty($line)) {
+
                         $line->status = Line::STATUS_CANCELED;
                         $line->penalty = 1;
                         $line->save();
-                        /** @var Trip $trip */
-                        $trips = Trip::find()->where(['line_id' => $line->id])->andWhere(['status' => Trip::STATUS_WAITING])->all();
+
+                        $trips = Trip::find()->where(['line_id' => $line->id])->andWhere(['status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]])->all();
+
                         if (!empty($trips)) {
+
+                            $ids = ArrayHelper::getColumn($trips, 'user_id');
+
+                            /** @var Trip $trip */
                             foreach ($trips as $trip) {
                                 $trip->driver_id = 0;
                                 $trip->vehicle_id = 0;
                                 $trip->line_id = 0;
                                 $trip->status = Trip::STATUS_CREATED;
                                 $trip->save();
-                                RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
-                                    'AND',
-                                    ['user_id' => $trip->user_id],
-                                    ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
-                                ]);
-                                $query = new ArrayQuery();
-                                $query->from($connections);
-                                $devices = $query->where(['device.user_id' => intval($trip->user_id)])->all();
-                                $send_response = [
-                                    'action' => 'declinePassengerTrip',
-                                    'error_code' => 0,
-                                    'data' => [
-                                        'message_id' => $this->message_id,
-                                        'device_id' => $user_device->id,
-                                        'user_id' => $user_device->user_id,
-                                        'data' => [
-                                            'decline_from' => time(),
-                                            'decline_time' => 300,
-                                            'trip' => $trip->toArray()
-                                        ]
-                                    ]
-                                ];
-                                if (empty($devices)) {
-                                    $notifications = Notifications::create(Notifications::NTD_TRIP_CANCEL, [$trip->user_id]);
-                                    foreach ($notifications as $notification) Notifications::send($notification);
-                                } else {
-                                    foreach ($devices as $device) $device->send(base64_encode(json_encode($send_response)));
-                                }
                             }
+
+                            RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                                'AND',
+                                ['user_id' => $ids],
+                                ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+                            ]);
+
+                            $query = new ArrayQuery();
+                            $query->from($connections);
+                            $devices = $query->where(['device.user_id' => $ids])->all();
+
+                            $send_response = [
+                                'action' => 'disbandedTrip',
+                                'error_code' => 0,
+                                'data' => [
+                                    'message_id' => time(),
+                                    'device_id' => $user_device->id,
+                                    'user_id' => $user_device->user_id,
+                                    'data' => [
+                                        'disband_from' => time(),
+                                        'disband_time' => 300,
+                                    ]
+                                ]
+                            ];
+
+                            if (!empty($devices)) foreach ($devices as $device) $device->send(base64_encode(json_encode($send_response)));
+
+                            $notifications = Notifications::create(
+                                Notifications::NT_TRIP_DISBANDED, $ids,
+                                \Yii::t('app', "Не все участники поездки подтвердили поездку. Вы поедете на ближайшей свободной машине.")
+                            );
+                            foreach ($notifications as $notification) Notifications::send($notification);
+
                         };
                         Queue::processingQueue();
                     }
@@ -641,7 +655,7 @@ class Message
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
 
         if (isset($data['data']['line']) && !empty($data['data']['line'])) {
-            $line_data = $data['data']['line'];;
+            $line_data = $data['data']['line'];
             $response = [
                 'message_id' => $this->message_id,
                 'device_id' => $device->id,
@@ -662,6 +676,102 @@ class Message
         }
 
         $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
+    public function disbandedTrip($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
+
+        if (isset($data['data']['line']) && !empty($data['data']['line'])) {
+
+            $trip_id = intval($data['data']['trip_id']);
+            $line_data = $data['data']['line'];
+
+            $response = [
+                'message_id' => time(),
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => [
+                    'disband_from' => time(),
+                    'disband_time' => 300,
+                ]
+            ];
+            /** @var \app\modules\api\models\Line $line */
+            $line = \app\modules\api\models\Line::findOne([
+                'id' => intval($line_data['id']),
+                'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]
+            ]);
+
+            /** @var Trip $trips */
+            $trips = Trip::find()->where([
+                'line_id' => intval($line_data['id']),
+                'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]
+            ])->andWhere(['!=', 'id', $trip_id])->all();
+
+            $ids = [];
+
+            if (!empty($trips)) {
+                $ids = ArrayHelper::getColumn($trips, 'user_id');
+                /** @var Trip $trip */
+                foreach ($trips as $trip) {
+                    $trip->vehicle_id = 0;
+                    $trip->line_id = 0;
+                    $trip->driver_id = 0;
+                    $trip->status = Trip::STATUS_CREATED;
+                    $trip->save();
+                }
+            }
+
+            if (!empty($line)) {
+                RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                    'AND',
+                    ['user_id' => $line->driver_id],
+                    ['type' => [RestFul::TYPE_DRIVER_ACCEPT, RestFul::TYPE_DRIVER_ACCEPT_DONE]]
+                ]);
+                $line->status = Line::STATUS_QUEUE;
+                $line->freeseats = $line->maxseats;
+                $line->save();
+
+                $ids = $ids + [$line->driver_id];
+            }
+
+            RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                'AND',
+                ['user_id' => $ids],
+                ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+            ]);
+
+            $notifications = Notifications::create(
+                Notifications::NT_TRIP_DISBANDED, $ids,
+                \Yii::t('app', "Не все участники поездки подтвердили поездку. Вы поедете на ближайшей свободной машине.")
+            );
+            foreach ($notifications as $notification) Notifications::send($notification);
+
+            $this->addressed = $ids;
+
+        } else {
+
+            $response = [
+                'message_id' => $this->message_id,
+                'device_id' => $device->id,
+                'user_id' => $device->user_id,
+                'data' => null
+            ];
+            $this->error_code = 2;
+
+        }
 
         return $response;
     }
@@ -704,13 +814,7 @@ class Message
             }
 
             if ($timer) {
-                $this->loop->addTimer(300, function () use ($passenger, $line_data) {
-
-                    /** @var \app\modules\api\models\Line $line */
-                    $line = \app\modules\api\models\Line::findOne([
-                        'id' => intval($line_data['id']),
-                        'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]
-                    ]);
+                $this->loop->addTimer(300, function () use ($passenger, $line_data, $connections, $device) {
 
                     /** @var Trip $trip */
                     $trip = Trip::find()->where([
@@ -721,19 +825,81 @@ class Message
 
                     if (!empty($trip)) {
 
-                        $trip->line_id = 0;
+                        /** @var \app\modules\api\models\Line $line */
+                        $line = \app\modules\api\models\Line::findOne([
+                            'id' => intval($line_data['id']),
+                            'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]
+                        ]);
+
+                        $not = !empty($trip->not) ? json_decode($trip->not) : [];
+                        $not[] = $line_data['id'];
+                        $trip->not = json_encode($not);
                         $trip->save();
+
+                        /** @var Trip $trips */
+                        $trips = Trip::find()->where([
+                            'line_id' => intval($line_data['id']),
+                            'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]
+                        ])->all();
+
+                        $ids = [];
+
+                        if (!empty($trips)) {
+                            $ids = ArrayHelper::getColumn($trips, 'user_id');
+                            foreach ($trips as $trip) {
+                                $trip->vehicle_id = 0;
+                                $trip->line_id = 0;
+                                $trip->driver_id = 0;
+                                $trip->status = Trip::STATUS_CREATED;
+                                $trip->save();
+                            }
+
+                        }
+
+                        if (!empty($line)) {
+                            RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+                                'AND',
+                                ['user_id' => $line->driver_id],
+                                ['type' => [RestFul::TYPE_DRIVER_ACCEPT, RestFul::TYPE_DRIVER_ACCEPT_DONE]]
+                            ]);
+                            $line->status = Line::STATUS_QUEUE;
+                            $line->freeseats = $line->maxseats;
+                            $line->save();
+                        }
 
                         RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
                             'AND',
-                            ['user_id' => $trip->user_id],
+                            ['user_id' => $ids],
                             ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
                         ]);
 
-                        if (!empty($line)) {
-                            $line->freeseats += $trip->seats;
-                            $line->save();
-                        }
+                        $query = new ArrayQuery();
+                        $query->from($connections);
+                        $devices = $query->where(['device.user_id' => [$line_data['driver_id']] + $ids])->all();
+
+                        $send_response = [
+                            'action' => 'disbandedTrip',
+                            'error_code' => 0,
+                            'data' => [
+                                'message_id' => time(),
+                                'device_id' => $device->id,
+                                'user_id' => $device->user_id,
+                                'data' => [
+                                    'disband_from' => time(),
+                                    'disband_time' => 300,
+                                ]
+                            ]
+                        ];
+
+                        if (!empty($devices)) foreach ($devices as $device) $device->send(base64_encode(json_encode($send_response)));
+
+                        $notifications = Notifications::create(
+                            Notifications::NT_TRIP_DISBANDED, [$line_data['driver_id']] + $ids,
+                            \Yii::t('app', "Возвращение в очередь. Поездка была расформирована.")
+                        );
+                        foreach ($notifications as $notification) Notifications::send($notification);
+
+                        Queue::processingQueue();
 
                     }
 

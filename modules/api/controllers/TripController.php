@@ -59,7 +59,8 @@ class TripController extends BaseController
                             'return',
                             'get-trip',
                             'update-trip',
-                            'get-km'
+                            'get-km',
+                            'start-editing', 'stop-editing'
                         ],
                         'allow' => true
                     ]
@@ -89,7 +90,9 @@ class TripController extends BaseController
                     'return' => ['POST'],
                     'get-trip' => ['GET'],
                     'update-trip' => ['POST'],
-                    'get-km' => ['GET']
+                    'get-km' => ['GET'],
+                    'start-editing' => ['GET'],
+                    'stop-editing' => ['GET']
                 ]
             ]
         ];
@@ -380,12 +383,6 @@ class TripController extends BaseController
         $trip->line_id = 0;
         $trip->not = json_encode($not);
 
-        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
-            'AND',
-            ['user_id' => $trip->user_id],
-            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
-        ]);
-
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
                 foreach ($trip->errors as $field => $error_message) {
@@ -401,27 +398,67 @@ class TripController extends BaseController
             } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить поездку", [], false));
         }
 
-        if($line->status != Line::STATUS_CANCELED) {
-            $line->freeseats += $trip->seats;
-            $line->save();
-        }
-
-        Queue::processingQueue();
+        RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
+            'AND',
+            ['user_id' => $trip->user_id],
+            ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
+        ]);
 
         /** @var \app\models\Devices $device */
-        $device = Devices::findOne(['user_id' => $line->driver_id]);
+        $device = Devices::findOne(['user_id' => $trip->user_id]);
         if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
+
+        $socket->push(base64_encode(json_encode([
+            'action' => "disbandedTrip",
+            'notifications' => [],
+            'data' => ['message_id' => time(), 'trip_id' => $trip->id, 'line' => $line->toArray()]
+        ])));
+
         $socket->push(base64_encode(json_encode([
             'action' => "driverQueue",
             'notifications' => [],
             'data' => ['message_id' => time()]
         ])));
 
+        Queue::processingQueue();
+
         $this->module->data['trip'] = $trip->toArray();
         $this->module->setSuccess();
         $this->module->sendResponse();
 
+    }
+
+    public function actionStartEditing($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $trip = Trip::findOne(['id' => $id, 'line_id' => 0, 'status' => Trip::STATUS_CREATED]);
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Редактирование невозможно", [], false));
+
+        $trip->status = Trip::STATUS_EDITING;
+        $trip->save();
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
+    }
+
+    public function actionStopEditing($id)
+    {
+        $user = $this->TokenAuth(self::TOKEN);
+        if ($user) $user = $this->user;
+
+        $trip = Trip::findOne(['id' => $id, 'status' => Trip::STATUS_EDITING]);
+        if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
+
+        $trip->status = Trip::STATUS_CREATED;
+        $trip->save();
+
+        $this->module->data['trip'] = $trip->toArray();
+        $this->module->setSuccess();
+        $this->module->sendResponse();
     }
 
     public function actionUpdateTrip($id)
@@ -439,7 +476,7 @@ class TripController extends BaseController
                 $this->module->setError(422, '_penalty', Yii::$app->mv->gt("У вас не оплачен штраф", [], false));
         }
 
-        $trip = Trip::findOne(['id' => $id, 'status' => [Trip::STATUS_CREATED, Trip::STATUS_SCHEDULED]]);
+        $trip = Trip::findOne(['id' => $id, 'status' => [Trip::STATUS_SCHEDULED, Trip::STATUS_EDITING]]);
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Поездку нельзя изменить", [], false));
 
         $trip->line_id = 0;
@@ -623,6 +660,8 @@ class TripController extends BaseController
             );
         }
 
+        if($trip->status == Trip::STATUS_EDITING) $trip->status = Trip::STATUS_CREATED;
+
         if (!$trip->validate() || !$trip->save()) {
             if ($trip->hasErrors()) {
                 foreach ($trip->errors as $field => $error_message) {
@@ -667,15 +706,6 @@ class TripController extends BaseController
         if (!$trip)
             $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете отменить очередь на данной поездке", [], false));
 
-        /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne(['id' => $trip->line_id]);
-        if(!empty($line)){
-            if($line->status == Line::STATUS_IN_PROGRESS)
-                $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете отменить очередь на данной поездке", [], false));
-            $line->freeseats += $trip->seats;
-            $line->save();
-        }
-
         if (!isset ($this->body->cancel_reason)) $this->body->cancel_reason = 0;
         $trip->status = Trip::STATUS_CANCELLED;
         $trip->driver_id = 0;
@@ -690,6 +720,26 @@ class TripController extends BaseController
             ['user_id' => $trip->user_id],
             ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
         ]);
+
+        /** @var \app\modules\api\models\Line $line */
+        $line = \app\modules\api\models\Line::findOne(['id' => $trip->line_id]);
+
+        if (!empty($line)) {
+
+            if ($line->status == Line::STATUS_IN_PROGRESS)
+                $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже не можете отменить очередь на данной поездке", [], false));
+
+            /** @var \app\models\Devices $device */
+            $device = Devices::findOne(['user_id' => $trip->user_id]);
+            if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
+            $socket = new SocketPusher(['authkey' => $device->auth_token]);
+            $socket->push(base64_encode(json_encode([
+                'action' => "disbandedTrip",
+                'notifications' => [],
+                'data' => ['message_id' => time(), 'trip_id' => $trip->id, 'line' => $line->toArray()]
+            ])));
+
+        }
 
         Queue::processingQueue();
 
@@ -879,7 +929,7 @@ class TripController extends BaseController
         $this->validateBodyParams(['checkpoint_id']);
 
         /** @var \app\modules\api\models\Line $line */
-        $line = \app\modules\api\models\Line::findOne(['id'=> $id, 'status' => Line::STATUS_IN_PROGRESS]);
+        $line = \app\modules\api\models\Line::findOne(['id' => $id, 'status' => Line::STATUS_IN_PROGRESS]);
         if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Вы еще не выехали", [], false));
 
         /** @var Checkpoint $checkpoint */
@@ -1444,7 +1494,7 @@ class TripController extends BaseController
             $seats = 0;
             $amount = 0;
 
-            if(!empty($passengers)) array_map(function ($item) use (&$seats, &$amount){
+            if (!empty($passengers)) array_map(function ($item) use (&$seats, &$amount) {
                 /** @var Trip $item */
                 $seats += $item->seats;
                 $amount += $item->amount;

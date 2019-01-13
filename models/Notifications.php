@@ -74,6 +74,7 @@ class Notifications extends \yii\db\ActiveRecord
     const
         NT_DEFAULT = 0,
         NT_BLACKLIST = 1,
+        NT_TRIP_DISBANDED = 33,
 
         NTP_TRIP_READY = 2,
         NTP_TRIP_CANCEL = 3,
@@ -107,6 +108,7 @@ class Notifications extends \yii\db\ActiveRecord
         return [
             self::NT_DEFAULT => Yii::t('app', "Стандартная"),
             self::NT_BLACKLIST => Yii::t('app', "Черный список"),
+            self::NT_TRIP_DISBANDED => Yii::t('app', "Поездка расформирована"),
 
             self::NTP_TRIP_SCHEDULED => Yii::t('app', "Напоминание о поездке"),
             self::NTP_TRIP_READY => Yii::t('app', "Машина готова к выезду. Поездка автоматически отменится через 5 минут."),

@@ -191,7 +191,7 @@ class LineController extends BaseController
         if ($user) $user = $this->user;
 
         $line = $this->getLine($id);
-        if (!$line) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найдена", [], false));
+        if (!$line || $line->freeseats == 0) $this->module->setError(422, '_line', Yii::$app->mv->gt("Редактирование невозможно.", [], false));
 
         $this->prepareBody();
         $this->validateBodyParams(['freeseats', 'seats']);
@@ -367,69 +367,28 @@ class LineController extends BaseController
             ->andWhere(['NOT', ['status' => [Trip::STATUS_CANCELLED, Trip::STATUS_CANCELLED_DRIVER]]])
             ->all();
 
-        if ($trips) {
+        if (!empty($trips)) {
 
             $line->penalty = 1;
             $line->update();
 
-            $trip_errors = 0;
             $_trips = [];
+
             /** @var \app\models\Devices $device */
             $device = Devices::findOne(['user_id' => $user->id]);
             if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
             $socket = new SocketPusher(['authkey' => $device->auth_token]);
 
-            foreach ($trips as $trip) {
+            foreach ($trips as $trip) $_trips[] = $trip->toArray();
 
-                $trip->driver_id = 0;
-                $trip->vehicle_id = 0;
-                $trip->line_id = 0;
-                $trip->status = Trip::STATUS_CREATED;
-                // TODO $trip->status = Trip::STATUS_CANCELLED_DRIVER;
-
-                if (!$trip->validate() || !$trip->save()) {
-                    if ($trip->hasErrors()) {
-                        foreach ($trip->errors as $field => $error_message) {
-                            if (is_array($error_message)) {
-                                $result = '';
-                                foreach ($error_message as $error) $result .= '; '.$error;
-                                $error_message = $result;
-                            }
-                            $this->module->setError(422, 'trip.' . $field, Yii::$app->mv->gt($error_message, [], false), true, false);
-                            $trip_errors++;
-                        }
-                    } else $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
-                }
-
-                RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
-                    'AND',
-                    ['user_id' => $trip->user_id],
-                    ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
-                ]);
-
-                $_trips[] = $trip->toArray();
-
-                $socket->push(base64_encode(json_encode([
-                    'action' => "declinePassengerTrip",
-                    //'action' => "cancelDriverTrip",
-                    'notifications' => Notifications::create(Notifications::NTD_TRIP_CANCEL, [$trip->user_id], '', $user->id),
-                    'data' => ['message_id' => time(), 'addressed' => [$trip->user_id], 'trip' => $trip->toArray()]
-                ])));
-
-            }
-
-            if ($trip_errors > 0) $this->module->sendResponse();
+            $socket->push(base64_encode(json_encode([
+                'action' => "disbandedTrip",
+                'notifications' => [],
+                'data' => ['message_id' => time(), 'trip_id' => 0, 'line' => $line->toArray()]
+            ])));
 
             $this->module->data['trips'] = $_trips;
         }
-
-        RestFul::updateAll([
-            'message' => json_encode(['status' => 'closed'])
-        ], [
-            'AND',
-            ['=', 'user_id', $line->driver_id],
-            ['=', 'type', RestFul::TYPE_DRIVER_ACCEPT]
-        ]);
 
         Queue::processingQueue();
 

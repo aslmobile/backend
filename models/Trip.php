@@ -72,6 +72,7 @@ class Trip extends \yii\db\ActiveRecord
         STATUS_WAY = 3,
         STATUS_FINISHED = 4,
         STATUS_SCHEDULED = 5,
+        STATUS_EDITING = 6,
         STATUS_CANCELLED_DRIVER = 9;
 
     const
@@ -521,6 +522,7 @@ class Trip extends \yii\db\ActiveRecord
             self::STATUS_WAY => Yii::t('app', "В пути"),
             self::STATUS_FINISHED => Yii::t('app', "Завершена"),
             self::STATUS_SCHEDULED => Yii::t('app', "Запланирована"),
+            self::STATUS_EDITING => Yii::t('app', "Редактируеться"),
             self::STATUS_CANCELLED_DRIVER => Yii::t('app', "Отменена водителем")
         ];
     }
