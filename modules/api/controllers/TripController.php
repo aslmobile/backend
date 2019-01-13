@@ -751,9 +751,8 @@ class TripController extends BaseController
 
     /**
      * Take a trip on a certain line by the passenger
-     * @param $id
      */
-    public function actionAcceptPassenger($id = 0)
+    public function actionAcceptPassenger()
     {
         $user = $this->TokenAuth(self::TOKEN);
         if ($user) $user = $this->user;
@@ -773,7 +772,7 @@ class TripController extends BaseController
         $trip->vehicle_id = $line->vehicle_id;
         $trip->status = Trip::STATUS_WAITING;
 
-        if ($line->freeseats == 0) $line->status = Line::STATUS_WAITING;
+        $line->status = Line::STATUS_WAITING;
 
         $trip->save();
         $line->save();
@@ -784,9 +783,12 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "acceptPassengerTrip",
-            'notifications' => Notifications::create(Notifications::NTD_TRIP_ADD, [$line->driver_id], '', $user->id),
+            'notifications' => [],
             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id], 'trip' => $trip->toArray()]
         ])));
+
+        $notifications = Notifications::create(Notifications::NTD_TRIP_ADD, [$line->driver_id], '', $user->id);
+        if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
 
         RestFul::updateAll(['message' => json_encode(['status' => 'closed'])], [
             'AND',
