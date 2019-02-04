@@ -163,18 +163,16 @@ class Notifications extends \yii\db\ActiveRecord
         $types = array_keys(self::getTypes());
         if (!isset ($types[$type])) return false;
         $notifications = [];
-        if (is_array($addressed)) {
-            foreach ($addressed as $user) {
-                $notification = new Notifications();
-                $notification->type = $type;
-                $notification->user_id = $user;
-                $notification->status = $status;
-                $notification->title = !empty($message) ? $message : self::getTypes()[$type];
-                $notification->text = $message;
-                $notification->time = $time ? $time : time();
-                $notification->initiator_id = $initiator;
-                if ($notification->save()) $notifications[] = $notification;
-            }
+        if (is_array($addressed)) foreach ($addressed as $user) {
+            $notification = new Notifications();
+            $notification->type = $type;
+            $notification->user_id = $user;
+            $notification->status = $status;
+            $notification->title = !empty($message) ? $message : self::getTypes()[$type];
+            $notification->text = $message;
+            $notification->time = $time ? $time : time();
+            $notification->initiator_id = $initiator;
+            if ($notification->save()) $notifications[] = $notification;
         }
         return $notifications;
     }

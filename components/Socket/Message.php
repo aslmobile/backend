@@ -707,7 +707,7 @@ class Message
                 'status' => [Line::STATUS_QUEUE, Line::STATUS_WAITING]
             ]);
 
-            /** @var Trip $trips */
+            /** @var Trip[] $trips */
             $trips = Trip::find()->where([
                 'line_id' => intval($line_data['id']),
                 'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]
@@ -827,7 +827,7 @@ class Message
                         $trip->not = json_encode($not);
                         $trip->save();
 
-                        /** @var Trip $trips */
+                        /** @var Trip[] $trips */
                         $trips = Trip::find()->where([
                             'line_id' => intval($line_data['id']),
                             'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]
