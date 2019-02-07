@@ -1078,13 +1078,14 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "checkpointArrived",
-            'notifications' => $notifications,
+            'notifications' => [],
             'data' => [
                 'message_id' => time(),
                 'line' => $line->toArray(), 'checkpoint' => $checkpoint->toArray(),
                 'addressed' => $addressed, 'timer' => $timer
             ]
         ])));
+        if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
 
         $this->module->data = $data;
         $this->module->setSuccess();
