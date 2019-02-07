@@ -363,20 +363,13 @@ class Message
 
         RestFul::updatePassengerAccept();
 
-        $watchdog = RestFul::findOne([
-            'type' => RestFul::TYPE_PASSENGER_ACCEPT_SEAT,
-            'user_id' => $device->user->id,
-            'message' => json_encode(['status' => 'request'])
-        ]);
-        if (!$watchdog) {
-            $watchdog = new RestFul([
-                'type' => RestFul::TYPE_PASSENGER_ACCEPT_SEAT,
-                'message' => json_encode(['status' => 'request']),
-                'user_id' => $device->user->id,
-                'uip' => '0.0.0.0'
-            ]);
-            $watchdog->save();
-        }
+        $watchdog = RestFul::find()->where([
+            'AND',
+            ['=', 'type', RestFul::TYPE_PASSENGER_ACCEPT_SEAT],
+            ['=', 'user_id', $device->user_id],
+            ['=', 'message', json_encode(['status' => 'request'])],
+            ['>', 'created_at', time() - 300],
+        ])->one();
 
         if (isset($data['data']['trip']) && !empty($data['data']['trip']))
             $trip_data = $data['data']['trip']; else $trip_data = null;
@@ -385,11 +378,11 @@ class Message
             'message_id' => $this->message_id,
             'device_id' => $device->id,
             'user_id' => $device->user_id,
-            'data' => [
+            'data' => !empty($watchdog) ? [
                 'seat_from' => $watchdog->created_at,
                 'seat_time' => 300,
                 'trip' => $trip_data
-            ]
+            ] : null
         ];
 
         $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
