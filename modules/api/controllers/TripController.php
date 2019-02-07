@@ -264,7 +264,7 @@ class TripController extends BaseController
             foreach ($_luggages as $luggage) {
 
                 if ($luggage['need_place']) {
-                    $tariff = $this->calculateLuggageTariff($route->id);
+                    $tariff = (object)$this->calculatePassengerTariff($route->id, $checkpoint->id);
                     $amount = (int)intval($luggage['seats']) * (float)floatval($tariff->tariff);
                 } else $amount = (float)floatval(0.0);
 
@@ -587,7 +587,7 @@ class TripController extends BaseController
             if (isset($_luggages)) foreach ($_luggages as $luggage) {
 
                 if ($luggage['need_place']) {
-                    $tariff = $this->calculateLuggageTariff($route->id);
+                    $tariff = (object)$this->calculatePassengerTariff($route->id, $checkpoint->id);
                     $amount = (int)intval($luggage['seats']) * (float)floatval($tariff->tariff);
                 } else $amount = (float)floatval(0.0);
 
