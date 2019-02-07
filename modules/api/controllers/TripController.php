@@ -1752,10 +1752,10 @@ class TripController extends BaseController
     protected function getRate($route_id)
     {
         /** @var \app\models\Line $line */
-        $lines = Line::findAll(['route_id' => $route_id, 'status' => Line::STATUS_QUEUE]);
+        $lines = Line::find()->where(['route_id' => $route_id, 'status' => Line::STATUS_QUEUE])->all();
 
         $seats = 0;
-        foreach ($lines as $line) $seats += $line->seats;
+        foreach ($lines as $line) $seats += $line->freeseats;
 
         $passengers = Trip::find()->where(['route_id' => $route_id, 'status' => Trip::STATUS_CREATED])->count();
 
