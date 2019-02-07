@@ -1050,11 +1050,22 @@ class TripController extends BaseController
             $data += ['trips' => $_trips, 'total' => $total];
 
         } else {
+
+            $trips = Trip::findAll(['line_id' => $line->id, 'status' => Trip::STATUS_WAITING, 'startpoint_id' => $checkpoint->id]);
+
             /** @var \app\models\Trip $trip */
-            $addressed = ArrayHelper::getColumn(
-                Trip::findAll(['line_id' => $line->id, 'status' => Trip::STATUS_WAITING, 'startpoint_id' => $checkpoint->id,]),
-                'user_id'
-            );
+            foreach ($trips as $trip) {
+                $inAcceptSeat = new RestFul([
+                    'type' => RestFul::TYPE_PASSENGER_ACCEPT_SEAT,
+                    'user_id' => $trip->user_id,
+                    'message' => json_encode(['status' => 'request']),
+                    'created_at' => time(),
+                ]);
+                $inAcceptSeat->save();
+            }
+
+            /** @var \app\models\Trip $trip */
+            $addressed = ArrayHelper::getColumn($trips, 'user_id');
             $notifications = Notifications::create(Notifications::NTP_TRIP_ARRIVED, $addressed, '', $user->id);
         }
 
