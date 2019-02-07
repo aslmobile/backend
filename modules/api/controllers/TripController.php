@@ -1052,6 +1052,7 @@ class TripController extends BaseController
         } else {
 
             $trips = Trip::findAll(['line_id' => $line->id, 'status' => Trip::STATUS_WAITING, 'startpoint_id' => $checkpoint->id]);
+            $time = time();
 
             /** @var \app\models\Trip $trip */
             foreach ($trips as $trip) {
@@ -1059,7 +1060,7 @@ class TripController extends BaseController
                     'type' => RestFul::TYPE_PASSENGER_ACCEPT_SEAT,
                     'user_id' => $trip->user_id,
                     'message' => json_encode(['status' => 'request']),
-                    'created_at' => time(),
+                    'created_at' => $time,
                 ]);
                 $inAcceptSeat->save();
             }
