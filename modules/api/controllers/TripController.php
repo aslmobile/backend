@@ -1666,14 +1666,10 @@ class TripController extends BaseController
         $this->prepareBody();
         $this->validateBodyParams(['seats']);
 
-        /** @var \app\models\Route $route */
-        $route = Route::findOne(['status' => Route::STATUS_ACTIVE, 'id' => $id]);
-        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
+        $tariff = (object)$this->calculateTariff($id);
 
-        $tariff = $this->calculateTariff($id)['tariff'];
-
-        $this->module->data['commission'] = ($route->base_tariff * 1.5 * $this->body->seats) / 10;
-        $this->module->data['one'] = $tariff;
+        $this->module->data['commission'] = ($tariff->base_tariff * 1.5 * $this->body->seats) / 10;
+        $this->module->data['one'] = $tariff->tariff;
         $this->module->setSuccess();
         $this->module->sendResponse();
 
@@ -1698,9 +1694,9 @@ class TripController extends BaseController
             }
         }
 
-        $tariff = $this->calculateTariff($id)['tariff'] * $seats;
+        $tariff = (object)$this->calculateTariff($id);
 
-        $this->module->data['tariff'] = $tariff;
+        $this->module->data['tariff'] = $tariff->tariff * $seats;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
@@ -1786,7 +1782,7 @@ class TripController extends BaseController
         $rate = $this->getRate($id);
 
         /** @var \app\models\Route $route */
-        $route = Route::findOne($id);
+        $route = Route::findOne(['status' => Route::STATUS_ACTIVE, 'id' => $id]);
         if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
 
         $tariff = $route->base_tariff * $rate;
