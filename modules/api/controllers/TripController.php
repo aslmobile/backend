@@ -1688,23 +1688,17 @@ class TripController extends BaseController
         $this->validateBodyParams(['seats', 'checkpoint']);
 
         $seats = $this->body->seats;
-        $tariff = $this->calculatePassengerTariff($id, $this->body->checkpoint)['tariff'] * $seats;
 
         if (isset($this->body->luggage) && !empty($this->body->luggage)) {
-
             $luggages = $this->body->luggage;
-
             foreach ($luggages as $luggage) {
                 $luggage = LuggageType::findOne($luggage);
                 if (!$luggage) $this->module->setError(422, '_luggage', Yii::$app->mv->gt("Не найден", [], false));
-                if ($luggage->need_place) {
-                    $luggage_tariff = $this->calculateLuggageTariff($id);
-                    $amount = (int)intval($luggage->seats) * (float)floatval($luggage_tariff->tariff);
-                } else $amount = (float)floatval(0.0);
-                $tariff += $amount;
+                if ($luggage->need_place) $seats += $luggage->seats;
             }
-
         }
+
+        $tariff = $this->calculatePassengerTariff($id, $this->body->checkpoint)['tariff'] * $seats;
 
         $this->module->data['tariff'] = $tariff;
         $this->module->setSuccess();
@@ -1758,18 +1752,12 @@ class TripController extends BaseController
     protected function getRate($route_id)
     {
         /** @var \app\models\Line $line */
-        $lines = Line::findAll(['route_id' => $route_id]);
-
-        //if (!$lines) $this->module->setError(422, '_line', Yii::$app->mv->gt("Не найден", [], false));
+        $lines = Line::findAll(['route_id' => $route_id, 'status' => Line::STATUS_QUEUE]);
 
         $seats = 0;
-        foreach ($lines as $line) $seats += $line->freeseats;
+        foreach ($lines as $line) $seats += $line->seats;
 
-        $passengers = Trip::find()->where([
-            'AND',
-            ['=', 'route_id', $route_id],
-            ['=', 'status', Trip::STATUS_CREATED]
-        ])->count();
+        $passengers = Trip::find()->where(['route_id' => $route_id, 'status' => Trip::STATUS_CREATED])->count();
 
         if ($seats == 0) $rate = 1.5;
         elseif ($passengers == 0) $rate = 1;
@@ -1822,35 +1810,6 @@ class TripController extends BaseController
         $tariff = $route->base_tariff * $rate + $taxi_tariff;
 
         return ['base_tariff' => $route->base_tariff, 'tariff' => $tariff];
-    }
-
-    /**
-     * @param $id
-     * @return object
-     */
-    protected function calculateLuggageTariff($id)
-    {
-        $rate = $this->getRate($id);
-
-        /** @var \app\models\Route $route */
-        $route = Route::findOne($id);
-        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
-
-        $tariff = $route->base_tariff * $rate;
-
-        return (object)['base_tariff' => $route->base_tariff, 'tariff' => $tariff];
-    }
-
-    protected function calculateDriverTariff()
-    {
-        /**
-         * Расчет тарифа по зависимостям:
-         * - Базовый тариф
-         * - Задолженость
-         * - Спрос
-         *
-         * ((кол-во пассажиров / кол-во мест) * базовый тариф) * коофициент + задолженость
-         */
     }
 
 }
