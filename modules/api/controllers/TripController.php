@@ -366,7 +366,7 @@ class TripController extends BaseController
         $this->module->data['acceptSeat'] = !empty($watchdog) ? [
             'seat_from' => $watchdog->created_at,
             'seat_time' => 300
-        ] : null;
+        ] : (object)[];
 
         $this->module->setSuccess();
         $this->module->sendResponse();
