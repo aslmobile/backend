@@ -351,9 +351,23 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $trip = Trip::findOne($id);
+
         if (!$trip) $this->module->setError(422, '_trip', Yii::$app->mv->gt("Не найден", [], false));
 
+        $watchdog = RestFul::find()->where([
+            'AND',
+            ['=', 'type', RestFul::TYPE_PASSENGER_ACCEPT_SEAT],
+            ['=', 'user_id', $trip->user_id],
+            ['=', 'message', json_encode(['status' => 'request'])],
+            ['>', 'created_at', time() - 300],
+        ])->one();
+
         $this->module->data['trip'] = $trip->toArray();
+        $this->module->data['acceptSeat'] = !empty($watchdog) ? [
+            'seat_from' => $watchdog->created_at,
+            'seat_time' => 300
+        ] : null;
+
         $this->module->setSuccess();
         $this->module->sendResponse();
     }

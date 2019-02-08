@@ -1021,16 +1021,12 @@ class Message
                             ]
                         ];
 
-                        if (empty($devices)) {
-                            $notifications = Notifications::create(
-                                Notifications::NTP_TRIP_CANCEL, [$trip->user_id],
-                                \Yii::t('app', "Вам отказано в поездке. Причина - опоздание."),
-                                $user_device->user_id
-                            );
-                            if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
-                        } else {
-                            foreach ($devices as $device) $device->send(base64_encode(json_encode($send_response)));
-                        }
+                        $notifications = Notifications::create(
+                            Notifications::NTP_TRIP_CANCEL, [$trip->user_id],
+                            \Yii::t('app', "Вам отказано в поездке. Причина - опоздание.")
+                        );
+                        if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
+                        if (!empty($devices)) foreach ($devices as $device) $device->send(base64_encode(json_encode($send_response)));
 
                     }
                 }
