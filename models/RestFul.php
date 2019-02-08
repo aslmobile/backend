@@ -27,7 +27,7 @@ class RestFul extends \yii\db\ActiveRecord
         TYPE_DRIVER_HANDLE_ROUTE = 5,
         TYPE_PASSENGER_ACCEPT = 6,
         TYPE_PASSENGER_DECLINE = 7,
-        TYPE_PASSENGER_ACCEPT_SEAT = 7;
+        TYPE_PASSENGER_ACCEPT_SEAT = 8;
 
     public static function tableName()
     {
