@@ -40,12 +40,13 @@ class Devices extends ActiveRecord
         STATUS_BLOCKED = 9;
 
     const
-        NOTIFICATION_ENABLED = 1,
-        NOTIFICATION_DISABLED = 0;
+        NOTIFICATION_DISABLED = 0,
+        NOTIFICATION_ENABLED = 1;
+
 
     const
-        APP_PASSENGER = 2,
-        APP_DRIVER = 1;
+        APP_DRIVER = 1,
+        APP_PASSENGER = 2;
 
     /**
      * @inheritdoc
