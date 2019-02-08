@@ -951,7 +951,7 @@ class TripController extends BaseController
 
             $addressed = ArrayHelper::getColumn($trips, 'user_id');
             $timer = false;
-            $notifications = Notifications::create(Notifications::NTP_TRIP_FINISHED, $addressed, '', $user->id);
+            $notifications = Notifications::create(Notifications::NTP_TRIP_FINISHED, $addressed);
 
             $_trips = [];
             $total = ['cash' => 0, 'card' => 0];
@@ -1067,7 +1067,7 @@ class TripController extends BaseController
 
             /** @var \app\models\Trip $trip */
             $addressed = ArrayHelper::getColumn($trips, 'user_id');
-            $notifications = Notifications::create(Notifications::NTP_TRIP_ARRIVED, $addressed, '', $user->id);
+            $notifications = Notifications::create(Notifications::NTP_TRIP_ARRIVED, $addressed);
         }
 
         $user->save();
