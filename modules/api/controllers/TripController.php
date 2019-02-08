@@ -1073,6 +1073,7 @@ class TripController extends BaseController
                 $inAcceptSeat = new RestFul([
                     'type' => RestFul::TYPE_PASSENGER_ACCEPT_SEAT,
                     'user_id' => $trip->user_id,
+                    'uip' => '0.0.0.0',
                     'message' => json_encode(['status' => 'request']),
                     'created_at' => $time,
                 ]);
