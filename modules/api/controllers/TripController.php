@@ -1087,6 +1087,8 @@ class TripController extends BaseController
 
         $user->save();
 
+        if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
+
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
         if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
@@ -1100,7 +1102,6 @@ class TripController extends BaseController
                 'addressed' => $addressed, 'timer' => $timer
             ]
         ])));
-        if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
 
         $this->module->data = $data;
         $this->module->setSuccess();
