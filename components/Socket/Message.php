@@ -703,7 +703,7 @@ class Message
             /** @var Trip[] $trips */
             $trips = Trip::find()->where([
                 'line_id' => intval($line_data['id']),
-                'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING]
+                'status' => [Trip::STATUS_CREATED, Trip::STATUS_WAITING, Trip::STATUS_WAY]
             ])->andWhere(['!=', 'id', $trip_id])->all();
 
             $ids = [];
