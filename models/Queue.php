@@ -17,6 +17,7 @@ class Queue extends Model
      */
     public static function processingQueue()
     {
+        $socket = new SocketPusher(['authkey' => \Yii::$app->params['socket']['authkey_server']]);
 
         $lines = \app\modules\api\models\Line::find()
             ->where(['status' => Line::STATUS_QUEUE])
@@ -31,6 +32,15 @@ class Queue extends Model
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])
             ->all();
 
+        $in_queue = ArrayHelper::getColumn($trips, 'user_id');
+        $socket->push(base64_encode(json_encode([
+            'action' => "startQueue",
+            'notifications' => [],
+            'data' => ['addressed' => $in_queue, 'message_id' => time()]
+        ])));
+        //$notifications = Notifications::create(Notifications::NTP_TRIP_SCHEDULED_START, $in_queue);
+        //if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
+
         $query = new ArrayQuery();
         $query->from(ArrayHelper::index($trips, 'id'));
 
@@ -39,9 +49,6 @@ class Queue extends Model
 
             $applicants = self::getQueue($line, $query);
             $ids = ArrayHelper::getColumn($applicants, 'id');
-
-            //self::unsetQueue($ids, $query);
-            //if (!empty($ids)) self::send($applicants, $ids, $line);
 
             if ($line->ready) {
                 self::unsetQueue($ids, $query);
@@ -52,7 +59,6 @@ class Queue extends Model
 
         }
 
-        $socket = new SocketPusher(['authkey' => \Yii::$app->params['socket']['authkey_server']]);
         $socket->push(base64_encode(json_encode(['action' => "changeQueue", 'data' => ['message_id' => time()]])));
 
     }

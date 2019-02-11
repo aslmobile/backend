@@ -322,26 +322,18 @@ class Message
      * @param $connections
      * @return array
      */
-    public function startScheduledTrip($data, $from, $connections)
+    public function startQueue($data, $from, $connections)
     {
-        /** @var Devices $device */
-        if ($this->validateDevice($from)) $device = $from->device;
-
         if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
-
-        if (isset($data['data']['trip']) && !empty($data['data']['trip']))
-            $trip_data = $data['data']['trip']; else $trip_data = null;
 
         $response = [
             'message_id' => $this->message_id,
-            'device_id' => $device->id,
-            'user_id' => $device->user_id,
-            'data' => [
-                'trip' => $trip_data
-            ]
+            'device_id' => 0,
+            'user_id' => 0,
+            'data' => null
         ];
 
-        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [null];
 
         return $response;
     }
