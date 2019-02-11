@@ -35,7 +35,7 @@ class Queue extends Model
         $query = new ArrayQuery();
 
         $in_queue = ArrayHelper::getColumn($query->from($trips)->where(['CALLBACK', function ($data) {
-            return $data['queue_time'] > $data['created_at'];
+            return intval($data['queue_time']) > intval($data['created_at']);
         }])->all(), 'user_id');
 
         $socket->push(base64_encode(json_encode([
