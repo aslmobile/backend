@@ -913,6 +913,7 @@ class TripController extends BaseController
             ['type' => [RestFul::TYPE_PASSENGER_ACCEPT, RestFul::TYPE_PASSENGER_ACCEPT_SEAT]]
         ]);
 
+        if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
 
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
@@ -920,7 +921,7 @@ class TripController extends BaseController
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "declinePassengerTrip",
-            'notifications' => $notifications,
+            'notifications' => [],
             'data' => ['message_id' => time(), 'addressed' => $addressed, 'trip' => $trip->toArray()]
         ])));
 
@@ -1161,18 +1162,22 @@ class TripController extends BaseController
                 '_trip', Yii::$app->mv->gt("Не удалось сохранить модель", [], false));
         }
 
+        $notifications = Notifications::create(
+            Notifications::NTD_TRIP_SEAT,
+            [$trip->user_id],
+            "Хорошей поездки, {$user->fullName}",
+            $user->id
+        );
+
+        if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
+
         /** @var \app\models\Devices $device */
         $device = Devices::findOne(['user_id' => $user->id]);
         if (!$device) $this->module->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
         $socket = new SocketPusher(['authkey' => $device->auth_token]);
         $socket->push(base64_encode(json_encode([
             'action' => "acceptPassengerSeat",
-            'notifications' => Notifications::create(
-                Notifications::NTD_TRIP_SEAT,
-                [$trip->user_id],
-                "Хорошей поездки, {$user->fullName}",
-                $user->id
-            ),
+            'notifications' => [],
             'data' => ['message_id' => time(), 'addressed' => [$line->driver_id, $trip->user_id], 'trip' => $trip->toArray()]
         ])));
 

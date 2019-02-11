@@ -124,14 +124,17 @@ class Queue extends Model
 
         foreach ($applicants as $applicant) {
 
+            $notifications = Notifications::create(
+                Notifications::NTP_TRIP_READY,
+                [$applicant['user_id']],
+                '',
+                $line->driver_id
+            );
+            if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
+
             $socket->push(base64_encode(json_encode([
                 'action' => "readyPassengerTrip",
-                'notifications' => Notifications::create(
-                    Notifications::NTP_TRIP_READY,
-                    [$applicant['user_id']],
-                    '',
-                    $line->driver_id
-                ),
+                'notifications' => [],
                 'data' => [
                     'message_id' => time(),
                     'addressed' => [$applicant['user_id']],
