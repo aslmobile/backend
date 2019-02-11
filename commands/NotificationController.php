@@ -3,6 +3,7 @@
 namespace app\commands;
 
 use app\components\ConsoleController;
+use app\models\Devices;
 use app\models\Notifications;
 use yii\base\Module;
 
@@ -58,7 +59,45 @@ class NotificationController extends ConsoleController
         echo "Notification send action index finished at " . date('d:m:Y H:i:s') . "\n";
     }
 
-    public function actionTest()
+    public function actionTest($user_id, $type = Notifications::NT_DEFAULT)
+    {
+        $push = \Yii::$app->push;
+        /*** @var $devices Devices */
+        $devices = Devices::find()->where(['user_id' => $user_id])
+            ->andWhere(['notifications' => Devices::NOTIFICATION_ENABLED])->all();
+
+        foreach ($devices as $device) {
+            switch (intval($device->type)) {
+                case Devices::TYPE_IOS:
+//                    $push->ios()->send($device->push_id, ['aps' => [
+//                        'alert' => $notification->text . ': ' . $notification->title,
+//                        'time' => $notification->updated_at,
+//                        'sound' => 'default',
+//                        'notification_id' => $notification->id,
+//                        'type' => $notification->type,
+//                    ]]);
+                    break;
+                case Devices::TYPE_ANDROID:
+                    $push->firebase()->send($device->push_id, [
+                        'priority' => 'high',
+//                        'notification' => [
+//                            'title' => $notification->title,
+//                            'body' => $notification->text,
+//                            'sound' => 'default',
+//                        ],
+                        'data' => [
+                            'title' => 'Test title',
+                            'body' => 'Test body',
+                            'time' => time(),
+                            'type' => $type,
+                        ],
+                    ], $device->app);
+                    break;
+            }
+        }
+    }
+
+    public function actionTestOld()
     {
         $push = \Yii::$app->push;
 //        $push->ios()->send('8a27747526c52cc5a66e920981ee069baa55ae4cd769b86125a1fe39494c0788', ['aps' => [
