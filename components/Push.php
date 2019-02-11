@@ -84,7 +84,7 @@ class Push extends Component
             $this->gcmEnabled = true;
         }
 
-        $this->setApp($this->defaultApplication);
+        //$this->setApp($this->defaultApplication);
 
     }
 
