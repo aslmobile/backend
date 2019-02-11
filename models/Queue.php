@@ -38,8 +38,8 @@ class Queue extends Model
             'notifications' => [],
             'data' => ['addressed' => $in_queue, 'message_id' => time()]
         ])));
-        //$notifications = Notifications::create(Notifications::NTP_TRIP_SCHEDULED_START, $in_queue);
-        //if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
+        $notifications = Notifications::create(Notifications::NTP_TRIP_SCHEDULED_START, $in_queue);
+        if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
 
         $query = new ArrayQuery();
         $query->from(ArrayHelper::index($trips, 'id'));
