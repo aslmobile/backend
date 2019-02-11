@@ -322,6 +322,36 @@ class Message
      * @param $connections
      * @return array
      */
+    public function startScheduledTrip($data, $from, $connections)
+    {
+        /** @var Devices $device */
+        if ($this->validateDevice($from)) $device = $from->device;
+
+        if (isset ($data['data']['message_id'])) $this->message_id = intval($data['data']['message_id']);
+
+        if (isset($data['data']['trip']) && !empty($data['data']['trip']))
+            $trip_data = $data['data']['trip']; else $trip_data = null;
+
+        $response = [
+            'message_id' => $this->message_id,
+            'device_id' => $device->id,
+            'user_id' => $device->user_id,
+            'data' => [
+                'trip' => $trip_data
+            ]
+        ];
+
+        $this->addressed = isset($data['data']['addressed']) ? $data['data']['addressed'] : [$device->user_id];
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $from
+     * @param $connections
+     * @return array
+     */
     public function acceptPassengerTrip($data, $from, $connections)
     {
         /** @var Devices $device */
