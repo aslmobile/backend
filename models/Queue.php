@@ -32,7 +32,12 @@ class Queue extends Model
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])
             ->all();
 
-        $in_queue = ArrayHelper::getColumn($trips, 'user_id');
+        $query = new ArrayQuery();
+
+        $in_queue = ArrayHelper::getColumn($query->from($trips)->andWhere(['CALLBACK', function ($data) {
+            return $data['queue_time'] > $data['created_at'];
+        }])->all(), 'user_id');
+
         $socket->push(base64_encode(json_encode([
             'action' => "startQueue",
             'notifications' => [],
@@ -41,7 +46,6 @@ class Queue extends Model
         $notifications = Notifications::create(Notifications::NTP_TRIP_SCHEDULED_START, $in_queue);
         if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
 
-        $query = new ArrayQuery();
         $query->from(ArrayHelper::index($trips, 'id'));
 
         /** @var  $line Line */
