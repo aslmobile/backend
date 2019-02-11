@@ -49,7 +49,7 @@ class TripController extends ConsoleController
                     Trip::cloneTrip($trip, Trip::STATUS_CREATED, true);
                 }
             }
-            Queue::processingQueue();
         }
+        Queue::processingQueue();
     }
 }
