@@ -43,7 +43,7 @@ class Queue extends Model
                 'notifications' => [],
                 'data' => ['addressed' => $users, 'message_id' => time()]
             ])));
-            $notifications = Notifications::create(Notifications::NTP_TRIP_SCHEDULED_START, $users);
+            $notifications = Notifications::create(Notifications::NTP_TRIP_QUEUE, $users);
             if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
             Trip::updateAll(['deferred' => 0], ['id' => ArrayHelper::getColumn($in_queue, 'id')]);
         }

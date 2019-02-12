@@ -85,7 +85,7 @@ class Notifications extends \yii\db\ActiveRecord
         NTP_TRIP_RATING = 8,
         NTP_TRIP_ARRIVED = 9,
         NTP_TRIP_SCHEDULED = 10,
-        NTP_TRIP_SCHEDULED_START = 23,
+        NTP_TRIP_QUEUE = 23,
 
         NTD_TRIP_SEATS = 11,
         NTD_TRIP_CANCEL = 12,
@@ -112,7 +112,7 @@ class Notifications extends \yii\db\ActiveRecord
             self::NT_TRIP_DISBANDED => Yii::t('app', "Поездка расформирована"),
 
             self::NTP_TRIP_SCHEDULED => Yii::t('app', "Напоминание о поездке"),
-            self::NTP_TRIP_SCHEDULED_START => Yii::t('app', "Напоминание о поездке - вы в очереди."),
+            self::NTP_TRIP_QUEUE => Yii::t('app', "Напоминание о поездке - вы в очереди."),
 
             self::NTP_TRIP_READY => Yii::t('app', "Машина готова к выезду. Поездка автоматически отменится через 5 минут."),
             self::NTP_TRIP_CANCEL => Yii::t('app', "Поездка отменена"),
