@@ -247,8 +247,10 @@ class TripController extends BaseController
         $trip->payment_status = Trip::PAYMENT_STATUS_WAITING;
         $trip->passenger_description = $this->body->comment;
         $trip->need_taxi = $this->body->taxi ? 1 : 0;
+
+        $trip->deferred = $this->body->time == -1 ? 0 : 1;
         $trip->queue_time = $this->body->time == -1 ? time() : $this->body->time;
-        $trip->start_time = $this->body->time == -1 ? time() + 1800 : $this->body->time;
+        $trip->start_time = $this->body->time == -1 ? time() + 1800 : $this->body->time + 1800;
 
         if ($taxi) {
             $trip->taxi_status = $taxi->status;
@@ -519,11 +521,13 @@ class TripController extends BaseController
         if (isset($this->body->comment) && !empty($this->body->comment))
             $comment = $this->body->comment; else $comment = $trip->passenger_description;
         if (isset($this->body->time) && !empty($this->body->time)) {
-            $time = $this->body->time == -1 ? time() + 1800 : $this->body->time;
+            $time = $this->body->time == -1 ? time() + 1800 : $this->body->time + 1800;
             $queue_time = $this->body->time == -1 ? time() : $this->body->time;
+            $deferred = $this->body->time == -1 ? 0 : 1;
         } else {
             $time = $trip->start_time;
             $queue_time = $trip->queue_time;
+            $deferred = $trip->deferred;
         }
 
         if (isset($this->body->vehicle_type_id) && !empty($this->body->vehicle_type_id))
@@ -583,6 +587,8 @@ class TripController extends BaseController
         $trip->payment_type = $payment_type;
         $trip->passenger_description = $comment;
         $trip->need_taxi = $taxi ? 1 : 0;
+
+        $trip->deferred = $deferred;
         $trip->queue_time = $queue_time;
         $trip->start_time = $time;
         $trip->vehicle_type_id = $vehicle_type_id;

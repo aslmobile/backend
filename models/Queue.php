@@ -34,17 +34,19 @@ class Queue extends Model
 
         $query = new ArrayQuery();
 
-        $in_queue = ArrayHelper::getColumn($query->from($trips)->where(['CALLBACK', function ($data) {
-            return intval($data['queue_time']) > intval($data['created_at']);
-        }])->all(), 'user_id');
+        $in_queue = $query->from($trips)->where(['deferred' => 1])->all();
 
-        $socket->push(base64_encode(json_encode([
-            'action' => "startQueue",
-            'notifications' => [],
-            'data' => ['addressed' => $in_queue, 'message_id' => time()]
-        ])));
-        $notifications = Notifications::create(Notifications::NTP_TRIP_SCHEDULED_START, $in_queue);
-        if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
+        if (!empty($in_queue)) {
+            $users = ArrayHelper::getColumn($in_queue, 'user_id');
+            $socket->push(base64_encode(json_encode([
+                'action' => "startQueue",
+                'notifications' => [],
+                'data' => ['addressed' => $users, 'message_id' => time()]
+            ])));
+            $notifications = Notifications::create(Notifications::NTP_TRIP_SCHEDULED_START, $users);
+            if (is_array($notifications)) foreach ($notifications as $notification) Notifications::send($notification);
+            Trip::updateAll(['deferred' => 0], ['id' => ArrayHelper::getColumn($in_queue, 'id')]);
+        }
 
         $query->from(ArrayHelper::index($trips, 'id'));
 
@@ -86,7 +88,7 @@ class Queue extends Model
 
         $data = $trips->where(['route_id' => $line->route_id])
             ->andWhere(['CALLBACK', function ($data) use ($line) {
-                return !empty($data['not'])?(!in_array($line->id, json_decode($data['not']))):true;
+                return !empty($data['not']) ? (!in_array($line->id, json_decode($data['not']))) : true;
             }])
             ->andWhere(['OR', ['vehicle_type_id' => $line->vehicle_type_id], ['vehicle_type_id' => 0]])
             ->orderBy(['seats' => SORT_DESC, 'created_at' => SORT_ASC])->all();

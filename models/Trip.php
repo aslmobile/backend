@@ -39,8 +39,11 @@ use yii\helpers\ArrayHelper;
  * @property integer $taxi_status
  * @property integer $taxi_cancel_reason
  * @property string $taxi_address
+ *
+ * @property integer $deferred
  * @property string $schedule
  * @property string $not
+ *
  * @property integer $taxi_time
  * @property integer $queue_time
  * @property integer $waiting_time
@@ -147,7 +150,8 @@ class Trip extends \yii\db\ActiveRecord
                     'finish_time',
                     'waiting_time',
                     'queue_time',
-                    'penalty'
+                    'penalty',
+                    'deferred'
                 ],
                 'integer'
             ],
@@ -222,6 +226,7 @@ class Trip extends \yii\db\ActiveRecord
             'vehicle_id' => Yii::t('app', "Автомобиль"),
             'need_taxi' => Yii::t('app', "Заказ такси"),
             'schedule' => Yii::t('app', "По расписанию"),
+            'deferred' => Yii::t('app', "Отложенная очередь"),
             'not' => Yii::t('app', "Нежелательные поездки водителей"),
             'finish_time' => Yii::t('app', "Время окончания"),
             'start_time' => Yii::t('app', "Время начала"),
@@ -775,6 +780,7 @@ class Trip extends \yii\db\ActiveRecord
 
         $new_trip = new Trip();
         $new_trip->schedule = $schedule;
+        $new_trip->deferred = 1;
 
         $old_attributes = $trip->attributes;
         unset($old_attributes['id']);
