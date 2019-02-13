@@ -643,45 +643,6 @@ class LineController extends BaseController
         $this->module->sendResponse();
     }
 
-    public function actionCalculateTariff()
-    {
-        $user = $this->TokenAuth(self::TOKEN);
-        if ($user) $user = $this->user;
-
-        $this->prepareBody();
-        $this->validateBodyParams(['startpoint']);
-
-        /** @var \app\models\Checkpoint $startpoint */
-        $startpoint = Checkpoint::findOne($this->body->startpoint);
-        if (!$startpoint || $startpoint->type != $startpoint::TYPE_START) $this->module->setError(422, '_startpoint', Yii::$app->mv->gt("Не найден", [], false));
-
-        /** @var \app\models\Route $route */
-        $route = Route::findOne(['id' => $startpoint->route, 'status' => Route::STATUS_ACTIVE]);
-        if (!$route) $this->module->setError(422, '_route', Yii::$app->mv->gt("Не найден", [], false));
-
-        /** @var \app\models\Checkpoint $endpoint */
-        $endpoint = Checkpoint::findOne([
-            'route' => $route->id,
-            'type' => Checkpoint::TYPE_END,
-            'status' => Checkpoint::STATUS_ACTIVE
-        ]);
-        if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
-
-        $rate = $this->getRate($route->id);
-        $seat = (float)round($route->base_tariff * $rate, 2);
-
-        $commission = (float)0.0;
-
-        $this->module->data['amount'] = [
-            'base_tariff' => $route->base_tariff,
-            'rate' => $rate,
-            'seat' => $seat,
-            'commission' => $commission
-        ];
-        $this->module->setSuccess();
-        $this->module->sendResponse();
-    }
-
     public function actionStartpoints()
     {
         $user = $this->TokenAuth(self::TOKEN);
@@ -955,45 +916,6 @@ class LineController extends BaseController
     protected function getLine($line_id)
     {
         return Line::findOne($line_id);
-    }
-
-    /**
-     * @param $route_id
-     * @return float|int
-     */
-    protected function getRate($route_id)
-    {
-        /** @var \app\models\Line $line */
-        $lines = Line::find()->andWhere([
-            'AND',
-            ['=', 'route_id', $route_id]
-        ])->all();
-
-        if (!$lines) return 1;
-
-        $seats = 0;
-        foreach ($lines as $line) $seats += $line->freeseats;
-
-        $passengers = Trip::find()->andWhere([
-            'AND',
-            ['=', 'route_id', $route_id],
-            ['=', 'driver_id', 0]
-        ])->count();
-
-        if ($seats == 0) $rate = 1.5;
-        elseif ($passengers == 0) $rate = 1;
-        else {
-            $hard_rate = round($passengers / $seats, 2);
-
-            if ($hard_rate <= .35) $rate = 1;
-            elseif ($hard_rate >= .35 && $hard_rate <= .6) $rate = 1.1;
-            elseif ($hard_rate >= .6 && $hard_rate <= .7) $rate = 1.2;
-            elseif ($hard_rate >= .7 && $hard_rate <= .8) $rate = 1.3;
-            elseif ($hard_rate >= .8 && $hard_rate <= .9) $rate = 1.4;
-            else $rate = 1.5;
-        }
-
-        return $rate;
     }
 
 }

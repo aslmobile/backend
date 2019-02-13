@@ -1771,29 +1771,42 @@ class TripController extends BaseController
 
     /**
      * @param $route_id
+     * @param int $seats
      * @return float|int
      */
-    protected function getRate($route_id)
+    protected function getRate($route_id, $seats = 0)
     {
-        /** @var \app\models\Line $line */
-        $lines = Line::find()->where(['route_id' => $route_id, 'status' => Line::STATUS_QUEUE])->all();
+        $lines = intval(Line::find()
+            ->where(['route_id' => $route_id, 'status' => Line::STATUS_QUEUE])
+            ->andWhere(['>', 'freeseats', 0])
+            ->sum('freeseats'));
 
-        $seats = 0;
-        foreach ($lines as $line) $seats += $line->freeseats;
+        $passengers = intval(Trip::find()
+            ->where(['route_id' => $route_id, 'line_id' => 0, 'status' => Trip::STATUS_CREATED])
+            ->count());
 
-        $passengers = Trip::find()->where(['route_id' => $route_id, 'status' => Trip::STATUS_CREATED])->count();
+        $seats += $lines;
 
-        if ($seats == 0) $rate = 1.5;
-        elseif ($passengers == 0) $rate = 1;
-        else {
+        if ($seats == 0 && $passengers > 0) {
+            $rate = 1.5;
+        } elseif ($passengers == 0) {
+            $rate = 1;
+        } else {
             $hard_rate = round($passengers / $seats, 2);
 
-            if ($hard_rate <= .35) $rate = 1;
-            elseif ($hard_rate >= .35 && $hard_rate <= .6) $rate = 1.1;
-            elseif ($hard_rate >= .6 && $hard_rate <= .7) $rate = 1.2;
-            elseif ($hard_rate >= .7 && $hard_rate <= .8) $rate = 1.3;
-            elseif ($hard_rate >= .8 && $hard_rate <= .9) $rate = 1.4;
-            else $rate = 1.5;
+            if ($hard_rate <= .35) {
+                $rate = 1;
+            } elseif ($hard_rate >= .35 && $hard_rate <= .6) {
+                $rate = 1.1;
+            } elseif ($hard_rate >= .6 && $hard_rate <= .7) {
+                $rate = 1.2;
+            } elseif ($hard_rate >= .7 && $hard_rate <= .8) {
+                $rate = 1.3;
+            } elseif ($hard_rate >= .8 && $hard_rate <= .9) {
+                $rate = 1.4;
+            } else {
+                $rate = 1.5;
+            }
         }
 
         return $rate;
