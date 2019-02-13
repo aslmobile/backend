@@ -155,7 +155,7 @@ class TripController extends BaseController
         if ($user) $user = $this->user;
 
         $state = $user->toArray();
-        if ($state['queue'] || $state['online'])
+        if ($state['init'] || $state['queue'] || $state['online'])
             $this->module->setError(422, '_trip', Yii::$app->mv->gt("Вы уже на маршруте!", [], false));
 
         $this->prepareBody();
