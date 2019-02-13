@@ -177,7 +177,7 @@ class Module extends \yii\base\Module
                 if ($template) $template = Yii::t('app', $template->template, ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
                 else $template = Yii::t('app', '{name} | Подтверждение: {code}', ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
 
-                $response = $SMSCenter->send($phone, $template, Yii::$app->params['smsc']['sender']);
+                $response = $SMSCenter->send($phone, $template);
                 $send = new \SimpleXMLElement($response);
             } else $send = (object)['cnt' => 1];
         } else $this->setError(422, '_device', Yii::$app->mv->gt("Не найден", [], false));
