@@ -141,7 +141,7 @@ class Module extends \yii\base\Module
                 $template = SmsTemplates::find()->where(['name' => "auth-template"])->one();
                 if ($template) $template = Yii::t('app', $template->template, ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
                 else $template = Yii::t('app', '{name} | Авторизация: {code}', ['name' => Yii::$app->params['defTitle'], 'code' => $code]);
-                $response = $SMSCenter->send($device->user->phone, $template, Yii::$app->params['smsc']['sender']);
+                $response = $SMSCenter->send($device->user->phone, $template);
                 try {
                     $send = new \SimpleXMLElement($response);
                 } catch (\Exception $e) {
