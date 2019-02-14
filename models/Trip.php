@@ -65,6 +65,9 @@ use yii\helpers\ArrayHelper;
  * @property VehicleType $vehicleType
  * @property LuggageType $baggage
  * @property array $baggages
+ *
+ * @property Line $line
+ * @property Line $lineR
  */
 class Trip extends \yii\db\ActiveRecord
 {
@@ -455,6 +458,22 @@ class Trip extends \yii\db\ActiveRecord
                 break;
         }
 
+    }
+
+    public function afterFind()
+    {
+        switch ($this->status) {
+            case Trip::STATUS_WAY:
+                $this->position = str_replace(';', ',', $this->lineR->position);
+                break;
+            case Trip::STATUS_FINISHED:
+                $this->position = $this->endpoint->latitude . ',' . $this->endpoint->longitude;
+                break;
+            default:
+                $this->position = $this->startpoint->latitude . ',' . $this->startpoint->longitude;
+                break;
+        }
+        parent::afterFind();
     }
 
     public function afterSave($insert, $changedAttributes)
