@@ -1776,14 +1776,14 @@ class TripController extends BaseController
      */
     protected function getRate($route_id, $seats = 0)
     {
-        $lines = intval(Line::find()
+        $lines = Line::find()
             ->where(['route_id' => $route_id, 'status' => Line::STATUS_QUEUE])
             ->andWhere(['>', 'freeseats', 0])
-            ->sum('freeseats'));
+            ->sum('freeseats');
 
-        $passengers = intval(Trip::find()
-            ->where(['route_id' => $route_id, 'line_id' => 0, 'status' => Trip::STATUS_CREATED])
-            ->count());
+        $passengers = Trip::find()
+            ->where(['route_id' => $route_id, 'line_id' => 0, 'status' => Trip::STATUS_CREATED, 'deferred' => 0])
+            ->count();
 
         $seats += $lines;
 
