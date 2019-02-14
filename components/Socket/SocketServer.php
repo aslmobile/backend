@@ -71,7 +71,7 @@ class SocketServer implements MessageComponentInterface
                 $result = new Message($conn, base64_encode(json_encode([
                     'action' => "checkOnline",
                     'data' => ['message_id' => time(), 'user_id' => $device->user_id]
-                    ])), $this->devices, $loop = $this->loop
+                ])), $this->devices, $loop = $this->loop
                 );
                 $query = new ArrayQuery();
                 $query->from($this->devices);
@@ -112,18 +112,28 @@ class SocketServer implements MessageComponentInterface
         }
 
         if ($conn->device->id) {
-            Yii::$app->db->createCommand()->update('users', ['last_activity' => time()], 'id = ' . $conn->device->user_id)->execute();
-            $result = new Message($conn, base64_encode(json_encode([
-                'action' => "checkOnline",
-                'data' => ['message_id' => time(), 'user_id' => $conn->device->user_id]
-            ])), $this->devices, $loop = $this->loop
-            );
+
             $query = new ArrayQuery();
             $query->from($this->devices);
-            foreach ($result->addressed as $user_id) {
-                $devices = $query->where(['device.user_id' => intval($user_id)])->all();
-                if (!empty($devices)) foreach ($devices as $device) $device->send(json_encode($result->message));
+            $online = $query
+                ->where(['device.user_id' => intval($conn->device->user_id)])
+                ->andWhere(['!=', 'device.id', intval($conn->device->id)])
+                ->all();
+
+            if (empty($online)) {
+                Yii::$app->db->createCommand()->update('users', ['last_activity' => time()], 'id = ' . $conn->device->user_id)->execute();
+                $result = new Message($conn, base64_encode(json_encode([
+                    'action' => "checkOnline",
+                    'data' => ['message_id' => time(), 'user_id' => $conn->device->user_id]
+                ])), $this->devices, $loop = $this->loop
+                );
+
+                foreach ($result->addressed as $user_id) {
+                    $devices = $query->where(['device.user_id' => intval($user_id)])->all();
+                    if (!empty($devices)) foreach ($devices as $device) $device->send(json_encode($result->message));
+                }
             }
+
         }
         echo "Device: {$conn->device->id}; User: {$conn->device->user_id}; disconnected.\n" . date('d.m.Y h:i', time()) . "\n";
 
