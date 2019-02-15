@@ -31,7 +31,6 @@ class PaymentCards extends \yii\db\ActiveRecord
         return 'payment_cards';
     }
 
-
     /**
      * @inheritdoc
      */
