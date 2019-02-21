@@ -1725,6 +1725,7 @@ class TripController extends BaseController
         $tariff = (object)$this->calculateTariff($id);
 
         $this->module->data['tariff'] = $tariff->tariff * $seats;
+        $this->module->data['one'] = $tariff->tariff;
         $this->module->setSuccess();
         $this->module->sendResponse();
     }
