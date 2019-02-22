@@ -266,8 +266,7 @@ class TripController extends BaseController
             foreach ($_luggages as $luggage) {
 
                 if ($luggage['need_place']) {
-                    $tariff = (object)$this->calculateTariff($route->id);
-                    $amount = (int)intval($luggage['seats']) * (float)floatval($tariff->tariff);
+                    $amount = (int)intval($luggage['seats']) * $trip->tariff;
                 } else $amount = (float)floatval(0.0);
 
                 $_trip_luggage = new TripLuggage();
@@ -514,8 +513,6 @@ class TripController extends BaseController
         $endpoint = Checkpoint::findOne(['type' => Checkpoint::TYPE_END, 'status' => Checkpoint::STATUS_ACTIVE, 'route' => $route->id]);
         if (!$endpoint) $this->module->setError(422, '_endpoint', Yii::$app->mv->gt("Не найден", [], false));
 
-        if (isset($this->body->seats) && !empty($this->body->seats))
-            $seats = $this->body->seats; else $seats = $trip->seats;
         if (isset($this->body->payment_type) && !empty($this->body->payment_type))
             $payment_type = $this->body->payment_type; else $payment_type = $trip->payment_type;
         if (isset($this->body->comment) && !empty($this->body->comment))
@@ -536,10 +533,12 @@ class TripController extends BaseController
         $luggage_unique = false;
 
         /** @var TripLuggage $luggage */
-        if (!empty($trip->luggages)) foreach ($trip->luggages as $luggage) {
-            $luggage_amount += $luggage->amount;
+        if (!empty($trip->luggages)) foreach ($trip->luggages as $luggage) if ($luggage->need_place) {
             $luggage_seats += $luggage->seats;
         }
+
+        if (isset($this->body->seats) && !empty($this->body->seats))
+            $seats = $this->body->seats + $luggage_seats; else $seats = $trip->seats;
 
         if (isset($this->body->luggage) && is_array($this->body->luggage)) {
 
@@ -548,12 +547,12 @@ class TripController extends BaseController
 
             $_luggages = [];
             $luggages = $this->body->luggage;
-            if (is_array($luggages) && count($luggages) > 0) foreach ($luggages as $luggage) {
+            if (is_array($luggages)) foreach ($luggages as $luggage) {
                 $luggage = LuggageType::findOne($luggage);
                 if (!$luggage) $this->module->setError(422, '_luggage', Yii::$app->mv->gt("Не найден", [], false));
                 $_luggages[] = $luggage->toArray();
             }
-            if ($_luggages && count($_luggages) > 0) {
+            if (!empty($_luggages)) {
                 foreach ($_luggages as $luggage) $luggage_unique .= $luggage['id'] . '+';
                 $luggage_unique .= $user->id . '+' . $route->id;
                 $luggage_unique = hash('sha256', md5($luggage_unique) . time());
@@ -582,7 +581,6 @@ class TripController extends BaseController
         $trip->endpoint_id = $endpoint->id;
 
         $trip->seats = $seats - $luggage_seats;
-        $trip->amount = ($trip->seats * $trip->tariff) - $luggage_amount;
 
         $trip->payment_type = $payment_type;
         $trip->passenger_description = $comment;
@@ -622,16 +620,13 @@ class TripController extends BaseController
 
                 $_trip_luggage->save();
 
-                $trip->seats += $_trip_luggage->seats;
-                $trip->amount += $_trip_luggage->amount;
+                if ($_trip_luggage->need_place) $trip->seats += $_trip_luggage->seats;
+
             }
 
-        } else {
+        } else $trip->seats += $luggage_seats;
 
-            $trip->seats += $luggage_seats;
-            $trip->amount += $luggage_amount;
-
-        }
+        $trip->amount = $trip->seats * $trip->tariff;
 
         if ($trip->payment_type == Trip::PAYMENT_TYPE_CASH) $trip->amount += $penalty_amount;
 
