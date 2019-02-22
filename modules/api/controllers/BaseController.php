@@ -69,7 +69,7 @@ class BaseController extends RestFul
         if ($ostype && !empty ($ostype)) $this->ostype = $ostype;
         else $this->module->setError(422, 'headers.ostype', Yii::$app->mv->gt("Обязательный параметр", [], false));
 
-        if ($apptype && !empty ($apptype)) $this->apptype = $apptype;
+        if ($apptype && !empty($apptype) && $apptype) $this->apptype = $apptype;
         else $this->module->setError(422, 'headers.application-type', Yii::$app->mv->gt("Обязательный параметр", [], false));
 
         return parent::beforeAction($event);
