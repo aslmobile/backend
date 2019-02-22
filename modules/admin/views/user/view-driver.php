@@ -78,7 +78,7 @@ use yii\grid\GridView;
     <div class="col-12 col-md-6">
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title"><?= Yii::t('app', "Водительское удостовирение"); ?></h3>
+                <h3 class="box-title"><?= Yii::t('app', "Водительское удостоверение"); ?></h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
@@ -89,7 +89,7 @@ use yii\grid\GridView;
                     <div class="col-12 col-md-6 border-left"><img class="img-responsive" src="<?= $license->image2; ?>" /></div>
                 </div>
                 <?php else : ?>
-                    <p class="text-center text-info"><?= Yii::$app->mv->gt("Водительское удостовирение не загружено", [], false); ?></p>
+                    <p class="text-center text-info"><?= Yii::$app->mv->gt("Водительское удостоверение не загружено", [], false); ?></p>
                 <?php endif; ?>
             </div>
             <!-- /.box-body -->

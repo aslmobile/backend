@@ -67,7 +67,7 @@ class UserController extends BaseController
         if ($user) $user = $this->user;
 
         if ($user->status == User::STATUS_PROCESS) {
-            $this->module->setError(422, '_sms', Yii::$app->mv->gt("Регистрация не завершена", [], false));
+            $this->module->setError(422, '_process', Yii::$app->mv->gt("Регистрация не завершена", [], false));
         }
 
         $this->module->data = $user->toArray();
