@@ -359,6 +359,25 @@ $act = Yii::$app->controller->action->id;
                     </li>
                 </ul>
             </li>
+            <li class="treeview<?= ($cont == 'dynamic') ? ' active' : '' ?>">
+                <a href="#">
+                    <i class="fa fa-file-text"></i>
+                    <span><?= Yii::$app->mv->gt('Страницы', [], false); ?></span>
+                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                </a>
+                <ul class="treeview-menu">
+                    <li<?= ($cont == 'dynamic' && ($act == 'index' || $act == 'update' || $act == 'view')) ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/dynamic/index') ?>">
+                            <i class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Список', [], false) ?>
+                        </a>
+                    </li>
+                    <li<?= ($cont == 'dynamic' && $act == 'create') ? ' class="active"' : '' ?>>
+                        <a href="<?= Url::toRoute('/admin/dynamic/create') ?>">
+                            <i class="fa fa-circle-o"></i> <?= Yii::$app->mv->gt('Новый', [], false) ?>
+                        </a>
+                    </li>
+                </ul>
+            </li>
             <li class="treeview<?= ($cont == 'cities') ? ' active' : '' ?>">
                 <a href="#"> <i class="fa fa-map-marker"></i>
                     <span><?= Yii::$app->mv->gt('Города', [], false); ?></span>
